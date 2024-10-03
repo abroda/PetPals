@@ -1,9 +1,8 @@
 # PetPals
-
-Team Project
+**Team Project**\
 Politechnika Wrocławska
 
 Authors:
-Aleksandra Broda
-Dominika Kołowrotkiewicz
+Aleksandra Broda\
+Dominika Kołowrotkiewicz\
 Dominika Sachanbińska
