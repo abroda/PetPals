@@ -2,7 +2,7 @@
 **Team Project**\
 Politechnika Wrocławska
 
-Authors:
+Authors:\
 Aleksandra Broda\
 Dominika Kołowrotkiewicz\
 Dominika Sachanbińska
