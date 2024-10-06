@@ -22,10 +22,6 @@ public class JwtService {
     @Value("${security.jwt.secret-key}")
     private String secretKey;
 
-    @Getter
-    @Value("${security.jwt.expiration-time}")
-    private long expirationTime;
-
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -40,15 +36,14 @@ public class JwtService {
     }
 
     public String generateToken(Map<String, Object> claims, UserDetails userDetails) {
-        return buildToken(claims, userDetails, expirationTime);
+        return buildToken(claims, userDetails);
     }
 
-    private String buildToken(Map<String, Object> claims, UserDetails userDetails, long expirationTime) {
+    private String buildToken(Map<String, Object> claims, UserDetails userDetails) {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256).compact();
     }
 
