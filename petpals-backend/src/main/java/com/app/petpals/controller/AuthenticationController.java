@@ -23,14 +23,14 @@ public class AuthenticationController {
     private final JwtService jwtService;
 
     @PostMapping("/register")
-    @Operation(summary = "Register new user")
+    @Operation(summary = "Register new user.")
     public ResponseEntity<User> register(@RequestBody final RegisterRequest registerRequest) {
         User user = authenticationService.register(registerRequest);
         return ResponseEntity.ok(user);
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Login to the application")
+    @Operation(summary = "Login to the application.")
     public ResponseEntity<AuthenticationResponse> login(@RequestBody final AuthenticationRequest authenticationRequest) {
         User user = authenticationService.authenticate(authenticationRequest);
         String token = jwtService.generateToken(user);
@@ -39,11 +39,11 @@ public class AuthenticationController {
     }
 
     @PostMapping("/verify")
-    @Operation(summary = "Verify account")
+    @Operation(summary = "Verify account.")
     public ResponseEntity<?> verifyUser(@RequestBody final VerifyUserRequest verifyUserRequest){
         try {
             authenticationService.verifyUser(verifyUserRequest);
-            return ResponseEntity.ok("Account verified successfully");
+            return ResponseEntity.ok("Account verified successfully.");
         } catch (RuntimeException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -54,7 +54,7 @@ public class AuthenticationController {
     public ResponseEntity<?> resendVerificationCode(@RequestParam String email){
         try {
             authenticationService.resendVerificationCode(email);
-            return ResponseEntity.ok("Verification code resent");
+            return ResponseEntity.ok("Verification code resent.");
         } catch (RuntimeException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }

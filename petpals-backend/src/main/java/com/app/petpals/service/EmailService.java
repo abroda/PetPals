@@ -22,4 +22,13 @@ public class EmailService {
         mailSender.send(mimeMessage);
     }
 
+    public void sendPasswordResetMail(String to, String subject, String body) throws MessagingException {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(body, true);
+        mailSender.send(mimeMessage);
+    }
+
 }

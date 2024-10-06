@@ -40,6 +40,7 @@ public class SecurityConfig {
                         authorizeRequests
                                 .requestMatchers(AUTH_WHITELIST).permitAll()
                                 .requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers("/api/account/password-reset/**").permitAll()
                                 .anyRequest().authenticated()
 
                 )
