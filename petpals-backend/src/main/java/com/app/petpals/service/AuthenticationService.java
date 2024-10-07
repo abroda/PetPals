@@ -39,7 +39,7 @@ public class AuthenticationService {
     }
 
     public User authenticate(AuthenticationRequest authenticationRequest) {
-        User user = userRepository.findByEmail(authenticationRequest.getEmail()).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findByUsername(authenticationRequest.getEmail()).orElseThrow(() -> new RuntimeException("User not found"));
         if (!user.isEnabled()) throw new RuntimeException("User is not verified. Please verify your account.");
 
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
@@ -50,7 +50,7 @@ public class AuthenticationService {
     }
 
     public void verifyUser(VerifyUserRequest verifyRequest) {
-        Optional<User> optionalUser = userRepository.findByEmail(verifyRequest.getEmail());
+        Optional<User> optionalUser = userRepository.findByUsername(verifyRequest.getEmail());
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             if (user.getVerificationExpiration().isBefore(LocalDateTime.now())) {
@@ -70,7 +70,7 @@ public class AuthenticationService {
     }
 
     public void resendVerificationCode(String email) {
-        Optional<User> optionalUser = userRepository.findByEmail(email);
+        Optional<User> optionalUser = userRepository.findByUsername(email);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             if (user.isEnabled()) {
@@ -103,7 +103,7 @@ public class AuthenticationService {
                 + "</html>";
 
         try {
-            emailService.sendVerificationMail(user.getEmail(), subject, htmlMessage);
+            emailService.sendVerificationMail(user.getUsername(), subject, htmlMessage);
         } catch (MessagingException e) {
             // Handle email sending exception
             e.printStackTrace();

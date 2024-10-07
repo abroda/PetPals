@@ -26,7 +26,7 @@ public class UserPasswordResetService {
     private final PasswordEncoder passwordEncoder;
 
     public void forgotPassword(CreateResetPasswordCodeRequest createResetPasswordCodeRequest) {
-        Optional<User> optionalUser = userRepository.findByEmail(createResetPasswordCodeRequest.getEmail());
+        Optional<User> optionalUser = userRepository.findByUsername(createResetPasswordCodeRequest.getEmail());
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             if (!user.isEnabled()) {
@@ -50,7 +50,7 @@ public class UserPasswordResetService {
     }
 
     public void confirmResetCode(ConfirmResetPasswordCodeRequest confirmResetPasswordCodeRequest) {
-        Optional<User> optionalUser = userRepository.findByEmail(confirmResetPasswordCodeRequest.getEmail());
+        Optional<User> optionalUser = userRepository.findByUsername(confirmResetPasswordCodeRequest.getEmail());
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             if (!user.isEnabled()) {
@@ -75,7 +75,7 @@ public class UserPasswordResetService {
 
     @Transactional
     public void resetPassword(ResetPasswordRequest resetPasswordRequest) {
-        Optional<User> optionalUser = userRepository.findByEmail(resetPasswordRequest.getEmail());
+        Optional<User> optionalUser = userRepository.findByUsername(resetPasswordRequest.getEmail());
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             Optional<UserPasswordReset> optionalUserPasswordReset = userPasswordResetRepository.findByUser(user);
@@ -113,7 +113,7 @@ public class UserPasswordResetService {
                 + "</html>";
 
         try {
-            emailService.sendPasswordResetMail(user.getEmail(), subject, htmlMessage);
+            emailService.sendPasswordResetMail(user.getUsername(), subject, htmlMessage);
         } catch (MessagingException e) {
             e.printStackTrace();
         }

@@ -1,56 +1,52 @@
 package com.app.petpals.controller;
 
-import com.app.petpals.payload.ConfirmResetPasswordCodeRequest;
-import com.app.petpals.payload.CreateResetPasswordCodeRequest;
-import com.app.petpals.payload.ResetPasswordRequest;
-import com.app.petpals.service.UserPasswordResetService;
+import com.app.petpals.entity.User;
+import com.app.petpals.payload.UserResponse;
+import com.app.petpals.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/account")
 @RequiredArgsConstructor
 @Tag(name = "Account")
 public class AccountController {
+    private final UserService userService;
 
-    private final UserPasswordResetService userPasswordResetService;
-
-    @PostMapping("/password-reset/request")
-    @Operation(summary = "Generate password reset code.")
-    public ResponseEntity<String> forgotPassword(@RequestBody final CreateResetPasswordCodeRequest createResetPasswordCodeRequest) {
-        try {
-            userPasswordResetService.forgotPassword(createResetPasswordCodeRequest);
-            return ResponseEntity.ok("Password reset code sent.");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    @GetMapping()
+    @Operation(summary = "Get user accounts.",  security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<List<UserResponse>> getUsers() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User authUser = (User) authentication.getPrincipal();
+        List<UserResponse> users = userService.getUsers();
+        return ResponseEntity.ok(users);
     }
 
-    @PostMapping("/password-reset/confirm")
-    @Operation(summary = "Validate provided password reset code.")
-    public ResponseEntity<String> confirmResetCode(@RequestBody final ConfirmResetPasswordCodeRequest confirmResetPasswordCodeRequest) {
-        try {
-            userPasswordResetService.confirmResetCode(confirmResetPasswordCodeRequest);
-            return ResponseEntity.ok("Code is valid.");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    @GetMapping("/email")
+    @Operation(summary = "Get user account by email.",  security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<UserResponse> getUserByEmail(@RequestParam String email) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User authUser = (User) authentication.getPrincipal();
+        UserResponse userResponse = userService.getByEmail(email);
+        return ResponseEntity.ok(userResponse);
     }
 
-    @PostMapping("/password-reset")
-    @Operation(summary = "Reset password.")
-    public ResponseEntity<String> resetPassword(@RequestBody final ResetPasswordRequest resetPasswordRequest) {
-        try {
-            userPasswordResetService.resetPassword(resetPasswordRequest);
-            return ResponseEntity.ok("Password was reset.");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    @GetMapping("/search")
+    @Operation(summary = "Search for users by email or display name.", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<List<UserResponse>> searchUsers(
+            @RequestParam(value = "email", required = false) String email,
+            @RequestParam(value = "displayName", required = false) String displayName) {
+
+        List<UserResponse> users = userService.searchUsers(email, displayName);
+
+        return ResponseEntity.ok(users);
     }
 }

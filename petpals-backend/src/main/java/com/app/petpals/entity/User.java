@@ -3,7 +3,6 @@ package com.app.petpals.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
@@ -21,10 +20,10 @@ public class User implements UserDetails {
     private String id;
 
     @Column(name = "username", unique = true, nullable = false)
-    private String username;
+    private String displayName;
 
     @Column(name = "email", unique = true, nullable = false)
-    private String email;
+    private String username; // email named username for UserDetails casting
 
     @Column(name = "password", nullable = false)
     private String password;
@@ -41,9 +40,12 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserPasswordReset passwordReset;
 
-    public User(String username, String email, String password) {
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private UserProfileDetails userProfileDetails;
+
+    public User(String username, String displayName, String password) {
         this.username = username;
-        this.email = email;
+        this.displayName = displayName;
         this.password = password;
     }
 
