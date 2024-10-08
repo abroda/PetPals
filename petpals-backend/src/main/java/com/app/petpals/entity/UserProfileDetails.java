@@ -16,16 +16,15 @@ public class UserProfileDetails {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "profile_picture_url")
-    private String profilePictureUrl;
+    @Column(name = "profile_picture_id", unique = true)
+    private String profilePictureId;
 
     @OneToOne
     @JoinColumn(name = "user_id", unique = true)
     private User user;
 
-    public UserProfileDetails(String description, String profilePictureUrl, User user) {
+    public UserProfileDetails(String description, User user) {
         this.description = description;
-        this.profilePictureUrl = profilePictureUrl;
         this.user = user;
     }
 
