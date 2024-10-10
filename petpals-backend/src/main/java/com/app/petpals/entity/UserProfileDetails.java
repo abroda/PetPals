@@ -1,5 +1,7 @@
 package com.app.petpals.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,6 +21,7 @@ public class UserProfileDetails {
     @Column(name = "profile_picture_id", unique = true)
     private String profilePictureId;
 
+    @JsonBackReference
     @OneToOne
     @JoinColumn(name = "user_id", unique = true)
     private User user;

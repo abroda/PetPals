@@ -1,6 +1,9 @@
 package com.app.petpals.service;
 
 import com.app.petpals.entity.User;
+import com.app.petpals.entity.UserProfileDetails;
+import com.app.petpals.payload.AccountEditRequest;
+import com.app.petpals.payload.AccountResponse;
 import com.app.petpals.payload.UserResponse;
 import com.app.petpals.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +18,7 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserRepository userRepository;
 
-    public List<UserResponse> getUsers(){
+    public List<UserResponse> getUsers() {
         List<User> users = userRepository.findAll();
         return users.stream()
                 .map(user -> UserResponse.builder()
@@ -65,6 +68,27 @@ public class UserService {
                             .userProfileDetails(user.getUserProfileDetails())
                             .build())
                     .collect(Collectors.toList());
+        }
+    }
+
+    public AccountResponse updateUser(String email, AccountEditRequest request) {
+        Optional<User> optionalUser = userRepository.findByUsername(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            if (user.getUserProfileDetails() == null) {
+                user.setUserProfileDetails(new UserProfileDetails());
+                user.getUserProfileDetails().setUser(user);
+            }
+            user.getUserProfileDetails().setDescription(request.getDescription());
+
+            userRepository.save(user);
+
+            return AccountResponse.builder()
+                    .description(request.getDescription())
+                    .username(user.getUsername())
+                    .build();
+        } else {
+            throw new RuntimeException("User not found.");
         }
     }
 }

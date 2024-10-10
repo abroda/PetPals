@@ -1,5 +1,6 @@
 package com.app.petpals.controller;
 
+import com.app.petpals.service.AWSImageService;
 import com.app.petpals.service.ImageService;
 import com.app.petpals.service.ImageServiceFactory;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class ImageController {
 
     private final ImageServiceFactory imageServiceFactory;
+    private final AWSImageService aWSImageService;
 
     @GetMapping(value = "/{id}", produces = "image/jpeg")
     @Operation(summary = "Get image by id.", security = @SecurityRequirement(name = "bearerAuth"))
@@ -54,6 +56,18 @@ public class ImageController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading image: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/presigned-url/{id}")
+    public ResponseEntity<String> getPresignedUrl(@PathVariable String id) {
+        AWSImageService imageService = (AWSImageService) imageServiceFactory.getImageService();
+        String presignedUrl = imageService.generatePresignedUrl(id);
+
+        if (presignedUrl == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to generate pre-signed URL.");
+        }
+
+        return ResponseEntity.ok(presignedUrl);
     }
 
     private boolean isImage(String contentType) {

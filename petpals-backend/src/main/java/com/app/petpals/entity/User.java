@@ -1,5 +1,6 @@
 package com.app.petpals.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -37,9 +38,11 @@ public class User implements UserDetails {
     @Column(name = "verification_expiration")
     private LocalDateTime verificationExpiration;
 
+    @JsonManagedReference
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserPasswordReset passwordReset;
 
+    @JsonManagedReference
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserProfileDetails userProfileDetails;
 

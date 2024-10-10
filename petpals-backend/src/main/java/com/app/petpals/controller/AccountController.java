@@ -1,6 +1,8 @@
 package com.app.petpals.controller;
 
 import com.app.petpals.entity.User;
+import com.app.petpals.payload.AccountEditRequest;
+import com.app.petpals.payload.AccountResponse;
 import com.app.petpals.payload.UserResponse;
 import com.app.petpals.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,8 +26,6 @@ public class AccountController {
     @GetMapping()
     @Operation(summary = "Get user accounts.",  security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<List<UserResponse>> getUsers() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User authUser = (User) authentication.getPrincipal();
         List<UserResponse> users = userService.getUsers();
         return ResponseEntity.ok(users);
     }
@@ -33,8 +33,6 @@ public class AccountController {
     @GetMapping("/email")
     @Operation(summary = "Get user account by email.",  security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<UserResponse> getUserByEmail(@RequestParam String email) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User authUser = (User) authentication.getPrincipal();
         UserResponse userResponse = userService.getByEmail(email);
         return ResponseEntity.ok(userResponse);
     }
@@ -49,4 +47,19 @@ public class AccountController {
 
         return ResponseEntity.ok(users);
     }
+
+    @PutMapping()
+    @Operation(summary = "Update user data.", description = "All fields are optional.", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<AccountResponse> updateUser(@RequestBody AccountEditRequest request){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User authUser = (User) authentication.getPrincipal();
+        AccountResponse response = userService.updateUser(authUser.getUsername(), request);
+        return ResponseEntity.ok(response);
+    }
+
+//    public void updateProfilePicture(){
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        User authUser = (User) authentication.getPrincipal();
+////        User user = userService.getByEmail(authUser.getUsername());
+//    }
 }

@@ -1,5 +1,6 @@
 package com.app.petpals.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +23,7 @@ public class UserPasswordReset {
     @Column(name = "reset_expiration")
     private LocalDateTime resetExpiration;
 
+    @JsonBackReference
     @OneToOne
     @JoinColumn(name = "user_id", unique = true)
     private User user;
