@@ -13,4 +13,5 @@ public class AccountResponse {
     private String email;
     private String username;
     private String description;
+    private String imageUrl;
 }

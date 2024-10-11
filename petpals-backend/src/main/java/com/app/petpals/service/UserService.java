@@ -18,26 +18,14 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserRepository userRepository;
 
-    public List<UserResponse> getUsers() {
-        List<User> users = userRepository.findAll();
-        return users.stream()
-                .map(user -> UserResponse.builder()
-                        .email(user.getUsername()) // Assuming email is stored in the username field
-                        .username(user.getDisplayName())
-                        .userProfileDetails(user.getUserProfileDetails())
-                        .build()
-                ).collect(Collectors.toList());
+    public List<User> getUsers() {
+        return userRepository.findAll();
     }
 
-    public UserResponse getByEmail(String email) {
+    public User getByEmail(String email) {
         Optional<User> optionalUser = userRepository.findByUsername(email);
         if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            return UserResponse.builder()
-                    .email(user.getUsername())
-                    .username(user.getDisplayName())
-                    .userProfileDetails(user.getUserProfileDetails())
-                    .build();
+            return optionalUser.get();
         } else {
             throw new RuntimeException("User not found");
         }
@@ -71,22 +59,26 @@ public class UserService {
         }
     }
 
-    public AccountResponse updateUser(String email, AccountEditRequest request) {
-        Optional<User> optionalUser = userRepository.findByUsername(email);
+    public User updateUser(AccountEditRequest request) {
+        Optional<User> optionalUser = userRepository.findByUsername(request.getEmail());
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             if (user.getUserProfileDetails() == null) {
                 user.setUserProfileDetails(new UserProfileDetails());
                 user.getUserProfileDetails().setUser(user);
             }
-            user.getUserProfileDetails().setDescription(request.getDescription());
-
+            if (request.getDisplayName() != null) {
+                user.setDisplayName(request.getDisplayName());
+            }
+            if (request.getDescription() != null) {
+                user.getUserProfileDetails().setDescription(request.getDescription());
+            }
+            if (request.getImageId() != null) {
+                user.getUserProfileDetails().setProfilePictureId(request.getImageId());
+            }
             userRepository.save(user);
 
-            return AccountResponse.builder()
-                    .description(request.getDescription())
-                    .username(user.getUsername())
-                    .build();
+            return user;
         } else {
             throw new RuntimeException("User not found.");
         }

@@ -10,5 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AccountEditRequest {
+    private String email;
+    private String displayName;
     private String description;
+    private String imageId;
 }

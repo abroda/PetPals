@@ -1,8 +1,6 @@
 package com.app.petpals.controller;
 
 import com.app.petpals.service.AWSImageService;
-import com.app.petpals.service.ImageService;
-import com.app.petpals.service.ImageServiceFactory;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,15 +20,13 @@ import org.springframework.web.multipart.MultipartFile;
 @Tag(name = "Images")
 public class ImageController {
 
-    private final ImageServiceFactory imageServiceFactory;
-    private final AWSImageService aWSImageService;
+    private final AWSImageService awsImageService;
 
     @GetMapping(value = "/{id}", produces = "image/jpeg")
     @Operation(summary = "Get image by id.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<byte[]> getImage(@PathVariable String id) {
         try {
-            ImageService imageService = imageServiceFactory.getImageService();
-            byte[] imageData = imageService.getImage(id);
+            byte[] imageData = awsImageService.getImage(id);
             return ResponseEntity.ok(imageData);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -50,8 +46,7 @@ public class ImageController {
             if (contentType == null || !isImage(contentType)) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid file type. Only image files are allowed.");
             }
-            ImageService imageService = imageServiceFactory.getImageService();
-            imageService.uploadImage(file.getBytes());
+            awsImageService.uploadImage(file.getBytes(), contentType);
             return ResponseEntity.status(HttpStatus.CREATED).body("Image uploaded successfully.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading image: " + e.getMessage());
@@ -60,8 +55,7 @@ public class ImageController {
 
     @GetMapping("/presigned-url/{id}")
     public ResponseEntity<String> getPresignedUrl(@PathVariable String id) {
-        AWSImageService imageService = (AWSImageService) imageServiceFactory.getImageService();
-        String presignedUrl = imageService.getPresignedUrl(id);
+        String presignedUrl = awsImageService.getPresignedUrl(id);
 
         if (presignedUrl == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to generate pre-signed URL.");
