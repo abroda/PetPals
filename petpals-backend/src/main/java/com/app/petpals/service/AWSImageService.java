@@ -98,10 +98,11 @@ public class AWSImageService {
     }
 
     public String getPresignedUrl(String id) {
+        if (id == null) return null;
         return preSignedUrlCache.get(id, this::generatePresignedUrl);
     }
 
-    public String generatePresignedUrl(String id) {
+    private String generatePresignedUrl(String id) {
         try {
             GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                     .bucket(bucketName)

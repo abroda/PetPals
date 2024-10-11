@@ -24,6 +24,9 @@ public class Dog {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "image_id")
+    private String imageId;
+
     @JsonBackReference
     @ManyToOne()
     @JoinColumn(name = "user_id")
