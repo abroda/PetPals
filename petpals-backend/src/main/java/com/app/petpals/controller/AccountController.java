@@ -1,6 +1,7 @@
 package com.app.petpals.controller;
 
 import com.app.petpals.entity.User;
+import com.app.petpals.entity.UserProfileDetails;
 import com.app.petpals.payload.AccountEditRequest;
 import com.app.petpals.payload.AccountResponse;
 import com.app.petpals.payload.UserResponse;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -39,8 +41,13 @@ public class AccountController {
                 .map(user -> AccountResponse.builder()
                         .email(user.getUsername())
                         .username(user.getDisplayName())
-                        .description(user.getUserProfileDetails().getDescription())
-                        .imageUrl(awsImageService.getPresignedUrl(user.getUserProfileDetails().getProfilePictureId()))
+                        .description(Optional.ofNullable(user.getUserProfileDetails())
+                                .map(UserProfileDetails::getDescription)
+                                .orElse(null))
+                        .imageUrl(Optional.ofNullable(user.getUserProfileDetails())
+                                .map(details -> awsImageService.getPresignedUrl(details.getProfilePictureId()))
+                                .orElse(null))
+                        .dogs(user.getDogs())
                         .build()
                 ).collect(Collectors.toList());
         return ResponseEntity.ok(response);
@@ -54,8 +61,13 @@ public class AccountController {
         return ResponseEntity.ok(AccountResponse.builder()
                 .email(user.getUsername())
                 .username(user.getDisplayName())
-                .description(user.getUserProfileDetails().getDescription())
-                .imageUrl(awsImageService.getPresignedUrl(user.getUserProfileDetails().getProfilePictureId()))
+                .description(Optional.ofNullable(user.getUserProfileDetails())
+                        .map(UserProfileDetails::getDescription)
+                        .orElse(null))
+                .imageUrl(Optional.ofNullable(user.getUserProfileDetails())
+                        .map(details -> awsImageService.getPresignedUrl(details.getProfilePictureId()))
+                        .orElse(null))
+                .dogs(user.getDogs())
                 .build());
     }
 
@@ -84,11 +96,12 @@ public class AccountController {
         try {
             User user = userService.getByEmail(authUser.getUsername());
             if (file != null && !file.isEmpty()) {
-                if (user.getUserProfileDetails().getProfilePictureId() != null) {
+                if (user.getUserProfileDetails() != null && user.getUserProfileDetails().getProfilePictureId() != null) {
                     awsImageService.deleteImage(user.getUserProfileDetails().getProfilePictureId());
                 }
                 imageId = awsImageService.uploadImage(file.getBytes(), file.getContentType());
             }
+
 
             AccountEditRequest request = AccountEditRequest.builder()
                     .email(authUser.getUsername())
@@ -107,6 +120,7 @@ public class AccountController {
                     .username(updatedUser.getDisplayName())
                     .description(updatedUser.getUserProfileDetails().getDescription())
                     .imageUrl(imageUrl)
+                    .dogs(updatedUser.getDogs())
                     .build();
 
             return ResponseEntity.ok(accountResponse);

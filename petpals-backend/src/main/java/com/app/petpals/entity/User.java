@@ -46,6 +46,10 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserProfileDetails userProfileDetails;
 
+    @JsonManagedReference
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Dog> dogs;
+
     public User(String username, String displayName, String password) {
         this.username = username;
         this.displayName = displayName;

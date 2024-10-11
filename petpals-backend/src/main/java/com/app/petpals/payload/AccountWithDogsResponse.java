@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccountResponse {
+public class AccountWithDogsResponse {
     private String email;
     private String username;
     private String description;

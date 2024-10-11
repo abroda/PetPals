@@ -31,6 +31,15 @@ public class UserService {
         }
     }
 
+    public User getById(String id) {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isPresent()) {
+            return optionalUser.get();
+        } else {
+            throw new RuntimeException("User not found");
+        }
+    }
+
     public List<UserResponse> searchUsers(String email, String displayName) {
         if (email != null && !email.isEmpty()) {
             return userRepository.findByUsernameContaining(email).stream()
