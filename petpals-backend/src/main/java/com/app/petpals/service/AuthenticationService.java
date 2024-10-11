@@ -27,8 +27,8 @@ public class AuthenticationService {
 
     public User register(RegisterRequest registerRequest) {
         User user = new User(
-                registerRequest.getUsername(),
                 registerRequest.getEmail(),
+                registerRequest.getDisplayName(),
                 passwordEncoder.encode(registerRequest.getPassword())
         );
         user.setVerificationCode(generateVerificationCode());
