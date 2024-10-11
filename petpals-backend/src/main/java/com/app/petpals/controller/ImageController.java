@@ -61,7 +61,7 @@ public class ImageController {
     @GetMapping("/presigned-url/{id}")
     public ResponseEntity<String> getPresignedUrl(@PathVariable String id) {
         AWSImageService imageService = (AWSImageService) imageServiceFactory.getImageService();
-        String presignedUrl = imageService.generatePresignedUrl(id);
+        String presignedUrl = imageService.getPresignedUrl(id);
 
         if (presignedUrl == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to generate pre-signed URL.");

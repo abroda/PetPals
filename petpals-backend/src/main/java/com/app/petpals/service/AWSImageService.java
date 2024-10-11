@@ -12,17 +12,22 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.time.Duration;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class AWSImageService implements ImageService {
     private final S3Client s3Client;
     private final String bucketName;
     private final S3Presigner s3Presigner;
+    private final Cache<String, String> preSignedUrlCache;
+
 
     public AWSImageService(@Value("${aws.s3.bucket.name}") String bucketName,
                            @Value("${aws.s3.key.access}") String accessKey,
@@ -55,6 +60,11 @@ public class AWSImageService implements ImageService {
                     .build();
         }
 
+        this.preSignedUrlCache = Caffeine.newBuilder()
+                .expireAfterWrite(15, TimeUnit.MINUTES)
+                .maximumSize(10_000)
+                .build();
+
     }
 
     @Override
@@ -75,41 +85,37 @@ public class AWSImageService implements ImageService {
 
     @Override
     public void uploadImage(byte[] imageData) {
-        // Generate a UUID for the filename
-        String imageFileName = UUID.randomUUID().toString() + ".jpg"; // You can change the extension based on your image type
+        String imageFileName = UUID.randomUUID().toString() + ".jpg";
 
-        // Convert byte array to InputStream
         InputStream imageInputStream = new ByteArrayInputStream(imageData);
 
-        // Create the PutObjectRequest for uploading to S3
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(bucketName) // Your S3 bucket name
-                .key(imageFileName)  // Unique UUID filename
-                .contentType("image/jpeg") // Adjust content type if needed (image/png, etc.)
+                .bucket(bucketName)
+                .key(imageFileName)
+                .contentType("image/jpeg")
                 .build();
 
-        // Upload the image to S3
         PutObjectResponse response = s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(imageInputStream, imageData.length));
 
-        // You can handle the response or logging as needed
         System.out.println("Image uploaded successfully. S3 Response: " + response);
+    }
+
+    public String getPresignedUrl(String objectKey) {
+        return preSignedUrlCache.get(objectKey, this::generatePresignedUrl);
     }
 
     public String generatePresignedUrl(String id) {
         try {
-            // Create a GetObjectRequest
             GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                     .bucket(bucketName)
-                    .key(id)  // The 'id' is the key (filename) of the image in the S3 bucket
+                    .key(id)
                     .build();
 
-            // Create a PresignGetObjectRequest with an expiration time (e.g., 15 minutes)
             GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
                     .getObjectRequest(getObjectRequest)
-                    .signatureDuration(Duration.ofMinutes(15))  // Set the expiration duration
+                    .signatureDuration(Duration.ofMinutes(15))
                     .build();
 
-            // Generate the pre-signed URL
             return s3Presigner.presignGetObject(presignRequest).url().toString();
 
         } catch (S3Exception e) {
