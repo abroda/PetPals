@@ -44,6 +44,7 @@ public class DogController {
                         .imageUrl(Optional.ofNullable(dog.getImageId())
                                 .map(awsImageService::getPresignedUrl)
                                 .orElse(null))
+                        .tags(dog.getTags())
                         .build()
                 ).collect(Collectors.toList()));
     }
@@ -124,11 +125,13 @@ public class DogController {
             if (dog.getImageId() != null && !dog.getImageId().isEmpty()) {
                 imageUrl = awsImageService.getPresignedUrl(dog.getImageId());
             }
+
             return ResponseEntity.ok(DogResponse.builder()
                     .id(dog.getId())
                     .name(dog.getName())
                     .description(dog.getDescription())
                     .imageUrl(imageUrl)
+                    .tags(dog.getTags())
                     .build());
 
         } catch (IOException e) {

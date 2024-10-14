@@ -39,6 +39,7 @@ public class AccountController {
         List<AccountResponse> response = users
                 .stream()
                 .map(user -> AccountResponse.builder()
+                        .id(user.getId())
                         .email(user.getUsername())
                         .username(user.getDisplayName())
                         .description(Optional.ofNullable(user.getUserProfileDetails())
@@ -59,6 +60,7 @@ public class AccountController {
         User user = userService.getByEmail(email);
 
         return ResponseEntity.ok(AccountResponse.builder()
+                .id(user.getId())
                 .email(user.getUsername())
                 .username(user.getDisplayName())
                 .description(Optional.ofNullable(user.getUserProfileDetails())
@@ -71,16 +73,16 @@ public class AccountController {
                 .build());
     }
 
-    @GetMapping("/search")
-    @Operation(summary = "Search for users by email or display name.", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<List<UserResponse>> searchUsers(
-            @RequestParam(value = "email", required = false) String email,
-            @RequestParam(value = "displayName", required = false) String displayName) {
-
-        List<UserResponse> users = userService.searchUsers(email, displayName);
-
-        return ResponseEntity.ok(users);
-    }
+//    @GetMapping("/search")
+//    @Operation(summary = "Search for users by email or display name.", security = @SecurityRequirement(name = "bearerAuth"))
+//    public ResponseEntity<List<UserResponse>> searchUsers(
+//            @RequestParam(value = "email", required = false) String email,
+//            @RequestParam(value = "displayName", required = false) String displayName) {
+//
+//        List<UserResponse> users = userService.searchUsers(email, displayName);
+//
+//        return ResponseEntity.ok(users);
+//    }
 
     @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Update user data.", description = "All fields are optional.", security = @SecurityRequirement(name = "bearerAuth"))
@@ -116,6 +118,7 @@ public class AccountController {
             }
 
             AccountResponse accountResponse = AccountResponse.builder()
+                    .id(updatedUser.getId())
                     .email(updatedUser.getUsername())
                     .username(updatedUser.getDisplayName())
                     .description(updatedUser.getUserProfileDetails().getDescription())

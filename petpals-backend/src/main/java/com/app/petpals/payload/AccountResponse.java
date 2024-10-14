@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AccountResponse {
+    private String id;
     private String email;
     private String username;
     private String description;

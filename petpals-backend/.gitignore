@@ -34,3 +34,6 @@ build/
 
 #ENV
 /src/main/resources/.env
+
+#KEYSTORE
+/src/main/resources/keystore.p12

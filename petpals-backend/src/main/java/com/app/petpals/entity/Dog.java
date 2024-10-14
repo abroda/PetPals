@@ -1,9 +1,12 @@
 package com.app.petpals.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.Set;
 
 
 @Getter
@@ -29,4 +32,12 @@ public class Dog {
     @ManyToOne()
     @JoinColumn(name = "user_id")
     private User user;
+
+    @JsonManagedReference
+    @ManyToMany
+    @JoinTable(
+            name = "dog_tags_rel",
+            joinColumns = @JoinColumn(name = "dog_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    Set<DogTag> tags;
 }
