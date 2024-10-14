@@ -27,10 +27,9 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/dogs")
 @RequiredArgsConstructor
-@Tag(name = "Dogs")
+@Tag(name = "Dog")
 public class DogController {
     private final DogService dogService;
-    private final UserService userService;
     private final AWSImageService awsImageService;
 
     @GetMapping()
