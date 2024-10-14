@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -26,6 +25,8 @@ public class AuthenticationController {
     @PostMapping("/register")
     @Operation(summary = "Register new user.")
     public ResponseEntity<User> register(@RequestBody final RegisterRequest registerRequest) {
+        System.out.println("HERRE!!!!!");
+        System.out.println(registerRequest);
         User user = authenticationService.register(registerRequest);
         return ResponseEntity.ok(user);
     }

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { AuthForm } from "@/components/forms/AuthForm";
 import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
 import { ThemedTextField } from "@/components/inputs/ThemedTextField";
 import { ThemedText } from "@/components/basic/ThemedText";
