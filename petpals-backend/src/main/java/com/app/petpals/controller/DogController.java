@@ -3,10 +3,10 @@ package com.app.petpals.controller;
 import com.app.petpals.entity.Dog;
 import com.app.petpals.entity.User;
 import com.app.petpals.payload.DogAddRequest;
+import com.app.petpals.payload.DogEditRequest;
 import com.app.petpals.payload.DogResponse;
 import com.app.petpals.service.AWSImageService;
 import com.app.petpals.service.DogService;
-import com.app.petpals.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -96,4 +96,63 @@ public class DogController {
         }
     }
 
+    @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Edit dog details.", description = "All fields except id are optional.", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<?> updateDog(
+            @RequestPart(value = "id") String id,
+            @RequestPart(value = "name", required = false) String name,
+            @RequestPart(value = "file", required = false) MultipartFile file,
+            @RequestPart(value = "description", required = false) String description) {
+        String imageId = null;
+        String imageUrl = null;
+        try {
+            if (file != null && !file.isEmpty()) {
+                Dog dog = dogService.getDogById(id);
+                if (dog.getImageId() != null) {
+                    awsImageService.deleteImage(dog.getImageId());
+                }
+                imageId = awsImageService.uploadImage(file.getBytes(), file.getContentType());
+            }
+            Dog dog = dogService.updateDog(
+                    DogEditRequest.builder()
+                            .id(id)
+                            .name(name)
+                            .description(description)
+                            .imageId(imageId)
+                            .build());
+
+            if (dog.getImageId() != null && !dog.getImageId().isEmpty()) {
+                imageUrl = awsImageService.getPresignedUrl(dog.getImageId());
+            }
+            return ResponseEntity.ok(DogResponse.builder()
+                    .id(dog.getId())
+                    .name(dog.getName())
+                    .description(dog.getDescription())
+                    .imageUrl(imageUrl)
+                    .build());
+
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading image: " + e.getMessage());
+        } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete dog.", description = "All fields except id are optional.", security = @SecurityRequirement(name = "bearerAuth"))
+    private ResponseEntity<?> deleteDog(@PathVariable String id) {
+        try {
+            Dog dog = dogService.getDogById(id);
+            if (dog.getImageId() != null && !dog.getImageId().isEmpty()) {
+                awsImageService.deleteImage(dog.getImageId());
+            }
+            dogService.deleteDog(id);
+            return ResponseEntity.ok("Dog deleted successfully.");
+        } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

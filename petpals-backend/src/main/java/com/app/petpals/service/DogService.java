@@ -3,8 +3,10 @@ package com.app.petpals.service;
 import com.app.petpals.entity.Dog;
 import com.app.petpals.entity.User;
 import com.app.petpals.payload.DogAddRequest;
+import com.app.petpals.payload.DogEditRequest;
 import com.app.petpals.repository.DogRepository;
 import com.app.petpals.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +17,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class DogService {
     private final DogRepository dogRepository;
-    private final UserService userService;
     private final UserRepository userRepository;
 
     public List<Dog> getDogs() {
@@ -33,19 +34,45 @@ public class DogService {
         return dogRepository.findAllByUser(user);
     }
 
+    @Transactional
     public Dog saveDog(String userId, DogAddRequest request) {
-        User user = userService.getById(userId);
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            Dog dog = new Dog();
+            dog.setUser(user);
+            dog.setName(request.getName());
+            dog.setDescription(request.getDescription());
+            dog.setImageId(request.getImageId());
 
-        Dog dog = new Dog();
-        dog.setUser(user);
-        dog.setName(request.getName());
-        dog.setDescription(request.getDescription());
-        dog.setImageId(request.getImageId());
+            List<Dog> userDogs = user.getDogs();
+            userDogs.add(dog);
+            user.setDogs(userDogs);
 
-        List<Dog> userDogs = user.getDogs();
-        userDogs.add(dog);
-        user.setDogs(userDogs);
+            return dogRepository.save(dog);
+        } else throw new RuntimeException("User not found");
+    }
 
-        return dogRepository.save(dog);
+    @Transactional
+    public Dog updateDog(DogEditRequest request){
+        Optional<Dog> optionalDog = dogRepository.findById(request.getId());
+        if (optionalDog.isPresent()) {
+            Dog dog = optionalDog.get();
+            if (request.getName() != null) {
+                dog.setName(request.getName());
+            }
+            if (request.getDescription() != null) {
+                dog.setDescription(request.getDescription());
+            }
+            if (request.getImageId() != null) {
+                dog.setImageId(request.getImageId());
+            }
+            return dogRepository.save(dog);
+        } else throw new RuntimeException("Dog not found");
+    }
+
+    @Transactional
+    public void deleteDog(String dogId) {
+        dogRepository.deleteById(dogId);
     }
 }
