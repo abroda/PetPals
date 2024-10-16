@@ -1,5 +1,9 @@
 package com.app.petpals.service;
 
+import com.app.petpals.exception.AWSFailedToDeleteException;
+import com.app.petpals.exception.AWSGetImageException;
+import com.app.petpals.exception.AWSPresignUrlException;
+import com.app.petpals.exception.AWSUploadImageException;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.beans.factory.annotation.Value;
@@ -78,23 +82,28 @@ public class AWSImageService {
             ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(getObjectRequest);
             return objectBytes.asByteArray();
         } catch (S3Exception e) {
-            throw new RuntimeException(e.awsErrorDetails().errorMessage());
+            throw new AWSGetImageException(e.awsErrorDetails().errorMessage());
         }
     }
 
     public String uploadImage(byte[] imageData, String fileType) {
-        String imageFileName = UUID.randomUUID().toString();
+        try {
+            String imageFileName = UUID.randomUUID().toString();
 
-        InputStream imageInputStream = new ByteArrayInputStream(imageData);
+            InputStream imageInputStream = new ByteArrayInputStream(imageData);
 
-        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(imageFileName)
-                .contentType(fileType)
-                .build();
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(imageFileName)
+                    .contentType(fileType)
+                    .build();
 
-        PutObjectResponse response = s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(imageInputStream, imageData.length));
-        return imageFileName;
+            PutObjectResponse response = s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(imageInputStream, imageData.length));
+            return imageFileName;
+        } catch (S3Exception e){
+            throw new AWSUploadImageException(e.awsErrorDetails().errorMessage());
+        }
+
     }
 
     public String getPresignedUrl(String id) {
@@ -117,7 +126,7 @@ public class AWSImageService {
             return s3Presigner.presignGetObject(presignRequest).url().toString();
 
         } catch (S3Exception e) {
-            throw new RuntimeException(e.awsErrorDetails().errorMessage());
+            throw new AWSPresignUrlException(e.awsErrorDetails().errorMessage());
         }
     }
 
@@ -131,7 +140,7 @@ public class AWSImageService {
             s3Client.deleteObject(deleteObjectRequest);
             preSignedUrlCache.invalidate(id);
         } catch (S3Exception e) {
-            throw new RuntimeException("Failed to delete file from S3: " + e.getMessage());
+            throw new AWSFailedToDeleteException("Failed to delete file from S3: " + e.getMessage());
         }
     }
 
