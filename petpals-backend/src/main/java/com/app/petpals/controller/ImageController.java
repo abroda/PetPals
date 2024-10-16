@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/images")
@@ -25,12 +27,8 @@ public class ImageController {
     @GetMapping(value = "/{id}", produces = "image/jpeg")
     @Operation(summary = "Get image by id.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<byte[]> getImage(@PathVariable String id) {
-        try {
             byte[] imageData = awsImageService.getImage(id);
             return ResponseEntity.ok(imageData);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
     }
 
     @PostMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -40,27 +38,18 @@ public class ImageController {
             )))
     public ResponseEntity<String> uploadImage(@Parameter(
             name = "file",
-            required = true) @RequestParam("file") MultipartFile file) {
-        try {
+            required = true) @RequestParam("file") MultipartFile file) throws IOException {
             String contentType = file.getContentType();
             if (contentType == null || !isImage(contentType)) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid file type. Only image files are allowed.");
             }
             awsImageService.uploadImage(file.getBytes(), contentType);
             return ResponseEntity.status(HttpStatus.CREATED).body("Image uploaded successfully.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading image: " + e.getMessage());
-        }
     }
 
     @GetMapping("/presigned-url/{id}")
     public ResponseEntity<String> getPresignedUrl(@PathVariable String id) {
         String presignedUrl = awsImageService.getPresignedUrl(id);
-
-        if (presignedUrl == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to generate pre-signed URL.");
-        }
-
         return ResponseEntity.ok(presignedUrl);
     }
 
