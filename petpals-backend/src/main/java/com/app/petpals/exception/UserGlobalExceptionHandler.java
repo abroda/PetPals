@@ -41,8 +41,26 @@ public class UserGlobalExceptionHandler {
     }
 
     @ExceptionHandler(UserAlreadyVerifiedException.class)
-    public ResponseEntity<UserErrorResponse> handleUserAlreadyVerifiedException(UserAlreadyVerifiedException e) {
+    public ResponseEntity<UserErrorResponse> handlePasswordResetInvalidException(UserAlreadyVerifiedException e) {
         UserErrorResponse error = new UserErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage(), System.currentTimeMillis());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(UserPasswordResetExpiredException.class)
+    public ResponseEntity<UserErrorResponse> handleUserPasswordResetExpiredException(UserPasswordResetExpiredException e) {
+        UserErrorResponse error = new UserErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage(), System.currentTimeMillis());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(UserPasswordResetInvalidException.class)
+    public ResponseEntity<UserErrorResponse> handlePasswordResetInvalidException(UserPasswordResetInvalidException e) {
+        UserErrorResponse error = new UserErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage(), System.currentTimeMillis());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(UserPasswordResetNotRequestedException.class)
+    public ResponseEntity<UserErrorResponse> handleUserPasswordResetNotRequestedException(UserPasswordResetNotRequestedException e) {
+        UserErrorResponse error = new UserErrorResponse(HttpStatus.NOT_FOUND.value(), e.getMessage(), System.currentTimeMillis());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 }

@@ -2,6 +2,7 @@ package com.app.petpals.service;
 
 import com.app.petpals.entity.User;
 import com.app.petpals.entity.UserPasswordReset;
+import com.app.petpals.exception.*;
 import com.app.petpals.payload.ConfirmResetPasswordCodeRequest;
 import com.app.petpals.payload.CreateResetPasswordCodeRequest;
 import com.app.petpals.payload.ResetPasswordRequest;
@@ -25,12 +26,12 @@ public class UserPasswordResetService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
 
-    public void forgotPassword(CreateResetPasswordCodeRequest createResetPasswordCodeRequest) {
+    public void forgotPassword(CreateResetPasswordCodeRequest createResetPasswordCodeRequest) throws MessagingException {
         Optional<User> optionalUser = userRepository.findByUsername(createResetPasswordCodeRequest.getEmail());
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             if (!user.isEnabled()) {
-                throw new RuntimeException("This user is not verified yet.");
+                throw new UserNotVerifiedException("This user is not verified yet.");
             }
             Optional<UserPasswordReset> optionalUserPasswordReset = userPasswordResetRepository.findByUser(user);
             UserPasswordReset userPasswordReset;
@@ -45,7 +46,7 @@ public class UserPasswordResetService {
             sendResetEmail(user, userPasswordReset);
             userPasswordResetRepository.save(userPasswordReset);
         } else {
-            throw new RuntimeException("User not found.");
+            throw new UserNotFoundException("User not found.");
         }
     }
 
@@ -54,22 +55,22 @@ public class UserPasswordResetService {
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             if (!user.isEnabled()) {
-                throw new RuntimeException("This user is not verified yet.");
+                throw new UserNotVerifiedException("This user is not verified yet.");
             }
             Optional<UserPasswordReset> optionalUserPasswordReset = userPasswordResetRepository.findByUser(user);
             if (optionalUserPasswordReset.isPresent()) {
                 UserPasswordReset userPasswordReset = optionalUserPasswordReset.get();
                 if (userPasswordReset.getResetExpiration().isBefore(LocalDateTime.now())) {
-                    throw new RuntimeException("Password reset code has expired.");
+                    throw new UserPasswordResetExpiredException("Password reset code has expired.");
                 }
                 if (!userPasswordReset.getResetCode().equals(confirmResetPasswordCodeRequest.getCode())) {
-                    throw new RuntimeException("Invalid password reset code.");
+                    throw new UserPasswordResetInvalidException("Invalid password reset code.");
                 }
             } else {
-                throw new RuntimeException("No password reset request found for the user.");
+                throw new UserPasswordResetNotRequestedException("No password reset request found for the user.");
             }
         } else {
-            throw new RuntimeException("User not found.");
+            throw new UserNotFoundException("User not found.");
         }
     }
 
@@ -82,21 +83,21 @@ public class UserPasswordResetService {
             if (optionalUserPasswordReset.isPresent()) {
                 UserPasswordReset userPasswordReset = optionalUserPasswordReset.get();
                 if (userPasswordReset.getResetExpiration().isBefore(LocalDateTime.now())) {
-                    throw new RuntimeException("Password reset code has expired.");
+                    throw new UserPasswordResetExpiredException("Password reset code has expired.");
                 }
                 if (!userPasswordReset.getResetCode().equals(resetPasswordRequest.getCode())) {
-                    throw new RuntimeException("Invalid password reset code.");
+                    throw new UserPasswordResetInvalidException("Invalid password reset code.");
                 }
                 user.setPassword(passwordEncoder.encode(resetPasswordRequest.getPassword()));
                 user.setPasswordReset(null);
                 userRepository.save(user);
             } else {
-                throw new RuntimeException("No password reset request found for this user.");
+                throw new UserPasswordResetNotRequestedException("No password reset request found for this user.");
             }
-        } else throw new RuntimeException("User not found.");
+        } else throw new UserNotFoundException("User not found.");
     }
 
-    public void sendResetEmail(User user, UserPasswordReset userPasswordReset) {
+    public void sendResetEmail(User user, UserPasswordReset userPasswordReset) throws MessagingException {
         String subject = "PetPals account password reset";
         String resetCode = userPasswordReset.getResetCode();
         String htmlMessage = "<html>"
@@ -111,12 +112,7 @@ public class UserPasswordResetService {
                 + "</div>"
                 + "</body>"
                 + "</html>";
-
-        try {
-            emailService.sendPasswordResetMail(user.getUsername(), subject, htmlMessage);
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
+        emailService.sendPasswordResetMail(user.getUsername(), subject, htmlMessage);
     }
 
     private String generateResetCode() {
