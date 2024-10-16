@@ -87,6 +87,7 @@ public class DogController {
                     .name(dog.getName())
                     .description(dog.getDescription())
                     .imageUrl(awsImageService.getPresignedUrl(imageId))
+                    .tags(dog.getTags())
                     .build());
 
         } catch (IOException e) {
@@ -157,5 +158,19 @@ public class DogController {
             System.out.println(e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @PutMapping
+    public ResponseEntity<?> addTagToDog(@RequestParam String dogId, @RequestParam String tagId) {
+        Dog dog = dogService.addTagToDog(dogId, tagId);
+        return ResponseEntity.ok(DogResponse.builder()
+                .id(dog.getId())
+                .name(dog.getName())
+                .description(dog.getDescription())
+                .imageUrl(Optional.ofNullable(dog.getImageId())
+                        .map(awsImageService::getPresignedUrl)
+                        .orElse(null))
+                .tags(dog.getTags())
+                .build());
     }
 }

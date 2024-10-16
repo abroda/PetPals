@@ -1,5 +1,6 @@
 package com.app.petpals.service;
 
+import com.app.petpals.exception.*;
 import com.app.petpals.payload.RegisterRequest;
 import com.app.petpals.payload.AuthenticationRequest;
 import com.app.petpals.payload.VerifyUserRequest;
@@ -25,7 +26,7 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
 
-    public User register(RegisterRequest registerRequest) {
+    public User register(RegisterRequest registerRequest) throws MessagingException {
         User user = new User(
                 registerRequest.getEmail(),
                 registerRequest.getDisplayName(),
@@ -39,8 +40,8 @@ public class AuthenticationService {
     }
 
     public User authenticate(AuthenticationRequest authenticationRequest) {
-        User user = userRepository.findByUsername(authenticationRequest.getEmail()).orElseThrow(() -> new RuntimeException("User not found"));
-        if (!user.isEnabled()) throw new RuntimeException("User is not verified. Please verify your account.");
+        User user = userRepository.findByUsername(authenticationRequest.getEmail()).orElseThrow(() -> new UserNotFoundException("User not found."));
+        if (!user.isEnabled()) throw new UserNotVerifiedException("User is not verified. Please verify your account.");
 
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 authenticationRequest.getEmail(),
@@ -53,8 +54,9 @@ public class AuthenticationService {
         Optional<User> optionalUser = userRepository.findByUsername(verifyRequest.getEmail());
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
+            if (user.isEnabled()) throw new UserAlreadyVerifiedException("User is already verified.");
             if (user.getVerificationExpiration().isBefore(LocalDateTime.now())) {
-                throw new RuntimeException("Verification code has expired.");
+                throw new UserVerificationCodeExpiredException("Verification code has expired.");
             }
             if (user.getVerificationCode().equals(verifyRequest.getVerificationCode())) {
                 user.setEnabled(true);
@@ -62,19 +64,19 @@ public class AuthenticationService {
                 user.setVerificationExpiration(null);
                 userRepository.save(user);
             } else {
-                throw new RuntimeException("Invalid verification code.");
+                throw new UserVerificationCodeInvalidException("Invalid verification code.");
             }
         } else {
-            throw new RuntimeException("User not found.");
+            throw new UserNotFoundException("User not found.");
         }
     }
 
-    public void resendVerificationCode(String email) {
+    public void resendVerificationCode(String email) throws MessagingException {
         Optional<User> optionalUser = userRepository.findByUsername(email);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             if (user.isEnabled()) {
-                throw new RuntimeException("User is already verified.");
+                throw new UserAlreadyVerifiedException("User is already verified.");
             } else {
                 user.setVerificationCode(generateVerificationCode());
                 user.setVerificationExpiration(LocalDateTime.now().plusMinutes(15));
@@ -82,11 +84,11 @@ public class AuthenticationService {
                 userRepository.save(user);
             }
         } else {
-            throw new RuntimeException("User not found.");
+            throw new UserNotFoundException("User not found.");
         }
     }
 
-    public void sendVerificationEmail(User user) {
+    public void sendVerificationEmail(User user) throws MessagingException {
         String subject = "PetPals account verification";
         String verificationCode = user.getVerificationCode();
         String htmlMessage = "<html>"
@@ -102,12 +104,7 @@ public class AuthenticationService {
                 + "</body>"
                 + "</html>";
 
-        try {
             emailService.sendVerificationMail(user.getUsername(), subject, htmlMessage);
-        } catch (MessagingException e) {
-            // Handle email sending exception
-            e.printStackTrace();
-        }
     }
 
     private String generateVerificationCode() {

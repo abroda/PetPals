@@ -9,6 +9,7 @@ import com.app.petpals.service.AuthenticationService;
 import com.app.petpals.service.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,9 +25,7 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     @Operation(summary = "Register new user.")
-    public ResponseEntity<User> register(@RequestBody final RegisterRequest registerRequest) {
-        System.out.println("HERRE!!!!!");
-        System.out.println(registerRequest);
+    public ResponseEntity<User> register(@RequestBody final RegisterRequest registerRequest) throws MessagingException {
         User user = authenticationService.register(registerRequest);
         return ResponseEntity.ok(user);
     }
@@ -43,22 +42,14 @@ public class AuthenticationController {
     @PostMapping("/verify")
     @Operation(summary = "Verify account.")
     public ResponseEntity<?> verifyUser(@RequestBody final VerifyUserRequest verifyUserRequest){
-        try {
             authenticationService.verifyUser(verifyUserRequest);
             return ResponseEntity.ok("Account verified successfully.");
-        } catch (RuntimeException e){
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
     }
 
     @PostMapping("/resend")
     @Operation(summary = "Resend verification code.")
-    public ResponseEntity<?> resendVerificationCode(@RequestParam String email){
-        try {
+    public ResponseEntity<?> resendVerificationCode(@RequestParam String email) throws MessagingException {
             authenticationService.resendVerificationCode(email);
             return ResponseEntity.ok("Verification code resent.");
-        } catch (RuntimeException e){
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
     }
 }

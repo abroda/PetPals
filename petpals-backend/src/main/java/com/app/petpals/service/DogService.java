@@ -1,10 +1,12 @@
 package com.app.petpals.service;
 
 import com.app.petpals.entity.Dog;
+import com.app.petpals.entity.DogTag;
 import com.app.petpals.entity.User;
 import com.app.petpals.payload.DogAddRequest;
 import com.app.petpals.payload.DogEditRequest;
 import com.app.petpals.repository.DogRepository;
+import com.app.petpals.repository.DogTagRepository;
 import com.app.petpals.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import java.util.Optional;
 public class DogService {
     private final DogRepository dogRepository;
     private final UserRepository userRepository;
+    private final DogTagRepository dogTagRepository;
 
     public List<Dog> getDogs() {
         return dogRepository.findAll();
@@ -54,7 +57,7 @@ public class DogService {
     }
 
     @Transactional
-    public Dog updateDog(DogEditRequest request){
+    public Dog updateDog(DogEditRequest request) {
         Optional<Dog> optionalDog = dogRepository.findById(request.getId());
         if (optionalDog.isPresent()) {
             Dog dog = optionalDog.get();
@@ -74,5 +77,25 @@ public class DogService {
     @Transactional
     public void deleteDog(String dogId) {
         dogRepository.deleteById(dogId);
+    }
+
+    @Transactional
+    public Dog addTagToDog(String dogId, String tagId) {
+        Dog dog = getDogById(dogId);
+        Optional<DogTag> optionalDogTag = dogTagRepository.findById(tagId);
+        if (optionalDogTag.isPresent()) {
+            dog.getTags().add(optionalDogTag.get());
+            return dogRepository.save(dog);
+        } else throw new RuntimeException("Dog Tag not found.");
+    }
+
+    @Transactional
+    public Dog removeTagToDog(String dogId, String tagId) {
+        Dog dog = getDogById(dogId);
+        Optional<DogTag> optionalDogTag = dogTagRepository.findById(tagId);
+        if (optionalDogTag.isPresent()) {
+            dog.getTags().remove(optionalDogTag.get());
+            return dogRepository.save(dog);
+        } else throw new RuntimeException("Dog Tag not found.");
     }
 }
