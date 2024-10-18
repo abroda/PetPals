@@ -1,11 +1,12 @@
 package com.app.petpals.service;
 
 import com.app.petpals.entity.User;
-import com.app.petpals.entity.UserProfileDetails;
+import com.app.petpals.exception.UserDataException;
+import com.app.petpals.exception.UserNotFoundException;
 import com.app.petpals.payload.AccountEditRequest;
-import com.app.petpals.payload.AccountResponse;
 import com.app.petpals.payload.UserResponse;
 import com.app.petpals.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,21 +23,12 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User getByEmail(String email) {
-        Optional<User> optionalUser = userRepository.findByUsername(email);
-        if (optionalUser.isPresent()) {
-            return optionalUser.get();
-        } else {
-            throw new RuntimeException("User not found");
-        }
-    }
-
     public User getById(String id) {
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isPresent()) {
             return optionalUser.get();
         } else {
-            throw new RuntimeException("User not found");
+            throw new UserNotFoundException("User not found.");
         }
     }
 
@@ -46,7 +38,6 @@ public class UserService {
                     .map(user -> UserResponse.builder()
                             .email(user.getUsername())
                             .username(user.getDisplayName())
-                            .userProfileDetails(user.getUserProfileDetails())
                             .build())
                     .collect(Collectors.toList());
         } else if (displayName != null && !displayName.isEmpty()) {
@@ -54,7 +45,6 @@ public class UserService {
                     .map(user -> UserResponse.builder()
                             .email(user.getUsername())
                             .username(user.getDisplayName())
-                            .userProfileDetails(user.getUserProfileDetails())
                             .build())
                     .collect(Collectors.toList());
         } else {
@@ -62,34 +52,35 @@ public class UserService {
                     .map(user -> UserResponse.builder()
                             .email(user.getUsername())
                             .username(user.getDisplayName())
-                            .userProfileDetails(user.getUserProfileDetails())
                             .build())
                     .collect(Collectors.toList());
         }
     }
 
-    public User updateUser(AccountEditRequest request) {
-        Optional<User> optionalUser = userRepository.findByUsername(request.getEmail());
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            if (user.getUserProfileDetails() == null) {
-                user.setUserProfileDetails(new UserProfileDetails());
-                user.getUserProfileDetails().setUser(user);
-            }
-            if (request.getDisplayName() != null) {
-                user.setDisplayName(request.getDisplayName());
-            }
-            if (request.getDescription() != null) {
-                user.getUserProfileDetails().setDescription(request.getDescription());
-            }
-            if (request.getImageId() != null) {
-                user.getUserProfileDetails().setProfilePictureId(request.getImageId());
-            }
-            userRepository.save(user);
+    public User updateUserData(String userId, AccountEditRequest request) {
+        User user = getById(userId);
+        if (request.getDisplayName() != null && !request.getDisplayName().isEmpty()) {
+            user.setDisplayName(request.getDisplayName());
+        } else throw new UserDataException("Username can't be null or empty.");
+        user.setDescription(request.getDescription());
 
-            return user;
-        } else {
-            throw new RuntimeException("User not found.");
-        }
+        return userRepository.save(user);
+    }
+
+    public User updateUserProfilePicture(String userId, String profilePictureId) {
+        User user = getById(userId);
+        user.setProfilePictureId(profilePictureId);
+        return userRepository.save(user);
+    }
+
+    public User deleteUserPicture(String userId) {
+        User user = getById(userId);
+        user.setProfilePictureId(null);
+        return userRepository.save(user);
+    }
+
+    @Transactional
+    public void deleteUser(String id) {
+        userRepository.deleteById(id);
     }
 }

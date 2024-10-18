@@ -1,5 +1,7 @@
 package com.app.petpals.controller;
 
+import com.app.petpals.entity.Dog;
+import com.app.petpals.payload.DogResponse;
 import com.app.petpals.service.DogTagService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -8,8 +10,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
-@RequestMapping("/api/dogs/tags")
+@RequestMapping("/api/dogtags")
 @RequiredArgsConstructor
 @Tag(name = "DogTags")
 public class DogTagController {

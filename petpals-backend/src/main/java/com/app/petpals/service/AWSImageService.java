@@ -107,7 +107,7 @@ public class AWSImageService {
     }
 
     public String getPresignedUrl(String id) {
-        if (id == null) throw new AWSPresignUrlException("Failed to generate pre-signed URL.");
+        if (id == null) return null;
         return preSignedUrlCache.get(id, this::generatePresignedUrl);
     }
 

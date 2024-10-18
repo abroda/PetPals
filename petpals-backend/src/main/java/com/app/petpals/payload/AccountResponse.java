@@ -18,5 +18,4 @@ public class AccountResponse {
     private String username;
     private String description;
     private String imageUrl;
-    private List<Dog> dogs;
 }
