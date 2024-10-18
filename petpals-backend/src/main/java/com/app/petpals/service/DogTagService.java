@@ -1,6 +1,7 @@
 package com.app.petpals.service;
 
 import com.app.petpals.entity.DogTag;
+import com.app.petpals.exception.DogTagNotFoundException;
 import com.app.petpals.repository.DogTagRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class DogTagService {
         Optional<DogTag> dogTagOptional = dogTagRepository.findById(tagId);
         if (dogTagOptional.isPresent()) {
             return dogTagOptional.get();
-        } else throw new RuntimeException("Tag not found.");
+        } else throw new DogTagNotFoundException("Tag not found.");
     }
 
     @Transactional
@@ -40,7 +41,7 @@ public class DogTagService {
             DogTag dogTag = dogTagOptional.get();
             dogTag.setTag(tagName);
             return dogTagRepository.save(dogTag);
-        } else throw new RuntimeException("Tag not found.");
+        } else throw new DogTagNotFoundException("Tag not found.");
     }
 
     @Transactional

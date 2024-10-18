@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@Tag(name = "Authentication")
+@Tag(name = "User")
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
@@ -52,4 +52,5 @@ public class AuthenticationController {
             authenticationService.resendVerificationCode(email);
             return ResponseEntity.ok("Verification code resent.");
     }
+
 }

@@ -2,7 +2,7 @@ package com.app.petpals.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -10,8 +10,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 @Entity
 @Table(name = "_user", uniqueConstraints = {@UniqueConstraint(name = "emailUnique", columnNames = {"email"})})
 public class User implements UserDetails {
@@ -20,7 +19,7 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(name = "username", unique = true, nullable = false)
+    @Column(name = "display_name", unique = true, nullable = false)
     private String displayName;
 
     @Column(name = "email", unique = true, nullable = false)
@@ -38,13 +37,15 @@ public class User implements UserDetails {
     @Column(name = "verification_expiration")
     private LocalDateTime verificationExpiration;
 
-    @JsonManagedReference
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private UserPasswordReset passwordReset;
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "profile_picture_id", unique = true)
+    private String profilePictureId;
 
     @JsonManagedReference
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private UserProfileDetails userProfileDetails;
+    private UserPasswordReset passwordReset;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

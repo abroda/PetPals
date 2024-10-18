@@ -63,4 +63,16 @@ public class UserGlobalExceptionHandler {
         UserErrorResponse error = new UserErrorResponse(HttpStatus.NOT_FOUND.value(), e.getMessage(), System.currentTimeMillis());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
+
+    @ExceptionHandler(UserNoEditFieldsException.class)
+    public ResponseEntity<UserErrorResponse> handleUserNoEditFieldsException(UserNoEditFieldsException e) {
+        UserErrorResponse error = new UserErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage(), System.currentTimeMillis());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(UserDataException.class)
+    public ResponseEntity<UserErrorResponse> handleUserDataException(UserDataException e) {
+        UserErrorResponse error = new UserErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage(), System.currentTimeMillis());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
 }

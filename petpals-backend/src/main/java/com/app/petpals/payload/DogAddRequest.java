@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -12,5 +14,5 @@ import lombok.NoArgsConstructor;
 public class DogAddRequest {
     private String name;
     private String description;
-    private String imageId;
+    private Set<String> tagIds;
 }
