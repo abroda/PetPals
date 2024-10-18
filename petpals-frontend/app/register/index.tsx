@@ -7,12 +7,15 @@ import { ThemedTextField } from "@/components/inputs/ThemedTextField";
 import { ThemedText } from "@/components/basic/ThemedText";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 import AppLogo from "@/components/decorations/static/AppLogo";
-import ThemedLoadingIndicator from "@/components/displays/ThemedLoadingIndicator";
+import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoadingIndicator";
 import HorizontalView from "@/components/basic/containers/HorizontalView";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import TermsOfUseDialog from "@/components/dialogs/TermsOfUseDialog";
 import { Checkbox } from "react-native-ui-lib";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
+import validators from "react-native-ui-lib/src/components/textField/validators";
+import { Pressable } from "react-native";
+import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 
 export default function RegisterScreen() {
   const [name, setName] = useState("");
@@ -22,33 +25,57 @@ export default function RegisterScreen() {
   const [termsAgreedTo, setTermsAgreedTo] = useState(false);
   const [validationMessage, setValidationMessage] = useState("");
   const [dialogVisible, setDialogVisible] = useState(false);
-  const { isLoading, responseMessage, register } = useAuth();
+  const { isLoading, responseMessage, passwordRegex, register } = useAuth();
 
-  const alarmColor = useThemeColor("alarm");
   const accentColor = useThemeColor("accent");
+
+  function validate() {
+    return (
+      name.length >= 3 &&
+      email.length >= 6 &&
+      validators.email(email) &&
+      password.length >= 8 &&
+      (password.match(passwordRegex)?.length ?? 0 >= 1) &&
+      password === repeatPassword
+    );
+  }
 
   async function submit() {
     setValidationMessage("Processing request...");
 
-    await register(name, email, password);
-
-    if (responseMessage !== "OK") {
-      setValidationMessage(responseMessage ?? "No response");
+    if (!validate()) {
+      setValidationMessage("Input is invalid.");
+    } else if (!termsAgreedTo) {
+      setValidationMessage("You have to accept Terms of Use.");
     } else {
-      setValidationMessage("Registration successful");
-      router.setParams({ email: email });
-      router.push("./verifyEmail");
+      register(name, email, password).then((result) => {
+        if (!result) {
+          setValidationMessage(responseMessage ?? "No response");
+        } else {
+          setValidationMessage("Registration successful");
+          router.setParams({ email: email });
+          router.push("./verifyEmail");
+        }
+      });
     }
   }
 
   return (
-    <ThemedScrollView
-      paddingH-25
-      paddingT-30
-    >
-      {isLoading ? (
-        <ThemedLoadingIndicator />
-      ) : (
+    <ThemedScrollView>
+      {dialogVisible && (
+        <TermsOfUseDialog
+          visible={dialogVisible}
+          onDismiss={() => setDialogVisible(false)}
+        />
+      )}
+      {isLoading && (
+        <ThemedLoadingIndicator
+          size="large"
+          fullScreen={true}
+          message="Loading..."
+        />
+      )}
+      {!isLoading && (
         <ThemedView
           style={{
             padding: 24,
@@ -63,8 +90,7 @@ export default function RegisterScreen() {
 
           {validationMessage && (
             <ThemedText
-              textStyleName="label"
-              center={false}
+              textStyleName="small"
               textColorName="alarm"
               style={{ marginBottom: "3%" }}
             >
@@ -72,60 +98,51 @@ export default function RegisterScreen() {
             </ThemedText>
           )}
           <ThemedTextField
-            text60L
             label="Name"
+            autoComplete="name"
             onChangeText={(newText: string) => setName(newText)}
-            enableErrors
-            validate={["required", (value) => (value ? value.length : 0) > 2]}
-            validateOnBlur
+            withValidation
+            validate={["required", (value) => (value ? value.length : 0) >= 3]}
             validationMessage={["Name is required", "Name is too short"]}
             maxLength={250}
           />
           <ThemedTextField
-            text60L
             label="Email"
+            autoComplete="email"
             onChangeText={(newText: string) => setEmail(newText)}
-            enableErrors
-            validationMessageStyle={{ color: useThemeColor("alarm") }}
-            validate={[
-              "required",
-              "email",
-              (value) => (value ? value.length : 0) > 6,
-            ]}
-            validateOnBlur
-            validationMessage={[
-              "Field is required",
-              "Email is invalid",
-              "Email is too short",
-            ]}
+            withValidation
+            validate={["required", "email"]}
+            validationMessage={["Email is required", "Email is invalid"]}
             maxLength={250}
           />
           <ThemedTextField
-            text60L
             label="Password"
             onChangeText={(newText: string) => setPassword(newText)}
-            secureTextEntry
-            validateOnChange
-            validationMessageStyle={{ color: useThemeColor("alarm") }}
-            showCharCounter
-            enableErrors
-            validate={["required", (value) => (value ? value.length : 0) > 6]}
+            isSecret
+            withValidation
+            validate={[
+              "required",
+              (value) => (value ? value.length : 0) >= 8,
+              (value) => (password.match(passwordRegex)?.length ?? 0) > 0,
+              (value) => password === repeatPassword,
+            ]}
             validationMessage={[
-              "Field is required",
+              "Password is required",
               "Password is too short",
               "Password is invalid",
+              "Passwords don't match",
             ]}
           />
           <ThemedTextField
-            text60L
             label="Repeat password"
             onChangeText={(newText: string) => setRepeatPassword(newText)}
-            secureTextEntry
-            validateOnChange
-            showCharCounter
-            enableErrors
-            validate={["required", (value) => repeatPassword == password]}
-            validationMessage={["Field is required", "Passwords don't match"]}
+            isSecret
+            withValidation
+            validate={["required", (value) => repeatPassword === password]}
+            validationMessage={[
+              "Repeat password is required",
+              "Passwords don't match",
+            ]}
           />
           <HorizontalView>
             <Checkbox
@@ -137,14 +154,13 @@ export default function RegisterScreen() {
                 { color: useThemeColor("text") },
                 useTextStyle("small"),
               ]}
-            ></Checkbox>
-            ,
+            />
             <ThemedText
               textColorName="link"
               textStyleName="smallBold"
               onPress={() => setDialogVisible(true)}
             >
-              Terms of Use
+              Terms of Use.
             </ThemedText>
           </HorizontalView>
 
@@ -161,11 +177,6 @@ export default function RegisterScreen() {
             textColorName="textOnSecondary"
             label="Go back"
             onPress={() => router.dismiss()}
-          />
-
-          <TermsOfUseDialog
-            visible={dialogVisible}
-            onDismiss={() => setDialogVisible(false)}
           />
         </ThemedView>
       )}

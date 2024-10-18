@@ -2,13 +2,14 @@ import { ThemedText } from "@/components/basic/ThemedText";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { Text } from "react-native-ui-lib";
 import { PropsWithChildren, useEffect, useState } from "react";
-import { Easing, ViewStyle } from "react-native";
+import { ViewStyle } from "react-native";
 import Animated, {
   useSharedValue,
   withDelay,
   withRepeat,
   withSequence,
   withTiming,
+  Easing,
 } from "react-native-reanimated";
 
 type AnimatedTextSwapProps = { texts: string[] } & PropsWithChildren<{
@@ -42,7 +43,7 @@ export function AnimatedTextSwap(props: AnimatedTextSwapProps) {
           opacity: fadeAnimation,
         }}
       >
-        <ThemedText>{mottos[currentMotto]}</ThemedText>
+        <ThemedText center={true}>{mottos[currentMotto]}</ThemedText>
       </Animated.View>
     </ThemedView>
   );

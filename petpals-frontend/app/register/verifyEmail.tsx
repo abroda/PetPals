@@ -33,16 +33,12 @@ export default function VerifyEmailScreen(email: string) {
 
       <ThemedView style={{ padding: "5%" }}>
         <ThemedText
-          center={false}
           textStyleName="header"
           style={{ marginBottom: "3%" }}
         >
           Verify email
         </ThemedText>
-        <ThemedText
-          center={false}
-          style={{ marginBottom: "10%" }}
-        >
+        <ThemedText style={{ marginBottom: "10%" }}>
           Please, enter verification code to finish registration.
         </ThemedText>
         <ThemedTextField

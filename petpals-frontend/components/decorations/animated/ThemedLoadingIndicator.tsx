@@ -7,17 +7,22 @@ import {
   ThemedColor,
   useThemeColor,
 } from "@/hooks/theme/useThemeColor";
-import { ActivityIndicator, Dimensions } from "react-native";
-import { ThemedText } from "../basic/ThemedText";
+import {
+  ActivityIndicator,
+  ActivityIndicatorProps,
+  Dimensions,
+} from "react-native";
+import { ThemedText } from "../../basic/ThemedText";
 import { LoaderScreen } from "react-native-ui-lib";
 import { ThemeColors } from "@/constants/theme/Colors";
 
-export type ThemedLoadingIndicatorProps = {
+export type ThemedLoadingIndicatorProps = ActivityIndicatorProps & {
   colorName?: ColorName;
   themedColor?: ThemedColor;
   textColorName?: ColorName;
   textThemedColor?: ThemedColor;
   message?: string;
+  fullScreen?: boolean;
 };
 
 export default function ThemedLoadingIndicator({
@@ -25,28 +30,37 @@ export default function ThemedLoadingIndicator({
   themedColor,
   textColorName = "text",
   textThemedColor,
-  message = "Loading...",
+  message = "",
+  fullScreen = false,
+  ...rest
 }: ThemedLoadingIndicatorProps) {
   const loaderColor = useThemeColor(colorName, themedColor);
   const textColor = useThemeColor(textColorName, textThemedColor);
   const backgroundColor = useThemeColor("background");
 
+  if (fullScreen) {
+    return (
+      <ThemedView
+        style={{
+          alignItems: "center",
+          justifyContent: "center",
+          margin: "50%",
+        }}
+      >
+        <ActivityIndicator
+          color={loaderColor}
+          {...rest}
+        />
+        <ThemedText textColorName={textColorName}>{message}</ThemedText>
+      </ThemedView>
+    );
+  }
+
   return (
-    <ThemedView
-      style={{
-        width: "100%",
-        height: "100%",
-        padding: "50%",
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: backgroundColor,
-      }}
-    >
+    <ThemedView>
       <ActivityIndicator
-        size="large"
         color={loaderColor}
-        style={{ marginBottom: 8 }}
+        {...rest}
       />
       <ThemedText textColorName={textColorName}>{message}</ThemedText>
     </ThemedView>

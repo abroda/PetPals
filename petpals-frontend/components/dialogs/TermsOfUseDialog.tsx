@@ -11,19 +11,18 @@ export default function TermsOfUseDialog({
   return (
     <Dialog
       visible={visible}
-      onDismiss={onDismiss}
+      onDismiss={() => {}}
       panDirection={PanningProvider.Directions.DOWN}
     >
       <ThemedView style={{ padding: "6%", borderRadius: 30 }}>
         <ThemedText
-          center={false}
           textStyleName="header"
           style={{ marginBottom: "5%" }}
         >
           Terms of Use
         </ThemedText>
         <ThemedScrollView>
-          <ThemedText center={false}>
+          <ThemedText>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean mi
             ex, efficitur iaculis porta a, tincidunt eget velit. Lorem ipsum
             dolor sit amet, consectetur adipiscing elit. Etiam congue, eros et

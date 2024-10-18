@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { apiPaths } from "@/constants/config/api";
+import { apiPaths } from "@/constants/config/API";
 import asyncStorage from "@react-native-async-storage/async-storage/src/AsyncStorage";
 import { Dictionary } from "react-native-ui-lib/src/typings/common";
 
@@ -15,15 +15,23 @@ export type AuthContextType = {
   authToken?: string;
   userEmail?: string;
   responseMessage?: string;
-  checkConnection: () => void;
-  register: (displayName: string, email: string, password: string) => void;
-  verifyEmail: (email: string, code: string) => void;
-  resendVerification: (email: string) => void;
-  requestPasswordReset: (email: string) => void;
-  confirmPasswordReset: (email: string, code: string) => void;
-  resetPassword: (email: string, password: string, code: string) => void;
-  login: (email: string, password: string) => void;
-  logout: () => void;
+  passwordRegex: string;
+  register: (
+    displayName: string,
+    email: string,
+    password: string
+  ) => Promise<boolean>;
+  verifyEmail: (email: string, code: string) => Promise<boolean>;
+  resendVerification: (email: string) => Promise<boolean>;
+  requestPasswordReset: (email: string) => Promise<boolean>;
+  confirmPasswordReset: (email: string, code: string) => Promise<boolean>;
+  resetPassword: (
+    email: string,
+    password: string,
+    code: string
+  ) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => Promise<boolean>;
 };
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -34,32 +42,34 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [authToken, setAuthToken] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [responseMessage, setResponseMessage] = useState("");
+  const passwordRegex =
+    "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$";
 
   const sendJsonQuery = (path: string, method: string, payload?: any) =>
     fetch(path, {
       method: method,
       mode: "cors",
       headers: {
-        "Content-Type": "application/json", // Ensure the Content-Type is set to application/json
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
     }).then((response) => response.json());
 
   const checkConnection = async () => {
     setIsProcessing(true);
+    setResponseMessage("");
 
-    await sendJsonQuery(apiPaths.checkConnection, "GET")
+    return sendJsonQuery(apiPaths.checkConnection, "GET")
       .then((_) => {
-        setResponseMessage("OK");
         setIsProcessing(false);
+        return true;
       })
       .catch((err: Error) => {
         console.error(err.message);
-        setResponseMessage(err.message);
+        setResponseMessage("Check connection: " + err.message);
         setIsProcessing(false);
+        return false;
       });
-
-    setIsProcessing(false);
   };
 
   const register = async (
@@ -68,84 +78,98 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     password: string
   ) => {
     setIsProcessing(true);
+    setResponseMessage("");
 
-    await sendJsonQuery(apiPaths.auth.register, "POST", {
+    return sendJsonQuery(apiPaths.auth.register, "POST", {
       displayName: displayName,
       email: email,
       password: password,
     })
       .then((response: Dictionary<any>) => {
-        setResponseMessage("OK");
         setIsProcessing(false);
+        return true;
       })
       .catch((err: Error) => {
-        console.error(err.message);
-        setResponseMessage(err.message);
+        console.error("Register: " + err.message);
+        setResponseMessage("Register: error");
         setIsProcessing(false);
+        return false;
       });
   };
 
   const verifyEmail = async (email: string, verificationCode: string) => {
     setIsProcessing(true);
-    await sendJsonQuery(apiPaths.auth.verifyEmail, "POST", {
+    setResponseMessage("");
+
+    return sendJsonQuery(apiPaths.auth.verifyEmail, "POST", {
       email: email,
       verificationCode: verificationCode,
     })
       .then((_) => {
-        setResponseMessage("OK");
         setIsProcessing(false);
+        return true;
       })
       .catch((err: Error) => {
         console.error(err.message);
-        setResponseMessage(err.message);
+        setResponseMessage("Verify email: " + err.message);
         setIsProcessing(false);
+        return false;
       });
   };
 
   const resendVerification = async (email: string) => {
     setIsProcessing(true);
-    await sendJsonQuery(apiPaths.auth.verifyEmail, "POST", email)
+    setResponseMessage("");
+
+    return sendJsonQuery(apiPaths.auth.verifyEmail, "POST", email)
       .then((_) => {
-        setResponseMessage("OK");
         setIsProcessing(false);
+        return true;
       })
       .catch((err: Error) => {
         console.error(err.message);
-        setResponseMessage(err.message);
+        setResponseMessage("Resend verification: " + err.message);
         setIsProcessing(false);
+        return false;
       });
   };
 
   const requestPasswordReset = async (email: string) => {
     setIsProcessing(true);
-    await sendJsonQuery(apiPaths.auth.requestPasswordReset, "POST", {
+    setResponseMessage("");
+
+    return sendJsonQuery(apiPaths.auth.requestPasswordReset, "POST", {
       email: email,
     })
       .then((response: string) => {
-        setResponseMessage(response);
         setIsProcessing(false);
+        return true;
       })
       .catch((err: Error) => {
         console.error(err.message);
-        setResponseMessage(err.message);
+        setResponseMessage("Request password reset: " + err.message);
         setIsProcessing(false);
+        return false;
       });
   };
 
   const confirmPasswordReset = async (email: string, code: string) => {
     setIsProcessing(true);
-    await sendJsonQuery(apiPaths.auth.confirmPasswordReset, "POST", {
+    setResponseMessage("");
+
+    return sendJsonQuery(apiPaths.auth.confirmPasswordReset, "POST", {
       email: email,
       code: code,
     })
       .then((response: string) => {
-        setResponseMessage(response);
         setIsProcessing(false);
+        return true;
       })
       .catch((err: Error) => {
         console.error(err.message);
-        setResponseMessage(err.message);
+        setResponseMessage("Confirm password reset: " + err.message);
         setIsProcessing(false);
+        return false;
       });
   };
 
@@ -154,33 +178,48 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     password: string,
     code: string
   ) => {
-    await sendJsonQuery(apiPaths.auth.resetPassword, "POST", {
+    setIsProcessing(true);
+    setResponseMessage("");
+
+    return sendJsonQuery(apiPaths.auth.resetPassword, "POST", {
       email: email,
       password: password,
       code: code,
     })
       .then((response: Dictionary<any>) => {
-        setResponseMessage("OK");
         setIsProcessing(false);
+        return true;
       })
       .catch((err: Error) => {
-        console.error(err.message);
-        setResponseMessage(err.message);
+        console.error("Reset password: " + err.message);
         setIsProcessing(false);
+        return false;
       });
   };
 
   const checkSavedLogin = async () => {
     setIsProcessing(true);
-    await asyncStorage
+    setResponseMessage("");
+
+    return asyncStorage
       .getItem("authToken")
-      .then((token: string | null) => setAuthToken(token ?? ""));
-    setIsProcessing(false);
-    setIsLoading(false);
+      .then((token: string | null) => {
+        setAuthToken(token ?? "");
+        setIsProcessing(false);
+      })
+      .catch((err: Error) => {
+        console.error(err.message);
+        setResponseMessage("Check saved login: " + err.message);
+        setIsProcessing(false);
+        return false;
+      });
   };
 
   const login = async (email: string, password: string) => {
-    await sendJsonQuery(apiPaths.auth.login, "POST", {
+    setIsProcessing(true);
+    setResponseMessage("");
+
+    return sendJsonQuery(apiPaths.auth.login, "POST", {
       email: email,
       password: password,
     })
@@ -188,27 +227,39 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setUserEmail(email);
         setAuthToken(response.token);
         asyncStorage.setItem("authToken", JSON.stringify(authToken));
-        setResponseMessage("OK");
         setIsProcessing(false);
+        return true;
       })
       .catch((err: Error) => {
         console.error(err.message);
-        setResponseMessage(err.message);
+        setResponseMessage("Login: " + err.message);
         setIsProcessing(false);
+        return false;
       });
   };
 
   const logout = async () => {
     setIsProcessing(true);
-    setAuthToken("");
-    await asyncStorage.setItem("authToken", authToken);
-    setIsProcessing(false);
+    setResponseMessage("");
+
+    return asyncStorage
+      .setItem("authToken", authToken)
+      .then(() => {
+        setAuthToken("");
+        setIsProcessing(false);
+        return true;
+      })
+      .catch((err: Error) => {
+        console.error(err.message);
+        setResponseMessage("Logout: " + err.message);
+        setIsProcessing(false);
+        return false;
+      });
   };
 
   useEffect(() => {
     if (isLoading) {
-      //checkConnection();
-      checkSavedLogin();
+      checkSavedLogin().then(() => setIsLoading(false));
     }
   }, [isLoading, isProcessing, responseMessage]);
 
@@ -220,7 +271,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         userEmail,
         authToken,
         responseMessage,
-        checkConnection,
+        passwordRegex,
         register,
         verifyEmail,
         resendVerification,

@@ -6,7 +6,7 @@ import {
   useThemeColor,
 } from "@/hooks/theme/useThemeColor";
 
-export type ThemedViewProps = ScrollViewProps & {
+export type ThemedScrollViewProps = ScrollViewProps & {
   colorName?: ColorName;
   themedColor?: ThemedColor;
 };
@@ -16,11 +16,12 @@ export function ThemedScrollView({
   colorName = "background",
   themedColor,
   ...otherProps
-}: ThemedViewProps) {
+}: ThemedScrollViewProps) {
   const backgroundColor = useThemeColor(colorName, themedColor);
 
   return (
     <ScrollView
+      automaticallyAdjustKeyboardInsets
       style={[{ backgroundColor: backgroundColor }, style]}
       {...otherProps}
     />
