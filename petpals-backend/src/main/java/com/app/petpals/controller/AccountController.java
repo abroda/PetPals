@@ -53,6 +53,13 @@ public class AccountController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/test")
+    @Operation(summary = "Get users for testing ONLY!", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<List<User>> getUsersTest() {
+        List<User> users = userService.getUsers();
+        return ResponseEntity.ok(users);
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get user account by id.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<AccountResponse> getUserById(@PathVariable String id) {
@@ -67,6 +74,26 @@ public class AccountController {
                         .map(awsImageService::getPresignedUrl)
                         .orElse(null))
                 .build());
+    }
+
+    @GetMapping("/{id}/friends")
+    @Operation(summary = "Get friends for user by id.", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<List<AccountResponse>> getFriendsById(@PathVariable String id) {
+        User user = userService.getById(id);
+        List<AccountResponse> response = user.getFriends()
+                .stream()
+                .map(friend -> AccountResponse.builder()
+                        .id(friend.getId())
+                        .email(friend.getUsername())
+                        .username(friend.getDisplayName())
+                        .description(friend.getDescription())
+                        .imageUrl(Optional.ofNullable(friend.getProfilePictureId())
+                                .map(awsImageService::getPresignedUrl)
+                                .orElse(null))
+                        .build()
+                ).collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/me")
@@ -145,7 +172,7 @@ public class AccountController {
     @Operation(summary = "Delete user profile picture by id.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<AccountResponse> deleteUserProfilePicture(@PathVariable String id) {
         User user = userService.getById(id);
-        if (user.getProfilePictureId() != null){
+        if (user.getProfilePictureId() != null) {
             awsImageService.deleteImage(user.getProfilePictureId());
             user = userService.deleteUserPicture(id);
         }
