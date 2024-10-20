@@ -5,6 +5,7 @@ import com.app.petpals.entity.User;
 import com.app.petpals.enums.FriendshipRequestStatus;
 import com.app.petpals.exception.FriendshipRequestDataException;
 import com.app.petpals.exception.FriendshipRequestNotFoundException;
+import com.app.petpals.exception.UserDataException;
 import com.app.petpals.exception.UserNotFoundException;
 import com.app.petpals.repository.FriendshipRepository;
 import com.app.petpals.repository.UserRepository;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -23,6 +25,10 @@ public class FriendshipService {
 
     @Transactional
     public void sendFriendRequest(String senderId, String receiverId) {
+        if (Objects.equals(senderId, receiverId)) {
+            throw new UserDataException("You can't request friendship with yourself.");
+        }
+
         Optional<User> optionalSender = userRepository.findById(senderId);
         Optional<User> optionalReceiver = userRepository.findById(receiverId);
         if (optionalSender.isPresent() && optionalReceiver.isPresent()) {
@@ -93,6 +99,10 @@ public class FriendshipService {
 
     @Transactional
     public void removeFriend(String userId, String friendId) {
+        if (Objects.equals(userId, friendId)) {
+            throw new UserDataException("You can't unfriend yourself.");
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
 
@@ -103,7 +113,6 @@ public class FriendshipService {
 
             user.getFriends().remove(friend);
             friend.getFriends().remove(user);
-            System.out.println("HERE!");
             userRepository.save(user);
             userRepository.save(friend);
 

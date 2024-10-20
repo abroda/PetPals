@@ -2,11 +2,9 @@ package com.app.petpals.controller;
 
 import com.app.petpals.entity.Dog;
 import com.app.petpals.entity.User;
-import com.app.petpals.payload.AccountEditRequest;
-import com.app.petpals.payload.AccountResponse;
-import com.app.petpals.payload.DogAddRequest;
-import com.app.petpals.payload.DogResponse;
+import com.app.petpals.payload.*;
 import com.app.petpals.service.AWSImageService;
+import com.app.petpals.service.BlockService;
 import com.app.petpals.service.DogService;
 import com.app.petpals.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,6 +31,7 @@ public class AccountController {
     private final UserService userService;
     private final AWSImageService awsImageService;
     private final DogService dogService;
+    private final BlockService blockService;
 
     @GetMapping()
     @Operation(summary = "Get user accounts.", security = @SecurityRequirement(name = "bearerAuth"))
@@ -132,6 +131,24 @@ public class AccountController {
                         .tags(dog.getTags())
                         .build())
                 .collect(Collectors.toList()));
+    }
+
+    @PostMapping("/block")
+    public ResponseEntity<String> blockUser(@RequestBody BlockRequest request) {
+        blockService.blockUser(request.getBlockerId(), request.getBlockedId());
+        return ResponseEntity.ok("User blocked successfully.");
+    }
+
+    @PostMapping("/unblock")
+    public ResponseEntity<String> unblockUser(@RequestBody BlockRequest request) {
+        blockService.unblockUser(request.getBlockerId(), request.getBlockedId());
+        return ResponseEntity.ok("User unblocked successfully.");
+    }
+
+    @GetMapping("/is-blocked")
+    public ResponseEntity<Boolean> isBlocked(@RequestBody BlockRequest request) {
+        boolean isBlocked = blockService.isBlocked(request.getBlockerId(), request.getBlockedId());
+        return ResponseEntity.ok(isBlocked);
     }
 
     @PutMapping(path = "/{id}")

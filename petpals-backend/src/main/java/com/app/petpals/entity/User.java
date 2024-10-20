@@ -66,6 +66,15 @@ public class User implements UserDetails {
     )
     private List<User> friends;
 
+    @JsonIgnore
+    @ManyToMany
+    @JoinTable(
+            name = "user_blocks",
+            joinColumns = @JoinColumn(name = "blocker_id"),
+            inverseJoinColumns = @JoinColumn(name = "blocked_id")
+    )
+    private List<User> blockedUsers;
+
     @JsonManagedReference
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Friendship> sentFriendRequests;
