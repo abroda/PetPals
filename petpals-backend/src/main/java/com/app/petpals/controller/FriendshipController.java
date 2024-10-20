@@ -1,8 +1,12 @@
 package com.app.petpals.controller;
 
+import com.app.petpals.entity.User;
+import com.app.petpals.payload.AccountResponse;
 import com.app.petpals.payload.FriendshipDeleteRequest;
 import com.app.petpals.payload.FriendshipRequest;
+import com.app.petpals.service.AWSImageService;
 import com.app.petpals.service.FriendshipService;
+import com.app.petpals.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,29 +14,55 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/friendships")
-@Tag(name = "Friendship")
+@RequestMapping("/api/users")
+@Tag(name = "User - Friendship")
 public class FriendshipController {
-
+    private final UserService userService;
+    private final AWSImageService awsImageService;
     private final FriendshipService friendshipService;
 
-    @PostMapping("/request")
+    @GetMapping("/{id}/friends")
+    @Operation(summary = "Get friends for user by id.", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<List<AccountResponse>> getFriendsById(@PathVariable String id) {
+        User user = userService.getById(id);
+        List<AccountResponse> response = user.getFriends()
+                .stream()
+                .map(friend -> AccountResponse.builder()
+                        .id(friend.getId())
+                        .email(friend.getUsername())
+                        .username(friend.getDisplayName())
+                        .description(friend.getDescription())
+                        .imageUrl(Optional.ofNullable(friend.getProfilePictureId())
+                                .map(awsImageService::getPresignedUrl)
+                                .orElse(null))
+                        .visibility(friend.getVisibility())
+                        .build()
+                ).collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/friends/request")
     @Operation(summary = "Send friends request.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<String> sendFriendRequest(@RequestBody FriendshipRequest request) {
         friendshipService.sendFriendRequest(request.getSenderId(), request.getReceiverId());
         return ResponseEntity.ok("Friend request sent.");
     }
 
-    @PostMapping("/accept/{requestId}")
+    @PostMapping("/friends/accept/{requestId}")
     @Operation(summary = "Accept friends request.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<String> acceptFriendRequest(@PathVariable String requestId) {
         friendshipService.acceptFriendRequest(requestId);
         return ResponseEntity.ok("Friend request accepted.");
     }
 
-    @PostMapping("/deny/{requestId}")
+    @PostMapping("/friends/deny/{requestId}")
     @Operation(summary = "Deny friends request.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<String> denyFriendRequest(@PathVariable String requestId) {
         friendshipService.denyFriendRequest(requestId);

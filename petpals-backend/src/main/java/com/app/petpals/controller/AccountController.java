@@ -1,11 +1,9 @@
 package com.app.petpals.controller;
 
-import com.app.petpals.entity.Dog;
 import com.app.petpals.entity.User;
-import com.app.petpals.payload.*;
+import com.app.petpals.payload.AccountEditRequest;
+import com.app.petpals.payload.AccountResponse;
 import com.app.petpals.service.AWSImageService;
-import com.app.petpals.service.BlockService;
-import com.app.petpals.service.DogService;
 import com.app.petpals.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -30,8 +28,6 @@ import java.util.stream.Collectors;
 public class AccountController {
     private final UserService userService;
     private final AWSImageService awsImageService;
-    private final DogService dogService;
-    private final BlockService blockService;
 
     @GetMapping()
     @Operation(summary = "Get user accounts.", security = @SecurityRequirement(name = "bearerAuth"))
@@ -77,27 +73,6 @@ public class AccountController {
                 .build());
     }
 
-    @GetMapping("/{id}/friends")
-    @Operation(summary = "Get friends for user by id.", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<List<AccountResponse>> getFriendsById(@PathVariable String id) {
-        User user = userService.getById(id);
-        List<AccountResponse> response = user.getFriends()
-                .stream()
-                .map(friend -> AccountResponse.builder()
-                        .id(friend.getId())
-                        .email(friend.getUsername())
-                        .username(friend.getDisplayName())
-                        .description(friend.getDescription())
-                        .imageUrl(Optional.ofNullable(friend.getProfilePictureId())
-                                .map(awsImageService::getPresignedUrl)
-                                .orElse(null))
-                        .visibility(friend.getVisibility())
-                        .build()
-                ).collect(Collectors.toList());
-
-        return ResponseEntity.ok(response);
-    }
-
     @GetMapping("/me")
     @Operation(summary = "Get user account by token - logged in users profile!", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<AccountResponse> me() {
@@ -113,42 +88,6 @@ public class AccountController {
                         .orElse(null))
                 .visibility(authUser.getVisibility())
                 .build());
-    }
-
-    @GetMapping("/{id}/dogs")
-    @Operation(summary = "Get dogs for user by id.", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<List<DogResponse>> getUserDogs(@PathVariable String id) {
-        User user = userService.getById(id);
-        List<Dog> dogs = dogService.getDogsByUser(user);
-        return ResponseEntity.ok(dogs.stream()
-                .map(dog -> DogResponse.builder()
-                        .id(dog.getId())
-                        .name(dog.getName())
-                        .description(dog.getDescription())
-                        .imageUrl(Optional.ofNullable(dog.getImageId())
-                                .map(awsImageService::getPresignedUrl)
-                                .orElse(null))
-                        .tags(dog.getTags())
-                        .build())
-                .collect(Collectors.toList()));
-    }
-
-    @PostMapping("/block")
-    public ResponseEntity<String> blockUser(@RequestBody BlockRequest request) {
-        blockService.blockUser(request.getBlockerId(), request.getBlockedId());
-        return ResponseEntity.ok("User blocked successfully.");
-    }
-
-    @PostMapping("/unblock")
-    public ResponseEntity<String> unblockUser(@RequestBody BlockRequest request) {
-        blockService.unblockUser(request.getBlockerId(), request.getBlockedId());
-        return ResponseEntity.ok("User unblocked successfully.");
-    }
-
-    @GetMapping("/is-blocked")
-    public ResponseEntity<Boolean> isBlocked(@RequestBody BlockRequest request) {
-        boolean isBlocked = blockService.isBlocked(request.getBlockerId(), request.getBlockedId());
-        return ResponseEntity.ok(isBlocked);
     }
 
     @PutMapping(path = "/{id}")
@@ -225,20 +164,5 @@ public class AccountController {
         });
         userService.deleteUser(id);
         return ResponseEntity.ok("User deleted successfully.");
-    }
-
-    @PostMapping("/{id}/dogs")
-    @Operation(summary = "Add dog to the user.", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<DogResponse> addDogToUser(@PathVariable String id, @RequestBody DogAddRequest request) {
-        Dog dog = dogService.saveDog(id, request);
-        return ResponseEntity.ok(DogResponse.builder()
-                .id(dog.getId())
-                .name(dog.getName())
-                .description(dog.getDescription())
-                .imageUrl(Optional.ofNullable(dog.getImageId())
-                        .map(awsImageService::getPresignedUrl)
-                        .orElse(null))
-                .tags(dog.getTags())
-                .build());
     }
 }
