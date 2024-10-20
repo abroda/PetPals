@@ -1,6 +1,8 @@
 package com.app.petpals.entity;
 
-import com.fasterxml.jackson.annotation.*;
+import com.app.petpals.enums.UserVisibility;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -28,7 +30,7 @@ public class User implements UserDetails {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "enabled")
+    @Column(name = "enabled", nullable = false)
     private boolean enabled;
 
     @Column(name = "verification_code")
@@ -42,6 +44,10 @@ public class User implements UserDetails {
 
     @Column(name = "profile_picture_id", unique = true)
     private String profilePictureId;
+
+    @Column(name = "visibility", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private UserVisibility visibility = UserVisibility.PUBLIC;
 
     @JsonManagedReference
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -48,6 +48,7 @@ public class AccountController {
                         .imageUrl(Optional.ofNullable(user.getProfilePictureId())
                                 .map(awsImageService::getPresignedUrl)
                                 .orElse(null))
+                        .visibility(user.getVisibility())
                         .build()
                 ).collect(Collectors.toList());
         return ResponseEntity.ok(response);
@@ -73,6 +74,7 @@ public class AccountController {
                 .imageUrl(Optional.ofNullable(user.getProfilePictureId())
                         .map(awsImageService::getPresignedUrl)
                         .orElse(null))
+                .visibility(user.getVisibility())
                 .build());
     }
 
@@ -90,6 +92,7 @@ public class AccountController {
                         .imageUrl(Optional.ofNullable(friend.getProfilePictureId())
                                 .map(awsImageService::getPresignedUrl)
                                 .orElse(null))
+                        .visibility(friend.getVisibility())
                         .build()
                 ).collect(Collectors.toList());
 
@@ -109,6 +112,7 @@ public class AccountController {
                 .imageUrl(Optional.ofNullable(authUser.getProfilePictureId())
                         .map(awsImageService::getPresignedUrl)
                         .orElse(null))
+                .visibility(authUser.getVisibility())
                 .build());
     }
 
@@ -142,6 +146,7 @@ public class AccountController {
                 .imageUrl(Optional.ofNullable(user.getProfilePictureId())
                         .map(awsImageService::getPresignedUrl)
                         .orElse(null))
+                .visibility(user.getVisibility())
                 .build());
     }
 
@@ -165,6 +170,7 @@ public class AccountController {
                 .imageUrl(Optional.ofNullable(updatedUser.getProfilePictureId())
                         .map(awsImageService::getPresignedUrl)
                         .orElse(null))
+                .visibility(user.getVisibility())
                 .build());
     }
 
@@ -184,6 +190,7 @@ public class AccountController {
                 .imageUrl(Optional.ofNullable(user.getProfilePictureId())
                         .map(awsImageService::getPresignedUrl)
                         .orElse(null))
+                .visibility(user.getVisibility())
                 .build());
     }
 

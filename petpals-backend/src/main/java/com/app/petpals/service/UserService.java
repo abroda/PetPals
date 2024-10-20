@@ -32,37 +32,39 @@ public class UserService {
         }
     }
 
-    public List<UserResponse> searchUsers(String email, String displayName) {
-        if (email != null && !email.isEmpty()) {
-            return userRepository.findByUsernameContaining(email).stream()
-                    .map(user -> UserResponse.builder()
-                            .email(user.getUsername())
-                            .username(user.getDisplayName())
-                            .build())
-                    .collect(Collectors.toList());
-        } else if (displayName != null && !displayName.isEmpty()) {
-            return userRepository.findByDisplayNameContaining(displayName).stream()
-                    .map(user -> UserResponse.builder()
-                            .email(user.getUsername())
-                            .username(user.getDisplayName())
-                            .build())
-                    .collect(Collectors.toList());
-        } else {
-            return userRepository.findAll().stream()
-                    .map(user -> UserResponse.builder()
-                            .email(user.getUsername())
-                            .username(user.getDisplayName())
-                            .build())
-                    .collect(Collectors.toList());
-        }
-    }
+//    public List<UserResponse> searchUsers(String email, String displayName) {
+//        if (email != null && !email.isEmpty()) {
+//            return userRepository.findByUsernameContaining(email).stream()
+//                    .map(user -> UserResponse.builder()
+//                            .email(user.getUsername())
+//                            .username(user.getDisplayName())
+//                            .build())
+//                    .collect(Collectors.toList());
+//        } else if (displayName != null && !displayName.isEmpty()) {
+//            return userRepository.findByDisplayNameContaining(displayName).stream()
+//                    .map(user -> UserResponse.builder()
+//                            .email(user.getUsername())
+//                            .username(user.getDisplayName())
+//                            .build())
+//                    .collect(Collectors.toList());
+//        } else {
+//            return userRepository.findAll().stream()
+//                    .map(user -> UserResponse.builder()
+//                            .email(user.getUsername())
+//                            .username(user.getDisplayName())
+//                            .build())
+//                    .collect(Collectors.toList());
+//        }
+//    }
 
     public User updateUserData(String userId, AccountEditRequest request) {
         User user = getById(userId);
         if (request.getDisplayName() != null && !request.getDisplayName().isEmpty()) {
             user.setDisplayName(request.getDisplayName());
         } else throw new UserDataException("Username can't be null or empty.");
+
         user.setDescription(request.getDescription());
+        user.setVisibility(request.getVisibility());
 
         return userRepository.save(user);
     }

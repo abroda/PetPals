@@ -1,11 +1,12 @@
 package com.app.petpals.service;
 
+import com.app.petpals.entity.User;
+import com.app.petpals.enums.UserVisibility;
 import com.app.petpals.exception.*;
-import com.app.petpals.payload.RegisterRequest;
 import com.app.petpals.payload.AuthenticationRequest;
+import com.app.petpals.payload.RegisterRequest;
 import com.app.petpals.payload.VerifyUserRequest;
 import com.app.petpals.repository.UserRepository;
-import com.app.petpals.entity.User;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -35,6 +36,7 @@ public class AuthenticationService {
         user.setVerificationCode(generateVerificationCode());
         user.setVerificationExpiration(LocalDateTime.now().plusMinutes(15));
         user.setEnabled(false);
+        user.setVisibility(UserVisibility.PUBLIC);
         sendVerificationEmail(user);
         return userRepository.save(user);
     }
@@ -104,7 +106,7 @@ public class AuthenticationService {
                 + "</body>"
                 + "</html>";
 
-            emailService.sendVerificationMail(user.getUsername(), subject, htmlMessage);
+        emailService.sendVerificationMail(user.getUsername(), subject, htmlMessage);
     }
 
     private String generateVerificationCode() {
