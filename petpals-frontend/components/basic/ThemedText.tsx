@@ -19,7 +19,7 @@ export type ThemedTextProps = TextProps & {
 
 export function ThemedText({
   style,
-  center = true,
+  center = false,
   textColorName = "text",
   textThemedColor,
   backgroundColorName = "background",

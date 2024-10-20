@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { AuthForm } from "@/components/forms/AuthForm";
 import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { ThemedText } from "@/components/basic/ThemedText";
@@ -9,6 +8,10 @@ import AppLogo from "@/components/decorations/static/AppLogo";
 
 export default function ResetPasswordScreen() {
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [code, setCode] = useState("");
+  const [password, setPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
+
   return (
     <ThemedScrollView
       paddingH-25
@@ -21,16 +24,12 @@ export default function ResetPasswordScreen() {
 
       <ThemedView style={{ padding: "5%" }}>
         <ThemedText
-          center={false}
           textStyleName="header"
           style={{ marginBottom: "3%" }}
         >
           Verify email
         </ThemedText>
-        <ThemedText
-          center={false}
-          style={{ marginBottom: "10%" }}
-        >
+        <ThemedText style={{ marginBottom: "10%" }}>
           Please, enter verification code to finish registration.
         </ThemedText>
         {!isConfirmed && (
@@ -38,10 +37,8 @@ export default function ResetPasswordScreen() {
             text60L
             label="Code"
             onChangeText={(newText: string) => setCode(newText)}
-            enableErrors
+            withValidation
             validate={["required", (value) => (value ? value.length : 0) >= 6]}
-            validateOnBlur
-            validationMessageStyle={{ color: useThemeColor("alarm") }}
             validationMessage={["Code is required", "Code is too short"]}
             maxLength={6}
           />
@@ -51,11 +48,8 @@ export default function ResetPasswordScreen() {
             text60L
             label="Password"
             onChangeText={(newText: string) => setPassword(newText)}
-            secureTextEntry
-            validateOnChange
-            validationMessageStyle={{ color: useThemeColor("alarm") }}
-            showCharCounter
-            enableErrors
+            isSecret
+            withValidation
             validate={["required", (value) => (value ? value.length : 0) > 6]}
             validationMessage={[
               "Field is required",
@@ -69,15 +63,13 @@ export default function ResetPasswordScreen() {
             text60L
             label="Repeat password"
             onChangeText={(newText: string) => setRepeatPassword(newText)}
-            secureTextEntry
-            validateOnChange
-            showCharCounter
-            enableErrors
-            validate={["required", (value) => repeatPassword == password]}
+            isSecret
+            withValidation
+            validate={["required", (value) => repeatPassword === password]}
             validationMessage={["Field is required", "Passwords don't match"]}
           />
         )}
-        <ThemedButton onPress={verify}>Confirm</ThemedButton>
+        <ThemedButton onPress={() => {}}>Confirm</ThemedButton>
       </ThemedView>
     </ThemedScrollView>
   );

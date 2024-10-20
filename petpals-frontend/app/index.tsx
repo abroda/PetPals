@@ -1,9 +1,7 @@
 import AppLogo from "@/components/decorations/static/AppLogo";
 import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
 import { useAuth } from "@/hooks/useAuth";
-import ThemedLoadingIndicator from "@/components/displays/ThemedLoadingIndicator";
-import { Dimensions } from "react-native";
-import { isLoading } from "expo-font";
+import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoadingIndicator";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import { router } from "expo-router";
@@ -17,18 +15,24 @@ export default function WelcomeScreen() {
   }
 
   return (
-    <ThemedScrollView>
-      {isLoading && <ThemedLoadingIndicator />}
+    <ThemedScrollView style={{ paddingTop: "20%" }}>
+      {isLoading && (
+        <ThemedLoadingIndicator
+          size="large"
+          message="Loading..."
+          fullScreen={true}
+        />
+      )}
       {!isLoading && (
         <AppLogo
-          size={45}
+          size={40}
           showName={!isLoading}
           showMotto={!isLoading}
         />
       )}
 
       {!isLoading && (
-        <ThemedView style={{ width: "100%", padding: "5%" }}>
+        <ThemedView style={{ width: "100%", padding: "5%", paddingTop: "3%" }}>
           <ThemedButton
             marginB-15
             label="Login"
