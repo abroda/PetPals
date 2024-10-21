@@ -5,7 +5,8 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { apiPaths } from "@/constants/config/API";
+// import { apiPaths } from "@/constants/config/API";
+import {apiPaths} from "@/constants/config/api"
 import asyncStorage from "@react-native-async-storage/async-storage/src/AsyncStorage";
 import { Dictionary } from "react-native-ui-lib/src/typings/common";
 

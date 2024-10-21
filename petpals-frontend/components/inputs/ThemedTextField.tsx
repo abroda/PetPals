@@ -51,7 +51,7 @@ export const ThemedTextField = forwardRef<
     const alarmColor = useThemeColor("alarm");
 
     return (
-      <ThemedView style={{ marginBottom: "3%" }}>
+      <ThemedView style={{ marginBottom: 10 }}>
         <TextField
           ref={ref}
           label={label}
@@ -64,8 +64,8 @@ export const ThemedTextField = forwardRef<
               borderRadius: 30,
               borderColor: textColor,
               paddingHorizontal: 10,
-              paddingVertical: "4%",
-              height: "100%",
+              paddingVertical: 5,
+              height: 50,
             },
             useTextStyle(textStyleName),
             rest.style,
@@ -76,7 +76,7 @@ export const ThemedTextField = forwardRef<
           validateOnBlur={withValidation}
           validateOnChange={withValidation}
           validationMessageStyle={[
-            { color: alarmColor, marginTop: "2%" },
+            { color: alarmColor, marginTop: 5 },
             useTextStyle("small"),
           ]}
           validate={validate}

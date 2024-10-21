@@ -1,7 +1,7 @@
-export const databaseURL = "https://localhost:8080/";
+export const databaseURL = "http://localhost:8080/";
 
 export const apiPaths = {
-  checkConnection: "https://localhost:8080/v3/api-docs.yaml",
+  checkConnection: "http://localhost:8080/v3/api-docs.yaml",
   auth: {
     register: databaseURL + "api/auth/register",
     verifyEmail: databaseURL + "api/auth/verify",
