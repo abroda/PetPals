@@ -16,6 +16,7 @@ export type ThemedIconProps = IconProps<
   asset?: string;
   colorName?: ColorName;
   themedColor?: ThemedColor;
+  active?: boolean;
 };
 
 export function ThemedIcon({
@@ -24,6 +25,7 @@ export function ThemedIcon({
   name = "help",
   colorName = "primary",
   themedColor = undefined,
+  active = true,
   ...rest
 }: ThemedIconProps) {
   const color = useThemeColor(colorName, themedColor);

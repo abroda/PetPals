@@ -25,8 +25,11 @@ export default function RegisterScreen() {
   const [termsAgreedTo, setTermsAgreedTo] = useState(false);
   const [validationMessage, setValidationMessage] = useState("");
   const [dialogVisible, setDialogVisible] = useState(false);
-  const { isLoading, responseMessage, passwordRegex, register } = useAuth();
+  const { isLoading, isProcessing, responseMessage, passwordRegex, register } =
+    useAuth();
 
+  const textColor = useThemeColor("text");
+  const textStyle = useTextStyle("small");
   const accentColor = useThemeColor("accent");
 
   function validate() {
@@ -41,8 +44,6 @@ export default function RegisterScreen() {
   }
 
   async function submit() {
-    setValidationMessage("Processing request...");
-
     if (!validate()) {
       setValidationMessage("Input is invalid.");
     } else if (!termsAgreedTo) {
@@ -52,6 +53,7 @@ export default function RegisterScreen() {
         if (!result) {
           setValidationMessage(responseMessage ?? "No response");
         } else {
+          setDialogVisible(false);
           setValidationMessage("Registration successful");
           router.setParams({ email: email });
           router.push("./verifyEmail");
@@ -61,12 +63,9 @@ export default function RegisterScreen() {
   }
 
   return (
-    <ThemedScrollView>
+    <ThemedScrollView style={{ paddingTop: "10%" }}>
       {dialogVisible && (
-        <TermsOfUseDialog
-          visible={dialogVisible}
-          onDismiss={() => setDialogVisible(false)}
-        />
+        <TermsOfUseDialog onDismiss={() => setDialogVisible(false)} />
       )}
       {isLoading && (
         <ThemedLoadingIndicator
@@ -144,16 +143,13 @@ export default function RegisterScreen() {
               "Passwords don't match",
             ]}
           />
-          <HorizontalView>
+          <HorizontalView justifyOption="flex-start">
             <Checkbox
               label="I have read and accept "
               value={termsAgreedTo}
               onValueChange={(value) => setTermsAgreedTo(value)}
               color={accentColor}
-              labelStyle={[
-                { color: useThemeColor("text") },
-                useTextStyle("small"),
-              ]}
+              labelStyle={[{ color: textColor }, textStyle]}
             />
             <ThemedText
               textColorName="link"
@@ -164,20 +160,24 @@ export default function RegisterScreen() {
             </ThemedText>
           </HorizontalView>
 
-          <ThemedButton
-            marginB-15
-            backgroundColorName="primary"
-            textColorName="textOnPrimary"
-            label="Register"
-            onPress={submit}
-          />
-          <ThemedButton
-            marginB-15
-            backgroundColorName="secondary"
-            textColorName="textOnSecondary"
-            label="Go back"
-            onPress={() => router.dismiss()}
-          />
+          {(!isProcessing || dialogVisible) && (
+            <ThemedButton
+              marginB-15
+              backgroundColorName="primary"
+              textColorName="textOnPrimary"
+              label="Register"
+              onPress={submit}
+            />
+          )}
+          {/* {(!isProcessing || dialogVisible) && (
+            <ThemedButton
+              marginB-15
+              backgroundColorName="secondary"
+              textColorName="textOnSecondary"
+              label="Go back"
+              onPress={() => router.dismiss()}
+            />
+          )} */}
         </ThemedView>
       )}
     </ThemedScrollView>

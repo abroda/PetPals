@@ -1,57 +1,45 @@
-import { StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 
 import { Avatar, View, Text } from "react-native-ui-lib";
 import { useState } from "react";
-import { Link } from "expo-router";
-import { useAuth } from "@/hooks/useAuth";
+import { Link, router } from "expo-router";
+import { ThemedText } from "../basic/ThemedText";
 
-export default function ProfileLink(props: { username: string }) {
-  const { userEmail } = useAuth();
+export default function FriendListItem(props: { username: string }) {
   const [selected, setSelected] = useState("");
 
   return (
     <ThemedView style={styles.topBar}>
-      <Text
-        text30BL
-        cyan10
-        style={styles.accountName}
-      >
-        {props.username}
-      </Text>
-      <Link
-        href={
-          userEmail === props.username ? "/user/me" : "/user/" + props.username
-        }
-      >
+      <Pressable onPress={() => router.push(`/user/${props.username}`)}>
         <Avatar
           source={{
             uri: "https://external-preview.redd.it/PzM9Myb5uugh3qrxvb1F0nVTsdXJKRl0NB88MuAPwZA.jpg?auto=webp&s=6627165dbd61ab8a8d7fc026b5ce9199c593fe93",
           }}
         />
-      </Link>
+      </Pressable>
+      <ThemedView style={{ justifyContent: "center" }}>
+        <ThemedText
+          style={{ paddingHorizontal: 20, fontSize: 30 }}
+          textStyleName="bigBold"
+          textColorName="link"
+        >
+          {props.username}
+        </ThemedText>
+      </ThemedView>
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  tabPage: {
-    height: "100%",
-    width: "100%",
-  },
   topBar: {
     flexDirection: "row",
     width: "100%",
     margin: 10,
-    justifyContent: "flex-end",
-  },
-  accountHeader: {
-    flexDirection: "row",
-    padding: 10,
+    justifyContent: "flex-start",
   },
   accountName: {
     paddingHorizontal: 20,
   },
-  agenda: {},
 });

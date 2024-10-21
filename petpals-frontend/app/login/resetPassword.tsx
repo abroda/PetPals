@@ -24,7 +24,7 @@ export default function ResetPasswordScreen() {
 
       <ThemedView style={{ padding: "5%" }}>
         <ThemedText
-          textStyleName="header"
+          textStyleName="bigBold"
           style={{ marginBottom: "3%" }}
         >
           Verify email

@@ -1,4 +1,11 @@
-import React, { useState } from "react";
+import React, {
+  ForwardedRef,
+  forwardRef,
+  LegacyRef,
+  ReactElement,
+  useRef,
+  useState,
+} from "react";
 import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
 import { useAuth } from "@/hooks/useAuth";
 import { router } from "expo-router";
@@ -6,11 +13,13 @@ import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoad
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 import AppLogo from "@/components/decorations/static/AppLogo";
 import { ThemedText } from "@/components/basic/ThemedText";
-import { ThemedTextField } from "@/components/inputs/ThemedTextField";
+import {
+  ForwardedRefTextField,
+  ThemedTextField,
+} from "@/components/inputs/ThemedTextField";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import ResetPasswordDialog from "@/components/dialogs/ResetPasswordDialog";
-import { Pressable } from "react-native";
-import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
+import { TextField, TextFieldRef } from "react-native-ui-lib";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -19,6 +28,8 @@ export default function LoginScreen() {
   const [dialogVisible, setDialogVisible] = useState(false);
   const { isLoading, isProcessing, responseMessage, passwordRegex, login } =
     useAuth();
+  const emailRef = useRef<TextFieldRef>(null);
+  const passwordRef = useRef<TextFieldRef>(null);
 
   function validate() {
     return email.length > 0 && password.length > 0;
@@ -27,25 +38,26 @@ export default function LoginScreen() {
   async function submit() {
     if (!validate()) {
       setValidationMessage("Input is invalid.");
-      return;
+    } else {
+      login(email, password).then((result) => {
+        if (!result) {
+          setValidationMessage(responseMessage ?? "Unknown error");
+        } else {
+          setDialogVisible(false);
+          setValidationMessage("Login successful");
+          router.dismissAll();
+          router.replace("/home");
+        }
+      });
     }
-
-    login(email, password).then((result) => {
-      if (!result) {
-        setValidationMessage(responseMessage ?? "Unknown error");
-      } else {
-        setValidationMessage("Login successful");
-        router.replace("../home");
-      }
-    });
   }
 
   return (
-    <ThemedScrollView>
+    <ThemedScrollView style={{ paddingTop: "0%" }}>
       {dialogVisible && (
         <ResetPasswordDialog
-          visible={dialogVisible}
-          onCancel={() => setDialogVisible(false)}
+          onDismiss={() => setDialogVisible(false)}
+          emailFilled={email}
         />
       )}
       {isLoading && (
@@ -78,6 +90,7 @@ export default function LoginScreen() {
             </ThemedText>
           )}
           <ThemedTextField
+            ref={emailRef}
             label="Email"
             autoComplete="email"
             onChangeText={(newText: string) => setEmail(newText)}
@@ -87,6 +100,7 @@ export default function LoginScreen() {
             maxLength={250}
           />
           <ThemedTextField
+            ref={passwordRef}
             label="Password"
             autoComplete="current-password"
             onChangeText={(newText: string) => setPassword(newText)}
@@ -100,13 +114,16 @@ export default function LoginScreen() {
             textColorName="link"
             textStyleName="small"
             onPress={() => setDialogVisible(true)}
-            style={{ marginBottom: "20%" }}
+            style={{ marginBottom: "15.5%" }}
           >
             Forgot password?
           </ThemedText>
-          {isProcessing && <ThemedLoadingIndicator size="large" />}
-          {!isProcessing && (
+          {isProcessing && !dialogVisible && (
+            <ThemedLoadingIndicator size="large" />
+          )}
+          {(!isProcessing || dialogVisible) && (
             <ThemedButton
+              marginT-72
               marginB-15
               backgroundColorName="primary"
               textColorName="textOnPrimary"
@@ -114,7 +131,7 @@ export default function LoginScreen() {
               onPress={submit}
             />
           )}
-          {!isProcessing && (
+          {/* {(!isProcessing || dialogVisible) && (
             <ThemedButton
               marginB-15
               backgroundColorName="secondary"
@@ -124,7 +141,7 @@ export default function LoginScreen() {
                 router.canDismiss() ? router.dismiss() : router.push("/");
               }}
             />
-          )}
+          )} */}
         </ThemedView>
       )}
     </ThemedScrollView>
