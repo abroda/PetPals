@@ -19,6 +19,7 @@ export const TextStyles: Dictionary<TextStyle> = {
   smallBold: { fontFamily: defaultFont, fontWeight: "bold", fontSize: 16 },
   default: { fontFamily: defaultFont, fontSize: 18 },
   defaultBold: { fontFamily: defaultFont, fontWeight: "bold", fontSize: 18 },
-  header: { fontFamily: defaultFont, fontWeight: "bold", fontSize: 20 },
+  big: { fontFamily: defaultFont, fontSize: 20 },
+  bigBold: { fontFamily: defaultFont, fontWeight: "bold", fontSize: 20 },
   logo: { fontFamily: logoFont, fontWeight: "bold" },
 };

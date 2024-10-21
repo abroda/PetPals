@@ -1,14 +1,16 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useEffect, useState, ReactNode, FC } from "react";
 
-export type ThemeContextType = {
+export type ExampleContextType = {
   theme: string;
   switchTheme: () => void;
 };
 
-export const ThemeContext = createContext<ThemeContextType | null>(null);
+export const ExampleContext = createContext<ExampleContextType | null>(null);
 
-export const ThemeProvider: FC<{ children: ReactNode }> = ({ children }) => {
+export const __ExampleProvider: FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [theme, setTheme] = useState("light");
 
   async function readTheme() {
@@ -44,8 +46,8 @@ export const ThemeProvider: FC<{ children: ReactNode }> = ({ children }) => {
   });
 
   return (
-    <ThemeContext.Provider value={{ theme, switchTheme }}>
+    <ExampleContext.Provider value={{ theme, switchTheme }}>
       {children}
-    </ThemeContext.Provider>
+    </ExampleContext.Provider>
   );
 };

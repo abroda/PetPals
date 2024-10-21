@@ -8,7 +8,7 @@ import {
 import { Avatar, View, Text, Button } from "react-native-ui-lib";
 import { useState } from "react";
 import { Link } from "expo-router";
-import ProfileLink from "./ProfileLink";
+import UserAvatar from "./UserAvatar";
 
 export type TopBarProps = ThemedViewProps & {
   showBackButton?: boolean;
@@ -30,7 +30,7 @@ export default function TopBar({
   return (
     <ThemedView style={styles.topBar}>
       {showBackButton && <Button>{"<-"}</Button>}
-      {showUserAvatar && <ProfileLink username="me" />}
+      {showUserAvatar && <UserAvatar username="me" />}
       {showOptionsButton && <Button>...</Button>}
     </ThemedView>
   );

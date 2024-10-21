@@ -28,6 +28,7 @@ export const ThemeColors = {
     icon: secondaryColor,
     active: primaryColor,
     disabled: lightGreyColor,
+    transparent: "#00000000",
   },
   dark: {
     primary: primaryColor,
@@ -46,5 +47,6 @@ export const ThemeColors = {
     icon: secondaryColor,
     active: primaryColor,
     disabled: darkGreyColor,
+    transparent: "#00000000",
   },
 };

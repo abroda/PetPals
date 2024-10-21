@@ -7,6 +7,7 @@ import {
 import { Button, ButtonProps } from "react-native-ui-lib";
 import { TextStyles } from "@/constants/theme/TextStyles";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
+import { ThemedIcon } from "../decorations/static/ThemedIcon";
 
 export type ThemedButtonProps = ButtonProps & {
   href?: string;

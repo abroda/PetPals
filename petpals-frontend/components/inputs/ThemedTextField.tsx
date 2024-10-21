@@ -1,4 +1,4 @@
-import { createRef, ElementRef, forwardRef, useRef } from "react";
+import { forwardRef, useEffect } from "react";
 import { TextField, TextFieldProps, TextFieldRef } from "react-native-ui-lib";
 import {
   ColorName,
@@ -8,25 +8,33 @@ import {
 import { TextStyleName, useTextStyle } from "@/hooks/theme/useTextStyle";
 import { ThemedView } from "../basic/containers/ThemedView";
 import { Validator } from "react-native-ui-lib/src/components/textField/types";
+import { Dimensions } from "react-native";
 
-export type ThemedTextFieldProps = //TextInputProps & {
-  TextFieldProps & {
-    textColorName?: ColorName;
-    textThemedColor?: ThemedColor;
-    backgroundColorName?: ColorName;
-    backgroundThemedColor?: ThemedColor;
-    textStyleName?: TextStyleName;
-    withValidation?: boolean;
-    validate?: Validator[];
-    validationMessage?: string[];
-    isSecret?: boolean;
-    label?: string;
-  };
+export type ThemedTextFieldProps = TextFieldProps & {
+  textColorName?: ColorName;
+  textThemedColor?: ThemedColor;
+  backgroundColorName?: ColorName;
+  backgroundThemedColor?: ThemedColor;
+  textStyleName?: TextStyleName;
+  withValidation?: boolean;
+  validate?: Validator[];
+  validationMessage?: string[];
+  isSecret?: boolean;
+  label?: string;
+};
 
-export const ThemedTextField = forwardRef<
-  ElementRef<typeof TextField>,
-  ThemedTextFieldProps
->(
+export const ForwardedRefTextField = forwardRef<TextFieldRef, TextFieldProps>(
+  (props, ref) => {
+    return (
+      <TextField
+        {...props}
+        ref={ref}
+      />
+    );
+  }
+);
+
+export const ThemedTextField = forwardRef<TextFieldRef, ThemedTextFieldProps>(
   (
     {
       textColorName = "text",
@@ -51,9 +59,8 @@ export const ThemedTextField = forwardRef<
     const alarmColor = useThemeColor("alarm");
 
     return (
-      <ThemedView style={{ marginBottom: 10 }}>
-        <TextField
-          ref={ref}
+      <ThemedView style={{ marginBottom: "2%" }}>
+        <ForwardedRefTextField
           label={label}
           labelColor={textColor}
           labelStyle={useTextStyle(textStyleName)}
@@ -61,11 +68,11 @@ export const ThemedTextField = forwardRef<
             {
               color: textColor,
               backgroundColor: backgroundColor,
-              borderRadius: 30,
+              borderRadius: Dimensions.get("window").width * 0.4,
               borderColor: textColor,
               paddingHorizontal: 10,
-              paddingVertical: 5,
-              height: 50,
+              paddingVertical: "4%",
+              height: "100%",
             },
             useTextStyle(textStyleName),
             rest.style,
@@ -76,36 +83,14 @@ export const ThemedTextField = forwardRef<
           validateOnBlur={withValidation}
           validateOnChange={withValidation}
           validationMessageStyle={[
-            { color: alarmColor, marginTop: 5 },
+            { color: alarmColor, marginTop: "2%" },
             useTextStyle("small"),
           ]}
           validate={validate}
           validationMessage={validationMessage}
           {...rest}
+          ref={ref}
         />
-        {/* <ThemedText
-        textColorName={textColorName}
-        textStyleName={textStyleName}
-      >
-        {label}
-      </ThemedText>
-      <TextInput
-        autoCorrect={rest.autoCorrect ?? false}
-        style={[
-          {
-            color: textColor,
-            backgroundColor: backgroundColor,
-            borderRadius: 28,
-            paddingHorizontal: 10,
-            paddingVertical: 8,
-            height: "100%",
-            marginVertical: "1%",
-          },
-          useTextStyle(textStyleName),
-        ]}
-        secureTextEntry={isSecret}
-        {...rest}
-      /> */}
       </ThemedView>
     );
   }

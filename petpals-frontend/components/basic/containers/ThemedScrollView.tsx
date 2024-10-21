@@ -21,6 +21,8 @@ export function ThemedScrollView({
 
   return (
     <ScrollView
+      nestedScrollEnabled
+      scrollEnabled
       automaticallyAdjustKeyboardInsets
       style={[{ backgroundColor: backgroundColor }, style]}
       {...otherProps}
