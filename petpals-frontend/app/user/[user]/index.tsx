@@ -41,7 +41,7 @@ export default function UserProfileScreen() {
           <ThemedButton
             onPress={() => {
               router.dismissAll();
-              router.push("/user/settings");
+              router.push("/user/me/settings");
             }}
           >
             Settings
@@ -51,7 +51,7 @@ export default function UserProfileScreen() {
           <ThemedButton
             onPress={() => {
               router.dismissAll();
-              router.push("/logout");
+              router.replace("/");
             }}
           >
             Logout
