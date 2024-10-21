@@ -14,7 +14,7 @@ export type AuthContextType = {
   isLoading: boolean;
   isProcessing: boolean;
   authToken?: string;
-  userEmail?: string;
+  userId?: string;
   responseMessage?: string;
   passwordRegex: string;
   register: (
@@ -41,7 +41,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [authToken, setAuthToken] = useState("");
-  const [userEmail, setUserEmail] = useState("");
+  const [userId, setUserId] = useState("")
   const [responseMessage, setResponseMessage] = useState("");
   const passwordRegex =
     "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$";
@@ -225,7 +225,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       password: password,
     })
       .then((response: Dictionary<any>) => {
-        setUserEmail(email);
+        setUserId(response.id)
         setAuthToken(response.token);
         asyncStorage.setItem("authToken", JSON.stringify(authToken));
         setIsProcessing(false);
@@ -269,7 +269,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       value={{
         isLoading,
         isProcessing,
-        userEmail,
+        userId,
         authToken,
         responseMessage,
         passwordRegex,

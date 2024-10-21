@@ -40,7 +40,9 @@ export default function HomeScreen() {
       {notificationsVisible && (
         <NotificationsPopup onDismiss={() => setNotificationsVisible(false)} />
       )}
+
       <PostFeed username="OtherUser"></PostFeed>
+
     </ThemedView>
   );
 }

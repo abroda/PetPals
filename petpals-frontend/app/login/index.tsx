@@ -36,20 +36,22 @@ export default function LoginScreen() {
   }
 
   async function submit() {
-    if (!validate()) {
-      setValidationMessage("Input is invalid.");
-    } else {
-      login(email, password).then((result) => {
-        if (!result) {
-          setValidationMessage(responseMessage ?? "Unknown error");
-        } else {
-          setDialogVisible(false);
-          setValidationMessage("Login successful");
-          router.dismissAll();
-          router.replace("/home");
-        }
-      });
-    }
+    // if (!validate()) {
+    //   setValidationMessage("Input is invalid.");
+    // } else {
+    //   login(email, password).then((result) => {
+    //     if (!result) {
+    //       setValidationMessage(responseMessage ?? "Unknown error");
+    //     } else {
+    //       setDialogVisible(false);
+    //       setValidationMessage("Login successful");
+    //       router.dismissAll();
+    //       router.replace("/home");
+
+    //     }
+    //   });
+    // }
+      router.replace("/home");
   }
 
   return (

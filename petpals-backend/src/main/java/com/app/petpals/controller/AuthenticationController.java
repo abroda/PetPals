@@ -35,7 +35,7 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponse> login(@RequestBody final AuthenticationRequest authenticationRequest) {
         User user = authenticationService.authenticate(authenticationRequest);
         String token = jwtService.generateToken(user);
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse(token);
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse(token, user.getId());
         return ResponseEntity.ok(authenticationResponse);
     }
 

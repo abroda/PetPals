@@ -5,18 +5,17 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { apiPaths } from "@/constants/config/API";
+import { apiPaths } from "@/constants/config/api";
 import asyncStorage from "@react-native-async-storage/async-storage/src/AsyncStorage";
 import { Dictionary } from "react-native-ui-lib/src/typings/common";
 import { useAuth } from "@/hooks/useAuth";
 
-// TODO
 
 export type PostContextType = {
   isProcessing: boolean;
   responseMessage: string;
-  getFeed: (username: string) => Promise<boolean>;
-  getPosts: (username: string) => Promise<boolean>;
+  getFeed: (username: string) => Promise<boolean>; // for home page
+  getPosts: (username: string) => Promise<boolean>; // for profile
   getPost: (username: string) => Promise<boolean>;
   addPost: (username: string, data: Object) => Promise<boolean>;
   editPost: (postId: string, data: Object) => Promise<boolean>;
