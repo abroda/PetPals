@@ -13,7 +13,6 @@ import { useColorScheme } from "@/hooks/theme/useColorScheme";
 import { assetsFonts } from "@/constants/theme/TextStyles";
 import { AuthProvider } from "@/context/AuthContext";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
-import HomeLayout from "./home/_layout";
 import { PostProvider } from "@/context/PostContext";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 

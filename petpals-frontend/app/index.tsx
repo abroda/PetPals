@@ -32,7 +32,7 @@ export default function WelcomeScreen() {
           }}
         >
           <AppLogo
-            size={40}
+            size={80}
             showName={!isLoading}
             showMotto={!isLoading}
           />

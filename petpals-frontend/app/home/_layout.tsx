@@ -3,6 +3,7 @@ import React, { useLayoutEffect } from "react";
 
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeLayout() {
   const backgroundColor = useThemeColor("tertiary");

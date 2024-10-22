@@ -86,7 +86,7 @@ export default function RegisterScreen() {
           }}
         >
           <AppLogo
-            size={20}
+            size={48}
             showMotto={false}
           />
 

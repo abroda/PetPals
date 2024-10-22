@@ -8,14 +8,17 @@ import { ThemedButton } from "../inputs/ThemedButton";
 import { Href, router } from "expo-router";
 import PostReactionPopup from "../popups/PostReactionPopup";
 import { useState } from "react";
+import { useWindowDimension } from "@/hooks/useWindowDimension";
 
 export default function Post(props: { username: string }) {
   const { userId } = useAuth();
   const [dialogVisible, setDialogVisible] = useState(false);
+  const percentToDP = useWindowDimension("shorter");
+
   return (
     <ThemedView
       colorName="tertiary"
-      style={{ margin: 20, borderRadius: 30 }}
+      style={{ margin: percentToDP(5), borderRadius: percentToDP(10) }}
     >
       <HorizontalView
         colorName="transparent"
@@ -24,21 +27,23 @@ export default function Post(props: { username: string }) {
         <ThemedView
           colorName="transparent"
           style={{
-            marginHorizontal: 10,
-            marginVertical: 20,
-            borderTopRightRadius: 30,
-            borderTopLeftRadius: 30,
+            marginLeft: percentToDP(4),
+            marginRight: percentToDP(2),
+            marginVertical: percentToDP(4),
           }}
         >
           <UserAvatar
-            size={50}
+            size={11}
             doLink={true}
             username={props.username}
           />
         </ThemedView>
 
         <ThemedText
-          style={{ backgroundColor: "transparent" }}
+          style={{
+            backgroundColor: "transparent",
+            paddingBottom: percentToDP(1),
+          }}
           textStyleName="big"
         >
           {props.username}
@@ -46,9 +51,9 @@ export default function Post(props: { username: string }) {
       </HorizontalView>
       <ThemedView
         style={{
-          width: "100%",
-          height: 400,
-          marginBottom: 20,
+          width: percentToDP(90),
+          height: percentToDP(90), // TODO adapt to image's width to height ratio
+          marginBottom: percentToDP(4),
         }}
       >
         <Image
@@ -56,30 +61,36 @@ export default function Post(props: { username: string }) {
             uri: "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
           }}
           style={{
-            width: "100%",
-            height: "100%",
+            width: percentToDP(90),
+            height: percentToDP(90),
           }}
         />
       </ThemedView>
       <ThemedText
         style={{
           backgroundColor: "transparent",
-          marginHorizontal: 10,
-          marginBottom: 20,
+          marginHorizontal: percentToDP(4),
+          marginBottom: percentToDP(6),
         }}
       >
         Example post with a cutie
       </ThemedText>
-      <HorizontalView colorName="transparent">
+      <HorizontalView
+        colorName="transparent"
+        style={{
+          marginBottom: percentToDP(4),
+          marginHorizontal: percentToDP(4),
+        }}
+      >
         <ThemedButton
-          style={{ width: "40%" }}
+          style={{ width: percentToDP(39) }}
           onPress={() =>
             router.push("/user/Username/post/postId" as Href<string>)
           }
-          label="Go to comment section"
+          label="Comments"
         />
         <ThemedButton
-          style={{ width: "30%" }}
+          style={{ width: percentToDP(39) }}
           onPress={() =>
             props.username === "me"
               ? router.push("/user/me/post/postID/edit")

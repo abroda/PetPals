@@ -86,7 +86,7 @@ export default function LoginScreen() {
           }}
         >
           <AppLogo
-            size={24}
+            size={48}
             showMotto={false}
           />
 

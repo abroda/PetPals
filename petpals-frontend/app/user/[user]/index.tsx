@@ -5,7 +5,7 @@ import { ThemedButton } from "@/components/inputs/ThemedButton";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import { router, usePathname } from "expo-router";
 import Post from "./post/[post]";
-import PostFeed from "@/components/lists/PostFeed";
+import PostFeed from "@/components/display/PostFeed";
 import PetAvatar from "@/components/navigation/PetAvatar";
 
 export default function UserProfileScreen() {
