@@ -8,6 +8,7 @@ import { Href } from "expo-router";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
 import { Pressable } from "react-native";
 import { ThemedView } from "../basic/containers/ThemedView";
+import { heightPercentageToDP } from "react-native-responsive-screen";
 export default function NotificationsPopup({ onDismiss = () => {} }) {
   return (
     <ThemedPopup onDismiss={onDismiss}>

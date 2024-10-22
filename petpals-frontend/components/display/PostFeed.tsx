@@ -17,15 +17,13 @@ export default function PostFeed(props: { username: string }) {
     reaction dialog, layout
   */
   return (
-    <ThemedView>
-      <FlatList
-        style={{
-          height: percentToDP(83),
-          marginBottom: percentToDP(6),
-        }}
-        data={postsData}
-        renderItem={(item) => <Post username={props.username} />}
-      />
-    </ThemedView>
+    <FlatList
+      style={{
+        height: percentToDP(76),
+        marginBottom: percentToDP(6),
+      }}
+      data={postsData}
+      renderItem={(item) => <Post username={props.username} />}
+    />
   );
 }

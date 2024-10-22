@@ -5,6 +5,7 @@ import {
   ThemedColor,
   useThemeColor,
 } from "@/hooks/theme/useThemeColor";
+import { useWindowDimension } from "@/hooks/useWindowDimension";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { type IconProps } from "@expo/vector-icons/build/createIconSet";
 import { type ComponentProps } from "react";
@@ -29,11 +30,12 @@ export function ThemedIcon({
   ...rest
 }: ThemedIconProps) {
   const color = useThemeColor(colorName, themedColor);
+  const percentToDP = useWindowDimension("shorter");
 
   if (asset) {
     return (
       <Icon
-        size={28}
+        size={percentToDP(rest.size ?? 8)}
         source={asset}
         style={[{ marginBottom: -3 }]}
         {...rest}
@@ -42,7 +44,7 @@ export function ThemedIcon({
   } else {
     return (
       <Ionicons
-        size={28}
+        size={percentToDP(rest.size ?? 8)}
         name={name}
         style={[{ color: color, marginBottom: -3 }, style]}
         {...rest}

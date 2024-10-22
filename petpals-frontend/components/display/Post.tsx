@@ -9,16 +9,19 @@ import { Href, router } from "expo-router";
 import PostReactionPopup from "../popups/PostReactionPopup";
 import { useState } from "react";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { Pressable } from "react-native";
+import { ThemedIcon } from "../decorations/static/ThemedIcon";
 
 export default function Post(props: { username: string }) {
   const { userId } = useAuth();
+  const [liked, setLiked] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
   const percentToDP = useWindowDimension("shorter");
 
   return (
     <ThemedView
       colorName="tertiary"
-      style={{ margin: percentToDP(5), borderRadius: percentToDP(10) }}
+      style={{ margin: percentToDP(3), borderRadius: percentToDP(10) }}
     >
       <HorizontalView
         colorName="transparent"
@@ -51,8 +54,8 @@ export default function Post(props: { username: string }) {
       </HorizontalView>
       <ThemedView
         style={{
-          width: percentToDP(90),
-          height: percentToDP(90), // TODO adapt to image's width to height ratio
+          width: percentToDP(94),
+          height: percentToDP(94), // TODO adapt to image's width to height ratio
           marginBottom: percentToDP(4),
         }}
       >
@@ -61,8 +64,8 @@ export default function Post(props: { username: string }) {
             uri: "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
           }}
           style={{
-            width: percentToDP(90),
-            height: percentToDP(90),
+            width: percentToDP(94),
+            height: percentToDP(94),
           }}
         />
       </ThemedView>
@@ -82,22 +85,31 @@ export default function Post(props: { username: string }) {
           marginHorizontal: percentToDP(4),
         }}
       >
-        <ThemedButton
-          style={{ width: percentToDP(39) }}
+        <Pressable
           onPress={() =>
             router.push("/user/Username/post/postId" as Href<string>)
           }
-          label="Comments"
-        />
-        <ThemedButton
-          style={{ width: percentToDP(39) }}
-          onPress={() =>
-            props.username === "me"
-              ? router.push("/user/me/post/postID/edit")
-              : setDialogVisible(true)
-          }
-          label={props.username === "me" ? "Edit" : "Add reaction"}
-        />
+        >
+          <ThemedIcon
+            size={30}
+            name={"chatbox-ellipses"}
+            colorName="link"
+            style={{
+              paddingLeft: percentToDP(1),
+              paddingBottom: percentToDP(1),
+            }}
+          />
+        </Pressable>
+        <Pressable onPress={() => setLiked(!liked)}>
+          <ThemedIcon
+            size={30}
+            name={liked ? "heart" : "heart-outline"}
+            style={{
+              paddingRight: percentToDP(1),
+              paddingBottom: percentToDP(1),
+            }}
+          />
+        </Pressable>
       </HorizontalView>
       {dialogVisible && (
         <PostReactionPopup onDismiss={() => setDialogVisible(false)} />

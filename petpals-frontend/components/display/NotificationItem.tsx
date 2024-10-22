@@ -11,6 +11,7 @@ import { useState } from "react";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
 import { Pressable } from "react-native";
 import { Href, router } from "expo-router";
+import { useWindowDimension } from "@/hooks/useWindowDimension";
 
 export default function NotificationItem(
   props: {
@@ -23,11 +24,17 @@ export default function NotificationItem(
   const { userEmail } = useAuth();
   const [seen, setSeen] = useState(props.seen);
 
+  const percentToDP = useWindowDimension("shorter");
+
   return (
     <Pressable onPress={() => setSeen(!seen)}>
       <ThemedView
         colorName={seen ? "tertiary" : "secondary"}
-        style={{ margin: "3%", padding: "3%", borderRadius: 30 }}
+        style={{
+          margin: percentToDP(1),
+          padding: percentToDP(1),
+          borderRadius: percentToDP(10),
+        }}
       >
         <HorizontalView colorName="transparent">
           <HorizontalView
@@ -36,7 +43,8 @@ export default function NotificationItem(
           >
             <ThemedView style={{ marginRight: "3%", borderRadius: 30 }}>
               <UserAvatar
-                size={50}
+                size={13}
+                doLink={true}
                 username={
                   (userEmail?.length ?? 0) > 0 ? userEmail ?? "me" : "me"
                 }
@@ -55,9 +63,13 @@ export default function NotificationItem(
           />
         </HorizontalView>
         <ThemedText
-          backgroundColorName="secondary"
+          backgroundColorName="transparent"
           textStyleName="small"
-          style={{ marginHorizontal: "1%", marginVertical: "3%" }}
+          style={{
+            marginLeft: percentToDP(16),
+            marginRight: percentToDP(2),
+            marginBottom: percentToDP(3),
+          }}
         >
           More details details details
         </ThemedText>

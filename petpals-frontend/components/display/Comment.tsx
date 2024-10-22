@@ -21,7 +21,8 @@ export default function Comment(props: { commentId: string }) {
         >
           <ThemedView style={{ marginRight: "3%", borderRadius: 30 }}>
             <UserAvatar
-              size={50}
+              size={10}
+              doLink={true}
               username={(userEmail?.length ?? 0) > 0 ? userEmail ?? "me" : "me"}
             />
           </ThemedView>
