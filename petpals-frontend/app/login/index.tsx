@@ -20,6 +20,8 @@ import {
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import ResetPasswordDialog from "@/components/dialogs/ResetPasswordDialog";
 import { TextField, TextFieldRef } from "react-native-ui-lib";
+import { heightPercentageToDP } from "react-native-responsive-screen";
+import { useWindowDimension } from "@/hooks/useWindowDimension";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -30,32 +32,38 @@ export default function LoginScreen() {
     useAuth();
   const emailRef = useRef<TextFieldRef>(null);
   const passwordRef = useRef<TextFieldRef>(null);
+  const percentToDP = useWindowDimension("shorter");
 
   function validate() {
     return email.length > 0 && password.length > 0;
   }
 
   async function submit() {
-    // if (!validate()) {
-    //   setValidationMessage("Input is invalid.");
-    // } else {
-    //   login(email, password).then((result) => {
-    //     if (!result) {
-    //       setValidationMessage(responseMessage ?? "Unknown error");
-    //     } else {
-    //       setDialogVisible(false);
-    //       setValidationMessage("Login successful");
-    //       router.dismissAll();
-    //       router.replace("/home");
-
-    //     }
-    //   });
-    // }
-      router.replace("/home");
+    if (!validate()) {
+      setValidationMessage("Input is invalid.");
+    } else {
+      login(email, password).then((result) => {
+        result = true;
+        if (!result) {
+          setValidationMessage(responseMessage ?? "Unknown error");
+        } else {
+          setDialogVisible(false);
+          setValidationMessage("Login successful");
+          router.dismissAll();
+          router.replace("/home");
+        }
+      });
+    }
   }
 
   return (
-    <ThemedScrollView style={{ paddingTop: "0%" }}>
+    <ThemedScrollView
+      style={{
+        flexGrow: 1,
+        height: percentToDP(100),
+        paddingTop: percentToDP(10),
+      }}
+    >
       {dialogVisible && (
         <ResetPasswordDialog
           onDismiss={() => setDialogVisible(false)}
@@ -74,11 +82,11 @@ export default function LoginScreen() {
           style={{
             padding: 24,
             flex: 1,
-            justifyContent: "center",
+            alignSelf: "center",
           }}
         >
           <AppLogo
-            size={20}
+            size={24}
             showMotto={false}
           />
 
@@ -86,7 +94,7 @@ export default function LoginScreen() {
             <ThemedText
               textStyleName="small"
               textColorName="alarm"
-              style={{ marginBottom: "3%" }}
+              style={{ marginBottom: percentToDP(3) }}
             >
               {validationMessage}
             </ThemedText>
@@ -116,7 +124,7 @@ export default function LoginScreen() {
             textColorName="link"
             textStyleName="small"
             onPress={() => setDialogVisible(true)}
-            style={{ marginBottom: "15.5%" }}
+            style={{ marginBottom: percentToDP(21.3) }}
           >
             Forgot password?
           </ThemedText>
@@ -125,8 +133,9 @@ export default function LoginScreen() {
           )}
           {(!isProcessing || dialogVisible) && (
             <ThemedButton
-              marginT-72
-              marginB-15
+              style={{
+                marginBottom: percentToDP(5),
+              }}
               backgroundColorName="primary"
               textColorName="textOnPrimary"
               label="Login"
@@ -135,7 +144,9 @@ export default function LoginScreen() {
           )}
           {/* {(!isProcessing || dialogVisible) && (
             <ThemedButton
-              marginB-15
+              style={{
+                marginBottom: percentToDP(5),
+              }}
               backgroundColorName="secondary"
               textColorName="textOnSecondary"
               label="Go back"

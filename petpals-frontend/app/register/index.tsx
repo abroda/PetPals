@@ -16,6 +16,7 @@ import { useTextStyle } from "@/hooks/theme/useTextStyle";
 import validators from "react-native-ui-lib/src/components/textField/validators";
 import { Pressable } from "react-native";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
+import { useWindowDimension } from "@/hooks/useWindowDimension";
 
 export default function RegisterScreen() {
   const [name, setName] = useState("");
@@ -31,6 +32,7 @@ export default function RegisterScreen() {
   const textColor = useThemeColor("text");
   const textStyle = useTextStyle("small");
   const accentColor = useThemeColor("accent");
+  const percentToDP = useWindowDimension("shorter");
 
   function validate() {
     return (
@@ -50,6 +52,7 @@ export default function RegisterScreen() {
       setValidationMessage("You have to accept Terms of Use.");
     } else {
       register(name, email, password).then((result) => {
+        result = true;
         if (!result) {
           setValidationMessage(responseMessage ?? "No response");
         } else {
@@ -63,7 +66,7 @@ export default function RegisterScreen() {
   }
 
   return (
-    <ThemedScrollView style={{ paddingTop: "10%" }}>
+    <ThemedScrollView style={{ paddingTop: percentToDP(10) }}>
       {dialogVisible && (
         <TermsOfUseDialog onDismiss={() => setDialogVisible(false)} />
       )}
@@ -79,7 +82,7 @@ export default function RegisterScreen() {
           style={{
             padding: 24,
             flex: 1,
-            justifyContent: "center",
+            alignSelf: "center",
           }}
         >
           <AppLogo
@@ -91,7 +94,10 @@ export default function RegisterScreen() {
             <ThemedText
               textStyleName="small"
               textColorName="alarm"
-              style={{ marginBottom: "3%" }}
+              style={{
+                marginBottom: percentToDP(3),
+                marginLeft: percentToDP(1),
+              }}
             >
               {validationMessage}
             </ThemedText>
@@ -143,7 +149,14 @@ export default function RegisterScreen() {
               "Passwords don't match",
             ]}
           />
-          <HorizontalView justifyOption="flex-start">
+          <HorizontalView
+            justifyOption="flex-start"
+            style={{
+              marginLeft: percentToDP(0.4),
+              marginBottom: percentToDP(8),
+              marginTop: percentToDP(9),
+            }}
+          >
             <Checkbox
               label="I have read and accept "
               value={termsAgreedTo}
@@ -162,7 +175,9 @@ export default function RegisterScreen() {
 
           {(!isProcessing || dialogVisible) && (
             <ThemedButton
-              marginB-15
+              style={{
+                marginBottom: percentToDP(14),
+              }}
               backgroundColorName="primary"
               textColorName="textOnPrimary"
               label="Register"
@@ -171,7 +186,9 @@ export default function RegisterScreen() {
           )}
           {/* {(!isProcessing || dialogVisible) && (
             <ThemedButton
-              marginB-15
+              style={{
+                marginBottom: percentToDP(14),
+              }}
               backgroundColorName="secondary"
               textColorName="textOnSecondary"
               label="Go back"

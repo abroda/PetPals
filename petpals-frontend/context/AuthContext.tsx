@@ -14,8 +14,10 @@ export type AuthContextType = {
   isProcessing: boolean;
   authToken?: string;
   userId?: string;
+  userEmail?: string;
   responseMessage?: string;
   passwordRegex: string;
+  codeRegex: string;
   register: (
     displayName: string,
     email: string,
@@ -23,7 +25,7 @@ export type AuthContextType = {
   ) => Promise<boolean>;
   verifyEmail: (email: string, code: string) => Promise<boolean>;
   resendVerification: (email: string) => Promise<boolean>;
-  requestPasswordReset: (email: string) => Promise<boolean>;
+  sendPasswordResetCode: (email: string) => Promise<boolean>;
   confirmPasswordReset: (email: string, code: string) => Promise<boolean>;
   resetPassword: (
     email: string,
@@ -41,9 +43,11 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [authToken, setAuthToken] = useState("");
   const [userId, setUserId] = useState("");
+  const [userEmail, setUserEmail] = useState("");
   const [responseMessage, setResponseMessage] = useState("");
   const passwordRegex =
     "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$";
+  const codeRegex = "^[0-9]{6}$";
 
   const sendJsonQuery = (path: string, method: string, payload?: any) =>
     fetch(path, {
@@ -87,6 +91,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     })
       .then((response: Dictionary<any>) => {
         setIsProcessing(false);
+        setUserEmail(email);
         return true;
       })
       .catch((err: Error) => {
@@ -134,11 +139,11 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       });
   };
 
-  const requestPasswordReset = async (email: string) => {
+  const sendPasswordResetCode = async (email: string) => {
     setIsProcessing(true);
     setResponseMessage("");
 
-    return sendJsonQuery(apiPaths.auth.requestPasswordReset, "POST", {
+    return sendJsonQuery(apiPaths.auth.sendPasswordResetCode, "POST", {
       email: email,
     })
       .then((response: string) => {
@@ -157,7 +162,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     setIsProcessing(true);
     setResponseMessage("");
 
-    return sendJsonQuery(apiPaths.auth.confirmPasswordReset, "POST", {
+    return sendJsonQuery(apiPaths.auth.sendPasswordResetCode, "POST", {
       email: email,
       code: code,
     })
@@ -200,19 +205,9 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const checkSavedLogin = async () => {
     setIsProcessing(true);
     setResponseMessage("");
-
-    return asyncStorage
-      .getItem("authToken")
-      .then((token: string | null) => {
-        setAuthToken(token ?? "");
-        setIsProcessing(false);
-      })
-      .catch((err: Error) => {
-        console.error(err.message);
-        setResponseMessage("Check saved login: " + err.message);
-        setIsProcessing(false);
-        return false;
-      });
+    // TODO
+    setIsProcessing(false);
+    return false;
   };
 
   const login = async (email: string, password: string) => {
@@ -269,13 +264,15 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         isLoading,
         isProcessing,
         userId,
+        userEmail,
         authToken,
         responseMessage,
         passwordRegex,
+        codeRegex,
         register,
         verifyEmail,
         resendVerification,
-        requestPasswordReset,
+        sendPasswordResetCode,
         confirmPasswordReset,
         resetPassword,
         login,

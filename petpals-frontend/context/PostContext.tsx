@@ -10,7 +10,6 @@ import asyncStorage from "@react-native-async-storage/async-storage/src/AsyncSto
 import { Dictionary } from "react-native-ui-lib/src/typings/common";
 import { useAuth } from "@/hooks/useAuth";
 
-
 export type PostContextType = {
   isProcessing: boolean;
   responseMessage: string;
@@ -106,7 +105,7 @@ export const PostProvider: FC<{ children: ReactNode }> = ({ children }) => {
     setIsProcessing(true);
     setResponseMessage("");
 
-    return sendJsonQuery(apiPaths.auth.requestPasswordReset, "POST", {
+    return sendJsonQuery(apiPaths.auth.sendPasswordResetCode, "POST", {
       username: username,
     })
       .then((response: string) => {

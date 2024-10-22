@@ -10,6 +10,7 @@ export type HorizontalViewProps = ThemedViewProps & {
 };
 
 export default function HorizontalView({
+  style,
   justifyOption = "space-between",
   ...props
 }: HorizontalViewProps) {
@@ -22,6 +23,7 @@ export default function HorizontalView({
           alignItems: "center",
           justifyContent: justifyOption,
         },
+        style,
       ]}
       {...props}
     >

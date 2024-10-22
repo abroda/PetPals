@@ -8,6 +8,7 @@ import { Button, ButtonProps } from "react-native-ui-lib";
 import { TextStyles } from "@/constants/theme/TextStyles";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
+import { useWindowDimension } from "@/hooks/useWindowDimension";
 
 export type ThemedButtonProps = ButtonProps & {
   href?: string;
@@ -34,15 +35,20 @@ export const ThemedButton = ({
     backgroundThemedColor
   );
   const textColor = useThemeColor(textColorName, textThemedColor);
+  const percentToDP = useWindowDimension("shorter");
+
   return (
     <Button
       color={textColor}
-      labelStyle={useTextStyle("default")}
+      labelStyle={[
+        useTextStyle("default"),
+        { paddingBottom: percentToDP(1.5) },
+      ]}
       style={[
         {
           backgroundColor: backgroundColor,
           borderColor: useThemeColor("text"),
-          width: "100%",
+          width: percentToDP(89),
         },
         style,
       ]}

@@ -65,9 +65,8 @@ export default function PostScreen() {
             onPress={() =>
               username === "me" ? router.push("./edit") : setDialogVisible(true)
             }
-          >
-            {username === "me" ? "Edit post" : "Add reaction"}
-          </ThemedButton>
+            label={username === "me" ? "Edit post" : "Add reaction"}
+          />
         </HorizontalView>
         <HorizontalView justifyOption="flex-start">
           <ThemedText

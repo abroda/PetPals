@@ -20,7 +20,6 @@ export default function HomeLayout() {
         headerShown: true,
         headerShadowVisible: false,
         headerStyle: {
-          pointerEvents: "none",
           height: 0,
           shadowRadius: 0,
         },
