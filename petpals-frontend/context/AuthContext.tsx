@@ -5,8 +5,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
-// import { apiPaths } from "@/constants/config/API";
-import {apiPaths} from "@/constants/config/api"
+import { apiPaths } from "@/constants/config/api";
 import asyncStorage from "@react-native-async-storage/async-storage/src/AsyncStorage";
 import { Dictionary } from "react-native-ui-lib/src/typings/common";
 
@@ -41,7 +40,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [authToken, setAuthToken] = useState("");
-  const [userId, setUserId] = useState("")
+  const [userId, setUserId] = useState("");
   const [responseMessage, setResponseMessage] = useState("");
   const passwordRegex =
     "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$";
@@ -225,7 +224,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       password: password,
     })
       .then((response: Dictionary<any>) => {
-        setUserId(response.id)
+        setUserId(response.id);
         setAuthToken(response.token);
         asyncStorage.setItem("authToken", JSON.stringify(authToken));
         setIsProcessing(false);
