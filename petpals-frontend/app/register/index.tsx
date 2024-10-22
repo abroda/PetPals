@@ -17,6 +17,7 @@ import validators from "react-native-ui-lib/src/components/textField/validators"
 import { Pressable } from "react-native";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RegisterScreen() {
   const [name, setName] = useState("");
@@ -33,6 +34,7 @@ export default function RegisterScreen() {
   const textStyle = useTextStyle("small");
   const accentColor = useThemeColor("accent");
   const percentToDP = useWindowDimension("shorter");
+  const heighPercentToDP = useWindowDimension("height");
 
   function validate() {
     return (
@@ -66,125 +68,129 @@ export default function RegisterScreen() {
   }
 
   return (
-    <ThemedScrollView style={{ paddingTop: percentToDP(10) }}>
-      {dialogVisible && (
-        <TermsOfUseDialog onDismiss={() => setDialogVisible(false)} />
-      )}
-      {isLoading && (
-        <ThemedLoadingIndicator
-          size="large"
-          fullScreen={true}
-          message="Loading..."
-        />
-      )}
-      {!isLoading && (
-        <ThemedView
-          style={{
-            padding: 24,
-            flex: 1,
-            alignSelf: "center",
-          }}
-        >
-          <AppLogo
-            size={48}
-            showMotto={false}
+    <SafeAreaView>
+      <ThemedScrollView style={{ paddingTop: percentToDP(10) }}>
+        {dialogVisible && (
+          <TermsOfUseDialog onDismiss={() => setDialogVisible(false)} />
+        )}
+        {isLoading && (
+          <ThemedLoadingIndicator
+            size="large"
+            fullScreen={true}
+            message="Loading..."
           />
-
-          {validationMessage && (
-            <ThemedText
-              textStyleName="small"
-              textColorName="alarm"
-              style={{
-                marginBottom: percentToDP(3),
-                marginLeft: percentToDP(1),
-              }}
-            >
-              {validationMessage}
-            </ThemedText>
-          )}
-          <ThemedTextField
-            label="Name"
-            autoComplete="name"
-            onChangeText={(newText: string) => setName(newText)}
-            withValidation
-            validate={["required", (value) => (value ? value.length : 0) >= 3]}
-            validationMessage={["Name is required", "Name is too short"]}
-            maxLength={250}
-          />
-          <ThemedTextField
-            label="Email"
-            autoComplete="email"
-            onChangeText={(newText: string) => setEmail(newText)}
-            withValidation
-            validate={["required", "email"]}
-            validationMessage={["Email is required", "Email is invalid"]}
-            maxLength={250}
-          />
-          <ThemedTextField
-            label="Password"
-            onChangeText={(newText: string) => setPassword(newText)}
-            isSecret
-            withValidation
-            validate={[
-              "required",
-              (value) => (value ? value.length : 0) >= 8,
-              (value) => (password.match(passwordRegex)?.length ?? 0) > 0,
-              (value) => password === repeatPassword,
-            ]}
-            validationMessage={[
-              "Password is required",
-              "Password is too short",
-              "Password is invalid",
-              "Passwords don't match",
-            ]}
-          />
-          <ThemedTextField
-            label="Repeat password"
-            onChangeText={(newText: string) => setRepeatPassword(newText)}
-            isSecret
-            withValidation
-            validate={["required", (value) => repeatPassword === password]}
-            validationMessage={[
-              "Repeat password is required",
-              "Passwords don't match",
-            ]}
-          />
-          <HorizontalView
-            justifyOption="flex-start"
+        )}
+        {!isLoading && (
+          <ThemedView
             style={{
-              marginLeft: percentToDP(0.4),
-              marginBottom: percentToDP(8),
-              marginTop: percentToDP(9),
+              padding: 24,
+              flex: 1,
+              alignSelf: "center",
             }}
           >
-            <Checkbox
-              label="I have read and accept "
-              value={termsAgreedTo}
-              onValueChange={(value) => setTermsAgreedTo(value)}
-              color={accentColor}
-              labelStyle={[{ color: textColor }, textStyle]}
+            <AppLogo
+              size={48}
+              showMotto={false}
             />
-            <ThemedText
-              textColorName="link"
-              textStyleName="smallBold"
-              onPress={() => setDialogVisible(true)}
-            >
-              Terms of Use.
-            </ThemedText>
-          </HorizontalView>
 
-          {(!isProcessing || dialogVisible) && (
-            <ThemedButton
-              style={{
-                marginBottom: percentToDP(14),
-              }}
-              backgroundColorName="primary"
-              textColorName="textOnPrimary"
-              label="Register"
-              onPress={submit}
+            {validationMessage && (
+              <ThemedText
+                textStyleName="small"
+                textColorName="alarm"
+                style={{
+                  marginBottom: percentToDP(3),
+                  marginLeft: percentToDP(1),
+                }}
+              >
+                {validationMessage}
+              </ThemedText>
+            )}
+            <ThemedTextField
+              label="Name"
+              autoComplete="name"
+              onChangeText={(newText: string) => setName(newText)}
+              withValidation
+              validate={[
+                "required",
+                (value) => (value ? value.length : 0) >= 3,
+              ]}
+              validationMessage={["Name is required", "Name is too short"]}
+              maxLength={250}
             />
-          )}
-          {/* {(!isProcessing || dialogVisible) && (
+            <ThemedTextField
+              label="Email"
+              autoComplete="email"
+              onChangeText={(newText: string) => setEmail(newText)}
+              withValidation
+              validate={["required", "email"]}
+              validationMessage={["Email is required", "Email is invalid"]}
+              maxLength={250}
+            />
+            <ThemedTextField
+              label="Password"
+              onChangeText={(newText: string) => setPassword(newText)}
+              isSecret
+              withValidation
+              validate={[
+                "required",
+                (value) => (value ? value.length : 0) >= 8,
+                (value) => (password.match(passwordRegex)?.length ?? 0) > 0,
+                (value) => password === repeatPassword,
+              ]}
+              validationMessage={[
+                "Password is required",
+                "Password is too short",
+                "Password is invalid",
+                "Passwords don't match",
+              ]}
+            />
+            <ThemedTextField
+              label="Repeat password"
+              onChangeText={(newText: string) => setRepeatPassword(newText)}
+              isSecret
+              withValidation
+              validate={["required", (value) => repeatPassword === password]}
+              validationMessage={[
+                "Repeat password is required",
+                "Passwords don't match",
+              ]}
+            />
+            <HorizontalView
+              justifyOption="flex-start"
+              style={{
+                marginLeft: percentToDP(0.4),
+                marginBottom: percentToDP(8),
+                marginTop: percentToDP(9),
+              }}
+            >
+              <Checkbox
+                label="I have read and accept "
+                value={termsAgreedTo}
+                onValueChange={(value) => setTermsAgreedTo(value)}
+                color={accentColor}
+                labelStyle={[{ color: textColor }, textStyle]}
+              />
+              <ThemedText
+                textColorName="link"
+                textStyleName="smallBold"
+                onPress={() => setDialogVisible(true)}
+              >
+                Terms of Use.
+              </ThemedText>
+            </HorizontalView>
+
+            {(!isProcessing || dialogVisible) && (
+              <ThemedButton
+                style={{
+                  marginBottom: percentToDP(14),
+                }}
+                backgroundColorName="primary"
+                textColorName="textOnPrimary"
+                label="Register"
+                onPress={submit}
+              />
+            )}
+            {/* {(!isProcessing || dialogVisible) && (
             <ThemedButton
               style={{
                 marginBottom: percentToDP(14),
@@ -195,8 +201,9 @@ export default function RegisterScreen() {
               onPress={() => router.dismiss()}
             />
           )} */}
-        </ThemedView>
-      )}
-    </ThemedScrollView>
+          </ThemedView>
+        )}
+      </ThemedScrollView>
+    </SafeAreaView>
   );
 }

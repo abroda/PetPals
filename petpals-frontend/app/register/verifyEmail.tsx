@@ -96,7 +96,9 @@ export default function VerifyEmailScreen() {
               maxLength={6}
             />
             {!isLoading && (
-              <ThemedView style={{ width: "100%", marginTop: percentToDP(22) }}>
+              <ThemedView
+                style={{ marginTop: percentToDP(22), alignSelf: "center" }}
+              >
                 <ThemedButton
                   marginB-15
                   label="Confirm"

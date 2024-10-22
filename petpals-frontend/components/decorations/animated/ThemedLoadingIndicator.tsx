@@ -44,7 +44,8 @@ export default function ThemedLoadingIndicator({
         style={{
           alignItems: "center",
           justifyContent: "center",
-          margin: "50%",
+          margin: "auto",
+          alignSelf: "center",
         }}
       >
         <ActivityIndicator

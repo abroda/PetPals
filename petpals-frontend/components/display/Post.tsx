@@ -87,7 +87,7 @@ export default function Post(props: { username: string }) {
       >
         <Pressable
           onPress={() =>
-            router.push("/user/Username/post/postId" as Href<string>)
+            router.push(`/user/${props.username}/post/postId` as Href<string>)
           }
         >
           <ThemedIcon

@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { router } from "expo-router";
 import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoadingIndicator";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ResetPasswordScreen() {
   const [isConfirmed, setIsConfirmed] = useState(false);
@@ -27,6 +28,7 @@ export default function ResetPasswordScreen() {
   } = useAuth();
 
   const percentToDP = useWindowDimension("shorter");
+  const heighPercentToDP = useWindowDimension("height");
 
   function verify() {
     return (code.match(codeRegex)?.length ?? 0) > 0;
@@ -50,95 +52,104 @@ export default function ResetPasswordScreen() {
   }
 
   return (
-    <ThemedScrollView style={{ paddingTop: percentToDP(10) }}>
-      {isLoading && (
-        <ThemedLoadingIndicator
-          size="large"
-          fullScreen={true}
-          message="Loading..."
-        />
-      )}
-      {!isLoading && (
-        <ThemedView
-          style={{
-            padding: 24,
-            flex: 1,
-            alignSelf: "center",
-          }}
-        >
-          <AppLogo
-            size={20}
-            showMotto={false}
+    <SafeAreaView>
+      {" "}
+      <ThemedScrollView style={{ paddingTop: percentToDP(10) }}>
+        {isLoading && (
+          <ThemedLoadingIndicator
+            size="large"
+            fullScreen={true}
+            message="Loading..."
           />
-          {validationMessage && (
-            <ThemedText
-              textStyleName="small"
-              textColorName="alarm"
-              style={{ marginBottom: percentToDP(3) }}
-            >
-              {validationMessage}
-            </ThemedText>
-          )}
-          <ThemedView style={{ padding: percentToDP(5) }}>
-            <ThemedText
-              textStyleName="bigBold"
-              style={{ marginBottom: percentToDP(3) }}
-            >
-              Reset password
-            </ThemedText>
-            <ThemedText style={{ marginBottom: percentToDP(10) }}>
-              Please enter a verification code and set a new password.
-            </ThemedText>
-            <ThemedTextField
-              label="Code"
-              onChangeText={(newText: string) => setCode(newText)}
-              withValidation
-              validate={[
-                "required",
-                (value) => (value?.match(codeRegex)?.length ?? 0) > 0,
-              ]}
-              validationMessage={["Code is required", "Code is too short"]}
-              maxLength={6}
+        )}
+        {!isLoading && (
+          <ThemedView
+            style={{
+              padding: 24,
+              flex: 1,
+              alignSelf: "center",
+            }}
+          >
+            <AppLogo
+              size={20}
+              showMotto={false}
             />
-            <ThemedTextField
-              label="Password"
-              onChangeText={(newText: string) => setPassword(newText)}
-              isSecret
-              withValidation
-              validate={["required", (value) => (value ? value.length : 0) > 6]}
-              validationMessage={[
-                "Field is required",
-                "Password is too short",
-                "Password is invalid",
-              ]}
-            />
-            <ThemedTextField
-              label="Repeat password"
-              onChangeText={(newText: string) => setRepeatPassword(newText)}
-              isSecret
-              withValidation
-              validate={["required", (value) => repeatPassword === password]}
-              validationMessage={["Field is required", "Passwords don't match"]}
-            />
-            <ThemedButton
-              onPress={submit}
-              label="Confirm"
-              textColorName="textOnPrimary"
-              style={{
-                marginTop: percentToDP(5),
-                marginBottom: percentToDP(5),
-              }}
-            />
-            <ThemedButton
-              onPress={resend}
-              label="Resend code"
-              textColorName="textOnSecondary"
-              backgroundColorName="secondary"
-              style={{ marginBottom: percentToDP(5) }}
-            />
+            {validationMessage && (
+              <ThemedText
+                textStyleName="small"
+                textColorName="alarm"
+                style={{ marginBottom: percentToDP(3) }}
+              >
+                {validationMessage}
+              </ThemedText>
+            )}
+            <ThemedView style={{ padding: percentToDP(5) }}>
+              <ThemedText
+                textStyleName="bigBold"
+                style={{ marginBottom: percentToDP(3) }}
+              >
+                Reset password
+              </ThemedText>
+              <ThemedText style={{ marginBottom: percentToDP(10) }}>
+                Please enter a verification code and set a new password.
+              </ThemedText>
+              <ThemedTextField
+                label="Code"
+                onChangeText={(newText: string) => setCode(newText)}
+                withValidation
+                validate={[
+                  "required",
+                  (value) => (value?.match(codeRegex)?.length ?? 0) > 0,
+                ]}
+                validationMessage={["Code is required", "Code is too short"]}
+                maxLength={6}
+              />
+              <ThemedTextField
+                label="Password"
+                onChangeText={(newText: string) => setPassword(newText)}
+                isSecret
+                withValidation
+                validate={[
+                  "required",
+                  (value) => (value ? value.length : 0) > 6,
+                ]}
+                validationMessage={[
+                  "Field is required",
+                  "Password is too short",
+                  "Password is invalid",
+                ]}
+              />
+              <ThemedTextField
+                label="Repeat password"
+                onChangeText={(newText: string) => setRepeatPassword(newText)}
+                isSecret
+                withValidation
+                validate={["required", (value) => repeatPassword === password]}
+                validationMessage={[
+                  "Field is required",
+                  "Passwords don't match",
+                ]}
+              />
+              <ThemedButton
+                onPress={submit}
+                label="Confirm"
+                textColorName="textOnPrimary"
+                style={{
+                  marginTop: percentToDP(5),
+                  marginBottom: percentToDP(5),
+                }}
+              />
+              <ThemedButton
+                onPress={resend}
+                label="Resend code"
+                textColorName="textOnSecondary"
+                backgroundColorName="secondary"
+                style={{ marginBottom: percentToDP(5) }}
+              />
+            </ThemedView>
           </ThemedView>
-        </ThemedView>
-      )}
-    </ThemedScrollView>
+        )}
+      </ThemedScrollView>
+    </SafeAreaView>
   );
 }

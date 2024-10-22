@@ -12,7 +12,7 @@ export type HorizontalViewProps = ThemedViewProps & {
 export default function HorizontalView({
   style,
   justifyOption = "space-between",
-  ...props
+  ...rest
 }: HorizontalViewProps) {
   return (
     <ThemedView
@@ -25,9 +25,9 @@ export default function HorizontalView({
         },
         style,
       ]}
-      {...props}
+      {...rest}
     >
-      {props.children}
+      {rest.children}
     </ThemedView>
   );
 }

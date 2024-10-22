@@ -6,7 +6,11 @@ import NotificationItem from "../display/NotificationItem";
 import { Href } from "expo-router";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
 import { Pressable } from "react-native";
+import { useWindowDimension } from "@/hooks/useWindowDimension";
 export default function NotificationsPopup({ onDismiss = () => {} }) {
+  const percentToPD = useWindowDimension("shorter");
+  const heightPercentToPD = useWindowDimension("height");
+
   return (
     <ThemedPopup onDismiss={onDismiss}>
       <HorizontalView>
@@ -18,7 +22,11 @@ export default function NotificationsPopup({ onDismiss = () => {} }) {
           ></ThemedIcon>
         </Pressable>
       </HorizontalView>
-      <ThemedScrollView style={{ height: "85%" }}>
+      <ThemedScrollView
+        style={{
+          height: "85%", // TODO: figure why setting pd height obscures HorizontalView above
+        }}
+      >
         <NotificationItem
           notificationItem={""}
           seen={false}

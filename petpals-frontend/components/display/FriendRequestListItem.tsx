@@ -6,12 +6,22 @@ import { Avatar, View, Text } from "react-native-ui-lib";
 import { useState } from "react";
 import { Link, router } from "expo-router";
 import { ThemedText } from "../basic/ThemedText";
+import { useWindowDimension } from "@/hooks/useWindowDimension";
 
 export default function FriendRequestListItem(props: { username: string }) {
   const [selected, setSelected] = useState("");
+  const percentToPD = useWindowDimension("shorter");
+  const heighPercentToPD = useWindowDimension("height");
 
   return (
-    <ThemedView style={styles.topBar}>
+    <ThemedView
+      style={{
+        flexDirection: "row",
+        width: percentToPD(100),
+        margin: percentToPD(4),
+        justifyContent: "flex-start",
+      }}
+    >
       <Pressable onPress={() => router.push(`/user/${props.username}`)}>
         <Avatar
           source={{
@@ -21,7 +31,10 @@ export default function FriendRequestListItem(props: { username: string }) {
       </Pressable>
       <ThemedView style={{ justifyContent: "center" }}>
         <ThemedText
-          style={{ paddingHorizontal: 20, fontSize: 30 }}
+          style={{
+            paddingHorizontal: percentToPD(2),
+            fontSize: percentToPD(8),
+          }}
           textStyleName="bigBold"
           textColorName="link"
         >
@@ -31,15 +44,3 @@ export default function FriendRequestListItem(props: { username: string }) {
     </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  topBar: {
-    flexDirection: "row",
-    width: "100%",
-    margin: 10,
-    justifyContent: "flex-start",
-  },
-  accountName: {
-    paddingHorizontal: 20,
-  },
-});

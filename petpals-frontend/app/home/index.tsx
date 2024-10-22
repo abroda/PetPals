@@ -52,7 +52,7 @@ export default function HomeScreen() {
           />
         )}
 
-        <PostFeed username="Dominika Xyz"></PostFeed>
+        <PostFeed username="Dominika_Xyz"></PostFeed>
       </ThemedView>
     </SafeAreaView>
   );

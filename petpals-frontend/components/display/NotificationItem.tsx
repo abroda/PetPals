@@ -6,7 +6,6 @@ import {
 import { ThemedText } from "@/components/basic/ThemedText";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import { useAuth } from "@/hooks/useAuth";
-import { ThemedButton } from "../inputs/ThemedButton";
 import { useState } from "react";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
 import { Pressable } from "react-native";
@@ -41,10 +40,15 @@ export default function NotificationItem(
             colorName="transparent"
             justifyOption="flex-start"
           >
-            <ThemedView style={{ marginRight: "3%", borderRadius: 30 }}>
+            <ThemedView
+              style={{
+                marginRight: percentToDP(2),
+                borderRadius: percentToDP(10),
+              }}
+            >
               <UserAvatar
                 size={13}
-                doLink={true}
+                doLink={false}
                 username={
                   (userEmail?.length ?? 0) > 0 ? userEmail ?? "me" : "me"
                 }

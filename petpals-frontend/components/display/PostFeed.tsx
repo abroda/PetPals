@@ -1,15 +1,15 @@
-import { ThemedText } from "@/components/basic/ThemedText";
-import { ThemedView } from "@/components/basic/containers/ThemedView";
-import { useAuth } from "@/hooks/useAuth";
-import { usePathname } from "expo-router";
-import { ReactElement, useState } from "react";
 import { FlatList } from "react-native-gesture-handler";
 import Post from "./Post";
-import { Dimensions, FlatListProps } from "react-native";
-import { ThemedScrollView } from "../basic/containers/ThemedScrollView";
+import { FlatListProps, StyleProp, ViewStyle } from "react-native";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { ReactElement } from "react";
 
-export default function PostFeed(props: { username: string }) {
+export type PostFeedProps = {
+  style?: ViewStyle;
+  username: string;
+};
+
+export default function PostFeed({ style, username }: PostFeedProps) {
   const postsData = [0, 1, 2, 3];
   const percentToDP = useWindowDimension("height");
   /*
@@ -18,12 +18,15 @@ export default function PostFeed(props: { username: string }) {
   */
   return (
     <FlatList
-      style={{
-        height: percentToDP(76),
-        marginBottom: percentToDP(6),
-      }}
+      style={[
+        {
+          height: style?.height ?? percentToDP(76),
+          marginBottom: style?.marginBottom ?? percentToDP(6),
+        },
+        style,
+      ]}
       data={postsData}
-      renderItem={(item) => <Post username={props.username} />}
+      renderItem={(item) => <Post username={username} />}
     />
   );
 }
