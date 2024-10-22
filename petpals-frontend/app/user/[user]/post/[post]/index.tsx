@@ -6,24 +6,36 @@ import PostReactionPopup from "@/components/popups/PostReactionPopup";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import { useAuth } from "@/hooks/useAuth";
-import { router, usePathname } from "expo-router";
+import { Href, router, usePathname } from "expo-router";
 import { useState } from "react";
 import { FlatList } from "react-native-gesture-handler";
 import { Avatar, Image } from "react-native-ui-lib";
 import Comment from "@/components/display/Comment";
 import PetAvatar from "@/components/navigation/PetAvatar";
+import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { Pressable } from "react-native";
+import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
+import CommentSection from "@/components/display/CommentSection";
 
 export default function PostScreen() {
   const path = usePathname();
   const username = path.split("/")[2];
   const { userEmail } = useAuth();
+  const [liked, setLiked] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
+  const percentToDP = useWindowDimension("shorter");
+  const heightPercentToDP = useWindowDimension("height");
 
   return (
-    <ThemedScrollView style={{ paddingTop: "8%" }}>
+    <ThemedScrollView
+      style={{
+        paddingTop: percentToDP(20),
+        height: heightPercentToDP(90),
+      }}
+    >
       <ThemedView
         colorName="tertiary"
-        style={{ margin: "3%", paddingVertical: "3%", borderRadius: 30 }}
+        style={{ margin: percentToDP(3), borderRadius: percentToDP(10) }}
       >
         <HorizontalView
           colorName="transparent"
@@ -31,21 +43,34 @@ export default function PostScreen() {
         >
           <ThemedView
             colorName="transparent"
-            style={{ margin: "3%", borderRadius: 30 }}
+            style={{
+              marginLeft: percentToDP(4),
+              marginRight: percentToDP(2),
+              marginVertical: percentToDP(4),
+            }}
           >
             <UserAvatar
-              size={50}
+              size={11}
               doLink={true}
               username={username}
             />
           </ThemedView>
-          <ThemedText textStyleName="big">{username}</ThemedText>
+
+          <ThemedText
+            style={{
+              backgroundColor: "transparent",
+              paddingBottom: percentToDP(1),
+            }}
+            textStyleName="big"
+          >
+            {username}
+          </ThemedText>
         </HorizontalView>
         <ThemedView
           style={{
-            width: "100%",
-            height: 400,
-            marginBottom: "5%",
+            width: percentToDP(94),
+            height: percentToDP(94), // TODO adapt to image's width to height ratio
+            marginBottom: percentToDP(4),
           }}
         >
           <Image
@@ -53,30 +78,56 @@ export default function PostScreen() {
               uri: "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
             }}
             style={{
-              width: "100%",
-              height: "100%",
+              width: percentToDP(94),
+              height: percentToDP(94),
             }}
           />
         </ThemedView>
-        <ThemedText>Example post with a cutie</ThemedText>
-        <HorizontalView justifyOption="flex-end">
-          <ThemedButton
-            style={{ width: "30%" }}
-            onPress={() =>
-              username === "me" ? router.push("./edit") : setDialogVisible(true)
-            }
-            label={username === "me" ? "Edit post" : "Add reaction"}
-          />
+        <ThemedText
+          style={{
+            backgroundColor: "transparent",
+            marginHorizontal: percentToDP(4),
+            marginBottom: percentToDP(6),
+          }}
+        >
+          Example post with a cutie
+        </ThemedText>
+        <HorizontalView
+          justifyOption="flex-end"
+          colorName="transparent"
+          style={{
+            marginBottom: percentToDP(4),
+            marginHorizontal: percentToDP(4),
+          }}
+        >
+          <Pressable onPress={() => setLiked(!liked)}>
+            <ThemedIcon
+              size={30}
+              name={liked ? "heart" : "heart-outline"}
+              style={{
+                paddingRight: percentToDP(1),
+                paddingBottom: percentToDP(1),
+              }}
+            />
+          </Pressable>
         </HorizontalView>
-        <HorizontalView justifyOption="flex-start">
+        <HorizontalView
+          justifyOption="flex-start"
+          colorName="transparent"
+          style={{
+            paddingBottom: percentToDP(8),
+            paddingHorizontal: percentToDP(4),
+          }}
+        >
           <ThemedText
             style={{ marginRight: 10 }}
             textStyleName="smallBold"
+            backgroundColorName="transparent"
           >
             Pets tagged:
           </ThemedText>
           <PetAvatar
-            size={40}
+            size={11}
             username="Username"
             pet="Cutie"
             doLink={true}
@@ -87,16 +138,7 @@ export default function PostScreen() {
         )}
       </ThemedView>
 
-      <ThemedView
-        colorName="tertiary"
-        style={{ borderRadius: 50, margin: "4%" }}
-      >
-        <ThemedText textStyleName="bigBold">Comments</ThemedText>
-        <FlatList
-          data={["1", "2", "3"]}
-          renderItem={(commentId) => <Comment commentId={commentId.item} />}
-        />
-      </ThemedView>
+      <CommentSection />
     </ThemedScrollView>
   );
 }
