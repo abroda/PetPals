@@ -40,6 +40,8 @@ export function ThemedText({
         {
           color: textColor,
           backgroundColor: backgroundColor,
+          flexWrap: "wrap",
+          flexShrink: 1,
         },
         useTextStyle(textStyleName),
         style,

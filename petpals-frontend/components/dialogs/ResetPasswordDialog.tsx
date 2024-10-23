@@ -11,17 +11,24 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import ThemedLoadingIndicator from "../decorations/animated/ThemedLoadingIndicator";
+import { useWindowDimension } from "@/hooks/useWindowDimension";
 
 export default function ResetPasswordDialog({
   onDismiss = () => {},
   emailFilled = "",
 }) {
   const [email, setEmail] = useState(emailFilled);
-  const [showResponse, setShowResponse] = useState(false);
-  const { requestPasswordReset, responseMessage, isProcessing } = useAuth();
+  const [validationMessage, setValidationMessage] = useState("");
+  const {
+    sendPasswordResetCode: requestPasswordReset,
+    responseMessage,
+    isProcessing,
+  } = useAuth();
 
   const smallTheme = useTextStyle("small");
   const alarmColor = useThemeColor("alarm");
+
+  const percentToDP = useWindowDimension("shorter");
 
   function validate() {
     return validators.email(email);
@@ -30,13 +37,13 @@ export default function ResetPasswordDialog({
   function submit() {
     if (validate()) {
       requestPasswordReset(email).then((result) => {
+        result = true;
         if (result) {
-          setShowResponse(false);
           router.setParams({ email: email });
           router.push("./resetPassword");
           onDismiss();
         } else {
-          setShowResponse(true);
+          setValidationMessage(responseMessage ?? "Error");
         }
       });
     }
@@ -44,29 +51,31 @@ export default function ResetPasswordDialog({
 
   return (
     <ThemedDialog onDismiss={onDismiss}>
-      <ThemedScrollView style={{ padding: "2%" }}>
+      <ThemedScrollView
+        style={{ padding: percentToDP(2), alignContent: "center" }}
+      >
         <ThemedText
           textStyleName="bigBold"
-          style={{ marginBottom: "4%" }}
+          style={{ marginBottom: percentToDP(4) }}
         >
           Reset password
         </ThemedText>
 
-        <ThemedText style={{ marginBottom: "4%" }}>
+        <ThemedText style={{ marginBottom: percentToDP(4) }}>
           Please enter your email below and we will send you a code to reset
           your password.
         </ThemedText>
 
-        {showResponse && (
+        {validationMessage && (
           <ThemedText
-            style={[smallTheme, { color: alarmColor, marginBottom: 10 }]}
+            textStyleName="small"
+            textColorName="alarm"
+            style={{ marginBottom: percentToDP(3) }}
           >
-            {responseMessage}
+            {validationMessage}
           </ThemedText>
         )}
         <ThemedTextField
-          text60L
-          marginB-20
           label="Email"
           value={email}
           onChangeText={(newText: string) => setEmail(newText)}
@@ -75,11 +84,12 @@ export default function ResetPasswordDialog({
           validate={["required", "email"]}
           validationMessage={["Field is required", "Email is invalid"]}
           maxLength={250}
+          width={78}
         />
         {isProcessing && (
           <ThemedLoadingIndicator
             size="large"
-            style={{ padding: "5%" }}
+            style={{ padding: percentToDP(5) }}
           />
         )}
         {!isProcessing && (
@@ -87,15 +97,15 @@ export default function ResetPasswordDialog({
             <ThemedButton
               label="Cancel"
               textColorName="textOnPrimary"
-              style={{ width: "30%", marginBottom: "2%" }}
+              style={{ width: percentToDP(33), marginBottom: percentToDP(2) }}
               onPress={onDismiss}
             />
             <ThemedButton
               label="Confirm"
               textColorName="textOnPrimary"
               style={{
-                width: "30%",
-                marginBottom: "2%",
+                width: percentToDP(33),
+                marginBottom: percentToDP(2),
               }}
               onPress={submit}
             />

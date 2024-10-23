@@ -9,12 +9,12 @@ import HorizontalView from "../basic/containers/HorizontalView";
 import UserAvatar from "../navigation/UserAvatar";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
 
-export default function ChatListItem(props: { username: string }) {
+export default function FriendActivityListItem(props: { username: string }) {
   const [selected, setSelected] = useState("");
   const percentToPD = useWindowDimension("shorter");
 
   return (
-    <Pressable onPress={() => router.push(`/chat/${props.username}`)}>
+    <Pressable onPress={() => router.push(`/user/${props.username}`)}>
       <HorizontalView justifyOption="flex-start">
         <UserAvatar
           size={13}

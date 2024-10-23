@@ -1,10 +1,18 @@
 import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
 import { ThemedText } from "@/components/basic/ThemedText";
+import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function Settings() {
+export default function AppSettings() {
+  const percentToDP = useWindowDimension("shorter");
+  const heighPercentToDP = useWindowDimension("height");
   return (
-    <ThemedScrollView style={{ height: "100%" }}>
-      <ThemedText style={{ marginTop: 60 }}>TODO: App settings</ThemedText>
-    </ThemedScrollView>
+    <SafeAreaView>
+      <ThemedScrollView style={{ height: heighPercentToDP(100) }}>
+        <ThemedText style={{ marginTop: percentToDP(10) }}>
+          TODO: App settings
+        </ThemedText>
+      </ThemedScrollView>
+    </SafeAreaView>
   );
 }

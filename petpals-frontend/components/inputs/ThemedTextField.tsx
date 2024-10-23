@@ -9,6 +9,8 @@ import { TextStyleName, useTextStyle } from "@/hooks/theme/useTextStyle";
 import { ThemedView } from "../basic/containers/ThemedView";
 import { Validator } from "react-native-ui-lib/src/components/textField/types";
 import { Dimensions } from "react-native";
+import { heightPercentageToDP } from "react-native-responsive-screen";
+import { useWindowDimension } from "@/hooks/useWindowDimension";
 
 export type ThemedTextFieldProps = TextFieldProps & {
   textColorName?: ColorName;
@@ -21,6 +23,7 @@ export type ThemedTextFieldProps = TextFieldProps & {
   validationMessage?: string[];
   isSecret?: boolean;
   label?: string;
+  width?: number;
 };
 
 export const ForwardedRefTextField = forwardRef<TextFieldRef, TextFieldProps>(
@@ -47,6 +50,7 @@ export const ThemedTextField = forwardRef<TextFieldRef, ThemedTextFieldProps>(
       validationMessage,
       isSecret,
       label,
+      width,
       ...rest
     }: ThemedTextFieldProps,
     ref
@@ -57,22 +61,27 @@ export const ThemedTextField = forwardRef<TextFieldRef, ThemedTextFieldProps>(
       backgroundThemedColor
     );
     const alarmColor = useThemeColor("alarm");
+    const percentToDP = useWindowDimension("shorter");
 
     return (
-      <ThemedView style={{ marginBottom: "2%" }}>
+      <ThemedView style={{ marginBottom: percentToDP(2), alignSelf: "center" }}>
         <ForwardedRefTextField
           label={label}
           labelColor={textColor}
-          labelStyle={useTextStyle(textStyleName)}
+          labelStyle={[
+            useTextStyle(textStyleName),
+            { paddingLeft: percentToDP(1) },
+          ]}
           style={[
             {
               color: textColor,
               backgroundColor: backgroundColor,
-              borderRadius: Dimensions.get("window").width * 0.4,
+              height: percentToDP(16),
+              width: percentToDP(width ?? 89),
+              borderRadius: percentToDP(10),
               borderColor: textColor,
-              paddingHorizontal: 10,
-              paddingVertical: "4%",
-              height: "100%",
+              paddingHorizontal: percentToDP(4),
+              marginTop: percentToDP(2),
             },
             useTextStyle(textStyleName),
             rest.style,
@@ -83,7 +92,7 @@ export const ThemedTextField = forwardRef<TextFieldRef, ThemedTextFieldProps>(
           validateOnBlur={withValidation}
           validateOnChange={withValidation}
           validationMessageStyle={[
-            { color: alarmColor, marginTop: "2%" },
+            { color: alarmColor, marginTop: percentToDP(1) },
             useTextStyle("small"),
           ]}
           validate={validate}

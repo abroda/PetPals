@@ -1,3 +1,4 @@
+import { useWindowDimension } from "@/hooks/useWindowDimension";
 import { ThemedView } from "../basic/containers/ThemedView";
 import { Dimensions, Modal, ModalProps } from "react-native";
 
@@ -11,6 +12,8 @@ export default function ThemedDialog({
   onDismiss = () => {},
   ...props
 }) {
+  const percentToDP = useWindowDimension("shorter");
+
   return (
     <Modal
       visible={visible}
@@ -31,10 +34,10 @@ export default function ThemedDialog({
       >
         <ThemedView
           style={{
-            margin: "5%",
-            padding: "4%",
-            paddingBottom: "1%",
-            borderRadius: 30,
+            margin: percentToDP(5),
+            padding: percentToDP(4),
+            paddingBottom: percentToDP(1),
+            borderRadius: percentToDP(10),
           }}
         >
           {props.children}

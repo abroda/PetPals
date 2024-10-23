@@ -8,27 +8,34 @@ import React from "react";
 import { Text, View, Linking } from "react-native";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
+import { useWindowDimension } from "@/hooks/useWindowDimension";
 
 export default function TermsOfUseDialog({ onDismiss = () => {} }) {
+  const percentToDP = useWindowDimension("shorter");
+  const heightPercentToDP = useWindowDimension("height");
+  const widthPercentToDP = useWindowDimension("width");
+
   return (
     <ThemedDialog onDismiss={onDismiss}>
       <ThemedView
         style={{
-          padding: "3%",
-          borderRadius: 30,
+          padding: percentToDP(3),
+          paddingTop: percentToDP(1),
+          borderRadius: percentToDP(10),
+          height: heightPercentToDP(80),
+          width: widthPercentToDP(83),
+          alignSelf: "center",
         }}
       >
         <ThemedText
           textStyleName="bigBold"
-          style={{ marginBottom: "5%" }}
+          style={{ marginBottom: percentToDP(3.5) }}
         >
           Terms of Use
         </ThemedText>
         <ThemedScrollView
-          scrollEnabled
           style={{
-            maxHeight: Dimensions.get("window").height * 0.5,
-            marginBottom: "7%",
+            marginBottom: percentToDP(7),
           }}
         >
           <ThemedText>
@@ -38,7 +45,10 @@ export default function TermsOfUseDialog({ onDismiss = () => {} }) {
         <ThemedButton
           label="Close"
           textColorName="textOnPrimary"
-          style={{ width: "50%", marginHorizontal: "25%" }}
+          style={{
+            width: percentToDP(50),
+            alignSelf: "center",
+          }}
           onPress={onDismiss}
         />
       </ThemedView>
@@ -55,36 +65,59 @@ export const TermsOfUse = () => {
   const boldTheme = useTextStyle("defaultBold");
   const bigTheme = useTextStyle("big");
   const bigBoldTheme = useTextStyle("bigBold");
+  const percentToDP = useWindowDimension("shorter");
+  const widthPercentToDP = useWindowDimension("width");
 
   return (
-    <ThemedView style={{ paddingVertical: 10 }}>
-      <ThemedText style={[smallBoldTheme, { marginBottom: 20 }]}>
+    <ThemedView style={{ width: widthPercentToDP(75) }}>
+      <ThemedText style={[smallBoldTheme, { marginBottom: percentToDP(10) }]}>
         <ThemedText style={smallTheme}>Effective Date: </ThemedText>
         15.10.2024{" "}
       </ThemedText>
 
-      <ThemedText style={[bigTheme, { marginBottom: 10, color: welcomeColor }]}>
+      <ThemedText
+        style={[
+          bigTheme,
+          {
+            marginBottom: percentToDP(5),
+            color: welcomeColor,
+          },
+        ]}
+      >
         Welcome to
         <ThemedText style={[bigBoldTheme, { color: welcomeColor }]}>
           {" "}
           PetPals.
         </ThemedText>
       </ThemedText>
-      <ThemedText style={{ marginBottom: 10 }}>
+      <ThemedText
+        style={{
+          marginBottom: percentToDP(5),
+        }}
+      >
         By accessing or using our app, you agree to comply with and be bound by
         the following Terms of Use. Please read these terms carefully before
         using our services. If you do not agree with these terms, you should not
         register or use the app.
       </ThemedText>
-
-      <ThemedText style={[bigBoldTheme, { marginVertical: 10 }]}>
+      <ThemedText
+        style={[
+          bigBoldTheme,
+          { marginVertical: 10, flexWrap: "wrap", flexShrink: 1 },
+        ]}
+      >
         1. Acceptance of Terms
       </ThemedText>
       <ThemedText>
         By registering for or using
         <ThemedText style={boldTheme}> PetPals</ThemedText>, you agree to be
         bound by these Terms of Use and our
-        <ThemedText style={[boldTheme, { color: linkColor }]}>
+        <ThemedText
+          style={[
+            boldTheme,
+            { color: linkColor, flexWrap: "wrap", flexShrink: 1 },
+          ]}
+        >
           {" "}
           Privacy Policy
         </ThemedText>
@@ -93,10 +126,15 @@ export const TermsOfUse = () => {
         means you accept the new terms.
       </ThemedText>
 
-      <ThemedText style={[bigBoldTheme, { marginVertical: 10 }]}>
+      <ThemedText
+        style={[
+          bigBoldTheme,
+          { marginVertical: 10, flexWrap: "wrap", flexShrink: 1 },
+        ]}
+      >
         2. Eligibility
       </ThemedText>
-      <ThemedText style={{ marginBottom: 3 }}>
+      <ThemedText style={{ marginBottom: 3, flexWrap: "wrap", flexShrink: 1 }}>
         You must be at least 18 years of age to register or use the app. By
         using <ThemedText style={boldTheme}>PetPals</ThemedText>, you represent
         and warrant that:

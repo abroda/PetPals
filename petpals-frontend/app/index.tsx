@@ -5,56 +5,76 @@ import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoad
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import { router } from "expo-router";
-import { ThemedText } from "@/components/basic/ThemedText";
+import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { SafeAreaView } from "react-native-safe-area-context";
+import HorizontalView from "@/components/basic/containers/HorizontalView";
 
 export default function WelcomeScreen() {
   const { isLoading, responseMessage, authToken } = useAuth();
+  const percentToDP = useWindowDimension("shorter");
+  const heightPercentToPD = useWindowDimension("height");
 
   if (!isLoading && authToken) {
     router.replace("./home");
   }
 
   return (
-    <ThemedScrollView style={{ paddingTop: "20%" }}>
-      {isLoading && (
-        <ThemedLoadingIndicator
-          size="large"
-          message="Loading..."
-          fullScreen={true}
-        />
-      )}
-      {!isLoading && (
-        <AppLogo
-          size={40}
-          showName={!isLoading}
-          showMotto={!isLoading}
-        />
-      )}
-
-      {!isLoading && (
-        <ThemedView style={{ width: "100%", padding: "5%", paddingTop: "3%" }}>
-          <ThemedButton
-            marginB-15
-            label="Login"
-            textColorName="textOnPrimary"
-            onPress={() => router.push("./login")}
+    <SafeAreaView>
+      <ThemedScrollView
+        style={{ height: heightPercentToPD(100), paddingTop: percentToDP(20) }}
+      >
+        {isLoading && (
+          <ThemedLoadingIndicator
+            size="large"
+            message="Loading..."
+            fullScreen={true}
+            style={{ alignSelf: "center" }}
           />
-          <ThemedButton
-            marginB-15
-            backgroundColorName="secondary"
-            textColorName="textOnSecondary"
-            label="Register"
-            onPress={() => router.push("./register")}
-          />
-        </ThemedView>
-      )}
-      {!isLoading && responseMessage !== "" && (
-        <ThemedView style={{ width: "100%", padding: "5%" }}>
+        )}
+        {!isLoading && (
+          <ThemedView
+            style={{
+              alignSelf: "center",
+            }}
+          >
+            <AppLogo
+              size={80}
+              showName={!isLoading}
+              showMotto={!isLoading}
+            />
+            <HorizontalView>
+              <ThemedButton
+                style={{ marginBottom: percentToDP(5), width: percentToDP(43) }}
+                textColorName="textOnPrimary"
+                label="Home Screen"
+                onPress={() => router.push("./home")}
+              />
+              <ThemedButton
+                style={{ marginBottom: percentToDP(5), width: percentToDP(43) }}
+                label="Login"
+                textColorName="textOnPrimary"
+                onPress={() => router.push("./login")}
+              />
+            </HorizontalView>
+            <ThemedButton
+              style={{ marginBottom: percentToDP(5) }}
+              backgroundColorName="secondary"
+              textColorName="textOnSecondary"
+              label="Register"
+              onPress={() => router.push("./register")}
+            />
+          </ThemedView>
+        )}
+        {/* {!isLoading && responseMessage !== "" && (
+        <ThemedView
+          style={{ width: percentToDP(100), padding: percentToDP(5) }}
+        >
           <ThemedText textColorName="alarm">
             Error: No connection to database
           </ThemedText>
         </ThemedView>
-      )}
-    </ThemedScrollView>
+      )} */}
+      </ThemedScrollView>
+    </SafeAreaView>
   );
 }

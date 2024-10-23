@@ -3,6 +3,7 @@ import { Avatar } from "react-native-ui-lib";
 import { router } from "expo-router";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemedView, ThemedViewProps } from "../basic/containers/ThemedView";
+import { useWindowDimension } from "@/hooks/useWindowDimension";
 
 export default function PetAvatar(props: {
   size: number;
@@ -11,6 +12,7 @@ export default function PetAvatar(props: {
   doLink: boolean;
 }) {
   const { userEmail } = useAuth();
+  const percentToDP = useWindowDimension("shorter");
 
   return (
     <Pressable
@@ -21,7 +23,7 @@ export default function PetAvatar(props: {
       }
     >
       <Avatar
-        size={props.size}
+        size={percentToDP(props.size)}
         source={{
           uri: "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
         }}

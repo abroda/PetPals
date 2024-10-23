@@ -4,97 +4,174 @@ import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import { router, usePathname } from "expo-router";
-import Post from "./post/[post]";
-import PostFeed from "@/components/lists/PostFeed";
+import PostFeed from "@/components/display/PostFeed";
 import PetAvatar from "@/components/navigation/PetAvatar";
+import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
+import { Pressable } from "react-native";
+import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 
 export default function UserProfileScreen() {
   const path = usePathname();
   const username = path.slice(path.lastIndexOf("/") + 1);
+  const percentToDP = useWindowDimension("shorter");
+  const heightPercentToPD = useWindowDimension("height");
   return (
-    <ThemedView style={{ height: "100%", paddingTop: 10 }}>
-      <HorizontalView justifyOption="flex-end">
-        <ThemedText style={{ margin: 10 }}>{username}</ThemedText>
-        <UserAvatar
-          username={username}
-          size={50}
-          doLink={false}
-        ></UserAvatar>
-      </HorizontalView>
-      <HorizontalView justifyOption="flex-start">
-        <ThemedText
-          style={{ marginRight: 10 }}
-          textStyleName="smallBold"
+    <SafeAreaView>
+      <ThemedView
+        style={{
+          height: heightPercentToPD(100),
+          paddingTop: heightPercentToPD(6),
+        }}
+      >
+        <HorizontalView justifyOption="flex-end">
+          <ThemedText style={{ margin: percentToDP(4) }}>{username}</ThemedText>
+          <UserAvatar
+            username={username}
+            size={13}
+            doLink={false}
+          ></UserAvatar>
+          {username == "me" && (
+            <Pressable
+              onPress={() => {
+                router.push("/user/me/editProfile");
+              }}
+            >
+              <ThemedIcon name="pencil"></ThemedIcon>
+            </Pressable>
+          )}
+        </HorizontalView>
+        <HorizontalView
+          justifyOption="flex-start"
+          style={{ paddingHorizontal: percentToDP(4) }}
         >
-          Pets:
-        </ThemedText>
-        <PetAvatar
-          size={40}
-          username={username}
-          pet="Cutie"
-          doLink={true}
-        />
-      </HorizontalView>
-      <ThemedView style={{ height: "80%" }}>
-        <ThemedText>TODO:User Profile</ThemedText>
-        {username === "me" && (
-          <ThemedButton
-            onPress={() => {
-              router.dismissAll();
-              router.push("/user/me/settings");
+          <ThemedText
+            style={{ marginRight: percentToDP(2) }}
+            textStyleName="smallBold"
+          >
+            Pets:
+          </ThemedText>
+          <PetAvatar
+            size={11}
+            username={username}
+            pet="Cutie"
+            doLink={true}
+          />
+          {username == "me" && (
+            <Pressable
+              onPress={() => {
+                router.push("/user/me/pet/Cutie/edit");
+              }}
+            >
+              <ThemedIcon name="pencil"></ThemedIcon>
+            </Pressable>
+          )}
+        </HorizontalView>
+        <ThemedView
+          style={{
+            height: heightPercentToPD(70),
+          }}
+        >
+          <ThemedView
+            style={{
+              height: heightPercentToPD(18),
+              paddingBottom: percentToDP(2),
             }}
           >
-            Settings
-          </ThemedButton>
-        )}
-        {username === "me" && (
-          <ThemedButton
-            onPress={() => {
-              router.dismissAll();
-              router.replace("/");
+            {username === "me" && (
+              <HorizontalView
+                justifyOption="space-evenly"
+                style={{
+                  height: heightPercentToPD(10),
+                  marginBottom: percentToDP(1),
+                }}
+              >
+                <ThemedButton
+                  onPress={() => {
+                    router.push("/user/me/settings");
+                  }}
+                  label="Settings"
+                  style={{ width: percentToDP(33) }}
+                ></ThemedButton>
+                <ThemedButton
+                  onPress={() => {
+                    router.dismissAll();
+                    router.replace("/");
+                  }}
+                  label="Logout"
+                  style={{ width: percentToDP(33) }}
+                ></ThemedButton>
+              </HorizontalView>
+            )}
+            {username === "me" && (
+              <HorizontalView
+                justifyOption="space-evenly"
+                style={{
+                  height: heightPercentToPD(10),
+                  marginBottom: percentToDP(1),
+                }}
+              >
+                <ThemedButton
+                  onPress={() => {
+                    router.push("./post/new");
+                  }}
+                  label="Add post"
+                  style={{ width: percentToDP(33) }}
+                ></ThemedButton>
+                <ThemedButton
+                  onPress={() => {
+                    router.push("./pet/new");
+                  }}
+                  label="Add pet"
+                  style={{ width: percentToDP(33) }}
+                ></ThemedButton>
+              </HorizontalView>
+            )}
+            {username !== "me" && (
+              <HorizontalView
+                style={{
+                  height: heightPercentToPD(10),
+                  marginBottom: percentToDP(4),
+                }}
+              >
+                <ThemedButton
+                  onPress={() => {
+                    router.push(`/chat/${username}`);
+                  }}
+                  label="Chat"
+                  style={{ width: percentToDP(33) }}
+                ></ThemedButton>
+                <ThemedButton
+                  onPress={() => {}}
+                  label="Send friend request"
+                  style={{ width: percentToDP(63) }}
+                ></ThemedButton>
+              </HorizontalView>
+            )}
+            {username !== "me" && (
+              <HorizontalView
+                style={{
+                  height: heightPercentToPD(20),
+                  marginBottom: percentToDP(4),
+                }}
+              >
+                <ThemedButton
+                  onPress={() => {}}
+                  label="Block"
+                  style={{ width: percentToDP(33) }}
+                ></ThemedButton>
+              </HorizontalView>
+            )}
+          </ThemedView>
+          <PostFeed
+            username={username}
+            style={{
+              marginBottom: percentToDP(1),
             }}
-          >
-            Logout
-          </ThemedButton>
-        )}
-        {username === "me" && (
-          <ThemedButton
-            onPress={() => {
-              router.dismissAll();
-              router.push("./post/new");
-            }}
-          >
-            Add post
-          </ThemedButton>
-        )}
-        {username === "me" && (
-          <ThemedButton
-            onPress={() => {
-              router.dismissAll();
-              router.push("./pet/new");
-            }}
-          >
-            Add pet
-          </ThemedButton>
-        )}
-        {username !== "me" && (
-          <ThemedButton
-            onPress={() => {
-              router.dismissAll();
-              router.push(`/chat/${username}`);
-            }}
-          >
-            Chat
-          </ThemedButton>
-        )}
-        {username !== "me" && (
-          <ThemedButton onPress={() => {}}>Send friend request</ThemedButton>
-        )}
-        {username !== "me" && (
-          <ThemedButton onPress={() => {}}>Block</ThemedButton>
-        )}
-        <PostFeed username={username} />
+          />
+        </ThemedView>
       </ThemedView>
-    </ThemedView>
+    </SafeAreaView>
   );
 }

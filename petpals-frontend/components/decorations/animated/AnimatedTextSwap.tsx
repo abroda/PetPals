@@ -10,6 +10,7 @@ import Animated, {
   withSequence,
   withTiming,
   Easing,
+  runOnJS,
 } from "react-native-reanimated";
 
 type AnimatedTextSwapProps = { texts: string[] } & PropsWithChildren<{
@@ -17,19 +18,20 @@ type AnimatedTextSwapProps = { texts: string[] } & PropsWithChildren<{
 }>;
 
 export function AnimatedTextSwap(props: AnimatedTextSwapProps) {
-  const mottos = props.texts;
-  const [currentMotto, setCurrentMotto] = useState(0);
+  const [currentText, setCurrentText] = useState(0);
   const fadeAnimation = useSharedValue(0);
 
   const fadeIn = () => withTiming(1, { duration: 1200, easing: Easing.cubic });
   const fadeOut = () =>
     withDelay(
       3000,
-      withTiming(0, { duration: 1000, easing: Easing.cubic }, () =>
-        setCurrentMotto((currentMotto + 1) % mottos.length)
-      )
+      withTiming(0, { duration: 1200, easing: Easing.cubic }, (finished) => {
+        if (finished) {
+          runOnJS(setCurrentText)((currentText + 1) % props.texts.length);
+        }
+      })
     );
-  const fadeInAndOut = () => withRepeat(withSequence(fadeIn(), fadeOut()));
+  const fadeInAndOut = () => withRepeat(withSequence(fadeIn(), fadeOut()), 0);
 
   useEffect(() => {
     fadeAnimation.value = fadeInAndOut();
@@ -43,7 +45,7 @@ export function AnimatedTextSwap(props: AnimatedTextSwapProps) {
           opacity: fadeAnimation,
         }}
       >
-        <ThemedText center={true}>{mottos[currentMotto]}</ThemedText>
+        <ThemedText center={true}>{props.texts[currentText]}</ThemedText>
       </Animated.View>
     </ThemedView>
   );
