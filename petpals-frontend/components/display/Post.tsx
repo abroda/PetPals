@@ -18,13 +18,13 @@ export default function Post() {
     const percentToDP = useWindowDimension("shorter");
     return (
         <ThemedView
-            colorName="tertiary"
-            style={{margin: 24, borderRadius: 10, paddingHorizontal: 24, paddingTop: 16, paddingBottom: 16}}
+            colorName="background"
+            style={{margin: 16, borderRadius: 10, paddingHorizontal: 24, paddingTop: 16, paddingBottom: 24}}
         >
             {/*POST HEADER*/}
             <HorizontalView justifyOption="flex-start" colorName="transparent" style={{marginBottom: 16}}>
                 <UserAvatar
-                    size={8}
+                    size={10}
                     doLink={true}
                     userId={"userIdFromList"}
                 />
@@ -53,7 +53,7 @@ export default function Post() {
             </ThemedView>
 
             {/*TITLE AND DESCRIPTION*/}
-            <ThemedText style={{backgroundColor: "transparent", marginBottom: 16}}
+            <ThemedText style={{backgroundColor: "transparent", marginBottom: 10}}
                         textStyleName="big">Example post with
                 a cutie</ThemedText>
             <ThemedText style={{backgroundColor: "transparent", marginBottom: 36}}
@@ -62,9 +62,15 @@ export default function Post() {
 
 
             {/*COMMENTS AND LIKES*/}
-            <HorizontalView colorName="transparent">
+            <HorizontalView colorName="transparent" style={{alignItems: "flex-start"}} justifyOption={"space-between"}>
                 <ThemedButton
-                    style={{width: 200, flexDirection: "row", alignItems: "flex-end", justifyContent: "center"}}
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "flex-end",
+                        justifyContent: "center",
+                        width: null,
+                        paddingHorizontal: percentToDP(6)
+                    }}
                     backgroundColorName="secondary"
                     onPress={() =>
                         router.push("/user/Username/post/postId" as Href<string>)
