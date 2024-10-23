@@ -8,41 +8,35 @@ import {Image} from "react-native-ui-lib";
 import {ThemedButton} from "@/components/inputs/ThemedButton";
 import {Href, router} from "expo-router";
 import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
+import {Pressable} from "react-native";
+import {useWindowDimension} from "@/hooks/useWindowDimension";
 
 export default function Post() {
     const {userId} = useAuth();
     const [dialogVisible, setDialogVisible] = useState(false);
+    const [liked, setLiked] = useState(false);
+    const percentToDP = useWindowDimension("shorter");
     return (
         <ThemedView
             colorName="tertiary"
-            style={{margin: 20, borderRadius: 10, paddingHorizontal: 20, paddingTop: 10, paddingBottom: 20}}
+            style={{margin: 24, borderRadius: 10, paddingHorizontal: 24, paddingTop: 16, paddingBottom: 16}}
         >
             {/*POST HEADER*/}
-            {/*<HorizontalView justifyOption="flex-start" colorName="transparent" shouldExpand={false}*/}
-            {/*>*/}
-            <ThemedView colorName="transparent" style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginBottom: 10
-            }}>
+            <HorizontalView justifyOption="flex-start" colorName="transparent" style={{marginBottom: 16}}>
                 <UserAvatar
-                    size={50}
+                    size={8}
                     doLink={true}
                     userId={"userIdFromList"}
                 />
-                <ThemedText style={{backgroundColor: "transparent", marginLeft: 10}}
+                <ThemedText style={{backgroundColor: "transparent", marginLeft: 16}}
                             textStyleName="big">Username</ThemedText>
-
-            </ThemedView>
-
-            {/*</HorizontalView>*/}
+            </HorizontalView>
 
             {/*IMAGE*/}
             <ThemedView
                 style={{
-                    // width: "100%",
                     height: 300,
-                    marginBottom: 20,
+                    marginBottom: 24,
                     borderRadius: 30
                 }}
             >
@@ -59,30 +53,38 @@ export default function Post() {
             </ThemedView>
 
             {/*TITLE AND DESCRIPTION*/}
-            <ThemedText style={{backgroundColor: "transparent", marginBottom: 10}}
+            <ThemedText style={{backgroundColor: "transparent", marginBottom: 16}}
                         textStyleName="big">Example post with
                 a cutie</ThemedText>
-            <ThemedText style={{backgroundColor: "transparent", marginBottom: 30}}
+            <ThemedText style={{backgroundColor: "transparent", marginBottom: 36}}
                         textStyleName="small">Oh what a great description! Surely written by a genius. Also look at this
                 cute doggo.</ThemedText>
 
 
             {/*COMMENTS AND LIKES*/}
-            <HorizontalView shouldExpand={false} colorName="transparent">
+            <HorizontalView colorName="transparent">
                 <ThemedButton
-                    style={{width: 200, flexDirection: "row", alignItems: "center", justifyContent: "center"}}
+                    style={{width: 200, flexDirection: "row", alignItems: "flex-end", justifyContent: "center"}}
                     backgroundColorName="secondary"
-                    // textColorName="secondary"
                     onPress={() =>
                         router.push("/user/Username/post/postId" as Href<string>)
                     }
                 >
                     {/*Go to comment section*/}
-                    <ThemedIcon name="chatbox" size={18} style={{marginRight: 10}}/>
+                    <ThemedIcon name="chatbox" size={20} style={{marginRight: 10}}/>
                     <ThemedText style={{backgroundColor: "transparent"}}
                                 textStyleName="small" textColorName="primary">21 comments</ThemedText>
                 </ThemedButton>
-                <ThemedIcon name="heart" />
+                <Pressable onPress={() => setLiked(!liked)}>
+                    <ThemedIcon
+                        size={32}
+                        name={liked ? "heart" : "heart-outline"}
+                        style={{
+                            paddingRight: percentToDP(1),
+                            paddingBottom: percentToDP(1),
+                        }}
+                    />
+                </Pressable>
             </HorizontalView>
 
 

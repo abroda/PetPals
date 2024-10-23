@@ -26,7 +26,7 @@ export default function PostFeed({ style, username }: PostFeedProps) {
         style,
       ]}
       data={postsData}
-      renderItem={(item) => <Post username={username} />}
+      renderItem={(item) => <Post />}
     />
   );
 }

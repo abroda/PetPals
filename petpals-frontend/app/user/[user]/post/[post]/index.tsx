@@ -54,7 +54,7 @@ export default function PostScreen() {
               <UserAvatar
                 size={11}
                 doLink={true}
-                username={username}
+                userId={username}
               />
             </ThemedView>
 
