@@ -11,7 +11,7 @@ import { useLayoutEffect, useState } from "react";
 import { Pressable } from "react-native";
 
 export default function HomeScreen() {
-  const { userEmail } = useAuth();
+  const { userId } = useAuth();
   const [notificationsVisible, setNotificationsVisible] = useState(false);
 
   return (
@@ -33,7 +33,7 @@ export default function HomeScreen() {
           <UserAvatar
             size={50}
             doLink={true}
-            username={(userEmail?.length ?? 0) > 0 ? userEmail ?? "me" : "me"}
+            userId={(userId?.length ?? 0) > 0 ? userId ?? "me" : "me"}
           />
         </ThemedView>
       </HorizontalView>
@@ -41,7 +41,7 @@ export default function HomeScreen() {
         <NotificationsPopup onDismiss={() => setNotificationsVisible(false)} />
       )}
 
-      <PostFeed username="OtherUser"></PostFeed>
+      <PostFeed></PostFeed>
 
     </ThemedView>
   );
