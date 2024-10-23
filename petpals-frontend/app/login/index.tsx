@@ -63,7 +63,7 @@ export default function LoginScreen() {
       <ThemedScrollView
         style={{
           flexGrow: 1,
-          height: percentToDP(100),
+          height: heighPercentToDP(100),
           paddingTop: percentToDP(10),
         }}
       >
@@ -89,7 +89,7 @@ export default function LoginScreen() {
             }}
           >
             <AppLogo
-              size={48}
+              size={40}
               showMotto={false}
             />
 

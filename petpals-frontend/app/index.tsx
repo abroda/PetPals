@@ -7,6 +7,7 @@ import { ThemedButton } from "@/components/inputs/ThemedButton";
 import { router } from "expo-router";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
 import { SafeAreaView } from "react-native-safe-area-context";
+import HorizontalView from "@/components/basic/containers/HorizontalView";
 
 export default function WelcomeScreen() {
   const { isLoading, responseMessage, authToken } = useAuth();
@@ -19,12 +20,15 @@ export default function WelcomeScreen() {
 
   return (
     <SafeAreaView>
-      <ThemedScrollView style={{ paddingTop: percentToDP(20) }}>
+      <ThemedScrollView
+        style={{ height: heightPercentToPD(100), paddingTop: percentToDP(20) }}
+      >
         {isLoading && (
           <ThemedLoadingIndicator
             size="large"
             message="Loading..."
             fullScreen={true}
+            style={{ alignSelf: "center" }}
           />
         )}
         {!isLoading && (
@@ -38,19 +42,20 @@ export default function WelcomeScreen() {
               showName={!isLoading}
               showMotto={!isLoading}
             />
-            <ThemedButton
-              style={{ marginBottom: percentToDP(5) }}
-              backgroundColorName="secondary"
-              textColorName="textOnSecondary"
-              label="Skip to Home"
-              onPress={() => router.push("./home")}
-            />
-            <ThemedButton
-              style={{ marginBottom: percentToDP(5) }}
-              label="Login"
-              textColorName="textOnPrimary"
-              onPress={() => router.push("./login")}
-            />
+            <HorizontalView>
+              <ThemedButton
+                style={{ marginBottom: percentToDP(5), width: percentToDP(43) }}
+                textColorName="textOnPrimary"
+                label="Home Screen"
+                onPress={() => router.push("./home")}
+              />
+              <ThemedButton
+                style={{ marginBottom: percentToDP(5), width: percentToDP(43) }}
+                label="Login"
+                textColorName="textOnPrimary"
+                onPress={() => router.push("./login")}
+              />
+            </HorizontalView>
             <ThemedButton
               style={{ marginBottom: percentToDP(5) }}
               backgroundColorName="secondary"

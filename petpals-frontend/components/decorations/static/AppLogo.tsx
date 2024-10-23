@@ -6,6 +6,7 @@ import { AnimatedTextSwap } from "../animated/AnimatedTextSwap";
 import { version } from "react";
 import HorizontalView from "@/components/basic/containers/HorizontalView";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { heightPercentageToDP } from "react-native-responsive-screen";
 
 export default function AppLogo(props: {
   size: number;
@@ -49,7 +50,7 @@ export default function AppLogo(props: {
           flex: 1,
           alignItems: "center",
           justifyContent: "center",
-          marginBottom: props.showMotto ? percentToDP(25) : percentToDP(4),
+          marginBottom: props.showMotto ? percentToDP(19) : percentToDP(8),
         }}
       >
         <Image
@@ -70,7 +71,7 @@ export default function AppLogo(props: {
             textStyleName="logo"
             style={{
               fontSize: percentToDP(0.17 * props.size),
-              marginBottom: percentToDP(0.08 * props.size),
+              marginBottom: percentToDP(0.045 * props.size),
             }}
           >
             PetPals
