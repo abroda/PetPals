@@ -19,7 +19,13 @@ export default function Post() {
     return (
         <ThemedView
             colorName="background"
-            style={{margin: 16, borderRadius: 10, paddingHorizontal: 24, paddingTop: 16, paddingBottom: 24}}
+            style={{
+                margin: 16,
+                borderRadius: 10,
+                paddingHorizontal: 24,
+                paddingTop: 16,
+                paddingBottom: 24
+            }}
         >
             {/*POST HEADER*/}
             <HorizontalView justifyOption="flex-start" colorName="transparent" style={{marginBottom: 16}}>

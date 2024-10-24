@@ -28,7 +28,7 @@ export default function UserProfileScreen() {
         <HorizontalView justifyOption="flex-end">
           <ThemedText style={{ margin: percentToDP(4) }}>{username}</ThemedText>
           <UserAvatar
-            username={username}
+            userId={username}
             size={13}
             doLink={false}
           ></UserAvatar>
