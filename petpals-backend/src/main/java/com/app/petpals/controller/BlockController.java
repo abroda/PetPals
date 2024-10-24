@@ -1,6 +1,8 @@
 package com.app.petpals.controller;
 
 import com.app.petpals.payload.BlockRequest;
+import com.app.petpals.payload.BooleanResponse;
+import com.app.petpals.payload.TextResponse;
 import com.app.petpals.service.BlockService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -18,22 +20,25 @@ public class BlockController {
 
     @PostMapping("/block")
     @Operation(summary = "Block user.", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<String> blockUser(@RequestBody BlockRequest request) {
+    public ResponseEntity<TextResponse> blockUser(@RequestBody BlockRequest request) {
         blockService.blockUser(request.getBlockerId(), request.getBlockedId());
-        return ResponseEntity.ok("User blocked successfully.");
+        TextResponse textResponse = new TextResponse("User blocked successfully.");
+        return ResponseEntity.ok(textResponse);
     }
 
     @PostMapping("/unblock")
     @Operation(summary = "Unblock user.", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<String> unblockUser(@RequestBody BlockRequest request) {
+    public ResponseEntity<TextResponse> unblockUser(@RequestBody BlockRequest request) {
         blockService.unblockUser(request.getBlockerId(), request.getBlockedId());
-        return ResponseEntity.ok("User unblocked successfully.");
+        TextResponse textResponse = new TextResponse("User unblocked successfully.");
+        return ResponseEntity.ok(textResponse);
     }
 
     @GetMapping("/is-blocked")
     @Operation(summary = "Check if user is blocked.", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<Boolean> isBlocked(@RequestBody BlockRequest request) {
+    public ResponseEntity<BooleanResponse> isBlocked(@RequestBody BlockRequest request) {
         boolean isBlocked = blockService.isBlocked(request.getBlockerId(), request.getBlockedId());
-        return ResponseEntity.ok(isBlocked);
+        BooleanResponse booleanResponse = new BooleanResponse(isBlocked);
+        return ResponseEntity.ok(booleanResponse);
     }
 }

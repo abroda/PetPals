@@ -35,7 +35,7 @@ export default function ResetPasswordDialog({
       let result = await sendPasswordResetCode(email);
       if (result.success) {
         router.setParams({ email: email });
-        router.push("./resetPassword");
+        router.push(`/login/resetPassword?email=${email}`);
         onDismiss();
       } else {
         setValidationMessage(result.message);
@@ -64,7 +64,7 @@ export default function ResetPasswordDialog({
           <ThemedText
             textStyleName="small"
             textColorName="alarm"
-            style={{ marginBottom: percentToDP(3) }}
+            style={{ marginBottom: percentToDP(3), marginLeft: percentToDP(1) }}
           >
             {validationMessage}
           </ThemedText>
@@ -84,7 +84,10 @@ export default function ResetPasswordDialog({
         {isProcessing && (
           <ThemedLoadingIndicator
             size="large"
-            style={{ padding: percentToDP(5) }}
+            style={{
+              marginVertical: percentToDP(1),
+              alignSelf: "center",
+            }}
           />
         )}
         {!isProcessing && (
@@ -92,7 +95,11 @@ export default function ResetPasswordDialog({
             <ThemedButton
               label="Cancel"
               textColorName="textOnPrimary"
-              style={{ width: percentToDP(33), marginBottom: percentToDP(2) }}
+              style={{
+                width: percentToDP(33),
+                marginTop: percentToDP(3),
+                marginBottom: percentToDP(2),
+              }}
               onPress={onDismiss}
             />
             <ThemedButton

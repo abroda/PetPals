@@ -42,13 +42,7 @@ export default function LoginScreen() {
   async function submit() {
     setValidationMessage("");
     if (!validate()) {
-      if (password.length == 0) {
-        setValidationMessage("Password is missing.");
-      }
-
-      if (email.length == 0) {
-        setValidationMessage("Email is missing.");
-      }
+      setValidationMessage("Input is invalid");
     } else {
       let result = await login(email, password);
       if (!result.success) {
@@ -134,7 +128,10 @@ export default function LoginScreen() {
               textColorName="link"
               textStyleName="small"
               onPress={() => setDialogVisible(true)}
-              style={{ marginBottom: percentToDP(21.3) }}
+              style={{
+                marginBottom: percentToDP(21.3),
+                marginLeft: percentToDP(1),
+              }}
             >
               Forgot password?
             </ThemedText>
@@ -152,19 +149,6 @@ export default function LoginScreen() {
                 onPress={submit}
               />
             )}
-            {/* {(!isProcessing || dialogVisible) && (
-            <ThemedButton
-              style={{
-                marginBottom: percentToDP(5),
-              }}
-              backgroundColorName="secondary"
-              textColorName="textOnSecondary"
-              label="Go back"
-              onPress={() => {
-                router.canDismiss() ? router.dismiss() : router.push("/");
-              }}
-            />
-          )} */}
           </ThemedView>
         )}
       </ThemedScrollView>

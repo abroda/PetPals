@@ -43,21 +43,21 @@
 //            requestBody = @RequestBody(content = @Content(
 //                    mediaType = "multipart/form-data"
 //            )))
-//    public ResponseEntity<String> uploadImage(@Parameter(
+//    public ResponseEntity<TextResponse> uploadImage(@Parameter(
 //            name = "file",
 //            required = true) @RequestParam("file") MultipartFile file) throws IOException {
 //            String contentType = file.getContentType();
 //            if (contentType == null || !isImage(contentType)) {
-//                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid file type. Only image files are allowed.");
+//                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new TextResponse("Invalid file type. Only image files are allowed."));
 //            }
 //            awsImageService.uploadImage(file.getBytes(), contentType);
-//            return ResponseEntity.status(HttpStatus.CREATED).body("Image uploaded successfully.");
+//            return ResponseEntity.status(HttpStatus.CREATED).body(new TextResponse"Image uploaded successfully."));
 //    }
 //
 //    @GetMapping("/presigned-url/{id}")
-//    public ResponseEntity<String> getPresignedUrl(@PathVariable String id) {
+//    public ResponseEntity<TextResponse> getPresignedUrl(@PathVariable String id) {
 //        String presignedUrl = awsImageService.getPresignedUrl(id);
-//        return ResponseEntity.ok(presignedUrl);
+//        return ResponseEntity.ok(new TextResponse(presignedUrl));
 //    }
 //
 //    private boolean isImage(String contentType) {

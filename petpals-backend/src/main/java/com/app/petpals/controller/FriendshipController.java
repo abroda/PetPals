@@ -4,6 +4,7 @@ import com.app.petpals.entity.User;
 import com.app.petpals.payload.AccountResponse;
 import com.app.petpals.payload.FriendshipDeleteRequest;
 import com.app.petpals.payload.FriendshipRequest;
+import com.app.petpals.payload.TextResponse;
 import com.app.petpals.service.AWSImageService;
 import com.app.petpals.service.FriendshipService;
 import com.app.petpals.service.UserService;
@@ -50,29 +51,29 @@ public class FriendshipController {
 
     @PostMapping("/friends/request")
     @Operation(summary = "Send friends request.", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<String> sendFriendRequest(@RequestBody FriendshipRequest request) {
+    public ResponseEntity<TextResponse> sendFriendRequest(@RequestBody FriendshipRequest request) {
         friendshipService.sendFriendRequest(request.getSenderId(), request.getReceiverId());
-        return ResponseEntity.ok("Friend request sent.");
+        return ResponseEntity.ok(new TextResponse("Friend request sent."));
     }
 
     @PostMapping("/friends/accept/{requestId}")
     @Operation(summary = "Accept friends request.", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<String> acceptFriendRequest(@PathVariable String requestId) {
+    public ResponseEntity<TextResponse> acceptFriendRequest(@PathVariable String requestId) {
         friendshipService.acceptFriendRequest(requestId);
-        return ResponseEntity.ok("Friend request accepted.");
+        return ResponseEntity.ok(new TextResponse("Friend request accepted."));
     }
 
     @PostMapping("/friends/deny/{requestId}")
     @Operation(summary = "Deny friends request.", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<String> denyFriendRequest(@PathVariable String requestId) {
+    public ResponseEntity<TextResponse> denyFriendRequest(@PathVariable String requestId) {
         friendshipService.denyFriendRequest(requestId);
-        return ResponseEntity.ok("Friend request denied.");
+        return ResponseEntity.ok(new TextResponse("Friend request denied."));
     }
 
     @DeleteMapping("/remove")
     @Operation(summary = "Remove friend.", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<String> removeFriend(@RequestBody FriendshipDeleteRequest request) {
+    public ResponseEntity<TextResponse> removeFriend(@RequestBody FriendshipDeleteRequest request) {
         friendshipService.removeFriend(request.getUserId(), request.getFriendId());
-        return ResponseEntity.ok("Friend removed.");
+        return ResponseEntity.ok(new TextResponse("Friend removed."));
     }
 }

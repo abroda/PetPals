@@ -3,6 +3,7 @@ package com.app.petpals.controller;
 import com.app.petpals.entity.User;
 import com.app.petpals.payload.AccountEditRequest;
 import com.app.petpals.payload.AccountResponse;
+import com.app.petpals.payload.TextResponse;
 import com.app.petpals.service.AWSImageService;
 import com.app.petpals.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -152,7 +153,7 @@ public class AccountController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete user.", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<String> deleteAccount(@PathVariable String id) {
+    public ResponseEntity<TextResponse> deleteAccount(@PathVariable String id) {
         User user = userService.getById(id);
         if (user.getProfilePictureId() != null) {
             awsImageService.deleteImage(user.getProfilePictureId());
@@ -163,6 +164,7 @@ public class AccountController {
             }
         });
         userService.deleteUser(id);
-        return ResponseEntity.ok("User deleted successfully.");
+        TextResponse textResponse = new TextResponse("User deleted successfully.");
+        return ResponseEntity.ok(textResponse);
     }
 }

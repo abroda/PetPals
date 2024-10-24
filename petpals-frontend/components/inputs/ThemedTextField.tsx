@@ -92,7 +92,11 @@ export const ThemedTextField = forwardRef<TextFieldRef, ThemedTextFieldProps>(
           validateOnBlur={withValidation}
           validateOnChange={withValidation}
           validationMessageStyle={[
-            { color: alarmColor, marginTop: percentToDP(1) },
+            {
+              color: alarmColor,
+              marginTop: percentToDP(1),
+              marginLeft: percentToDP(1),
+            },
             useTextStyle("small"),
           ]}
           validate={validate}

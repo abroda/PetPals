@@ -56,7 +56,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [authToken, setAuthToken] = useState("");
   const [userId, setUserId] = useState("");
   const [userEmail, setUserEmail] = useState("");
-  const [responseMessage, setResponseMessage] = useState("");
   const passwordRegex =
     "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$";
   const codeRegex = "^[0-9]{6}$";
@@ -65,19 +64,18 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     path: string,
     method: string = "POST",
     payload: any = {},
-    onOKResponse: (payload: any) => void = (payload: any) =>
-      setResponseMessage("OK: " + payload.message),
-    onBadResponse: (payload: any) => void = (payload: any) =>
-      setResponseMessage("Server error: " + payload.message),
-    onJSONParseError: (reason: any) => void = (reason: any) =>
-      setResponseMessage("JSON parse error: " + reason),
-    onError: (error: Error) => void = (error: Error) =>
-      setResponseMessage("Fetch error: " + error.message)
+    onOKResponse: (payload: any) => string = (payload: any) =>
+      `OK: ${payload.message}`,
+    onBadResponse: (payload: any) => string = (payload: any) =>
+      `Server error: ${payload.message}`,
+    onJsonParseError: (reason: any) => string = (reason: any) =>
+      `JSON parse error: ${reason}`,
+    onError: (error: Error) => string = (error: Error) =>
+      `Fetch error: ${error.message}`
   ) => {
-    setResponseMessage("");
     setIsProcessing(true);
 
-    return fetch(path, {
+    return await fetch(path, {
       method: method,
       mode: "cors",
       headers: {
@@ -90,25 +88,21 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
           .json()
           .then((payload) => {
             if (response.ok) {
-              onOKResponse(payload);
               setIsProcessing(false);
-              return true;
+              return { success: true, message: onOKResponse(payload) };
             } else {
-              onBadResponse(payload);
               setIsProcessing(false);
-              return false;
+              return { success: false, message: onBadResponse(payload) };
             }
           })
           .catch((reason) => {
-            onJSONParseError(reason);
             setIsProcessing(false);
-            return false;
+            return { success: false, message: onJsonParseError(reason) };
           });
       })
       .catch((error: Error) => {
-        onError(error);
         setIsProcessing(false);
-        return false;
+        return { success: false, message: onError(error) };
       });
   };
 
@@ -117,7 +111,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     email: string,
     password: string
   ) => {
-    let success = await sendJsonQuery(
+    return await sendJsonQuery(
       apiPaths.auth.register,
       "POST",
       {
@@ -125,47 +119,37 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         email: email,
         password: password,
       },
-      (payload) => setUserEmail(email)
+      (payload) => {
+        setUserEmail(email);
+        return "";
+      }
     );
-    return { success: success, message: responseMessage };
   };
 
   const verifyEmail = async (email: string, verificationCode: string) => {
-    let success = await sendJsonQuery(apiPaths.auth.verifyEmail, "POST", {
+    return await sendJsonQuery(apiPaths.auth.verifyEmail, "POST", {
       email: email,
       verificationCode: verificationCode,
     });
-    return { success: success, message: responseMessage };
   };
 
   const resendVerification = async (email: string) => {
-    let success = await sendJsonQuery(apiPaths.auth.resend, "POST", {
+    return await sendJsonQuery(apiPaths.auth.resend, "POST", {
       email: email,
     });
-    return { success: success, message: responseMessage };
   };
 
   const sendPasswordResetCode = async (email: string) => {
-    let success = await sendJsonQuery(
-      apiPaths.auth.sendPasswordResetCode,
-      "POST",
-      {
-        email: email,
-      }
-    );
-    return { success: success, message: responseMessage };
+    return await sendJsonQuery(apiPaths.auth.sendPasswordResetCode, "POST", {
+      email: email,
+    });
   };
 
   const confirmPasswordReset = async (email: string, code: string) => {
-    let success = await sendJsonQuery(
-      apiPaths.auth.sendPasswordResetCode,
-      "POST",
-      {
-        email: email,
-        code: code,
-      }
-    );
-    return { success: success, message: responseMessage };
+    return await sendJsonQuery(apiPaths.auth.sendPasswordResetCode, "POST", {
+      email: email,
+      code: code,
+    });
   };
 
   const resetPassword = async (
@@ -173,16 +157,15 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     password: string,
     code: string
   ) => {
-    let success = await sendJsonQuery(apiPaths.auth.resetPassword, "POST", {
+    return await sendJsonQuery(apiPaths.auth.resetPassword, "POST", {
       email: email,
       password: password,
       code: code,
     });
-    return { success: success, message: responseMessage };
   };
 
   const login = async (email: string, password: string) => {
-    let success = await sendJsonQuery(
+    return await sendJsonQuery(
       apiPaths.auth.login,
       "POST",
       {
@@ -196,13 +179,12 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         asyncStorage.setItem("userId", JSON.stringify(userId));
         asyncStorage.setItem("userEmail", JSON.stringify(userEmail));
         asyncStorage.setItem("authToken", JSON.stringify(authToken));
+        return "";
       }
     );
-    return { success: success, message: responseMessage };
   };
 
   const logout = async () => {
-    setResponseMessage("");
     setIsProcessing(true);
     let success = await asyncStorage
       .setItem("authToken", authToken)
@@ -214,16 +196,14 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       })
       .catch((error: Error) => {
         console.error("Logout: " + error.message);
-        setResponseMessage("Logout: " + error.message);
         return false;
       });
 
     setIsProcessing(false);
-    return { success: success, message: responseMessage };
+    return { success: success, message: "" };
   };
 
   const load = async () => {
-    setResponseMessage("");
     setIsProcessing(true);
 
     asyncStorage.getItem("userId").then((value) => {
@@ -255,7 +235,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         userId,
         userEmail,
         authToken,
-        responseMessage,
         passwordRegex,
         codeRegex,
         register,
