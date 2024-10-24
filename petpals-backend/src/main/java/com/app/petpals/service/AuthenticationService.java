@@ -28,6 +28,10 @@ public class AuthenticationService {
     private final EmailService emailService;
 
     public User register(RegisterRequest registerRequest) throws MessagingException {
+        Optional<User> userCheck = userRepository.findByUsername(registerRequest.getEmail());
+        if (userCheck.isPresent()) {
+            throw new UserAlreadyExistsException("User already exists.");
+        }
         User user = new User(
                 registerRequest.getEmail(),
                 registerRequest.getDisplayName(),

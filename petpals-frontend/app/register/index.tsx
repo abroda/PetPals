@@ -47,15 +47,17 @@ export default function RegisterScreen() {
   }
 
   async function submit() {
+    setValidationMessage("");
+
     if (!validate()) {
       setValidationMessage("Input is invalid.");
     } else if (!termsAgreedTo) {
       setValidationMessage("You have to accept Terms of Use.");
     } else {
       let result = await register(name, email, password);
-      if (!result.success) {
-        setValidationMessage(result.message);
-      } else {
+      setValidationMessage(result.message);
+
+      if (result.success) {
         setDialogVisible(false);
         router.push("./verifyEmail");
       }
@@ -99,7 +101,7 @@ export default function RegisterScreen() {
                 textColorName="alarm"
                 style={{
                   marginBottom: percentToDP(3),
-                  marginLeft: percentToDP(4),
+                  marginLeft: percentToDP(1),
                   flexWrap: "wrap",
                   flexShrink: 1,
                 }}
@@ -185,7 +187,10 @@ export default function RegisterScreen() {
             </HorizontalView>
 
             {isProcessing && !dialogVisible && (
-              <ThemedLoadingIndicator size="large" />
+              <ThemedLoadingIndicator
+                size="large"
+                style={{ marginBottom: percentToDP(14) }}
+              />
             )}
             {(!isProcessing || dialogVisible) && (
               <ThemedButton

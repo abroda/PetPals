@@ -31,14 +31,14 @@ export default function ResetPasswordDialog({
   }
 
   async function submit() {
+    setValidationMessage("");
     if (validate()) {
       let result = await sendPasswordResetCode(email);
+      setValidationMessage(result.message);
       if (result.success) {
         router.setParams({ email: email });
         router.push(`/login/resetPassword?email=${email}`);
         onDismiss();
-      } else {
-        setValidationMessage(result.message);
       }
     }
   }

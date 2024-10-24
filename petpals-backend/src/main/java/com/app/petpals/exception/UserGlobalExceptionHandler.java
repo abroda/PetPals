@@ -75,4 +75,10 @@ public class UserGlobalExceptionHandler {
         UserErrorResponse error = new UserErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage(), System.currentTimeMillis());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<UserErrorResponse> handleUserAlreadyExistsException(UserAlreadyExistsException e) {
+        UserErrorResponse error = new UserErrorResponse(HttpStatus.CONFLICT.value(), e.getMessage(), System.currentTimeMillis());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
 }

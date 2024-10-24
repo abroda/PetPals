@@ -41,7 +41,8 @@ export default function VerifyEmailScreen() {
     } else {
       let result = await verifyEmail(email, code);
       if (result.success) {
-        router.push("/login");
+        router.dismissAll();
+        router.push("/register/success");
       } else {
         setValidationMessage(result.message);
       }
@@ -54,9 +55,7 @@ export default function VerifyEmailScreen() {
       setValidationMessage("Invalid email.");
     } else {
       let result = await resendVerification(email);
-      if (result.success) {
-        setValidationMessage(result.message);
-      }
+      setValidationMessage(result.message);
     }
   }
 

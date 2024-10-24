@@ -41,13 +41,15 @@ export default function LoginScreen() {
 
   async function submit() {
     setValidationMessage("");
+
     if (!validate()) {
       setValidationMessage("Input is invalid");
     } else {
       let result = await login(email, password);
-      if (!result.success) {
-        setValidationMessage(result.message);
-      } else {
+
+      setValidationMessage(result.message);
+
+      if (result.success) {
         setDialogVisible(false);
         router.dismissAll();
         router.replace("/home");

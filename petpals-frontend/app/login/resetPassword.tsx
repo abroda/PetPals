@@ -6,7 +6,7 @@ import { ThemedTextField } from "@/components/inputs/ThemedTextField";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import AppLogo from "@/components/decorations/static/AppLogo";
 import { useAuth } from "@/hooks/useAuth";
-import { router, useLocalSearchParams } from "expo-router";
+import { Href, router, useLocalSearchParams } from "expo-router";
 import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoadingIndicator";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -40,21 +40,23 @@ export default function ResetPasswordScreen() {
   }
 
   async function submit() {
+    setValidationMessage("");
     if (verify()) {
       let result = await resetPassword(email as string, password, code);
+
+      setValidationMessage(result.message);
+
       if (result.success) {
-        router.replace("/login");
-      } else {
-        setValidationMessage(result.message);
+        router.dismissAll();
+        router.replace("/login/resetPasswordSuccess" as Href<string>);
       }
     }
   }
 
   async function resend() {
+    setValidationMessage("");
     let result = await sendPasswordResetCode(userEmail ?? "");
-    if (result.success) {
-      setValidationMessage(result.message);
-    }
+    setValidationMessage(result.message);
   }
 
   return (
@@ -96,7 +98,7 @@ export default function ResetPasswordScreen() {
               textStyleName="bigBold"
               style={{ marginBottom: percentToDP(3) }}
             >
-              Reset password for {email}
+              Reset password
             </ThemedText>
             <ThemedText style={{ marginBottom: percentToDP(10) }}>
               Please enter a verification code and set a new password.
