@@ -19,11 +19,7 @@ export default function ResetPasswordDialog({
 }) {
   const [email, setEmail] = useState(emailFilled);
   const [validationMessage, setValidationMessage] = useState("");
-  const {
-    sendPasswordResetCode: requestPasswordReset,
-    responseMessage,
-    isProcessing,
-  } = useAuth();
+  const { sendPasswordResetCode, isProcessing } = useAuth();
 
   const smallTheme = useTextStyle("small");
   const alarmColor = useThemeColor("alarm");
@@ -34,18 +30,16 @@ export default function ResetPasswordDialog({
     return validators.email(email);
   }
 
-  function submit() {
+  async function submit() {
     if (validate()) {
-      requestPasswordReset(email).then((result) => {
-        result = true;
-        if (result) {
-          router.setParams({ email: email });
-          router.push("./resetPassword");
-          onDismiss();
-        } else {
-          setValidationMessage(responseMessage ?? "Error");
-        }
-      });
+      let result = await sendPasswordResetCode(email);
+      if (result.success) {
+        router.setParams({ email: email });
+        router.push("./resetPassword");
+        onDismiss();
+      } else {
+        setValidationMessage(result.message);
+      }
     }
   }
 
@@ -77,6 +71,7 @@ export default function ResetPasswordDialog({
         )}
         <ThemedTextField
           label="Email"
+          autoComplete="email"
           value={email}
           onChangeText={(newText: string) => setEmail(newText)}
           autoFocus

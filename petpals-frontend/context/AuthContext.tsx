@@ -7,7 +7,6 @@ import React, {
 } from "react";
 import { apiPaths } from "@/constants/config/api";
 import asyncStorage from "@react-native-async-storage/async-storage/src/AsyncStorage";
-import { Dictionary } from "react-native-ui-lib/src/typings/common";
 
 export type AuthContextType = {
   isLoading: boolean;
@@ -22,18 +21,31 @@ export type AuthContextType = {
     displayName: string,
     email: string,
     password: string
-  ) => Promise<boolean>;
-  verifyEmail: (email: string, code: string) => Promise<boolean>;
-  resendVerification: (email: string) => Promise<boolean>;
-  sendPasswordResetCode: (email: string) => Promise<boolean>;
-  confirmPasswordReset: (email: string, code: string) => Promise<boolean>;
+  ) => Promise<{ success: boolean; message: string }>;
+  verifyEmail: (
+    email: string,
+    code: string
+  ) => Promise<{ success: boolean; message: string }>;
+  resendVerification: (
+    email: string
+  ) => Promise<{ success: boolean; message: string }>;
+  sendPasswordResetCode: (
+    email: string
+  ) => Promise<{ success: boolean; message: string }>;
+  confirmPasswordReset: (
+    email: string,
+    code: string
+  ) => Promise<{ success: boolean; message: string }>;
   resetPassword: (
     email: string,
     password: string,
     code: string
-  ) => Promise<boolean>;
-  login: (email: string, password: string) => Promise<boolean>;
-  logout: () => Promise<boolean>;
+  ) => Promise<{ success: boolean; message: string }>;
+  login: (
+    email: string,
+    password: string
+  ) => Promise<{ success: boolean; message: string }>;
+  logout: () => Promise<{ success: boolean; message: string }>;
 };
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -49,28 +61,52 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$";
   const codeRegex = "^[0-9]{6}$";
 
-  const sendJsonQuery = (path: string, method: string, payload?: any) =>
-    fetch(path, {
+  const sendJsonQuery = async (
+    path: string,
+    method: string = "POST",
+    payload: any = {},
+    onOKResponse: (payload: any) => void = (payload: any) =>
+      setResponseMessage("OK: " + payload.message),
+    onBadResponse: (payload: any) => void = (payload: any) =>
+      setResponseMessage("Server error: " + payload.message),
+    onJSONParseError: (reason: any) => void = (reason: any) =>
+      setResponseMessage("JSON parse error: " + reason),
+    onError: (error: Error) => void = (error: Error) =>
+      setResponseMessage("Fetch error: " + error.message)
+  ) => {
+    setResponseMessage("");
+    setIsProcessing(true);
+
+    return fetch(path, {
       method: method,
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
-    }).then((response) => response.json());
-
-  const checkConnection = async () => {
-    setIsProcessing(true);
-    setResponseMessage("");
-
-    return sendJsonQuery(apiPaths.checkConnection, "GET")
-      .then((_) => {
-        setIsProcessing(false);
-        return true;
+    })
+      .then((response: Response) => {
+        return response
+          .json()
+          .then((payload) => {
+            if (response.ok) {
+              onOKResponse(payload);
+              setIsProcessing(false);
+              return true;
+            } else {
+              onBadResponse(payload);
+              setIsProcessing(false);
+              return false;
+            }
+          })
+          .catch((reason) => {
+            onJSONParseError(reason);
+            setIsProcessing(false);
+            return false;
+          });
       })
-      .catch((err: Error) => {
-        console.error(err.message);
-        setResponseMessage("Check connection: " + err.message);
+      .catch((error: Error) => {
+        onError(error);
         setIsProcessing(false);
         return false;
       });
@@ -81,101 +117,55 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     email: string,
     password: string
   ) => {
-    setIsProcessing(true);
-    setResponseMessage("");
-
-    return sendJsonQuery(apiPaths.auth.register, "POST", {
-      displayName: displayName,
-      email: email,
-      password: password,
-    })
-      .then((response: Dictionary<any>) => {
-        setIsProcessing(false);
-        setUserEmail(email);
-        return true;
-      })
-      .catch((err: Error) => {
-        console.error("Register: " + err.message);
-        setResponseMessage("Register: error");
-        setIsProcessing(false);
-        return false;
-      });
+    let success = await sendJsonQuery(
+      apiPaths.auth.register,
+      "POST",
+      {
+        displayName: displayName,
+        email: email,
+        password: password,
+      },
+      (payload) => setUserEmail(email)
+    );
+    return { success: success, message: responseMessage };
   };
 
   const verifyEmail = async (email: string, verificationCode: string) => {
-    setIsProcessing(true);
-    setResponseMessage("");
-
-    return sendJsonQuery(apiPaths.auth.verifyEmail, "POST", {
+    let success = await sendJsonQuery(apiPaths.auth.verifyEmail, "POST", {
       email: email,
       verificationCode: verificationCode,
-    })
-      .then((_) => {
-        setIsProcessing(false);
-        return true;
-      })
-      .catch((err: Error) => {
-        console.error(err.message);
-        setResponseMessage("Verify email: " + err.message);
-        setIsProcessing(false);
-        return false;
-      });
+    });
+    return { success: success, message: responseMessage };
   };
 
   const resendVerification = async (email: string) => {
-    setIsProcessing(true);
-    setResponseMessage("");
-
-    return sendJsonQuery(apiPaths.auth.verifyEmail, "POST", email)
-      .then((_) => {
-        setIsProcessing(false);
-        return true;
-      })
-      .catch((err: Error) => {
-        console.error(err.message);
-        setResponseMessage("Resend verification: " + err.message);
-        setIsProcessing(false);
-        return false;
-      });
+    let success = await sendJsonQuery(apiPaths.auth.resend, "POST", {
+      email: email,
+    });
+    return { success: success, message: responseMessage };
   };
 
   const sendPasswordResetCode = async (email: string) => {
-    setIsProcessing(true);
-    setResponseMessage("");
-
-    return sendJsonQuery(apiPaths.auth.sendPasswordResetCode, "POST", {
-      email: email,
-    })
-      .then((response: string) => {
-        setIsProcessing(false);
-        return true;
-      })
-      .catch((err: Error) => {
-        console.error(err.message);
-        setResponseMessage("Request password reset: " + err.message);
-        setIsProcessing(false);
-        return false;
-      });
+    let success = await sendJsonQuery(
+      apiPaths.auth.sendPasswordResetCode,
+      "POST",
+      {
+        email: email,
+      }
+    );
+    return { success: success, message: responseMessage };
   };
 
   const confirmPasswordReset = async (email: string, code: string) => {
-    setIsProcessing(true);
-    setResponseMessage("");
-
-    return sendJsonQuery(apiPaths.auth.sendPasswordResetCode, "POST", {
-      email: email,
-      code: code,
-    })
-      .then((response: string) => {
-        setIsProcessing(false);
-        return true;
-      })
-      .catch((err: Error) => {
-        console.error(err.message);
-        setResponseMessage("Confirm password reset: " + err.message);
-        setIsProcessing(false);
-        return false;
-      });
+    let success = await sendJsonQuery(
+      apiPaths.auth.sendPasswordResetCode,
+      "POST",
+      {
+        email: email,
+        code: code,
+      }
+    );
+    return { success: success, message: responseMessage };
   };
 
   const resetPassword = async (
@@ -183,80 +173,79 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     password: string,
     code: string
   ) => {
-    setIsProcessing(true);
-    setResponseMessage("");
-
-    return sendJsonQuery(apiPaths.auth.resetPassword, "POST", {
+    let success = await sendJsonQuery(apiPaths.auth.resetPassword, "POST", {
       email: email,
       password: password,
       code: code,
-    })
-      .then((response: Dictionary<any>) => {
-        setIsProcessing(false);
-        return true;
-      })
-      .catch((err: Error) => {
-        console.error("Reset password: " + err.message);
-        setIsProcessing(false);
-        return false;
-      });
-  };
-
-  const checkSavedLogin = async () => {
-    setIsProcessing(true);
-    setResponseMessage("");
-    // TODO
-    setIsProcessing(false);
-    return false;
+    });
+    return { success: success, message: responseMessage };
   };
 
   const login = async (email: string, password: string) => {
-    setIsProcessing(true);
-    setResponseMessage("");
-
-    return sendJsonQuery(apiPaths.auth.login, "POST", {
-      email: email,
-      password: password,
-    })
-      .then((response: Dictionary<any>) => {
-        setUserId(response.id);
-        setAuthToken(response.token);
+    let success = await sendJsonQuery(
+      apiPaths.auth.login,
+      "POST",
+      {
+        email: email,
+        password: password,
+      },
+      (payload) => {
+        setUserId(payload.id);
+        setUserEmail(email);
+        setAuthToken(payload.token);
+        asyncStorage.setItem("userId", JSON.stringify(userId));
+        asyncStorage.setItem("userEmail", JSON.stringify(userEmail));
         asyncStorage.setItem("authToken", JSON.stringify(authToken));
-        setIsProcessing(false);
-        return true;
-      })
-      .catch((err: Error) => {
-        console.error(err.message);
-        setResponseMessage("Login: " + err.message);
-        setIsProcessing(false);
-        return false;
-      });
+      }
+    );
+    return { success: success, message: responseMessage };
   };
 
   const logout = async () => {
-    setIsProcessing(true);
     setResponseMessage("");
-
-    return asyncStorage
+    setIsProcessing(true);
+    let success = await asyncStorage
       .setItem("authToken", authToken)
       .then(() => {
+        setUserId("");
+        setUserEmail("");
         setAuthToken("");
-        setIsProcessing(false);
         return true;
       })
-      .catch((err: Error) => {
-        console.error(err.message);
-        setResponseMessage("Logout: " + err.message);
-        setIsProcessing(false);
+      .catch((error: Error) => {
+        console.error("Logout: " + error.message);
+        setResponseMessage("Logout: " + error.message);
         return false;
       });
+
+    setIsProcessing(false);
+    return { success: success, message: responseMessage };
+  };
+
+  const load = async () => {
+    setResponseMessage("");
+    setIsProcessing(true);
+
+    asyncStorage.getItem("userId").then((value) => {
+      setUserId(value ?? "");
+    });
+    asyncStorage.getItem("userEmail").then((value) => {
+      setUserEmail(value ?? "");
+    });
+    asyncStorage.getItem("authToken").then((value) => {
+      setAuthToken(value ?? "");
+    });
+
+    setIsProcessing(false);
+
+    setIsLoading(false);
   };
 
   useEffect(() => {
     if (isLoading) {
-      checkSavedLogin().then(() => setIsLoading(false));
+      load();
     }
-  }, [isLoading, isProcessing, responseMessage]);
+  }, []);
 
   return (
     <AuthContext.Provider

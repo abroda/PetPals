@@ -27,8 +27,7 @@ export default function RegisterScreen() {
   const [termsAgreedTo, setTermsAgreedTo] = useState(false);
   const [validationMessage, setValidationMessage] = useState("");
   const [dialogVisible, setDialogVisible] = useState(false);
-  const { isLoading, isProcessing, responseMessage, passwordRegex, register } =
-    useAuth();
+  const { isLoading, isProcessing, passwordRegex, register } = useAuth();
 
   const textColor = useThemeColor("text");
   const textStyle = useTextStyle("small");
@@ -53,23 +52,24 @@ export default function RegisterScreen() {
     } else if (!termsAgreedTo) {
       setValidationMessage("You have to accept Terms of Use.");
     } else {
-      register(name, email, password).then((result) => {
-        result = true;
-        if (!result) {
-          setValidationMessage(responseMessage ?? "No response");
-        } else {
-          setDialogVisible(false);
-          setValidationMessage("Registration successful");
-          router.setParams({ email: email });
-          router.push("./verifyEmail");
-        }
-      });
+      let result = await register(name, email, password);
+      if (!result.success) {
+        setValidationMessage(result.message);
+      } else {
+        setDialogVisible(false);
+        router.push("./verifyEmail");
+      }
     }
   }
 
   return (
     <SafeAreaView>
-      <ThemedScrollView style={{ paddingTop: percentToDP(10) }}>
+      <ThemedScrollView
+        style={{
+          height: heighPercentToDP(100),
+          paddingTop: percentToDP(10),
+        }}
+      >
         {dialogVisible && (
           <TermsOfUseDialog onDismiss={() => setDialogVisible(false)} />
         )}
@@ -89,7 +89,7 @@ export default function RegisterScreen() {
             }}
           >
             <AppLogo
-              size={48}
+              size={40}
               showMotto={false}
             />
 
@@ -99,7 +99,9 @@ export default function RegisterScreen() {
                 textColorName="alarm"
                 style={{
                   marginBottom: percentToDP(3),
-                  marginLeft: percentToDP(1),
+                  marginLeft: percentToDP(4),
+                  flexWrap: "wrap",
+                  flexShrink: 1,
                 }}
               >
                 {validationMessage}
@@ -109,6 +111,7 @@ export default function RegisterScreen() {
               label="Name"
               autoComplete="name"
               onChangeText={(newText: string) => setName(newText)}
+              autoFocus
               withValidation
               validate={[
                 "required",
@@ -128,6 +131,7 @@ export default function RegisterScreen() {
             />
             <ThemedTextField
               label="Password"
+              autoComplete="password-new"
               onChangeText={(newText: string) => setPassword(newText)}
               isSecret
               withValidation
@@ -140,12 +144,13 @@ export default function RegisterScreen() {
               validationMessage={[
                 "Password is required",
                 "Password is too short",
-                "Password is invalid",
+                "Password must have at least one each of: small letter, big letter, number, special character",
                 "Passwords don't match",
               ]}
             />
             <ThemedTextField
               label="Repeat password"
+              autoComplete="password-new"
               onChangeText={(newText: string) => setRepeatPassword(newText)}
               isSecret
               withValidation
@@ -179,10 +184,13 @@ export default function RegisterScreen() {
               </ThemedText>
             </HorizontalView>
 
+            {isProcessing && !dialogVisible && (
+              <ThemedLoadingIndicator size="large" />
+            )}
             {(!isProcessing || dialogVisible) && (
               <ThemedButton
                 style={{
-                  marginBottom: percentToDP(14),
+                  marginBottom: percentToDP(6),
                 }}
                 backgroundColorName="primary"
                 textColorName="textOnPrimary"
@@ -190,17 +198,19 @@ export default function RegisterScreen() {
                 onPress={submit}
               />
             )}
-            {/* {(!isProcessing || dialogVisible) && (
-            <ThemedButton
-              style={{
-                marginBottom: percentToDP(14),
-              }}
-              backgroundColorName="secondary"
-              textColorName="textOnSecondary"
-              label="Go back"
-              onPress={() => router.dismiss()}
-            />
-          )} */}
+            {(!isProcessing || dialogVisible) && (
+              <ThemedText
+                textColorName="link"
+                textStyleName="small"
+                onPress={() => router.push("./verifyEmail")}
+                style={{
+                  marginBottom: percentToDP(14),
+                  alignSelf: "center",
+                }}
+              >
+                Already registered? Verify email
+              </ThemedText>
+            )}
           </ThemedView>
         )}
       </ThemedScrollView>

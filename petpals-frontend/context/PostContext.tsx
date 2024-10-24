@@ -11,22 +11,22 @@ import { Dictionary } from "react-native-ui-lib/src/typings/common";
 import { useAuth } from "@/hooks/useAuth";
 
 export type PostContextType = {
-  isProcessing: boolean;
-  responseMessage: string;
-  getFeed: (username: string) => Promise<boolean>; // for home page
-  getPosts: (username: string) => Promise<boolean>; // for profile
-  getPost: (username: string) => Promise<boolean>;
-  addPost: (username: string, data: Object) => Promise<boolean>;
-  editPost: (postId: string, data: Object) => Promise<boolean>;
-  removePost: (postId: string) => Promise<boolean>;
-  addReaction: (username: string, reaction: string) => Promise<boolean>;
-  removeReaction: (username: string, reaction: string) => Promise<boolean>;
-  addComment: (
-    username: string,
-    postId: string,
-    contents: string
-  ) => Promise<boolean>;
-  removeComment: (commentId: string) => Promise<boolean>;
+  // isProcessing: boolean;
+  // responseMessage: string;
+  // getFeed: (username: string) => Promise<boolean>; // for home page
+  // getPosts: (username: string) => Promise<boolean>; // for profile
+  // getPost: (username: string) => Promise<boolean>;
+  // addPost: (username: string, data: Object) => Promise<boolean>;
+  // editPost: (postId: string, data: Object) => Promise<boolean>;
+  // removePost: (postId: string) => Promise<boolean>;
+  // addReaction: (username: string, reaction: string) => Promise<boolean>;
+  // removeReaction: (username: string, reaction: string) => Promise<boolean>;
+  // addComment: (
+  //   username: string,
+  //   postId: string,
+  //   contents: string
+  // ) => Promise<boolean>;
+  // removeComment: (commentId: string) => Promise<boolean>;
 };
 
 export const PostContext = createContext<PostContextType | null>(null);
@@ -36,34 +36,63 @@ export const PostProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [responseMessage, setResponseMessage] = useState("");
   const { userEmail } = useAuth();
 
-  const sendJsonQuery = (path: string, method: string, payload?: any) =>
-    fetch(path, {
+  const sendJsonQuery = async (
+    path: string,
+    method: string = "POST",
+    payload: any = {},
+    onOKResponse: (payload: any) => void = (payload: any) =>
+      setResponseMessage("OK: " + payload.message),
+    onBadResponse: (payload: any) => void = (payload: any) =>
+      setResponseMessage("Server error: " + payload.message),
+    onJSONParseError: (reason: any) => void = (reason: any) =>
+      setResponseMessage("JSON parse error: " + reason),
+    onError: (error: Error) => void = (error: Error) =>
+      setResponseMessage("Fetch error: " + error.message)
+  ) => {
+    setResponseMessage("");
+    setIsProcessing(true);
+    const { authToken } = useAuth();
+
+    return fetch(path, {
       method: method,
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
       },
       body: JSON.stringify(payload),
-    }).then((response) => response.json());
-
-  const getFeed = async (username: string) => {
-    setIsProcessing(true);
-    setResponseMessage("");
-
-    return sendJsonQuery(apiPaths.auth.register, "POST", {
-      username: username,
     })
-      .then((response: Dictionary<any>) => {
-        setIsProcessing(false);
-        return true;
+      .then((response: Response) => {
+        return response
+          .json()
+          .then((payload) => {
+            if (response.ok) {
+              onOKResponse(payload);
+              setIsProcessing(false);
+              return true;
+            } else {
+              onBadResponse(payload);
+              setIsProcessing(false);
+              return false;
+            }
+          })
+          .catch((reason) => {
+            onJSONParseError(reason);
+            setIsProcessing(false);
+            return false;
+          });
       })
-      .catch((err: Error) => {
-        console.error("Register: " + err.message);
-        setResponseMessage("Register: error");
+      .catch((error: Error) => {
+        onError(error);
         setIsProcessing(false);
         return false;
       });
   };
+
+  const getFeed = async (username: string) =>
+    sendJsonQuery(apiPaths.auth.register, "POST", {
+      username: username,
+    });
 
   const getPosts = async (username: string) => {
     setIsProcessing(true);
@@ -101,61 +130,20 @@ export const PostProvider: FC<{ children: ReactNode }> = ({ children }) => {
       });
   };
 
-  const addPost = async (username: string, data: Object) => {
-    setIsProcessing(true);
-    setResponseMessage("");
-
-    return sendJsonQuery(apiPaths.auth.sendPasswordResetCode, "POST", {
+  const addPost = async (username: string, data: Object) =>
+    sendJsonQuery(apiPaths.auth.sendPasswordResetCode, "POST", {
       username: username,
-    })
-      .then((response: string) => {
-        setIsProcessing(false);
-        return true;
-      })
-      .catch((err: Error) => {
-        console.error(err.message);
-        setResponseMessage("Request password reset: " + err.message);
-        setIsProcessing(false);
-        return false;
-      });
-  };
+    });
 
-  const editPost = async (postId: string, data: Object) => {
-    setIsProcessing(true);
-    setResponseMessage("");
-
-    return sendJsonQuery(apiPaths.auth.confirmPasswordReset, "POST", {
+  const editPost = async (postId: string, data: Object) =>
+    sendJsonQuery(apiPaths.auth.resetPassword, "POST", {
       postId: postId,
-    })
-      .then((response: string) => {
-        setIsProcessing(false);
-        return true;
-      })
-      .catch((err: Error) => {
-        console.error(err.message);
-        setResponseMessage("Confirm password reset: " + err.message);
-        setIsProcessing(false);
-        return false;
-      });
-  };
+    });
 
-  const removePost = async (postId: string) => {
-    setIsProcessing(true);
-    setResponseMessage("");
-
-    return sendJsonQuery(apiPaths.auth.resetPassword, "POST", {
+  const removePost = async (postId: string) =>
+    sendJsonQuery(apiPaths.auth.resetPassword, "POST", {
       postId: postId,
-    })
-      .then((response: Dictionary<any>) => {
-        setIsProcessing(false);
-        return true;
-      })
-      .catch((err: Error) => {
-        console.error("Reset password: " + err.message);
-        setIsProcessing(false);
-        return false;
-      });
-  };
+    });
 
   const addReaction = async (username: string, reaction: string) => {
     setIsProcessing(true);
@@ -175,60 +163,42 @@ export const PostProvider: FC<{ children: ReactNode }> = ({ children }) => {
       });
   };
 
-  const removeReaction = async (username: string, reaction: string) => {
-    setIsProcessing(true);
-    setResponseMessage("");
-
-    return sendJsonQuery(apiPaths.auth.login, "POST", {
+  const removeReaction = async (username: string, reaction: string) =>
+    sendJsonQuery(apiPaths.auth.login, "POST", {
       email: username,
       password: reaction,
-    })
-      .then((response: Dictionary<any>) => {
-        setIsProcessing(false);
-        return true;
-      })
-      .catch((err: Error) => {
-        console.error(err.message);
-        setResponseMessage("Login: " + err.message);
-        setIsProcessing(false);
-        return false;
-      });
-  };
+    });
 
   const addComment = async (
     username: string,
     postId: string,
     contents: string
   ) => {
-    setIsProcessing(true);
-    setResponseMessage("");
-
     return true;
   };
 
   const removeComment = async (commentId: string) => {
-    setIsProcessing(true);
-    setResponseMessage("");
-
     return true;
   };
 
   return (
     <PostContext.Provider
-      value={{
-        isProcessing,
-        responseMessage,
-        getFeed,
-        getPosts,
-        getPost,
-        addPost,
-        editPost,
-        removePost,
-        addReaction,
-        removeReaction,
-        addComment,
-        removeComment,
-      }}
+      value={
+        {
+          // isProcessing,
+          // responseMessage,
+          // getFeed,
+          // getPosts,
+          // getPost,
+          // addPost,
+          // editPost,
+          // removePost,
+          // addReaction,
+          // removeReaction,
+          // addComment,
+          // removeComment,
+        }
+      }
     >
       {children}
     </PostContext.Provider>

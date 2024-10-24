@@ -29,8 +29,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [validationMessage, setValidationMessage] = useState("");
   const [dialogVisible, setDialogVisible] = useState(false);
-  const { isLoading, isProcessing, responseMessage, passwordRegex, login } =
-    useAuth();
+  const { isLoading, isProcessing, login } = useAuth();
   const emailRef = useRef<TextFieldRef>(null);
   const passwordRef = useRef<TextFieldRef>(null);
   const percentToDP = useWindowDimension("shorter");
@@ -41,20 +40,24 @@ export default function LoginScreen() {
   }
 
   async function submit() {
+    setValidationMessage("");
     if (!validate()) {
-      setValidationMessage("Input is invalid.");
+      if (password.length == 0) {
+        setValidationMessage("Password is missing.");
+      }
+
+      if (email.length == 0) {
+        setValidationMessage("Email is missing.");
+      }
     } else {
-      login(email, password).then((result) => {
-        result = true;
-        if (!result) {
-          setValidationMessage(responseMessage ?? "Unknown error");
-        } else {
-          setDialogVisible(false);
-          setValidationMessage("Login successful");
-          router.dismissAll();
-          router.replace("/home");
-        }
-      });
+      let result = await login(email, password);
+      if (!result.success) {
+        setValidationMessage(result.message);
+      } else {
+        setDialogVisible(false);
+        router.dismissAll();
+        router.replace("/home");
+      }
     }
   }
 
@@ -62,7 +65,6 @@ export default function LoginScreen() {
     <SafeAreaView>
       <ThemedScrollView
         style={{
-          flexGrow: 1,
           height: heighPercentToDP(100),
           paddingTop: percentToDP(10),
         }}
@@ -97,7 +99,11 @@ export default function LoginScreen() {
               <ThemedText
                 textStyleName="small"
                 textColorName="alarm"
-                style={{ marginBottom: percentToDP(3) }}
+                style={{
+                  marginBottom: percentToDP(3),
+                  flexWrap: "wrap",
+                  flexShrink: 1,
+                }}
               >
                 {validationMessage}
               </ThemedText>
@@ -107,6 +113,7 @@ export default function LoginScreen() {
               label="Email"
               autoComplete="email"
               onChangeText={(newText: string) => setEmail(newText)}
+              autoFocus
               withValidation
               validate={["required"]}
               validationMessage={["Email is required"]}
@@ -115,7 +122,7 @@ export default function LoginScreen() {
             <ThemedTextField
               ref={passwordRef}
               label="Password"
-              autoComplete="current-password"
+              autoComplete="password"
               onChangeText={(newText: string) => setPassword(newText)}
               isSecret
               withValidation
@@ -137,7 +144,7 @@ export default function LoginScreen() {
             {(!isProcessing || dialogVisible) && (
               <ThemedButton
                 style={{
-                  marginBottom: percentToDP(5),
+                  marginBottom: percentToDP(14),
                 }}
                 backgroundColorName="primary"
                 textColorName="textOnPrimary"

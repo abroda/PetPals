@@ -8,15 +8,18 @@ import { router } from "expo-router";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
 import { SafeAreaView } from "react-native-safe-area-context";
 import HorizontalView from "@/components/basic/containers/HorizontalView";
+import { useEffect } from "react";
 
 export default function WelcomeScreen() {
-  const { isLoading, responseMessage, authToken } = useAuth();
+  const { isLoading, isProcessing, userId, authToken } = useAuth();
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToPD = useWindowDimension("height");
 
-  if (!isLoading && authToken) {
-    router.replace("./home");
-  }
+  useEffect(() => {
+    if (!isLoading && !isProcessing && userId && authToken) {
+      router.replace("/home");
+    }
+  }, []);
 
   return (
     <SafeAreaView>
@@ -47,13 +50,13 @@ export default function WelcomeScreen() {
                 style={{ marginBottom: percentToDP(5), width: percentToDP(43) }}
                 textColorName="textOnPrimary"
                 label="Home Screen"
-                onPress={() => router.push("./home")}
+                onPress={() => router.push("/home")}
               />
               <ThemedButton
                 style={{ marginBottom: percentToDP(5), width: percentToDP(43) }}
                 label="Login"
                 textColorName="textOnPrimary"
-                onPress={() => router.push("./login")}
+                onPress={() => router.push("/login")}
               />
             </HorizontalView>
             <ThemedButton
@@ -61,19 +64,10 @@ export default function WelcomeScreen() {
               backgroundColorName="secondary"
               textColorName="textOnSecondary"
               label="Register"
-              onPress={() => router.push("./register")}
+              onPress={() => router.push("/register")}
             />
           </ThemedView>
         )}
-        {/* {!isLoading && responseMessage !== "" && (
-        <ThemedView
-          style={{ width: percentToDP(100), padding: percentToDP(5) }}
-        >
-          <ThemedText textColorName="alarm">
-            Error: No connection to database
-          </ThemedText>
-        </ThemedView>
-      )} */}
       </ThemedScrollView>
     </SafeAreaView>
   );

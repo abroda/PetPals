@@ -21,7 +21,6 @@ export default function ResetPasswordScreen() {
     isLoading,
     isProcessing,
     userEmail,
-    responseMessage,
     resetPassword,
     sendPasswordResetCode,
     codeRegex,
@@ -34,21 +33,22 @@ export default function ResetPasswordScreen() {
     return (code.match(codeRegex)?.length ?? 0) > 0;
   }
 
-  function submit() {
+  async function submit() {
     if (verify()) {
-      resetPassword(userEmail ?? "", password, code).then((result) => {
-        result = true;
-        if (result) {
-          router.replace("/login");
-        }
-      });
+      let result = await resetPassword(userEmail ?? "", password, code);
+      if (result.success) {
+        router.replace("/login");
+      } else {
+        setValidationMessage(result.message);
+      }
     }
   }
 
-  function resend() {
-    sendPasswordResetCode(userEmail ?? "").then((result) => {
-      setValidationMessage(responseMessage ?? "Error");
-    });
+  async function resend() {
+    let result = await sendPasswordResetCode(userEmail ?? "");
+    if (result.success) {
+      setValidationMessage(result.message);
+    }
   }
 
   return (
@@ -78,7 +78,11 @@ export default function ResetPasswordScreen() {
               <ThemedText
                 textStyleName="small"
                 textColorName="alarm"
-                style={{ marginBottom: percentToDP(3) }}
+                style={{
+                  marginBottom: percentToDP(3),
+                  flexWrap: "wrap",
+                  flexShrink: 1,
+                }}
               >
                 {validationMessage}
               </ThemedText>
@@ -95,7 +99,9 @@ export default function ResetPasswordScreen() {
               </ThemedText>
               <ThemedTextField
                 label="Code"
+                autoComplete="one-time-code"
                 onChangeText={(newText: string) => setCode(newText)}
+                autoFocus
                 withValidation
                 validate={[
                   "required",
@@ -106,6 +112,7 @@ export default function ResetPasswordScreen() {
               />
               <ThemedTextField
                 label="Password"
+                autoComplete="password-new"
                 onChangeText={(newText: string) => setPassword(newText)}
                 isSecret
                 withValidation
@@ -121,6 +128,7 @@ export default function ResetPasswordScreen() {
               />
               <ThemedTextField
                 label="Repeat password"
+                autoComplete="password-new"
                 onChangeText={(newText: string) => setRepeatPassword(newText)}
                 isSecret
                 withValidation
@@ -130,22 +138,27 @@ export default function ResetPasswordScreen() {
                   "Passwords don't match",
                 ]}
               />
-              <ThemedButton
-                onPress={submit}
-                label="Confirm"
-                textColorName="textOnPrimary"
-                style={{
-                  marginTop: percentToDP(5),
-                  marginBottom: percentToDP(5),
-                }}
-              />
-              <ThemedButton
-                onPress={resend}
-                label="Resend code"
-                textColorName="textOnSecondary"
-                backgroundColorName="secondary"
-                style={{ marginBottom: percentToDP(5) }}
-              />
+              {isProcessing && <ThemedLoadingIndicator size="large" />}
+              {!isProcessing && (
+                <ThemedButton
+                  onPress={submit}
+                  label="Confirm"
+                  textColorName="textOnPrimary"
+                  style={{
+                    marginTop: percentToDP(5),
+                    marginBottom: percentToDP(5),
+                  }}
+                />
+              )}
+              {!isProcessing && (
+                <ThemedButton
+                  onPress={resend}
+                  label="Resend code"
+                  textColorName="textOnSecondary"
+                  backgroundColorName="secondary"
+                  style={{ marginBottom: percentToDP(5) }}
+                />
+              )}
             </ThemedView>
           </ThemedView>
         )}

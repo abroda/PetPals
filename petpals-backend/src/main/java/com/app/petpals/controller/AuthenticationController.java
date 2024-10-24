@@ -1,10 +1,7 @@
 package com.app.petpals.controller;
 
 import com.app.petpals.entity.User;
-import com.app.petpals.payload.AuthenticationRequest;
-import com.app.petpals.payload.AuthenticationResponse;
-import com.app.petpals.payload.RegisterRequest;
-import com.app.petpals.payload.VerifyUserRequest;
+import com.app.petpals.payload.*;
 import com.app.petpals.service.AuthenticationService;
 import com.app.petpals.service.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,16 +38,18 @@ public class AuthenticationController {
 
     @PostMapping("/verify")
     @Operation(summary = "Verify account.")
-    public ResponseEntity<?> verifyUser(@RequestBody final VerifyUserRequest verifyUserRequest){
+    public ResponseEntity<TextResponse> verifyUser(@RequestBody final VerifyUserRequest verifyUserRequest){
             authenticationService.verifyUser(verifyUserRequest);
-            return ResponseEntity.ok("Account verified successfully.");
+            TextResponse textResponse = new TextResponse("Account verified successfully.");
+            return ResponseEntity.ok(textResponse);
     }
 
     @PostMapping("/resend")
     @Operation(summary = "Resend verification code.")
-    public ResponseEntity<?> resendVerificationCode(@RequestParam String email) throws MessagingException {
-            authenticationService.resendVerificationCode(email);
-            return ResponseEntity.ok("Verification code resent.");
+    public ResponseEntity<TextResponse> resendVerificationCode(@RequestBody ResendRequest resendRequest) throws MessagingException {
+            authenticationService.resendVerificationCode(resendRequest.getEmail());
+            TextResponse textResponse = new TextResponse("Verification code resent.");
+            return ResponseEntity.ok(textResponse);
     }
 
 }

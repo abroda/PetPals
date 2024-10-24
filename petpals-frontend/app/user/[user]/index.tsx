@@ -11,10 +11,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
 import { Pressable } from "react-native";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function UserProfileScreen() {
   const path = usePathname();
   const username = path.slice(path.lastIndexOf("/") + 1);
+  const { logout } = useAuth();
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToPD = useWindowDimension("height");
   return (
@@ -96,8 +98,12 @@ export default function UserProfileScreen() {
                 ></ThemedButton>
                 <ThemedButton
                   onPress={() => {
-                    router.dismissAll();
-                    router.replace("/");
+                    logout().then((result) => {
+                      if (result.success) {
+                        router.dismissAll();
+                        router.replace("/");
+                      }
+                    });
                   }}
                   label="Logout"
                   style={{ width: percentToDP(33) }}
