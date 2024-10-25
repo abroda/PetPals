@@ -25,7 +25,6 @@ export default function PostScreen() {
 
     return (
         <SafeAreaView style={{height: "100%"}}>
-            <ThemedView colorName="background" style={{height: 80}}></ThemedView>
             <ThemedScrollView colorName="secondary" style={{flex: 1}}>
                 <ThemedView
                     style={{
@@ -100,6 +99,7 @@ export default function PostScreen() {
                                 username="Username"
                                 pet="Cutie3"
                                 doLink={true}
+
                             />
                         </HorizontalView>
                         <HorizontalView justifyOption={"flex-end"}>
@@ -130,7 +130,8 @@ export default function PostScreen() {
                                         borderWidth: 2
                                     }}>
 
-                            <HorizontalView style={{flex: 0, alignItems: "center", marginBottom: 6}} justifyOption="space-between"
+                            <HorizontalView style={{flex: 0, alignItems: "center", marginBottom: 6}}
+                                            justifyOption="space-between"
                                             colorName="transparent">
                                 <HorizontalView style={{flex: 0}} justifyOption={"flex-start"} colorName="transparent">
                                     <UserAvatar size={10} userId={"someCommenterId"} doLink={true}/>
