@@ -5,12 +5,12 @@ export const assetsFonts = {
   SpaceMono: require("../../assets/fonts/SpaceMono-Regular.ttf"),
   "Alata-Regular": require("../../assets/fonts/Alata-Regular.ttf"),
   "JosefinSans-Regular": require("../../assets/fonts/JosefinSans-Regular.ttf"),
-  "JosefinSans-SemiBold": require("../../assets/fonts/JosefinSans-SemiBold.ttf"),
+  "JosefinSans-Bold": require("../../assets/fonts/JosefinSans-Bold.ttf"),
   "LeagueSpartan-Regular": require("../../assets/fonts/LeagueSpartan-Regular.ttf"),
 };
 
 const defaultFont = "LeagueSpartan-Regular";
-const logoFont = "JosefinSans-SemiBold";
+const logoFont = "JosefinSans-Bold";
 
 export const TextStyles: Dictionary<TextStyle> = {
   tiny: { fontFamily: defaultFont, fontSize: 12 },
@@ -21,5 +21,5 @@ export const TextStyles: Dictionary<TextStyle> = {
   defaultBold: { fontFamily: defaultFont, fontWeight: "bold", fontSize: 18 },
   big: { fontFamily: defaultFont, fontSize: 20 },
   bigBold: { fontFamily: defaultFont, fontWeight: "bold", fontSize: 20 },
-  logo: { fontFamily: logoFont, fontWeight: "bold" },
+  logo: { fontFamily: logoFont },
 };
