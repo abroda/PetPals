@@ -1,59 +1,104 @@
 import HorizontalView from "@/components/basic/containers/HorizontalView";
-import { ThemedView } from "@/components/basic/containers/ThemedView";
+import {ThemedView} from "@/components/basic/containers/ThemedView";
 import AppLogo from "@/components/decorations/static/AppLogo";
-import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
-import PostFeed from "@/components/display/PostFeed";
+import {useAuth} from "@/hooks/useAuth";
+import {useWindowDimension} from "@/hooks/useWindowDimension";
+import {useState} from "react";
+import {SafeAreaView} from "react-native-safe-area-context";
+import {Pressable} from "react-native";
+import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
 import UserAvatar from "@/components/navigation/UserAvatar";
-import NotificationsPopup from "@/components/popups/NotificationsPopup";
-import { useAuth } from "@/hooks/useAuth";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
-import { useNavigation } from "expo-router";
-import { useLayoutEffect, useState } from "react";
-import { Pressable } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import PostFeed from "@/components/lists/PostFeed";
+import Post from "@/components/display/Post";
 
 export default function HomeScreen() {
-  const { userEmail } = useAuth();
-  const [notificationsVisible, setNotificationsVisible] = useState(false);
+    const {userId} = useAuth();
+    const [notificationsVisible, setNotificationsVisible] = useState(false);
 
-  const percentToDP = useWindowDimension("shorter");
-  const heightPercentToDP = useWindowDimension("height");
+    const percentToDP = useWindowDimension("shorter");
+    const heightPercentToDP = useWindowDimension("height");
 
-  return (
-    <SafeAreaView>
-      <ThemedView style={{ height: heightPercentToDP(100) }}>
-        <HorizontalView>
-          <AppLogo
-            size={13}
-            version="horizontal"
-          />
-          <Pressable
-            onPress={() => {
-              console.log(notificationsVisible);
-              setNotificationsVisible(!notificationsVisible);
-            }}
-          >
-            <ThemedIcon
-              size={percentToDP(8)}
-              name="notifications"
-            />
-          </Pressable>
-          <ThemedView style={{ margin: percentToDP(3) }}>
-            <UserAvatar
-              size={13}
-              doLink={true}
-              username={(userEmail?.length ?? 0) > 0 ? userEmail ?? "me" : "me"}
-            />
-          </ThemedView>
-        </HorizontalView>
-        {notificationsVisible && (
-          <NotificationsPopup
-            onDismiss={() => setNotificationsVisible(false)}
-          />
-        )}
+    return (
+        <SafeAreaView>
+            <ThemedView colorName="primary" style={{height: heightPercentToDP(100)}}>
+                <ThemedView colorName="secondary" style={{height: 80}}>
+                    <HorizontalView style={{paddingHorizontal: 10}}>
 
-        <PostFeed username="Dominika_Xyz"></PostFeed>
-      </ThemedView>
-    </SafeAreaView>
-  );
+                        {/* APP LOGO */}
+                        <AppLogo
+                            size={10}
+                            version="horizontal"
+                        />
+
+                        {/* NOTIFICATIONS ICON */}
+                        <Pressable
+                            onPress={() => {
+                                console.log(notificationsVisible);
+                                setNotificationsVisible(!notificationsVisible);
+                            }}
+                        >
+                            <ThemedIcon
+                                size={percentToDP(6)}
+                                name="notifications"
+                            />
+                        </Pressable>
+
+                        {/* USER AVATAR */}
+                        <ThemedView style={{marginLeft: percentToDP(3)}}>
+                            <UserAvatar
+                                size={10}
+                                doLink={true}
+                                userId={(userId?.length ?? 0) > 0 ? userId ?? "me" : "me"}
+                            />
+                        </ThemedView>
+                    </HorizontalView>
+                </ThemedView>
+
+                {/* POST FEED */}
+                <PostFeed></PostFeed>
+            </ThemedView>
+            {/*/!* BACKGROUND BEHIND ALL POSTS AND TOP BAR - COLOR VISIBLE BELOW NAVBAR*!/*/}
+            {/*<ThemedView colorName="transparent" style={{height: heightPercentToDP(100)}}>*/}
+
+            {/*    /!*APP LOGO AND USER AVATAR - TOP OF APP *!/*/}
+            {/*    <HorizontalView colorName="background" style={{padding: percentToDP(3)}}>*/}
+            {/*        <AppLogo*/}
+            {/*            size={13}*/}
+            {/*            version="horizontal"*/}
+            {/*        />*/}
+            {/*        <Pressable*/}
+            {/*            onPress={() => {*/}
+            {/*                console.log(notificationsVisible);*/}
+            {/*                setNotificationsVisible(!notificationsVisible);*/}
+            {/*            }}*/}
+            {/*        >*/}
+            {/*            <ThemedIcon*/}
+            {/*                size={percentToDP(8)}*/}
+            {/*                name="notifications"*/}
+            {/*            />*/}
+            {/*        </Pressable>*/}
+
+            {/*        <ThemedView style={{marginLeft: percentToDP(3)}}>*/}
+            {/*            <UserAvatar*/}
+            {/*                size={13}*/}
+            {/*                doLink={true}*/}
+            {/*                userId={(userId?.length ?? 0) > 0 ? userId ?? "me" : "me"}*/}
+            {/*            />*/}
+            {/*        </ThemedView>*/}
+            {/*    </HorizontalView>*/}
+
+            {/*    {notificationsVisible && (*/}
+            {/*        <NotificationsPopup*/}
+            {/*            onDismiss={() => setNotificationsVisible(false)}*/}
+            {/*        />*/}
+            {/*    )}*/}
+
+
+            {/*    /!* POST FEED *!/*/}
+            {/*    <PostFeed username="Dominika_Xyz"></PostFeed>*/}
+
+            {/*</ThemedView>*/}
+
+        </SafeAreaView>
+    );
 }
