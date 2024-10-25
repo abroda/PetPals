@@ -27,6 +27,7 @@ export default function PetAvatar(props: {
         source={{
           uri: "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
         }}
+
       />
     </Pressable>
   );

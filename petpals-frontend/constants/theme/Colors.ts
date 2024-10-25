@@ -4,7 +4,7 @@ const tertiaryColor = "#162521";
 const accentColor = "#52b8a3";
 const alarmColor = "#c54835";
 
-const lightColor = "#f9fdf7";
+const lightColor = "#1C302A";
 const lightGreyColor = "#d3dedc";
 const greyColor = "#617c78";
 const darkGreyColor = "#3b4e4a";

@@ -1,7 +1,6 @@
-export const databaseURL = "http://192.168.237.222:8080/";
+export const databaseURL = "http://192.168.76.222:8080/";
 
 export const apiPaths = {
-  checkConnection: "http://localhost:8080/v3/api-docs.yaml",
   auth: {
     register: databaseURL + "api/auth/register",
     verifyEmail: databaseURL + "api/auth/verify",
@@ -10,10 +9,19 @@ export const apiPaths = {
     resetPassword: databaseURL + "api/account/password-reset",
     login: databaseURL + "api/auth/login",
   },
-  posts: {},
-  profiles: {},
-  friends: {},
-  chats: {},
-  walks: {},
-  groupWalks: {},
+	posts: {},
+	profiles: {},
+	friends: {},
+	chats: {},
+	walks: {},
+	groupWalks: {},
+	users: {
+		getAllUsers: databaseURL + "api/users",
+		getUserById: (id: string) => databaseURL + "api/users/" + id,
+		getLoggedInUser: databaseURL + "api/users/me",
+		updateUser: (id: string) => databaseURL + "api/users/" + id,
+		updateUserProfilePicture: (id: string) => databaseURL + "api/users/" + id + "/picture",
+		deleteUserPicture: (id: string) => databaseURL + "api/users/" + id + "/picture",
+		deleteUser: (id: string) => databaseURL + "api/users/" + id,
+	},
 };

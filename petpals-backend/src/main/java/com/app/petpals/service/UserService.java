@@ -25,6 +25,7 @@ public class UserService {
 
     public User getById(String id) {
         Optional<User> optionalUser = userRepository.findById(id);
+
         if (optionalUser.isPresent()) {
             return optionalUser.get();
         } else {

@@ -13,8 +13,10 @@ import { useColorScheme } from "@/hooks/theme/useColorScheme";
 import { assetsFonts } from "@/constants/theme/TextStyles";
 import { AuthProvider } from "@/context/AuthContext";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
+import HomeLayout from "./home/_layout";
 import { PostProvider } from "@/context/PostContext";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { UserProvider } from "@/context/UserContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -38,25 +40,28 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <AuthProvider>
-          <PostProvider>
-            <Stack
-              screenOptions={{
-                headerShown: true,
-                headerShadowVisible: false,
-                headerTransparent: true,
-                headerTintColor: textColor,
-                headerTitle: "",
-                headerBackVisible: true,
-                headerBackTitleVisible: false,
-              }}
-            >
-              <Stack.Screen
-                name="index"
-                options={{ title: "PetPals" }}
-              />
-              <Stack.Screen name="+not-found" />
-            </Stack>
-          </PostProvider>
+					<UserProvider>
+						<PostProvider>
+							<Stack
+								screenOptions={{
+									headerShown: true,
+									headerShadowVisible: false,
+									headerTransparent: true,
+									headerTintColor: 'white',
+									headerTitle: "",
+									headerBackVisible: true,
+									headerBackTitleVisible: false,
+
+								}}
+							>
+								<Stack.Screen
+									name="index"
+									options={{ title: "PetPals" }}
+								/>
+								<Stack.Screen name="+not-found" />
+							</Stack>
+						</PostProvider>
+						</UserProvider>
         </AuthProvider>
       </ThemeProvider>
     </GestureHandlerRootView>
