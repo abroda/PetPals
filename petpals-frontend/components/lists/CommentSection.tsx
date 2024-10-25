@@ -2,7 +2,7 @@ import { ThemedText } from "@/components/basic/ThemedText";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { FlatList } from "react-native-gesture-handler";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
-import Comment from "./Comment";
+import Comment from "../display/Comment";
 
 export default function CommentSection() {
   const percentToDP = useWindowDimension("shorter");

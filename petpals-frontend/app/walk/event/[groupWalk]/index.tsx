@@ -7,7 +7,7 @@ import { Href, router } from "expo-router";
 import Comment from "@/components/display/Comment";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
 import { SafeAreaView } from "react-native-safe-area-context";
-import CommentSection from "@/components/display/CommentSection";
+import CommentSection from "@/components/lists/CommentSection";
 
 export default function GroupWalkScreen() {
   const buttonColor = useThemeColor("link");

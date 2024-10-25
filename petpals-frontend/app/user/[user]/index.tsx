@@ -4,7 +4,7 @@ import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import { router, usePathname } from "expo-router";
-import PostFeed from "@/components/display/PostFeed";
+import PostFeed from "@/components/lists/PostFeed";
 import PetAvatar from "@/components/navigation/PetAvatar";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -171,9 +171,10 @@ export default function UserProfileScreen() {
             )}
           </ThemedView>
           <PostFeed
-            username={username}
-            style={{
-              marginBottom: percentToDP(1),
+            outerViewProps={{
+              style: {
+                marginBottom: percentToDP(1),
+              },
             }}
           />
         </ThemedView>
