@@ -16,6 +16,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import { PostProvider } from "@/context/PostContext";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { WalksProvider } from "@/context/WalksContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -40,23 +41,25 @@ export default function RootLayout() {
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <AuthProvider>
           <PostProvider>
-            <Stack
-              screenOptions={{
-                headerShown: true,
-                headerShadowVisible: false,
-                headerTransparent: true,
-                headerTintColor: textColor,
-                headerTitle: "",
-                headerBackVisible: true,
-                headerBackTitleVisible: false,
-              }}
-            >
-              <Stack.Screen
-                name="index"
-                options={{ title: "PetPals" }}
-              />
-              <Stack.Screen name="+not-found" />
-            </Stack>
+            <WalksProvider>
+              <Stack
+                screenOptions={{
+                  headerShown: true,
+                  headerShadowVisible: false,
+                  headerTransparent: true,
+                  headerTintColor: textColor,
+                  headerTitle: "",
+                  headerBackVisible: true,
+                  headerBackTitleVisible: false,
+                }}
+              >
+                <Stack.Screen
+                  name="index"
+                  options={{ title: "PetPals" }}
+                />
+                <Stack.Screen name="+not-found" />
+              </Stack>
+            </WalksProvider>
           </PostProvider>
         </AuthProvider>
       </ThemeProvider>
