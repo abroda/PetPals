@@ -3,27 +3,76 @@ import {ThemedScrollView} from "@/components/basic/containers/ThemedScrollView";
 import {ThemedView} from "@/components/basic/containers/ThemedView";
 import {ThemedButton} from "@/components/inputs/ThemedButton";
 import {useAuth} from "@/hooks/useAuth";
-import {router, usePathname} from "expo-router";
-import {useState} from "react";
+import {router, useNavigation, usePathname} from "expo-router";
+import React, {useLayoutEffect, useRef, useState} from "react";
 import {useWindowDimension} from "@/hooks/useWindowDimension";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
+import {Image, TextField, TextFieldRef} from "react-native-ui-lib";
+import {ThemedTextField} from "@/components/inputs/ThemedTextField";
+import {View} from "react-native";
+import {ThemedMultilineTextField} from "@/components/inputs/ThemedMultilineTextField";
 
 export default function NewPostScreen() {
     const path = usePathname();
     const username = path.split("/")[2];
     const {userEmail} = useAuth();
     const [dialogVisible, setDialogVisible] = useState(false);
-
     const percentToDP = useWindowDimension("shorter");
     const heightPercentToDP = useWindowDimension("height");
 
+    // ERROR HANDLING
+    const [validationMessage, setValidationMessage] = useState("")
+
+    // INPUT STATES
+    const [postTitle, setPostTitle] = useState("");
+    const [postDescription, setPostDescription] = useState("");
+
+    // INPUT REFS
+    const postTitleRef = useRef<TextFieldRef>(null);
+    const postDescriptionRef = useRef<TextFieldRef>(null);
+
+    // HIDING DEFAULT NAVIGATION
+    const navigation = useNavigation();
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerShown: false,
+        });
+    }, [navigation]);
+
+
+    function validate() {
+        return postTitleRef.current?.validate();
+    }
+
+    // might need to be async
+    function submit() {
+        if (!validate()) {
+            // TODO: handle invalid input here
+            console.log("FAILED TO ADD A NEW POST")
+            // setValidationMessage("Input is invalid");
+        } else {
+            // TODO: connect to add post context function here, handle server side errors too
+            console.log("SUCCESSFULLY ADDED NEW POST")
+
+            // let result = await login(email, password);
+            // setValidationMessage(result.message);
+            // if (result.success) {
+            //     setDialogVisible(false);
+            //     router.dismissAll();
+            //     router.replace("/home");
+            // }
+        }
+    }
+
+
     return (
-        <SafeAreaView style={{height: "100%"}}>
-            <ThemedScrollView colorName="background">
-                {/* TOP NAVBAR */}
-                <HorizontalView colorName="primary"
-                                style={{height: heightPercentToDP(10), paddingHorizontal: percentToDP(5)}}>
+        <SafeAreaView style={{flex: 1}}>
+            {/* TOP NAVBAR */}
+            <ThemedView style={{height: heightPercentToDP(10)}}>
+                <HorizontalView colorName="secondary"
+                                style={{height: heightPercentToDP(10), paddingHorizontal: percentToDP(5)}}
+                >
                     {/* BACK BUTTON */}
                     <ThemedButton backgroundColorName="background"
                                   style={{
@@ -32,7 +81,6 @@ export default function NewPostScreen() {
                                       minWidth: heightPercentToDP(7) // MIN WIDTH HAS TO BE OVERWRITTEN FOR WIDTH TO TAKE EFFECT!
                                   }}
                                   onPress={() => {
-                                      console.log("TEST")
                                       router.back()
                                   }}>
                         <ThemedIcon size={heightPercentToDP(4)}
@@ -46,84 +94,221 @@ export default function NewPostScreen() {
                                       height: heightPercentToDP(7),
                                       width: heightPercentToDP(7),
                                       minWidth: heightPercentToDP(7) // MIN WIDTH HAS TO BE OVERWRITTEN FOR WIDTH TO TAKE EFFECT!
-                                  }}>
+                                  }}
+                                  onPress={submit}>
                         <ThemedIcon size={heightPercentToDP(4)}
                                     style={{width: heightPercentToDP(4), height: heightPercentToDP(4)}}
                                     colorName="primary" name={"checkmark"}/>
                     </ThemedButton>
                 </HorizontalView>
-                <ThemedView colorName="secondary" style={{height: heightPercentToDP(20)}}>
+            </ThemedView>
+
+
+            <ThemedScrollView colorName="secondary" style={{flex: 1, paddingTop: heightPercentToDP(3)}}
+                              contentContainerStyle={{flexGrow: 1}}>
+                {/* POST CONTAINER */}
+                <ThemedView colorName="background" style={{
+                    // height: "100%",
+                    borderTopLeftRadius: 30,
+                    borderTopRightRadius: 30,
+                    padding: percentToDP(5),
+                    paddingTop: percentToDP(10),
+                    flex: 1,
+                    // flexGrow: 1,
+                    // justifyContent: "space-between"
+                }}>
+
+                    {/* POST IMAGE */}
+                    {/* TODO: make it an input. */}
+                    <ThemedView
+                        style={{
+                            height: percentToDP(80),
+                            marginBottom: percentToDP(10),
+                            borderRadius: 30
+                        }}
+                    >
+                        <Image
+                            source={{
+                                uri: "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
+                            }}
+                            style={{
+                                width: "100%",
+                                height: "100%",
+                                borderRadius: 30,
+                            }}
+                        />
+                    </ThemedView>
+
+                    {/* POST TITLE INPUT */}
+                    <ThemedTextField
+                        ref={postTitleRef}
+                        label="Post title"
+                        onChangeText={(newText: string) => setPostTitle(newText)}
+                        withValidation
+                        validate={["required"]}
+                        validationMessage={["Post title is required"]}
+                        maxLength={100}
+                    />
+
+                    {/* POST DESCRIPTION INPUT */}
+                    <ThemedMultilineTextField label="Post description" maxLength={255}/>
+
+                    {/* POST DESCRIPTION INPUT */}
+                    {/*<ThemedTextField*/}
+                    {/*    ref={postDescriptionRef}*/}
+                    {/*    label="Post description"*/}
+                    {/*    onChangeText={(newText: string) => setPostDescription(newText)}*/}
+                    {/*    maxLength={255}*/}
+                    {/*    multiline={true}*/}
+                    {/*    // numberOfLines={4}*/}
+                    {/*/>*/}
+
+                    {/* POST DESCRIPTION INPUT */}
+                    {/*<ThemedTextField*/}
+                    {/*    ref={postDescriptionRef}*/}
+                    {/*    label="Post description"*/}
+                    {/*    onChangeText={(newText: string) => setPostDescription(newText)}*/}
+                    {/*    maxLength={255}*/}
+                    {/*/>*/}
 
                 </ThemedView>
 
-                {/*<ThemedView*/}
-                {/*  colorName="tertiary"*/}
-                {/*  style={{*/}
-                {/*    margin: percentToDP(3),*/}
-                {/*    paddingVertical: percentToDP(3),*/}
-                {/*    borderRadius: percentToDP(10),*/}
-                {/*  }}*/}
-                {/*>*/}
-                {/*  <HorizontalView*/}
-                {/*    colorName="transparent"*/}
-                {/*    justifyOption="flex-start"*/}
-                {/*  >*/}
-                {/*    <ThemedView*/}
-                {/*      colorName="transparent"*/}
-                {/*      style={{ margin: percentToDP(3), borderRadius: percentToDP(10) }}*/}
-                {/*    >*/}
-                {/*      <ThemedText textStyleName="big">TODO: Add post</ThemedText>*/}
-                {/*    </ThemedView>*/}
-                {/*  </HorizontalView>*/}
-                {/*  <ThemedView*/}
-                {/*    style={{*/}
-                {/*      alignSelf: "center",*/}
-                {/*      height: 400,*/}
-                {/*      marginBottom: percentToDP(5),*/}
-                {/*    }}*/}
-                {/*  >*/}
-                {/*    <Image*/}
-                {/*      source={{*/}
-                {/*        uri: "https://www.coalitionrc.com/wp-content/uploads/2017/01/placeholder.jpg",*/}
-                {/*      }}*/}
-                {/*      style={{*/}
-                {/*        width: percentToDP(100),*/}
-                {/*        height: percentToDP(100),*/}
-                {/*      }}*/}
-                {/*    />*/}
-                {/*  </ThemedView>*/}
-                {/*  <ThemedText>Enter Title</ThemedText>*/}
-                {/*  <HorizontalView justifyOption="flex-end">*/}
-                {/*    <ThemedButton*/}
-                {/*      style={{ width: percentToDP(30) }}*/}
-                {/*      onPress={() => router.replace("./newPostID")}*/}
-                {/*      label="Save"*/}
-                {/*    ></ThemedButton>*/}
-                {/*  </HorizontalView>*/}
-                {/*  <HorizontalView justifyOption="flex-start">*/}
-                {/*    <ThemedText*/}
-                {/*      style={{ marginRight: percentToDP(5) }}*/}
-                {/*      textStyleName="smallBold"*/}
-                {/*    >*/}
-                {/*      Pets tagged:*/}
-                {/*    </ThemedText>*/}
-                {/*    <PetAvatar*/}
-                {/*      size={11}*/}
-                {/*      username="Username"*/}
-                {/*      pet="Cutie"*/}
-                {/*      doLink={true}*/}
-                {/*    />*/}
-                {/*  </HorizontalView>*/}
-                {/*  {dialogVisible && (*/}
-                {/*    <PostReactionPopup onDismiss={() => setDialogVisible(false)} />*/}
-                {/*  )}*/}
-                {/*</ThemedView>*/}
-
-                {/*<ThemedView*/}
-                {/*  colorName="tertiary"*/}
-                {/*  style={{ borderRadius: percentToDP(10), margin: percentToDP(4) }}*/}
-                {/*/>*/}
             </ThemedScrollView>
         </SafeAreaView>
     );
+}
+
+
+{/*<ThemedView*/
+}
+{/*  colorName="tertiary"*/
+}
+{/*  style={{*/
+}
+{/*    margin: percentToDP(3),*/
+}
+{/*    paddingVertical: percentToDP(3),*/
+}
+{/*    borderRadius: percentToDP(10),*/
+}
+{/*  }}*/
+}
+{/*>*/
+}
+{/*  <HorizontalView*/
+}
+{/*    colorName="transparent"*/
+}
+{/*    justifyOption="flex-start"*/
+}
+{/*  >*/
+}
+{/*    <ThemedView*/
+}
+{/*      colorName="transparent"*/
+}
+{/*      style={{ margin: percentToDP(3), borderRadius: percentToDP(10) }}*/
+}
+{/*    >*/
+}
+{/*      <ThemedText textStyleName="big">TODO: Add post</ThemedText>*/
+}
+{/*    </ThemedView>*/
+}
+{/*  </HorizontalView>*/
+}
+{/*  <ThemedView*/
+}
+{/*    style={{*/
+}
+{/*      alignSelf: "center",*/
+}
+{/*      height: 400,*/
+}
+{/*      marginBottom: percentToDP(5),*/
+}
+{/*    }}*/
+}
+{/*  >*/
+}
+{/*    <Image*/
+}
+{/*      source={{*/
+}
+{/*        uri: "https://www.coalitionrc.com/wp-content/uploads/2017/01/placeholder.jpg",*/
+}
+{/*      }}*/
+}
+{/*      style={{*/
+}
+{/*        width: percentToDP(100),*/
+}
+{/*        height: percentToDP(100),*/
+}
+{/*      }}*/
+}
+{/*    />*/
+}
+{/*  </ThemedView>*/
+}
+{/*  <ThemedText>Enter Title</ThemedText>*/
+}
+{/*  <HorizontalView justifyOption="flex-end">*/
+}
+{/*    <ThemedButton*/
+}
+{/*      style={{ width: percentToDP(30) }}*/
+}
+{/*      onPress={() => router.replace("./newPostID")}*/
+}
+{/*      label="Save"*/
+}
+{/*    ></ThemedButton>*/
+}
+{/*  </HorizontalView>*/
+}
+{/*  <HorizontalView justifyOption="flex-start">*/
+}
+{/*    <ThemedText*/
+}
+{/*      style={{ marginRight: percentToDP(5) }}*/
+}
+{/*      textStyleName="smallBold"*/
+}
+{/*    >*/
+}
+{/*      Pets tagged:*/
+}
+{/*    </ThemedText>*/
+}
+{/*    <PetAvatar*/
+}
+{/*      size={11}*/
+}
+{/*      username="Username"*/
+}
+{/*      pet="Cutie"*/
+}
+{/*      doLink={true}*/
+}
+{/*    />*/
+}
+{/*  </HorizontalView>*/
+}
+{/*  {dialogVisible && (*/
+}
+{/*    <PostReactionPopup onDismiss={() => setDialogVisible(false)} />*/
+}
+{/*  )}*/
+}
+{/*</ThemedView>*/
+}
+
+{/*<ThemedView*/
+}
+{/*  colorName="tertiary"*/
+}
+{/*  style={{ borderRadius: percentToDP(10), margin: percentToDP(4) }}*/
+}
+{/*/>*/
 }

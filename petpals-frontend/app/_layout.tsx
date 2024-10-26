@@ -47,8 +47,8 @@ export default function RootLayout() {
                                 headerTransparent: true,
                                 headerTintColor: textColor,
                                 headerTitle: "",
-                                headerBackVisible: false, // removed back arrows for centering with our components!
-                                headerLeft: () => null,
+                                headerBackVisible: true, // removed back arrows for centering with our components!
+                                // headerLeft: () => null,
                                 headerBackTitleVisible: false,
                             }}
                         >

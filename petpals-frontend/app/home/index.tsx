@@ -56,9 +56,13 @@ export default function HomeScreen() {
                     </HorizontalView>
                 </ThemedView>
 
-                <ThemedView><ThemedButton onPress={() =>
-                    router.push("/user/Username/post/new" as Href<string>)
-                }><ThemedText>TEMPORARY ADD</ThemedText></ThemedButton></ThemedView>
+                <ThemedView>
+                    <ThemedButton onPress={() =>
+                        router.push("/user/Username/post/new" as Href<string>)
+                    }>
+                        <ThemedText>TEMPORARY ADD</ThemedText>
+                    </ThemedButton>
+                </ThemedView>
                 {/* POST FEED */}
                 <PostFeed></PostFeed>
             </ThemedView>
