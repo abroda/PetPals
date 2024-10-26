@@ -9,7 +9,9 @@ import {Pressable} from "react-native";
 import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import PostFeed from "@/components/lists/PostFeed";
-import Post from "@/components/display/Post";
+import {ThemedButton} from "@/components/inputs/ThemedButton";
+import {ThemedText} from "@/components/basic/ThemedText";
+import {Href, router} from "expo-router";
 
 export default function HomeScreen() {
     const {userId} = useAuth();
@@ -21,8 +23,8 @@ export default function HomeScreen() {
     return (
         <SafeAreaView>
             <ThemedView colorName="primary" style={{height: heightPercentToDP(100)}}>
-                <ThemedView colorName="secondary" style={{height: 80}}>
-                    <HorizontalView style={{paddingHorizontal: 10}}>
+                <ThemedView colorName="secondary" style={{height: heightPercentToDP(10)}}>
+                    <HorizontalView style={{paddingHorizontal: percentToDP(5)}}>
 
                         {/* APP LOGO */}
                         <AppLogo
@@ -54,6 +56,13 @@ export default function HomeScreen() {
                     </HorizontalView>
                 </ThemedView>
 
+                <ThemedView>
+                    <ThemedButton onPress={() =>
+                        router.push("/user/Username/post/new" as Href<string>)
+                    }>
+                        <ThemedText>TEMPORARY ADD</ThemedText>
+                    </ThemedButton>
+                </ThemedView>
                 {/* POST FEED */}
                 <PostFeed></PostFeed>
             </ThemedView>
