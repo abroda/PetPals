@@ -8,10 +8,11 @@ import React, {useLayoutEffect, useRef, useState} from "react";
 import {useWindowDimension} from "@/hooks/useWindowDimension";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
-import {Image, TextField, TextFieldRef} from "react-native-ui-lib";
+import {Image, TextFieldRef} from "react-native-ui-lib";
 import {ThemedTextField} from "@/components/inputs/ThemedTextField";
-import {View} from "react-native";
 import {ThemedMultilineTextField} from "@/components/inputs/ThemedMultilineTextField";
+import {Pressable} from "react-native";
+import * as ImagePicker from 'expo-image-picker';
 
 export default function NewPostScreen() {
     const path = usePathname();
@@ -25,6 +26,7 @@ export default function NewPostScreen() {
     const [validationMessage, setValidationMessage] = useState("")
 
     // INPUT STATES
+    const [photo, setPhoto] = useState<string | null>(null);
     const [postTitle, setPostTitle] = useState("");
     const [postDescription, setPostDescription] = useState("");
 
@@ -40,6 +42,24 @@ export default function NewPostScreen() {
         });
     }, [navigation]);
 
+    const selectPhoto = async () => {
+        const {canAskAgain, status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        console.log(canAskAgain)
+        console.log(status)
+        if (status !== 'granted') {
+            alert('Sorry, we need camera roll permissions to make this work!');
+            return;
+        }
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            quality: 1,
+        });
+
+        if (!result.canceled && result.assets && result.assets.length > 0) {
+            setPhoto(result.assets[0].uri);
+        }
+    }
 
     function validate() {
         return postTitleRef.current?.validate();
@@ -123,20 +143,24 @@ export default function NewPostScreen() {
                     <ThemedView
                         style={{
                             height: percentToDP(80),
+                            // width: percentToDP(80),
                             marginBottom: percentToDP(10),
                             borderRadius: 30
                         }}
                     >
-                        <Image
-                            source={{
-                                uri: "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
-                            }}
+                        {photo ? <Image
+                            // source={{
+                            //     uri: "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
+                            // }}
+                            source={{ uri: photo }}
                             style={{
                                 width: "100%",
                                 height: "100%",
                                 borderRadius: 30,
                             }}
-                        />
+                        /> : <Pressable style={{backgroundColor: "#000", width: "100%", height: "100%"}}
+                                        onPress={selectPhoto}></Pressable>}
+
                     </ThemedView>
 
                     {/* POST TITLE INPUT */}
