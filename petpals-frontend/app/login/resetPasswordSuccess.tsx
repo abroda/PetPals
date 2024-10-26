@@ -50,7 +50,11 @@ export default function ResetPasswordSuccessScreen() {
           }}
           label="Go to Login"
           textColorName="textOnPrimary"
-          onPress={() => router.replace("/login")}
+          onPress={() => {
+            router.dismissAll();
+            router.replace("/");
+            router.push("/login");
+          }}
         />
       </ThemedView>
     </ThemedScrollView>

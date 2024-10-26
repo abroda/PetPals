@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ThemedText } from "../basic/ThemedText";
 import { ThemedScrollView } from "../basic/containers/ThemedScrollView";
 import { ThemedButton } from "../inputs/ThemedButton";
@@ -12,6 +12,7 @@ import { useTextStyle } from "@/hooks/theme/useTextStyle";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import ThemedLoadingIndicator from "../decorations/animated/ThemedLoadingIndicator";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { TextFieldRef } from "react-native-ui-lib";
 
 export default function ResetPasswordDialog({
   onDismiss = () => {},
@@ -26,19 +27,31 @@ export default function ResetPasswordDialog({
 
   const percentToDP = useWindowDimension("shorter");
 
+  const emailRef = useRef<TextFieldRef>(null);
+
+  const asyncAbortController = useRef<AbortController | undefined>(undefined);
+  useEffect(() => {
+    asyncAbortController.current = new AbortController();
+    return () => {
+      asyncAbortController.current?.abort();
+    };
+  }, []);
+
   function validate() {
-    return validators.email(email);
+    return emailRef.current?.validate();
   }
 
   async function submit() {
     setValidationMessage("");
     if (validate()) {
       let result = await sendPasswordResetCode(email);
-      setValidationMessage(result.message);
+
       if (result.success) {
-        router.setParams({ email: email });
         router.push(`/login/resetPassword?email=${email}`);
         onDismiss();
+      } else {
+        setValidationMessage(result.returnValue);
+        asyncAbortController.current = new AbortController();
       }
     }
   }
@@ -70,6 +83,7 @@ export default function ResetPasswordDialog({
           </ThemedText>
         )}
         <ThemedTextField
+          ref={emailRef}
           label="Email"
           autoComplete="email"
           value={email}
@@ -77,7 +91,7 @@ export default function ResetPasswordDialog({
           autoFocus
           withValidation
           validate={["required", "email"]}
-          validationMessage={["Field is required", "Email is invalid"]}
+          validationMessage={["Email is required", "Email is invalid"]}
           maxLength={250}
           width={78}
         />
