@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { ThemedText } from "@/components/basic/ThemedText";
@@ -10,6 +10,7 @@ import { Href, router, useLocalSearchParams } from "expo-router";
 import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoadingIndicator";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { TextFieldRef } from "react-native-ui-lib";
 
 export default function ResetPasswordScreen() {
   const { email } = useLocalSearchParams();
@@ -31,12 +32,27 @@ export default function ResetPasswordScreen() {
   const percentToDP = useWindowDimension("shorter");
   const heighPercentToDP = useWindowDimension("height");
 
+  const codeRef = useRef<TextFieldRef>(null);
+  const passwordRef = useRef<TextFieldRef>(null);
+  const repeatPasswordRef = useRef<TextFieldRef>(null);
+
+  const asyncAbortController = useRef<AbortController | undefined>(undefined);
+  useEffect(() => {
+    asyncAbortController.current = new AbortController();
+    return () => {
+      asyncAbortController.current?.abort();
+    };
+  }, []);
+
+  // update repeat password validation message on password change
+  useEffect(() => {
+    repeatPasswordRef.current?.validate();
+  }, [password]);
+
   function verify() {
-    return (
-      (code.match(codeRegex)?.length ?? 0) > 0 &&
-      password === repeatPassword &&
-      (password.match(passwordRegex)?.length ?? 0) > 0
-    );
+    let res = codeRef.current?.validate();
+    res = passwordRef.current?.validate() && res;
+    return repeatPasswordRef.current?.validate() && res;
   }
 
   async function submit() {
@@ -44,19 +60,21 @@ export default function ResetPasswordScreen() {
     if (verify()) {
       let result = await resetPassword(email as string, password, code);
 
-      setValidationMessage(result.message);
-
       if (result.success) {
         router.dismissAll();
         router.replace("/login/resetPasswordSuccess" as Href<string>);
+      } else {
+        setValidationMessage(result.returnValue);
+        asyncAbortController.current = new AbortController();
       }
     }
   }
 
   async function resend() {
     setValidationMessage("");
-    let result = await sendPasswordResetCode(userEmail ?? "");
-    setValidationMessage(result.message);
+    let result = await sendPasswordResetCode(email as string);
+    setValidationMessage(result.returnValue);
+    asyncAbortController.current = new AbortController();
   }
 
   return (
@@ -104,6 +122,7 @@ export default function ResetPasswordScreen() {
               Please enter a verification code and set a new password.
             </ThemedText>
             <ThemedTextField
+              ref={codeRef}
               label="Code"
               autoComplete="one-time-code"
               onChangeText={(newText: string) => setCode(newText)}
@@ -117,6 +136,7 @@ export default function ResetPasswordScreen() {
               maxLength={6}
             />
             <ThemedTextField
+              ref={passwordRef}
               label="Password"
               autoComplete="password-new"
               onChangeText={(newText: string) => setPassword(newText)}
@@ -126,24 +146,23 @@ export default function ResetPasswordScreen() {
                 "required",
                 (value) => (value ? value.length : 0) > 6,
                 (value) => (value?.match(passwordRegex)?.length ?? 0) > 0,
-                (value) => password === repeatPassword,
               ]}
               validationMessage={[
                 "Password is required",
-                "Password is too short",
+                "Password is too short (min. 8 characters)",
                 "Password must have at least one each of: small letter, big letter, number, special character",
-                "Passwords don't match",
               ]}
             />
             <ThemedTextField
+              ref={repeatPasswordRef}
               label="Repeat password"
               autoComplete="password-new"
               onChangeText={(newText: string) => setRepeatPassword(newText)}
               isSecret
               withValidation
-              validate={["required", (value) => repeatPassword === password]}
+              validate={["required", (value) => value === password]}
               validationMessage={[
-                "Reset password is required",
+                "Repeat password is required",
                 "Passwords don't match",
               ]}
             />

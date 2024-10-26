@@ -3,6 +3,7 @@ import React, {
   forwardRef,
   LegacyRef,
   ReactElement,
+  useEffect,
   useRef,
   useState,
 } from "react";
@@ -29,30 +30,41 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [validationMessage, setValidationMessage] = useState("");
   const [dialogVisible, setDialogVisible] = useState(false);
+
   const { isLoading, isProcessing, login } = useAuth();
+
   const emailRef = useRef<TextFieldRef>(null);
   const passwordRef = useRef<TextFieldRef>(null);
+
   const percentToDP = useWindowDimension("shorter");
   const heighPercentToDP = useWindowDimension("height");
 
+  const asyncAbortController = useRef<AbortController | undefined>(undefined);
+  useEffect(() => {
+    asyncAbortController.current = new AbortController();
+    return () => {
+      asyncAbortController.current?.abort();
+    };
+  }, []);
+
   function validate() {
-    return email.length > 0 && password.length > 0;
+    let res = emailRef.current?.validate();
+    return passwordRef.current?.validate() && res;
   }
 
   async function submit() {
     setValidationMessage("");
 
-    if (!validate()) {
-      setValidationMessage("Input is invalid");
-    } else {
-      let result = await login(email, password);
-
-      setValidationMessage(result.message);
+    if (validate()) {
+      let result = await login(email, password, asyncAbortController.current);
 
       if (result.success) {
         setDialogVisible(false);
         router.dismissAll();
         router.replace("/home");
+      } else {
+        setValidationMessage(result.returnValue);
+        asyncAbortController.current = new AbortController();
       }
     }
   }

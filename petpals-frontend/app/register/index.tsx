@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
 import { router } from "expo-router";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,11 +11,8 @@ import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoad
 import HorizontalView from "@/components/basic/containers/HorizontalView";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import TermsOfUseDialog from "@/components/dialogs/TermsOfUseDialog";
-import { Checkbox } from "react-native-ui-lib";
+import { Checkbox, TextFieldRef } from "react-native-ui-lib";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
-import validators from "react-native-ui-lib/src/components/textField/validators";
-import { Pressable } from "react-native";
-import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -29,37 +26,58 @@ export default function RegisterScreen() {
   const [dialogVisible, setDialogVisible] = useState(false);
   const { isLoading, isProcessing, passwordRegex, register } = useAuth();
 
+  // to have all fields get validated at once on submit
+  const nameRef = useRef<TextFieldRef>(null);
+  const emailRef = useRef<TextFieldRef>(null);
+  const passwordRef = useRef<TextFieldRef>(null);
+  const repeatPasswordRef = useRef<TextFieldRef>(null);
+
   const textColor = useThemeColor("text");
   const textStyle = useTextStyle("small");
   const accentColor = useThemeColor("accent");
   const percentToDP = useWindowDimension("shorter");
   const heighPercentToDP = useWindowDimension("height");
 
+  // to cancel async calls still being processed on unmount,
+  // to avoid them executing unwanted effects in the background
+  const asyncAbortController = useRef<AbortController | undefined>(undefined);
+  useEffect(() => {
+    asyncAbortController.current = new AbortController();
+    return () => {
+      asyncAbortController.current?.abort();
+    };
+  }, []);
+
+  // update repeat password validation message on password change
+  useEffect(() => {
+    repeatPasswordRef.current?.validate();
+  }, [password]);
+
   function validate() {
-    return (
-      name.length >= 3 &&
-      email.length >= 6 &&
-      validators.email(email) &&
-      password.length >= 8 &&
-      (password.match(passwordRegex)?.length ?? 0 >= 1) &&
-      password === repeatPassword
-    );
+    let res = nameRef.current?.validate();
+    res = emailRef.current?.validate() && res;
+    res = passwordRef.current?.validate() && res;
+    return repeatPasswordRef.current?.validate() && res;
   }
 
   async function submit() {
     setValidationMessage("");
 
-    if (!validate()) {
-      setValidationMessage("Input is invalid.");
-    } else if (!termsAgreedTo) {
-      setValidationMessage("You have to accept Terms of Use.");
-    } else {
-      let result = await register(name, email, password);
-      setValidationMessage(result.message);
+    if (validate()) {
+      if (!termsAgreedTo) {
+        setValidationMessage("You have to accept Terms of Use.");
+      } else {
+        let result = await register(name, email, password);
 
-      if (result.success) {
-        setDialogVisible(false);
-        router.push("./verifyEmail");
+        if (result.success) {
+          setDialogVisible(false);
+          router.push("/register/verifyEmail");
+        } else {
+          setValidationMessage(result.returnValue);
+          asyncAbortController.current = new AbortController();
+          // get a new abortController in case old one was called
+          // (once the abort signal is set through .abort() it stays on)
+        }
       }
     }
   }
@@ -110,6 +128,7 @@ export default function RegisterScreen() {
               </ThemedText>
             )}
             <ThemedTextField
+              ref={nameRef}
               label="Name"
               autoComplete="name"
               onChangeText={(newText: string) => setName(newText)}
@@ -119,10 +138,14 @@ export default function RegisterScreen() {
                 "required",
                 (value) => (value ? value.length : 0) >= 3,
               ]}
-              validationMessage={["Name is required", "Name is too short"]}
+              validationMessage={[
+                "Name is required",
+                "Name is too short (min. 3 characters)",
+              ]}
               maxLength={250}
             />
             <ThemedTextField
+              ref={emailRef}
               label="Email"
               autoComplete="email"
               onChangeText={(newText: string) => setEmail(newText)}
@@ -132,6 +155,7 @@ export default function RegisterScreen() {
               maxLength={250}
             />
             <ThemedTextField
+              ref={passwordRef}
               label="Password"
               autoComplete="password-new"
               onChangeText={(newText: string) => setPassword(newText)}
@@ -140,23 +164,22 @@ export default function RegisterScreen() {
               validate={[
                 "required",
                 (value) => (value ? value.length : 0) >= 8,
-                (value) => (password.match(passwordRegex)?.length ?? 0) > 0,
-                (value) => password === repeatPassword,
+                (value) => (value?.match(passwordRegex)?.length ?? 0) > 0,
               ]}
               validationMessage={[
                 "Password is required",
-                "Password is too short",
+                "Password is too short (min. 8 characters)",
                 "Password must have at least one each of: small letter, big letter, number, special character",
-                "Passwords don't match",
               ]}
             />
             <ThemedTextField
+              ref={repeatPasswordRef}
               label="Repeat password"
               autoComplete="password-new"
               onChangeText={(newText: string) => setRepeatPassword(newText)}
               isSecret
               withValidation
-              validate={["required", (value) => repeatPassword === password]}
+              validate={["required", (value) => value === password]}
               validationMessage={[
                 "Repeat password is required",
                 "Passwords don't match",
@@ -207,7 +230,7 @@ export default function RegisterScreen() {
               <ThemedText
                 textColorName="link"
                 textStyleName="small"
-                onPress={() => router.push("./verifyEmail")}
+                onPress={() => router.push("/register/verifyEmail")}
                 style={{
                   marginBottom: percentToDP(14),
                   alignSelf: "center",
