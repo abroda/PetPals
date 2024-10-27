@@ -1,6 +1,6 @@
 import {ThemedView} from "@/components/basic/containers/ThemedView";
-import {usePathname} from "expo-router";
-import {useState} from "react";
+import {Href, router, useNavigation, usePathname} from "expo-router";
+import React, {useLayoutEffect, useState} from "react";
 import {useWindowDimension} from "@/hooks/useWindowDimension";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {ThemedScrollView} from "@/components/basic/containers/ThemedScrollView";
@@ -12,6 +12,7 @@ import {Pressable} from "react-native";
 import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
 import PetAvatar from "@/components/navigation/PetAvatar";
 import {useThemeColor} from "@/hooks/theme/useThemeColor";
+import {ThemedButton} from "@/components/inputs/ThemedButton";
 
 export default function PostScreen() {
     const path = usePathname();
@@ -23,8 +24,52 @@ export default function PostScreen() {
     const tertiaryColor = useThemeColor("tertiary")
     const comments = ["1", "2", "3"]
 
+    // HIDING DEFAULT NAVIGATION
+    const navigation = useNavigation();
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerShown: false,
+        });
+    }, [navigation]);
+
     return (
         <SafeAreaView style={{height: "100%"}}>
+            <ThemedView style={{height: heightPercentToDP(10)}}>
+                <HorizontalView colorName="secondary"
+                                style={{height: heightPercentToDP(10), paddingHorizontal: percentToDP(5)}}
+                >
+                    {/* BACK BUTTON */}
+                    <ThemedButton backgroundColorName="background"
+                                  style={{
+                                      height: heightPercentToDP(7),
+                                      width: heightPercentToDP(7),
+                                      minWidth: heightPercentToDP(7) // MIN WIDTH HAS TO BE OVERWRITTEN FOR WIDTH TO TAKE EFFECT!
+                                  }}
+                                  onPress={() => {
+                                      router.back()
+                                  }}>
+                        <ThemedIcon size={heightPercentToDP(4)}
+                                    style={{width: heightPercentToDP(4), height: heightPercentToDP(4)}}
+                                    colorName="primary" name={"arrow-back"}/>
+                    </ThemedButton>
+
+                    {/* EDIT BUTTON */}
+                    <ThemedButton backgroundColorName="background"
+                                  style={{
+                                      height: heightPercentToDP(7),
+                                      width: heightPercentToDP(7),
+                                      minWidth: heightPercentToDP(7) // MIN WIDTH HAS TO BE OVERWRITTEN FOR WIDTH TO TAKE EFFECT!
+                                  }}
+                                  onPress={() => {
+                                      router.push("/user/Username/post/postId/edit" as Href<string>)
+                                  }}
+                    >
+                        <ThemedIcon size={heightPercentToDP(4)}
+                                    style={{width: heightPercentToDP(4), height: heightPercentToDP(4)}}
+                                    colorName="primary" name={"pencil"}/>
+                    </ThemedButton>
+                </HorizontalView>
+            </ThemedView>
             <ThemedScrollView colorName="secondary" style={{flex: 1}}>
                 <ThemedView
                     style={{

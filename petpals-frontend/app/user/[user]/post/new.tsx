@@ -246,26 +246,7 @@ export default function NewPostScreen() {
                     {/* POST DESCRIPTION INPUT */}
                     <ThemedMultilineTextField label="Post description" maxLength={255} style={{marginBottom: percentToDP(10)}}/>
 
-                    {/* POST DESCRIPTION INPUT */}
-                    {/*<ThemedTextField*/}
-                    {/*    ref={postDescriptionRef}*/}
-                    {/*    label="Post description"*/}
-                    {/*    onChangeText={(newText: string) => setPostDescription(newText)}*/}
-                    {/*    maxLength={255}*/}
-                    {/*    multiline={true}*/}
-                    {/*    // numberOfLines={4}*/}
-                    {/*/>*/}
-
-                    {/* POST DESCRIPTION INPUT */}
-                    {/*<ThemedTextField*/}
-                    {/*    ref={postDescriptionRef}*/}
-                    {/*    label="Post description"*/}
-                    {/*    onChangeText={(newText: string) => setPostDescription(newText)}*/}
-                    {/*    maxLength={255}*/}
-                    {/*/>*/}
-
                 </ThemedView>
-
             </ThemedScrollView>
         </SafeAreaView>
     );
