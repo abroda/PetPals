@@ -8,11 +8,13 @@ import React, {useLayoutEffect, useRef, useState} from "react";
 import {useWindowDimension} from "@/hooks/useWindowDimension";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
-import {Image, TextFieldRef} from "react-native-ui-lib";
+import {Image, TextFieldRef, TouchableOpacity} from "react-native-ui-lib";
 import {ThemedTextField} from "@/components/inputs/ThemedTextField";
 import {ThemedMultilineTextField} from "@/components/inputs/ThemedMultilineTextField";
-import {Pressable} from "react-native";
 import * as ImagePicker from 'expo-image-picker';
+import {ThemedText} from "@/components/basic/ThemedText";
+import {useThemeColor} from "@/hooks/theme/useThemeColor";
+import {View} from "react-native";
 
 export default function NewPostScreen() {
     const path = usePathname();
@@ -21,6 +23,9 @@ export default function NewPostScreen() {
     const [dialogVisible, setDialogVisible] = useState(false);
     const percentToDP = useWindowDimension("shorter");
     const heightPercentToDP = useWindowDimension("height");
+    const secondaryColor = useThemeColor("secondary");
+    const backgroundColor = useThemeColor("background");
+
 
     // ERROR HANDLING
     const [validationMessage, setValidationMessage] = useState("")
@@ -148,18 +153,58 @@ export default function NewPostScreen() {
                             borderRadius: 30
                         }}
                     >
-                        {photo ? <Image
-                            // source={{
-                            //     uri: "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
-                            // }}
-                            source={{ uri: photo }}
-                            style={{
-                                width: "100%",
-                                height: "100%",
+                        {photo ? <View style={{
                                 borderRadius: 30,
-                            }}
-                        /> : <Pressable style={{backgroundColor: "#000", width: "100%", height: "100%"}}
-                                        onPress={selectPhoto}></Pressable>}
+                                borderWidth: 1,
+                                borderColor: secondaryColor,
+                            }}>
+                                <Image
+                                    // source={{
+                                    //     uri: "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
+                                    // }}
+                                    source={{uri: photo}}
+                                    style={{
+                                        width: "100%",
+                                        height: "100%",
+                                        borderRadius: 30,
+                                    }}
+                                />
+                                <TouchableOpacity
+                                    activeOpacity={0.6}
+                                    style={{
+                                        position: "absolute",
+                                        backgroundColor: backgroundColor,
+                                        top: 10,
+                                        right: 10,
+                                        borderRadius: 30,
+                                        height: heightPercentToDP(7),
+                                        width: heightPercentToDP(7),
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        borderColor: secondaryColor,
+                                        borderWidth: 1,
+                                    }}
+                                    onPress={selectPhoto}>
+                                    <ThemedIcon name="pencil" size={heightPercentToDP(4)}
+                                                style={{width: heightPercentToDP(4), height: heightPercentToDP(4)}}/>
+                                </TouchableOpacity>
+                            </View> :
+                            <TouchableOpacity
+                                activeOpacity={0.6}
+                                style={{
+                                    backgroundColor: "rgba(0,0,0,0.1)",
+                                    borderRadius: 30,
+                                    borderWidth: 1,
+                                    borderColor: secondaryColor,
+                                    width: "100%",
+                                    height: "100%",
+                                    alignItems: "center",
+                                    justifyContent: "center"
+                                }}
+                                onPress={selectPhoto}>
+                                <ThemedIcon name="camera"/>
+                                <ThemedText backgroundColorName={"transparent"}>Tap to select photo</ThemedText>
+                            </TouchableOpacity>}
 
                     </ThemedView>
 
