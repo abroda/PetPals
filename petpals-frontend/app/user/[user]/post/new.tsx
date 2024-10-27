@@ -58,6 +58,8 @@ export default function NewPostScreen() {
 
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
             quality: 1,
         });
 
@@ -148,7 +150,8 @@ export default function NewPostScreen() {
                     {/* TODO: make it an input. */}
                     <ThemedView
                         style={{
-                            height: percentToDP(80),
+                            width: percentToDP(90),
+                            height: percentToDP(90),
                             marginBottom: percentToDP(10),
                             borderRadius: 30
                         }}
@@ -241,7 +244,7 @@ export default function NewPostScreen() {
                     />
 
                     {/* POST DESCRIPTION INPUT */}
-                    <ThemedMultilineTextField label="Post description" maxLength={255}/>
+                    <ThemedMultilineTextField label="Post description" maxLength={255} style={{marginBottom: percentToDP(10)}}/>
 
                     {/* POST DESCRIPTION INPUT */}
                     {/*<ThemedTextField*/}
