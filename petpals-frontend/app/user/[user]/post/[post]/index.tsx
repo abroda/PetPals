@@ -49,7 +49,8 @@ export default function PostScreen() {
                     {/*IMAGE*/}
                     <ThemedView
                         style={{
-                            height: percentToDP(80),
+                            width: percentToDP(90),
+                            height: percentToDP(90),
                             marginBottom: percentToDP(5),
                             borderRadius: 30
                         }}

@@ -20,9 +20,9 @@ export default function Post() {
         <ThemedView
             colorName="background"
             style={{
-                margin: 16,
+                margin: percentToDP(5),
                 borderRadius: 10,
-                paddingHorizontal: 24,
+                paddingHorizontal: percentToDP(5),
                 paddingTop: 16,
                 paddingBottom: 24
             }}
@@ -41,7 +41,8 @@ export default function Post() {
             {/*IMAGE*/}
             <ThemedView
                 style={{
-                    height: 300,
+                    width: percentToDP(80),
+                    height: percentToDP(80),
                     marginBottom: 24,
                     borderRadius: 30
                 }}
