@@ -66,6 +66,10 @@ export default function NewPostScreen() {
         }
     }
 
+    const clearPhoto = () => {
+        setPhoto(null)
+    }
+
     function validate() {
         return postTitleRef.current?.validate();
     }
@@ -133,14 +137,11 @@ export default function NewPostScreen() {
                               contentContainerStyle={{flexGrow: 1}}>
                 {/* POST CONTAINER */}
                 <ThemedView colorName="background" style={{
-                    // height: "100%",
                     borderTopLeftRadius: 30,
                     borderTopRightRadius: 30,
                     padding: percentToDP(5),
                     paddingTop: percentToDP(10),
                     flex: 1,
-                    // flexGrow: 1,
-                    // justifyContent: "space-between"
                 }}>
 
                     {/* POST IMAGE */}
@@ -148,7 +149,6 @@ export default function NewPostScreen() {
                     <ThemedView
                         style={{
                             height: percentToDP(80),
-                            // width: percentToDP(80),
                             marginBottom: percentToDP(10),
                             borderRadius: 30
                         }}
@@ -158,10 +158,8 @@ export default function NewPostScreen() {
                                 borderWidth: 1,
                                 borderColor: secondaryColor,
                             }}>
+                                {/* SELECTED PHOTO */}
                                 <Image
-                                    // source={{
-                                    //     uri: "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
-                                    // }}
                                     source={{uri: photo}}
                                     style={{
                                         width: "100%",
@@ -169,6 +167,8 @@ export default function NewPostScreen() {
                                         borderRadius: 30,
                                     }}
                                 />
+
+                                {/* EDIT BUTTON */}
                                 <TouchableOpacity
                                     activeOpacity={0.6}
                                     style={{
@@ -186,6 +186,27 @@ export default function NewPostScreen() {
                                     }}
                                     onPress={selectPhoto}>
                                     <ThemedIcon name="pencil" size={heightPercentToDP(4)}
+                                                style={{width: heightPercentToDP(4), height: heightPercentToDP(4)}}/>
+                                </TouchableOpacity>
+
+                                {/* CLEAR PHOTO BUTTON */}
+                                <TouchableOpacity
+                                    activeOpacity={0.6}
+                                    style={{
+                                        position: "absolute",
+                                        backgroundColor: backgroundColor,
+                                        top:  heightPercentToDP(7) + 20,
+                                        right: 10,
+                                        borderRadius: 30,
+                                        height: heightPercentToDP(7),
+                                        width: heightPercentToDP(7),
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        borderColor: secondaryColor,
+                                        borderWidth: 1,
+                                    }}
+                                    onPress={clearPhoto}>
+                                    <ThemedIcon name="close" size={heightPercentToDP(4)}
                                                 style={{width: heightPercentToDP(4), height: heightPercentToDP(4)}}/>
                                 </TouchableOpacity>
                             </View> :
