@@ -7,6 +7,7 @@ import {useWindowDimension} from "@/hooks/useWindowDimension";
 export default function UserAvatar(props: {
     size: number;
     userId: string;
+    imageUrl: string | null; // Accepts the S3 image URL
     doLink: boolean;
 }) {
     const {userId} = useAuth();
@@ -27,7 +28,7 @@ export default function UserAvatar(props: {
             <Avatar
                 size={percentToDP(props.size)}
                 source={{
-                    uri: "https://external-preview.redd.it/PzM9Myb5uugh3qrxvb1F0nVTsdXJKRl0NB88MuAPwZA.jpg?auto=webp&s=6627165dbd61ab8a8d7fc026b5ce9199c593fe93",
+                    uri: props.imageUrl || "https://external-preview.redd.it/PzM9Myb5uugh3qrxvb1F0nVTsdXJKRl0NB88MuAPwZA.jpg?auto=webp&s=6627165dbd61ab8a8d7fc026b5ce9199c593fe93",
                 }}
             />
         </Pressable>

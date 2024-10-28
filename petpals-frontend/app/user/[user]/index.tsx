@@ -7,7 +7,7 @@ import { router, usePathname } from "expo-router";
 import PostFeed from "@/components/lists/PostFeed";
 import PetAvatar from "@/components/navigation/PetAvatar";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
-import { SafeAreaView, View, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
+import {SafeAreaView, View, ScrollView, StyleSheet, ActivityIndicator, FlatList} from "react-native";
 import { Pressable } from "react-native";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import { useContext, useEffect, useState } from "react";
@@ -21,18 +21,29 @@ import { useAuth } from "@/hooks/useAuth";
 export default function UserProfileScreen() {
 
     const path = usePathname();
-    const username = path.slice(path.lastIndexOf("/") + 1);
+    const [username, setUsername] = useState(path.slice(path.lastIndexOf("/") + 1));
     const { logout } = useAuth();
     const percentToDP = useWindowDimension("shorter");
     const heightPercentToPD = useWindowDimension("height");
 
+    // Sample pet data
+    const pets = [
+        { name: "Tori", breed: "Golden Retriever", id: "1" },
+        { name: "Abi", breed: "Leonberger", id: "2" },
+        { name: "Fibi", breed: "Mixed", id: "3" },
+        { name: "Toby", breed: "Mixed", id: "4" },
+        { name: "Ronnie", breed: "Mixed", id: "5" },
+    ];
+
     const [loading, setLoading] = useState(true);
 
+    // @ts-ignore
     const { getUserById, userProfile, isProcessing, responseMessage } = useContext(UserContext);
 
     useEffect(() => {
         getUserById(username);
     }, [username]);
+
 
     if (isProcessing) {
         return <Text>Loading...</Text>;
@@ -43,25 +54,31 @@ export default function UserProfileScreen() {
         <SafeAreaView style={{ flex: 1 }}>
             <ThemedView style={{ flex: 1, paddingTop: heightPercentToPD(6) }}>
 
-                <HorizontalView justifyOption="flex-end">
-                    <ThemedText style={{ margin: percentToDP(4) }}>{username}</ThemedText>
-                    <UserAvatar
-                        userId={username}
-                        size={13}
-                        doLink={false}
-                    ></UserAvatar>
-                    {username == "me" && (
-                        <Pressable
-                            onPress={() => {
-                                router.push("/user/me/editProfile");
-                            }}
-                        >
-                            <ThemedIcon name="pencil"></ThemedIcon>
-                        </Pressable>
-                    )}
-                </HorizontalView>
 
-                <ScrollView>
+                <ScrollView horizontal={false}>
+                    <View><Text>Hello</Text></View>
+
+                    <HorizontalView justifyOption="flex-end">
+                        <ThemedText style={{ margin: percentToDP(5) }}>{username}</ThemedText>
+                        <UserAvatar
+                            userId={userProfile?.userId}
+                            imageUrl={userProfile?.imageUrl || null} // Pass the S3 image URL
+                            size={13}
+                            doLink={false}
+                        ></UserAvatar>
+                        {username == "me" && (
+                            <Pressable
+                                onPress={() => {
+                                    router.push("/user/me/editProfile");
+                                }}
+                            >
+                                <ThemedIcon name="pencil"></ThemedIcon>
+                            </Pressable>
+                        )}
+                    </HorizontalView>
+
+
+
                     {/* Darker background for user info */}
                     <View style={{
                         height: 420,
@@ -81,7 +98,7 @@ export default function UserProfileScreen() {
                             <View style={{
                                 marginTop: -90,
                             }}>
-                                <UserAvatar userId={userProfile?.username} size={40} doLink={false} />
+                                <UserAvatar size={40} userId={userProfile?.userId} imageUrl={userProfile?.imageUrl || null} doLink={false}/>
                             </View>
 
                             {/* Username text */}
@@ -227,7 +244,7 @@ export default function UserProfileScreen() {
 
                     {/* Pets Section */}
                     <ThemedText style={{
-                        fontSize: 24,
+                        fontSize: 30,
                         color: "#FAF7EA",
                         marginLeft: 30,
                         marginBottom: 20,
@@ -236,111 +253,60 @@ export default function UserProfileScreen() {
                         Dogs
                     </ThemedText>
 
-                    <ScrollView horizontal style={{marginLeft: 20, marginVertical: 10,}}>
-                        <View style={{
-                            alignItems: "center",
-                            marginRight: 20,
-                            backgroundColor: '#0A2421',
-                            borderTopLeftRadius: 100,
-                            borderTopRightRadius: 100,
-                            borderBottomLeftRadius: 10,
-                            borderBottomRightRadius: 10,
-                            padding: 5,
-                        }}>
-                            <PetAvatar size={30} username={userProfile?.username} pet="Tori" doLink={false} />
-                            <ThemedText style={{
-                                backgroundColor: '#0A2421',
-                                fontSize: 16,
-                                fontWeight: "bold",
-                                color: "#FAF7EA",
-                                marginTop: 10,
+                    <FlatList
+                        horizontal
+                        data={pets}
+                        keyExtractor={(item) => item.id}
+                        renderItem={({ item }) => (
+                            <View style={{
+                                marginRight: 10,
+                                paddingVertical: 10,
                             }}>
-                                Tori
-                            </ThemedText>
-                            <ThemedText style={{
-                                backgroundColor: '#0A2421',
-                                fontSize: 14,
-                                color: "#FAF7EA",
-                                marginBottom: 10,
-                            }}>
-                                Golden Retriever
-                            </ThemedText>
-                        </View>
+                                <View style={{
+                                    backgroundColor: '#0A2421',
+                                    padding: 10,
+                                    borderRadius: 10,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                }}>
+                                    <PetAvatar size={32} username={userProfile?.username} pet={item.name} doLink={false} />
+                                    <ThemedText style={{
+                                        fontSize: 22,
+                                        color: '#FAF7EA',
+                                        fontWeight: 'bold',
+                                        backgroundColor: 'none',
+                                        marginTop: 10,
+                                    }}>
+                                        {item.name}
+                                    </ThemedText>
+                                    <ThemedText style={{
+                                        fontSize: 12,
+                                        fontStyle: 'italic',
+                                        color: '#FAF7EA',
+                                        backgroundColor: 'none',
+                                    }}>
+                                        {item.breed}
+                                    </ThemedText>
+                                </View>
 
-                        <View style={{
-                            alignItems: "center",
-                            marginRight: 20,
-                            backgroundColor: '#0A2421',
-                            borderTopLeftRadius: 100,
-                            borderTopRightRadius: 100,
-                            borderBottomLeftRadius: 10,
-                            borderBottomRightRadius: 10,
-                            padding: 5,
-                        }}>
-                            <PetAvatar size={30} username={userProfile?.username} pet="Abi" doLink={false} />
-                            {username == "me" && (
-                                <Pressable
-                                    onPress={() => {
-                                        router.push("/user/me/pet/Cutie/edit");
-                                    }}
-                                >
-                                    <ThemedIcon name="pencil"></ThemedIcon>
-                                </Pressable>
-                            )}
+                            </View>
+                        )}
+                        showsHorizontalScrollIndicator={false}
+                        style={{
+                            marginLeft: 30,
+                        }}
+                    />
 
-                            <ThemedText style={{
-                                backgroundColor: '#0A2421',
-                                fontSize: 16,
-                                fontWeight: "bold",
-                                color: "#FAF7EA",
-                                marginTop: 10,
-                            }}>
-                                Abi
-                            </ThemedText>
-                            <ThemedText style={{
-                                backgroundColor: '#0A2421',
-                                fontSize: 14,
-                                color: "#FAF7EA",
-                                marginBottom: 10,
-                            }}>
-                                Leonberger
-                            </ThemedText>
-                        </View>
+                    {/*{username == "me" && (*/}
+                    {/*    <Pressable*/}
+                    {/*        onPress={() => {*/}
+                    {/*            router.push("/user/me/pet/Cutie/edit");*/}
+                    {/*}}*/}
 
-                        <View style={{
-                            alignItems: "center",
-                            marginRight: 20,
-                            backgroundColor: '#0A2421',
-                            borderTopLeftRadius: 100,
-                            borderTopRightRadius: 100,
-                            borderBottomLeftRadius: 10,
-                            borderBottomRightRadius: 10,
-                            padding: 5,
-                        }}>
-                            <PetAvatar size={30} username={userProfile?.username} pet="Fibi" doLink={false} />
-                            <ThemedText style={{
-                                backgroundColor: '#0A2421',
-                                fontSize: 16,
-                                fontWeight: "bold",
-                                color: "#FAF7EA",
-                                marginTop: 10,
-                            }}>
-                                Fibi
-                            </ThemedText>
-                            <ThemedText style={{
-                                backgroundColor: '#0A2421',
-                                fontSize: 14,
-                                color: "#FAF7EA",
-                                marginBottom: 10,
-                            }}>
-                                Mixed
-                            </ThemedText>
-                        </View>
-                    </ScrollView>
 
                     {/* PostFeed */}
                     <ThemedText style={{
-                        fontSize: 24,
+                        fontSize: 30,
                         color: "#FAF7EA",
                         marginLeft: 30,
                         marginBottom: 0,

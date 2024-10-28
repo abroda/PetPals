@@ -3,13 +3,14 @@ import {ThemedView} from "@/components/basic/containers/ThemedView";
 import AppLogo from "@/components/decorations/static/AppLogo";
 import {useAuth} from "@/hooks/useAuth";
 import {useWindowDimension} from "@/hooks/useWindowDimension";
-import {useState} from "react";
+import {useContext, useState} from "react";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {Pressable} from "react-native";
 import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import PostFeed from "@/components/lists/PostFeed";
 import Post from "@/components/display/Post";
+import {UserContext} from "@/context/UserContext";
 
 export default function HomeScreen() {
     const {userId} = useAuth();
@@ -17,6 +18,9 @@ export default function HomeScreen() {
 
     const percentToDP = useWindowDimension("shorter");
     const heightPercentToDP = useWindowDimension("height");
+
+    const userContext = useContext(UserContext);
+    const { userProfile, isProcessing, getUserById, responseMessage } = useContext(UserContext)!;
 
     return (
         <SafeAreaView>
@@ -49,6 +53,7 @@ export default function HomeScreen() {
                                 size={10}
                                 doLink={true}
                                 userId={(userId?.length ?? 0) > 0 ? userId ?? "me" : "me"}
+                                imageUrl={userProfile?.imageUrl || null}
                             />
                         </ThemedView>
                     </HorizontalView>
