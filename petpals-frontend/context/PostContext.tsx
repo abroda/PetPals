@@ -35,6 +35,7 @@ export const PostProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [responseMessage, setResponseMessage] = useState("");
   const { userEmail } = useAuth();
+  const [posts, setPosts] = useState([])
 
   const sendJsonQuery = async (
     path: string,
@@ -94,12 +95,12 @@ export const PostProvider: FC<{ children: ReactNode }> = ({ children }) => {
       username: username,
     });
 
-  const getPosts = async (username: string) => {
+  const getPosts = async (userId: string) => {
     setIsProcessing(true);
     setResponseMessage("");
 
-    return sendJsonQuery(apiPaths.auth.verifyEmail, "POST", {
-      username: username,
+    return sendJsonQuery(apiPaths.posts.getPosts, "GET", {
+      userId: userId,
     })
       .then((_) => {
         setIsProcessing(false);
@@ -107,7 +108,7 @@ export const PostProvider: FC<{ children: ReactNode }> = ({ children }) => {
       })
       .catch((err: Error) => {
         console.error(err.message);
-        setResponseMessage("Verify email: " + err.message);
+        setResponseMessage("Get posts: " + err.message);
         setIsProcessing(false);
         return false;
       });

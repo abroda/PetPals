@@ -9,7 +9,9 @@ export const apiPaths = {
     resetPassword: databaseURL + "api/account/password-reset",
     login: databaseURL + "api/auth/login",
   },
-  posts: {},
+  posts: {
+    getPosts: databaseURL + "api/posts"
+  },
   profiles: {},
   friends: {},
   chats: {},

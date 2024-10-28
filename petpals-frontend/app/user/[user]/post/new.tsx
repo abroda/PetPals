@@ -49,8 +49,6 @@ export default function NewPostScreen() {
 
     const selectPhoto = async () => {
         const {canAskAgain, status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        console.log(canAskAgain)
-        console.log(status)
         if (status !== 'granted') {
             alert('Sorry, we need camera roll permissions to make this work!');
             return;

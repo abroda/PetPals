@@ -6,10 +6,12 @@ import com.app.petpals.payload.AccountResponse;
 import com.app.petpals.payload.TextResponse;
 import com.app.petpals.service.AWSImageService;
 import com.app.petpals.service.UserService;
+import com.app.petpals.utils.CheckUserAuthorization;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -61,7 +63,6 @@ public class AccountController {
     @Operation(summary = "Get user account by id.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<AccountResponse> getUserById(@PathVariable String id) {
         User user = userService.getById(id);
-
         return ResponseEntity.ok(AccountResponse.builder()
                 .id(user.getId())
                 .email(user.getUsername())
@@ -91,6 +92,7 @@ public class AccountController {
                 .build());
     }
 
+    @CheckUserAuthorization
     @PutMapping(path = "/{id}")
     @Operation(summary = "Update user data by id.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<AccountResponse> updateUserData(@PathVariable String id, @RequestBody AccountEditRequest accountEditRequest) {
@@ -107,6 +109,7 @@ public class AccountController {
                 .build());
     }
 
+    @CheckUserAuthorization
     @PutMapping(path = "/{id}/picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Update user profile picture by id.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<AccountResponse> updateUserProfilePicture(@PathVariable String id, @RequestParam("file") MultipartFile file) throws IOException {
@@ -131,6 +134,7 @@ public class AccountController {
                 .build());
     }
 
+    @CheckUserAuthorization
     @DeleteMapping(path = "/{id}/picture")
     @Operation(summary = "Delete user profile picture by id.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<AccountResponse> deleteUserProfilePicture(@PathVariable String id) {
@@ -151,6 +155,7 @@ public class AccountController {
                 .build());
     }
 
+    @CheckUserAuthorization
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete user.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<TextResponse> deleteAccount(@PathVariable String id) {
