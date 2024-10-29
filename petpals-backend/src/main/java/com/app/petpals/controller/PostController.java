@@ -1,7 +1,9 @@
 package com.app.petpals.controller;
 
 import com.app.petpals.entity.Post;
+import com.app.petpals.payload.LikePostRequest;
 import com.app.petpals.payload.PostAddRequest;
+import com.app.petpals.payload.PostEditRequest;
 import com.app.petpals.payload.PostResponse;
 import com.app.petpals.service.AWSImageService;
 import com.app.petpals.service.PostService;
@@ -29,11 +31,12 @@ public class PostController {
     private final AWSImageService awsImageService;
 
     @GetMapping("/test")
-    private List<Post> getTest(){
+    @Operation(summary = "Get all posts for tests ONLY.", security = @SecurityRequirement(name = "bearerAuth"))
+    private List<Post> getTest() {
         return postService.getTest();
     }
 
-    @GetMapping
+    @GetMapping()
     @Operation(summary = "Get posts page.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Page<PostResponse>> getPosts(Pageable pageable) {
         Page<Post> postPage = postService.getPosts(pageable);
@@ -61,10 +64,16 @@ public class PostController {
                 .build());
     }
 
-    @PutMapping(value = "/{id}/picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping("/{postId}")
+    @Operation(summary = "Edit post data by id.", security = @SecurityRequirement(name = "bearerAuth"))
+    public Post editPost(@PathVariable String postId, @RequestBody PostEditRequest request) {
+        return postService.updatePost(postId, request);
+    }
+
+    @PutMapping(value = "/{postId}/picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Edit post picture by id.", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<PostResponse> editPostPicture(@PathVariable String id, @RequestParam MultipartFile file) throws IOException {
-        Post post = postService.getPostById(id);
+    public ResponseEntity<PostResponse> editPostPicture(@PathVariable String postId, @RequestParam MultipartFile file) throws IOException {
+        Post post = postService.getPostById(postId);
         String imageId = null;
         if (file != null && !file.isEmpty()) {
             if (post.getPostPictureId() != null) {
@@ -72,7 +81,7 @@ public class PostController {
             }
             imageId = awsImageService.uploadImage(file.getBytes(), file.getContentType());
         }
-        post = postService.updatePostPicture(id, imageId);
+        post = postService.updatePostPicture(postId, imageId);
         return ResponseEntity.ok(PostResponse.builder()
                 .id(post.getId())
                 .title(post.getTitle())
@@ -81,5 +90,29 @@ public class PostController {
                         .map(awsImageService::getPresignedUrl)
                         .orElse(null))
                 .build());
+    }
+
+    @PostMapping("/{postId}/like")
+    @Operation(summary = "Like a post.", security = @SecurityRequirement(name = "bearerAuth"))
+    public Post likePost(@PathVariable String postId, @RequestBody LikePostRequest request) {
+        return postService.likePost(postId, request);
+    }
+
+    @DeleteMapping("/{postId}/picture")
+    @Operation(summary = "Remove post picture by id.", security = @SecurityRequirement(name = "bearerAuth"))
+    public Post removePostPicture(@PathVariable String postId) {
+        Post post = postService.getPostById(postId);
+        if (post.getPostPictureId() != null) {
+            awsImageService.deleteImage(post.getPostPictureId());
+            post = postService.deletePostPicture(postId);
+        }
+        return post;
+    }
+
+    @DeleteMapping("/{postId}")
+    @Operation(summary = "Like a post.", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<?> deletePost(@PathVariable String postId) {
+        postService.deletePost(postId);
+        return ResponseEntity.ok("Post deleted successfully.");
     }
 }

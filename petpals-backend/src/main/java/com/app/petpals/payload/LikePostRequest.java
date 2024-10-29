@@ -9,9 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CommentAddRequest {
+public class LikePostRequest {
     private String userId;
-    private String entityId;
-    private String entityType;
-    private String content;
 }

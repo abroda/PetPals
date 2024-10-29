@@ -4,15 +4,17 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "post")
-public class Post extends CommentableEntity {
+public class Post {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
 
     @Column(name = "title", nullable = false)
     private String title;
@@ -27,4 +29,11 @@ public class Post extends CommentableEntity {
     @ManyToOne
     @JoinColumn(name = "creator_id")
     private User creator;
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostComment> comments;
+
+    @ManyToMany(mappedBy = "likedPosts")
+    private List<User> likes;
 }

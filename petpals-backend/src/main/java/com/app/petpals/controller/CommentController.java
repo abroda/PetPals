@@ -1,7 +1,7 @@
 package com.app.petpals.controller;
 
-import com.app.petpals.entity.Comment;
-import com.app.petpals.payload.CommentAddRequest;
+import com.app.petpals.entity.PostComment;
+import com.app.petpals.payload.PostCommentAddRequest;
 import com.app.petpals.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +16,7 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping()
-    public Comment addComment(@RequestBody CommentAddRequest request) {
+    public PostComment addComment(@RequestBody PostCommentAddRequest request) {
         return commentService.addComment(request);
     }
 
