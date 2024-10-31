@@ -39,7 +39,7 @@ export function ThemedText({
       style={[
         {
           color: textColor,
-          backgroundColor: backgroundColor,
+          backgroundColor: 'none',
           flexWrap: "wrap",
           flexShrink: 1,
         },

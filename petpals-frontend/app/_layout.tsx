@@ -17,6 +17,7 @@ import HomeLayout from "./home/_layout";
 import { PostProvider } from "@/context/PostContext";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { UserProvider } from "@/context/UserContext";
+import { Provider as PaperProvider } from 'react-native-paper';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -37,33 +38,37 @@ export default function RootLayout() {
   }
 
   return (
+      <PaperProvider>
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <AuthProvider>
-					<UserProvider>
-						<PostProvider>
-							<Stack
-								screenOptions={{
-									headerShown: true,
-									headerShadowVisible: false,
-									headerTransparent: true,
-									headerTintColor: 'white',
-									headerTitle: "",
-									headerBackVisible: true,
-									headerBackTitleVisible: false,
+            <UserProvider>
+                <PostProvider>
 
-								}}
-							>
-								<Stack.Screen
-									name="index"
-									options={{ title: "PetPals" }}
-								/>
-								<Stack.Screen name="+not-found" />
-							</Stack>
-						</PostProvider>
-						</UserProvider>
+                        <Stack
+                            screenOptions={{
+                                headerShown: true,
+                                headerShadowVisible: false,
+                                headerTransparent: true,
+                                headerTintColor: 'white',
+                                headerTitle: "",
+                                headerBackVisible: true,
+                                headerBackTitleVisible: false,
+
+                            }}
+                        >
+                            <Stack.Screen
+                                name="index"
+                                options={{ title: "PetPals" }}
+                            />
+                            <Stack.Screen name="+not-found" />
+                        </Stack>
+
+                </PostProvider>
+            </UserProvider>
         </AuthProvider>
       </ThemeProvider>
     </GestureHandlerRootView>
+      </PaperProvider>
   );
 }
