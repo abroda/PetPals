@@ -36,7 +36,6 @@ public class FriendshipController {
                 .stream()
                 .map(friend -> AccountResponse.builder()
                         .id(friend.getId())
-                        .email(friend.getUsername())
                         .username(friend.getDisplayName())
                         .description(friend.getDescription())
                         .imageUrl(Optional.ofNullable(friend.getProfilePictureId())

@@ -14,4 +14,5 @@ public class PostResponse {
     private String title;
     private String description;
     private String imageUrl;
+    private PostAuthorResponse author;
 }

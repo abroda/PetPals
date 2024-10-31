@@ -39,7 +39,6 @@ public class AccountController {
                 .stream()
                 .map(user -> AccountResponse.builder()
                         .id(user.getId())
-                        .email(user.getUsername())
                         .username(user.getDisplayName())
                         .description(user.getDescription())
                         .imageUrl(Optional.ofNullable(user.getProfilePictureId())
@@ -64,7 +63,6 @@ public class AccountController {
         User user = userService.getById(userId);
         return ResponseEntity.ok(AccountResponse.builder()
                 .id(user.getId())
-                .email(user.getUsername())
                 .username(user.getDisplayName())
                 .description(user.getDescription())
                 .imageUrl(Optional.ofNullable(user.getProfilePictureId())
@@ -81,7 +79,6 @@ public class AccountController {
         User authUser = (User) auth.getPrincipal();
         return ResponseEntity.ok(AccountResponse.builder()
                 .id(authUser.getId())
-                .email(authUser.getUsername())
                 .username(authUser.getDisplayName())
                 .description(authUser.getDescription())
                 .imageUrl(Optional.ofNullable(authUser.getProfilePictureId())
@@ -99,7 +96,6 @@ public class AccountController {
         User user = userService.updateUserData(userId, accountEditRequest);
         return ResponseEntity.ok(AccountResponse.builder()
                 .id(user.getId())
-                .email(user.getUsername())
                 .username(user.getDisplayName())
                 .description(user.getDescription())
                 .imageUrl(Optional.ofNullable(user.getProfilePictureId())
@@ -124,7 +120,6 @@ public class AccountController {
         User updatedUser = userService.updateUserProfilePicture(userId, imageId);
         return ResponseEntity.ok(AccountResponse.builder()
                 .id(updatedUser.getId())
-                .email(updatedUser.getUsername())
                 .username(updatedUser.getDisplayName())
                 .description(updatedUser.getDescription())
                 .imageUrl(Optional.ofNullable(updatedUser.getProfilePictureId())
@@ -145,7 +140,6 @@ public class AccountController {
         }
         return ResponseEntity.ok(AccountResponse.builder()
                 .id(user.getId())
-                .email(user.getUsername())
                 .username(user.getDisplayName())
                 .description(user.getDescription())
                 .imageUrl(Optional.ofNullable(user.getProfilePictureId())

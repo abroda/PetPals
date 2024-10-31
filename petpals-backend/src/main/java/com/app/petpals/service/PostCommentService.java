@@ -5,6 +5,7 @@ import com.app.petpals.entity.PostComment;
 import com.app.petpals.entity.User;
 import com.app.petpals.exception.PostCommentDataException;
 import com.app.petpals.exception.PostCommentNotFoundException;
+import com.app.petpals.exception.UserUnauthorizedException;
 import com.app.petpals.payload.PostCommentAddRequest;
 import com.app.petpals.payload.PostCommentEditRequest;
 import com.app.petpals.repository.PostCommentRepository;
@@ -26,8 +27,13 @@ public class PostCommentService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
 
-    public List<PostComment> getTest() {
+    public List<PostComment> getAllPostComments() {
         return postCommentRepository.findAll();
+    }
+
+    public List<PostComment> getAllPostCommentsByPostId(String postId) {
+        postService.getPostById(postId);
+        return postCommentRepository.findByPostId(postId);
     }
 
     public PostComment getPostCommentById(String postCommentId) {
@@ -46,11 +52,23 @@ public class PostCommentService {
         return postCommentRepository.save(newComment);
     }
 
-    public PostComment updatePostComment(String postCommentId, PostCommentEditRequest request) {
+    public PostComment updatePostComment(String postCommentId, PostCommentEditRequest request, String userId) {
         if (request.getContent() == null || request.getContent().isEmpty())
             throw new PostCommentDataException("Post comment content is required.");
         PostComment postComment = getPostCommentById(postCommentId);
+        if (!postComment.getCommenter().getId().equals(userId)) {
+            throw new UserUnauthorizedException("Unauthorized action.");
+        }
         postComment.setContent(request.getContent());
         return postCommentRepository.save(postComment);
+    }
+
+    @Transactional
+    public void deletePostComment(String postCommentId, String userId) {
+        PostComment postComment = getPostCommentById(postCommentId);
+        if (!postComment.getCommenter().getId().equals(userId)) {
+            throw new UserUnauthorizedException("Unauthorized action.");
+        }
+        postCommentRepository.deleteById(postCommentId);
     }
 }
