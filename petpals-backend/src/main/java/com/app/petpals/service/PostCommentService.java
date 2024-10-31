@@ -19,7 +19,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class CommentService {
+public class PostCommentService {
     private final PostCommentRepository postCommentRepository;
     private final UserService userService;
     private final PostService postService;
@@ -35,9 +35,9 @@ public class CommentService {
     }
 
     @Transactional
-    public PostComment addComment(PostCommentAddRequest request) {
+    public PostComment addComment(String postId, PostCommentAddRequest request) {
         User user = userService.getById(request.getUserId());
-        Post post = postService.getPostById(request.getPostId());
+        Post post = postService.getPostById(postId);
         PostComment newComment = new PostComment();
         newComment.setContent(request.getContent());
         newComment.setCommenter(user);

@@ -8,4 +8,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CheckUserAuthorization {
+    String idField() default "userId";
+
+    String pathVariable() default "";
+
+    String requestParam() default "";
 }

@@ -7,6 +7,7 @@ import com.app.petpals.payload.PostEditRequest;
 import com.app.petpals.payload.PostResponse;
 import com.app.petpals.service.AWSImageService;
 import com.app.petpals.service.PostService;
+import com.app.petpals.utils.CheckUserAuthorization;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -50,6 +51,7 @@ public class PostController {
                 .build()));
     }
 
+    @CheckUserAuthorization
     @PostMapping()
     @Operation(summary = "Add new post.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<PostResponse> addPost(@RequestBody PostAddRequest request) {
@@ -64,12 +66,14 @@ public class PostController {
                 .build());
     }
 
+    @CheckUserAuthorization
     @PutMapping("/{postId}")
     @Operation(summary = "Edit post data by id.", security = @SecurityRequirement(name = "bearerAuth"))
     public Post editPost(@PathVariable String postId, @RequestBody PostEditRequest request) {
         return postService.updatePost(postId, request);
     }
 
+    @CheckUserAuthorization
     @PutMapping(value = "/{postId}/picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Edit post picture by id.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<PostResponse> editPostPicture(@PathVariable String postId, @RequestParam MultipartFile file) throws IOException {
@@ -110,7 +114,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{postId}")
-    @Operation(summary = "Like a post.", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Delete a post. (DELETE PICTURE BEFORE)", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<?> deletePost(@PathVariable String postId) {
         postService.deletePost(postId);
         return ResponseEntity.ok("Post deleted successfully.");

@@ -11,6 +11,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PostCommentAddRequest {
     private String userId;
-    private String postId;
     private String content;
 }
