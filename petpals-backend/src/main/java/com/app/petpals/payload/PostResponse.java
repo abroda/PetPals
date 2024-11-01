@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -15,4 +17,6 @@ public class PostResponse {
     private String description;
     private String imageUrl;
     private PostAuthorResponse author;
+    private List<PostCommentResponse> comments;
+    private List<String> likes;
 }

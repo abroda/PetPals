@@ -80,6 +80,22 @@ public class PostCommentController {
         return ResponseEntity.ok(new TextResponse("Comment deleted successfully."));
     }
 
+    @CheckUserAuthorization(idField = "userId")
+    @PostMapping("/comments/{commentId}/like")
+    @Operation(summary = "Like post comment by commentId.", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<PostCommentResponse> likePostComment(@PathVariable("commentId") String commentId, @RequestBody LikePostCommentRequest request) {
+        PostComment postComment = postCommentService.likePostComment(commentId, request);
+        return ResponseEntity.ok(getPostCommentResponseResponse(postComment));
+    }
+
+    @CheckUserAuthorization(idField = "userId")
+    @DeleteMapping("/comments/{commentId}/like")
+    @Operation(summary = "Remove like post comment by commentId.", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<PostCommentResponse> removeLikePostComment(@PathVariable("commentId") String commentId, @RequestBody LikePostCommentRequest request) {
+        PostComment postComment = postCommentService.removeLikePostComment(commentId, request);
+        return ResponseEntity.ok(getPostCommentResponseResponse(postComment));
+    }
+
     private PostCommentResponse getPostCommentResponseResponse(PostComment postComment) {
         return PostCommentResponse.builder()
                 .commentId(postComment.getId())

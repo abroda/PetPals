@@ -19,4 +19,10 @@ public class PostCommentGlobalExceptionHandler {
         PostCommentErrorResponse error = new PostCommentErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage(), System.currentTimeMillis());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
+
+    @ExceptionHandler(PostCommentLikeException.class)
+    public ResponseEntity<PostCommentErrorResponse> handlePostCommentLikeException(PostCommentLikeException e) {
+        PostCommentErrorResponse error = new PostCommentErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage(), System.currentTimeMillis());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
 }
