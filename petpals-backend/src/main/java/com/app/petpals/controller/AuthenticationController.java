@@ -33,6 +33,7 @@ public class AuthenticationController {
         User user = authenticationService.authenticate(authenticationRequest);
         String token = jwtService.generateToken(user);
         AuthenticationResponse authenticationResponse = new AuthenticationResponse(token, user.getId());
+        System.out.println("LOGGING IN");
         return ResponseEntity.ok(authenticationResponse);
     }
 
