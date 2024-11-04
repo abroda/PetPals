@@ -49,12 +49,12 @@ export default function NotificationItem(
               <UserAvatar
                 size={13}
                 doLink={false}
-                username={
-                  (userEmail?.length ?? 0) > 0 ? userEmail ?? "me" : "me"
-                }
+                userId={(userEmail?.length ?? 0) > 0 ? userEmail ?? "me" : "me"}
               />
             </ThemedView>
-            <ThemedText textStyleName={seen ? "default" : "defaultBold"}>
+            <ThemedText
+              textStyleOptions={{ weight: seen ? "regular" : "bold" }}
+            >
               Username did X
             </ThemedText>
           </HorizontalView>
@@ -68,7 +68,7 @@ export default function NotificationItem(
         </HorizontalView>
         <ThemedText
           backgroundColorName="transparent"
-          textStyleName="small"
+          textStyleOptions={{ size: "small" }}
           style={{
             marginLeft: percentToDP(16),
             marginRight: percentToDP(2),

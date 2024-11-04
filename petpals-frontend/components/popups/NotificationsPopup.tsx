@@ -14,7 +14,9 @@ export default function NotificationsPopup({ onDismiss = () => {} }) {
   return (
     <ThemedPopup onDismiss={onDismiss}>
       <HorizontalView>
-        <ThemedText textStyleName="bigBold">Notifications</ThemedText>
+        <ThemedText textStyleOptions={{ size: "big", weight: "bold" }}>
+          Notifications
+        </ThemedText>
         <Pressable onPress={onDismiss}>
           <ThemedIcon
             name="close"

@@ -32,7 +32,7 @@ export default function RegisterSuccessScreen() {
           showMotto={false}
         />
         <ThemedText
-          textStyleName="bigBold"
+          textStyleOptions={{ size: "big", weight: "bold" }}
           textColorName="primary"
           style={{
             marginTop: percentToDP(20),

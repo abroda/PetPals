@@ -40,7 +40,9 @@ export default function NewPostScreen() {
               colorName="transparent"
               style={{ margin: percentToDP(3), borderRadius: percentToDP(10) }}
             >
-              <ThemedText textStyleName="big">TODO: Add post</ThemedText>
+              <ThemedText textStyleOptions={{ size: "big" }}>
+                TODO: Add post
+              </ThemedText>
             </ThemedView>
           </HorizontalView>
           <ThemedView
@@ -71,7 +73,7 @@ export default function NewPostScreen() {
           <HorizontalView justifyOption="flex-start">
             <ThemedText
               style={{ marginRight: percentToDP(5) }}
-              textStyleName="smallBold"
+              textStyleOptions={{ size: "small", weight: "bold" }}
             >
               Pets tagged:
             </ThemedText>

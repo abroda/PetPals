@@ -46,7 +46,10 @@ export function ThemedIcon({
       <Ionicons
         size={percentToDP(rest.size ?? 8)}
         name={name}
-        style={[{ color: color, marginBottom: -3 }, style]}
+        style={[
+          { color: color, marginBottom: -3, backgroundColor: "transparent" },
+          style,
+        ]}
         {...rest}
       />
     );

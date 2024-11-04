@@ -17,8 +17,9 @@ export type Participant = {
 };
 
 export type GroupWalkTag = string;
+export const tagRegex = '^[^!@#$%^&*(),.?":{}|<>]*$';
 
-export type Comment = {
+export type CommentContent = {
   id: string;
   creator: Participant;
   content: string;
@@ -30,7 +31,8 @@ export type GroupWalk = {
   creator: Participant;
   title: string;
   description: string;
-  datetime: string;
+  datetime: Date;
+  location: string;
   tags: GroupWalkTag[];
   participantsCount: number;
   petsCount: number; // needed?
@@ -79,7 +81,7 @@ export type WalksContextType = {
   ) => Promise<{ success: boolean; returnValue: any }>;
   addGroupWalkComment: (
     walkId: string,
-    data: Comment,
+    data: CommentContent,
     asyncAbortController?: AbortController
   ) => Promise<{ success: boolean; returnValue: any }>;
   deleteGroupWalkComment: (
@@ -98,6 +100,7 @@ export const WalksContext = createContext<WalksContextType | null>(null);
 
 export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const { userId } = useAuth();
 
   const getGroupWalk = async (
     walkId: string,
@@ -194,7 +197,6 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
     tags: GroupWalkTag[],
     asyncAbortController?: AbortController
   ) => {
-    const { userId } = useAuth();
     return serverQuery({
       path:
         from === "all"
@@ -211,7 +213,7 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const addGroupWalkComment = async (
     walkId: string,
-    data: Comment,
+    data: CommentContent,
     asyncAbortController?: AbortController
   ) => {
     return serverQuery({

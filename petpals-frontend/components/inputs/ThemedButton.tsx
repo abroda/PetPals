@@ -1,33 +1,38 @@
-import { StyleSheet } from "react-native";
 import {
   ColorName,
   ThemedColor,
   useThemeColor,
 } from "@/hooks/theme/useThemeColor";
 import { Button, ButtonProps } from "react-native-ui-lib";
-import { TextStyles } from "@/constants/theme/TextStyles";
-import { useTextStyle } from "@/hooks/theme/useTextStyle";
-import { ThemedIcon } from "../decorations/static/ThemedIcon";
+import { TextStyleOptions, useTextStyle } from "@/hooks/theme/useTextStyle";
+import { ThemedIcon, ThemedIconProps } from "../decorations/static/ThemedIcon";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { Ionicons } from "@expo/vector-icons";
+import { ComponentProps } from "react";
 
 export type ThemedButtonProps = ButtonProps & {
-  href?: string;
-  iconName?: string;
   backgroundColorName?: ColorName;
   backgroundThemedColor?: ThemedColor;
   textColorName?: ColorName;
   textThemedColor?: ThemedColor;
-  type?: "long" | "half" | "small" | "with_icon" | "icon_only";
+  textStyleOptions?: TextStyleOptions;
+  shape?: "long" | "half" | "short" | "round";
+  border?: boolean;
+  iconName?: ComponentProps<typeof Ionicons>["name"];
+  iconSize?: number;
 };
 
 export const ThemedButton = ({
   style,
-  iconName,
   backgroundColorName = "primary",
   backgroundThemedColor,
   textColorName = "text",
   textThemedColor,
-  type = "long",
+  textStyleOptions = {},
+  shape = "long",
+  border = false,
+  iconName,
+  iconSize,
   ...rest
 }: ThemedButtonProps) => {
   const backgroundColor = useThemeColor(
@@ -36,22 +41,65 @@ export const ThemedButton = ({
   );
   const textColor = useThemeColor(textColorName, textThemedColor);
   const percentToDP = useWindowDimension("shorter");
+  const textStyle = useTextStyle(textStyleOptions);
 
   return (
     <Button
       color={textColor}
       labelStyle={[
-        useTextStyle("default"),
-        { paddingBottom: percentToDP(1.5) },
+        textStyle,
+        {
+          marginBottom: percentToDP(iconName && shape === "short" ? -0.8 : 0.6),
+        },
       ]}
+      size={
+        shape === "long"
+          ? "large"
+          : shape == "half"
+          ? "medium"
+          : shape === "short"
+          ? "small"
+          : "xSmall"
+      }
       style={[
         {
           backgroundColor: backgroundColor,
-          borderColor: useThemeColor("text"),
-          width: percentToDP(89),
+          borderColor: textColor,
+          borderRadius: percentToDP(10),
+          paddingBottom:
+            iconName && shape === "short" ? percentToDP(2.2) : undefined,
+          width: percentToDP(
+            shape === "long"
+              ? 89
+              : shape == "half"
+              ? 48
+              : shape === "short"
+              ? 27
+              : 15
+          ),
+          height: percentToDP(shape === "short" ? 10 : 15),
+          borderWidth: border ? 2 : 0,
+          alignContent: "center",
+          alignItems: "center",
+          justifyContent: "center",
         },
         style,
       ]}
+      iconSource={
+        iconName
+          ? () => (
+              <ThemedIcon
+                size={iconSize ?? textStyle.fontSize}
+                name={iconName}
+                colorName={textColorName}
+                style={{
+                  paddingRight: percentToDP(rest.iconOnRight ? 0 : 1),
+                  paddingLeft: percentToDP(rest.iconOnRight ? 1 : 0),
+                }}
+              />
+            )
+          : undefined
+      }
       {...rest}
     ></Button>
   );

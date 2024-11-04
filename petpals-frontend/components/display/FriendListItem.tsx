@@ -34,7 +34,7 @@ export default function FriendListItem(props: { username: string }) {
             paddingHorizontal: percentToPD(2),
             fontSize: percentToPD(8),
           }}
-          textStyleName="bigBold"
+          textStyleOptions={{ size: "big", weight: "bold" }}
           textColorName="link"
         >
           {props.username}

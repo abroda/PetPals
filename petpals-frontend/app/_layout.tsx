@@ -14,6 +14,7 @@ import { useColorScheme } from "@/hooks/theme/useColorScheme";
 import { assetsFonts } from "@/constants/theme/TextStyles";
 import { AuthProvider } from "@/context/AuthContext";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
+import { useTextStyle } from "@/hooks/theme/useTextStyle";
 import { PostProvider } from "@/context/PostContext";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { WalksProvider } from "@/context/WalksContext";
@@ -25,6 +26,7 @@ export default function RootLayout() {
   const [loaded] = useFonts(assetsFonts);
   const backgroundColor = useThemeColor("background");
   const textColor = useThemeColor("text");
+  const headerStyle = useTextStyle({ size: "big", weight: "bold" });
 
   useEffect(() => {
     if (loaded) {
@@ -48,9 +50,15 @@ export default function RootLayout() {
                   headerShadowVisible: false,
                   headerTransparent: true,
                   headerTintColor: textColor,
+                  headerStyle: { backgroundColor: backgroundColor },
                   headerTitle: "",
                   headerBackVisible: true,
                   headerBackTitleVisible: false,
+                  headerTitleStyle: {
+                    fontFamily: headerStyle.fontFamily,
+                    fontWeight: headerStyle.fontWeight,
+                    fontSize: headerStyle.fontSize,
+                  },
                 }}
               >
                 <Stack.Screen

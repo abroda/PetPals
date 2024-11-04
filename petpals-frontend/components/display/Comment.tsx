@@ -8,8 +8,15 @@ import { useState } from "react";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
 import { Pressable } from "react-native";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { CommentContent } from "@/context/WalksContext";
 
-export default function Comment(props: { commentId: string }) {
+export default function Comment({
+  commentId,
+  comment,
+}: {
+  commentId: string;
+  comment?: CommentContent;
+}) {
   const { userEmail } = useAuth();
   const [liked, setLiked] = useState(false);
   const percentToDP = useWindowDimension("shorter");
@@ -39,13 +46,15 @@ export default function Comment(props: { commentId: string }) {
             <UserAvatar
               size={10}
               doLink={true}
-              username={(userEmail?.length ?? 0) > 0 ? userEmail ?? "me" : "me"}
+              userId={comment?.creator.id ?? "me"}
             />
           </ThemedView>
-          <ThemedText textStyleName="big">Username</ThemedText>
+          <ThemedText textStyleOptions={{ size: "big" }}>
+            {comment?.creator.name ?? "Username"}
+          </ThemedText>
         </HorizontalView>
         <Pressable onPress={() => setLiked(!liked)}>
-          <ThemedIcon name={liked ? "heart" : "heart-outline"} />
+          <ThemedIcon name={comment?.liked ? "heart" : "heart-outline"} />
         </Pressable>
       </HorizontalView>
       <ThemedText
@@ -57,7 +66,7 @@ export default function Comment(props: { commentId: string }) {
           padding: percentToDP(3),
         }}
       >
-        Example comment comment
+        {comment?.content ?? "Example comment comment"}
       </ThemedText>
     </ThemedView>
   );

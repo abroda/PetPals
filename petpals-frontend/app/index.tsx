@@ -9,6 +9,7 @@ import { useWindowDimension } from "@/hooks/useWindowDimension";
 import { SafeAreaView } from "react-native-safe-area-context";
 import HorizontalView from "@/components/basic/containers/HorizontalView";
 import { useEffect } from "react";
+import "react-native-get-random-values";
 
 export default function WelcomeScreen() {
   const { isLoading, isProcessing, userId, authToken } = useAuth();

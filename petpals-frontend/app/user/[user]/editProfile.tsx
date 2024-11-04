@@ -8,7 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function EditUserProfileScreen() {
   const path = usePathname();
-  const username = path.slice(path.lastIndexOf("/") + 1);
+  const userId = path.slice(path.lastIndexOf("/") + 1);
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToPD = useWindowDimension("height");
   return (
@@ -20,9 +20,9 @@ export default function EditUserProfileScreen() {
         }}
       >
         <HorizontalView justifyOption="flex-end">
-          <ThemedText style={{ margin: percentToDP(4) }}>{username}</ThemedText>
+          <ThemedText style={{ margin: percentToDP(4) }}>{userId}</ThemedText>
           <UserAvatar
-            username={username}
+            userId={userId}
             size={13}
             doLink={false}
           ></UserAvatar>
@@ -33,7 +33,7 @@ export default function EditUserProfileScreen() {
         >
           <ThemedText
             style={{ marginRight: percentToDP(2) }}
-            textStyleName="smallBold"
+            textStyleOptions={{ size: "small", weight: "bold" }}
           >
             TODO: Edit Profile
           </ThemedText>

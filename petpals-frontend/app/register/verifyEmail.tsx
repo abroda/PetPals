@@ -94,7 +94,7 @@ export default function VerifyEmailScreen() {
           />
           {validationMessage && (
             <ThemedText
-              textStyleName="small"
+              textStyleOptions={{ size: "small" }}
               textColorName="alarm"
               style={{
                 marginBottom: percentToDP(3),
@@ -106,7 +106,7 @@ export default function VerifyEmailScreen() {
             </ThemedText>
           )}
           <ThemedText
-            textStyleName="bigBold"
+            textStyleOptions={{ size: "big", weight: "bold" }}
             style={{ marginBottom: percentToDP(3) }}
           >
             Verify email

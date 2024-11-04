@@ -31,6 +31,7 @@ export const serverQuery = async ({
   retriesCount = 3, // minimum 1
   timeout = 5000,
 }: AsyncQuery) => {
+  console.log("Query: " + method + " " + path);
   onStart();
 
   let abortController = asyncAbortController ?? new AbortController();

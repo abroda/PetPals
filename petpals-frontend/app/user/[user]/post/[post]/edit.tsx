@@ -42,7 +42,9 @@ export default function EditPostScreen() {
               colorName="transparent"
               style={{ margin: percentToDP(3), borderRadius: 30 }}
             >
-              <ThemedText textStyleName="big">TODO: Edit post</ThemedText>
+              <ThemedText textStyleOptions={{ size: "big" }}>
+                TODO: Edit post
+              </ThemedText>
             </ThemedView>
           </HorizontalView>
           <ThemedView
@@ -78,7 +80,7 @@ export default function EditPostScreen() {
           <HorizontalView justifyOption="flex-start">
             <ThemedText
               style={{ marginRight: 10 }}
-              textStyleName="smallBold"
+              textStyleOptions={{ size: "small", weight: "bold" }}
             >
               Pets tagged:
             </ThemedText>

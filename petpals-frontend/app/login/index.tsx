@@ -105,7 +105,7 @@ export default function LoginScreen() {
 
             {validationMessage && (
               <ThemedText
-                textStyleName="small"
+                textStyleOptions={{ size: "small" }}
                 textColorName="alarm"
                 style={{
                   marginBottom: percentToDP(3),
@@ -140,7 +140,7 @@ export default function LoginScreen() {
 
             <ThemedText
               textColorName="link"
-              textStyleName="small"
+              textStyleOptions={{ size: "small" }}
               onPress={() => setDialogVisible(true)}
               style={{
                 marginBottom: percentToDP(21.3),

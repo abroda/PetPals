@@ -28,7 +28,7 @@ export default function TermsOfUseDialog({ onDismiss = () => {} }) {
         }}
       >
         <ThemedText
-          textStyleName="bigBold"
+          textStyleOptions={{ size: "big", weight: "bold" }}
           style={{ marginBottom: percentToDP(3.5) }}
         >
           Terms of Use
@@ -60,11 +60,11 @@ export const TermsOfUse = () => {
   const linkColor = useThemeColor("link");
   const welcomeColor = useThemeColor("primary");
   const warningColor = useThemeColor("alarm");
-  const smallTheme = useTextStyle("small");
-  const smallBoldTheme = useTextStyle("smallBold");
-  const boldTheme = useTextStyle("defaultBold");
-  const bigTheme = useTextStyle("big");
-  const bigBoldTheme = useTextStyle("bigBold");
+  const smallTheme = useTextStyle({ size: "small" });
+  const smallBoldTheme = useTextStyle({ size: "big", weight: "bold" });
+  const boldTheme = useTextStyle({ weight: "bold" });
+  const bigTheme = useTextStyle({ size: "big" });
+  const bigBoldTheme = useTextStyle({ size: "big", weight: "bold" });
   const percentToDP = useWindowDimension("shorter");
   const widthPercentToDP = useWindowDimension("width");
 

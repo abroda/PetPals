@@ -18,19 +18,19 @@ export default function ChatListItem(props: { username: string }) {
       <HorizontalView justifyOption="flex-start">
         <UserAvatar
           size={13}
-          username={props.username}
+          userId={props.username}
           doLink={true}
         />
         <ThemedView style={{ justifyContent: "center" }}>
           <ThemedText
             style={{ paddingHorizontal: percentToPD(8) }}
-            textStyleName="bigBold"
+            textStyleOptions={{ size: "big", weight: "bold" }}
           >
             {props.username}
           </ThemedText>
           <ThemedText
             style={{ paddingHorizontal: percentToPD(8) }}
-            textStyleName="small"
+            textStyleOptions={{ size: "small" }}
           >
             {props.username}
           </ThemedText>

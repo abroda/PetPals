@@ -101,7 +101,7 @@ export default function ResetPasswordScreen() {
             />
             {validationMessage && (
               <ThemedText
-                textStyleName="small"
+                textStyleOptions={{ size: "small" }}
                 textColorName="alarm"
                 style={{
                   marginBottom: percentToDP(3),
@@ -113,7 +113,7 @@ export default function ResetPasswordScreen() {
               </ThemedText>
             )}
             <ThemedText
-              textStyleName="bigBold"
+              textStyleOptions={{ size: "big", weight: "bold" }}
               style={{ marginBottom: percentToDP(3) }}
             >
               Reset password

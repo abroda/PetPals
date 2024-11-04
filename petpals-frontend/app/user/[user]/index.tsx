@@ -50,7 +50,7 @@ export default function UserProfileScreen() {
         >
           <ThemedText
             style={{ marginRight: percentToDP(2) }}
-            textStyleName="smallBold"
+            textStyleOptions={{ size: "small", weight: "bold" }}
           >
             Pets:
           </ThemedText>

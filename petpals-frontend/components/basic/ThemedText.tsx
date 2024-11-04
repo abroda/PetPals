@@ -6,7 +6,7 @@ import {
   ThemedColor,
   useThemeColor,
 } from "@/hooks/theme/useThemeColor";
-import { TextStyleName, useTextStyle } from "@/hooks/theme/useTextStyle";
+import { TextStyleOptions, useTextStyle } from "@/hooks/theme/useTextStyle";
 
 export type ThemedTextProps = TextProps & {
   center?: boolean;
@@ -14,7 +14,7 @@ export type ThemedTextProps = TextProps & {
   textThemedColor?: ThemedColor;
   backgroundColorName?: ColorName;
   backgroundThemedColor?: ThemedColor;
-  textStyleName?: TextStyleName;
+  textStyleOptions?: TextStyleOptions;
 };
 
 export function ThemedText({
@@ -24,7 +24,7 @@ export function ThemedText({
   textThemedColor,
   backgroundColorName = "background",
   backgroundThemedColor,
-  textStyleName = "default",
+  textStyleOptions: textStyleName = {},
   ...rest
 }: ThemedTextProps) {
   const textColor = useThemeColor(textColorName, textThemedColor);

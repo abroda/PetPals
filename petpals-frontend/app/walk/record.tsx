@@ -32,11 +32,13 @@ export default function RecordWalkScreen() {
             size={40}
           ></ThemedIcon>
         </Pressable>
-        <ThemedText textStyleName="bigBold">TODO</ThemedText>
+        <ThemedText textStyleOptions={{ size: "big", weight: "bold" }}>
+          TODO
+        </ThemedText>
         <ThemedText>Visible users</ThemedText>
         <UserAvatar
           size={13}
-          username={"OtherUser"}
+          userId={"OtherUser"}
           doLink={true}
         />
         <ThemedText>Ongoing group walk</ThemedText>

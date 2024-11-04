@@ -5,7 +5,7 @@ import {
   ThemedColor,
   useThemeColor,
 } from "@/hooks/theme/useThemeColor";
-import { TextStyleName, useTextStyle } from "@/hooks/theme/useTextStyle";
+import { TextStyleOptions, useTextStyle } from "@/hooks/theme/useTextStyle";
 import { ThemedView } from "../basic/containers/ThemedView";
 import { Validator } from "react-native-ui-lib/src/components/textField/types";
 import { Dimensions } from "react-native";
@@ -17,7 +17,7 @@ export type ThemedTextFieldProps = TextFieldProps & {
   textThemedColor?: ThemedColor;
   backgroundColorName?: ColorName;
   backgroundThemedColor?: ThemedColor;
-  textStyleName?: TextStyleName;
+  textStyleOptions?: TextStyleOptions;
   withValidation?: boolean;
   validate?: Validator[];
   validationMessage?: string[];
@@ -44,7 +44,7 @@ export const ThemedTextField = forwardRef<TextFieldRef, ThemedTextFieldProps>(
       textThemedColor = undefined,
       backgroundColorName = "textField",
       backgroundThemedColor = undefined,
-      textStyleName = "default",
+      textStyleOptions = {},
       withValidation,
       validate,
       validationMessage,
@@ -69,7 +69,7 @@ export const ThemedTextField = forwardRef<TextFieldRef, ThemedTextFieldProps>(
           label={label}
           labelColor={textColor}
           labelStyle={[
-            useTextStyle(textStyleName),
+            useTextStyle(textStyleOptions),
             { paddingLeft: percentToDP(1) },
           ]}
           style={[
@@ -83,7 +83,7 @@ export const ThemedTextField = forwardRef<TextFieldRef, ThemedTextFieldProps>(
               paddingHorizontal: percentToDP(4),
               marginTop: percentToDP(2),
             },
-            useTextStyle(textStyleName),
+            useTextStyle(textStyleOptions),
             rest.style,
           ]}
           secureTextEntry={isSecret}
@@ -97,7 +97,7 @@ export const ThemedTextField = forwardRef<TextFieldRef, ThemedTextFieldProps>(
               marginTop: percentToDP(1),
               marginLeft: percentToDP(1),
             },
-            useTextStyle("small"),
+            useTextStyle({ size: "small" }),
           ]}
           validate={validate}
           validationMessage={validationMessage}
