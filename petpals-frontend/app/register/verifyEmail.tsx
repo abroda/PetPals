@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
 import { ThemedTextField } from "@/components/inputs/ThemedTextField";
 import { ThemedText } from "@/components/basic/ThemedText";
@@ -11,6 +11,7 @@ import { router } from "expo-router";
 import validators from "react-native-ui-lib/src/components/textField/validators";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
 import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoadingIndicator";
+import { TextFieldRef } from "react-native-ui-lib";
 
 export default function VerifyEmailScreen() {
   const [code, setCode] = useState("");
@@ -28,34 +29,43 @@ export default function VerifyEmailScreen() {
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToPD = useWindowDimension("height");
 
+  const emailRef = useRef<TextFieldRef>(null);
+  const codeRef = useRef<TextFieldRef>(null);
+
+  const asyncAbortController = useRef<AbortController | undefined>(undefined);
+  useEffect(() => {
+    asyncAbortController.current = new AbortController();
+    return () => {
+      asyncAbortController.current?.abort();
+    };
+  }, []);
+
   function verify() {
-    return (
-      (code.match(codeRegex)?.length ?? 0) > 0 && validators.email(email ?? "")
-    );
+    let res = codeRef.current?.validate();
+    return emailRef.current?.validate() && res;
   }
 
   async function submit() {
     setValidationMessage("");
-    if (!verify()) {
-      setValidationMessage("Input is invalid.");
-    } else {
+    if (verify()) {
       let result = await verifyEmail(email, code);
+
       if (result.success) {
         router.dismissAll();
-        router.push("/register/success");
+        router.replace("/register/success");
       } else {
-        setValidationMessage(result.message);
+        setValidationMessage(result.returnValue);
+        asyncAbortController.current = new AbortController();
       }
     }
   }
 
   async function resend() {
     setValidationMessage("");
-    if (!validators.email(email)) {
-      setValidationMessage("Invalid email.");
-    } else {
+    if (emailRef.current?.validate()) {
       let result = await resendVerification(email);
-      setValidationMessage(result.message);
+      setValidationMessage(result.returnValue);
+      asyncAbortController.current = new AbortController();
     }
   }
 
@@ -105,6 +115,7 @@ export default function VerifyEmailScreen() {
             Please enter verification code to finish registration.
           </ThemedText>
           <ThemedTextField
+            ref={emailRef}
             label="Email"
             autoComplete="email"
             value={email}
@@ -116,6 +127,7 @@ export default function VerifyEmailScreen() {
             maxLength={250}
           />
           <ThemedTextField
+            ref={codeRef}
             label="Code"
             autoComplete="one-time-code"
             onChangeText={(newText: string) => setCode(newText)}

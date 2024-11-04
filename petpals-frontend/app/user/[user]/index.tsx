@@ -97,13 +97,10 @@ export default function UserProfileScreen() {
                   style={{ width: percentToDP(33) }}
                 ></ThemedButton>
                 <ThemedButton
-                  onPress={() => {
-                    logout().then((result) => {
-                      if (result.success) {
-                        router.dismissAll();
-                        router.replace("/");
-                      }
-                    });
+                  onPress={async () => {
+                    logout();
+                    router.dismissAll();
+                    router.replace("/");
                   }}
                   label="Logout"
                   style={{ width: percentToDP(33) }}
