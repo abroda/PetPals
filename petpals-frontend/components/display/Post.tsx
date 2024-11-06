@@ -10,8 +10,9 @@ import {Href, router} from "expo-router";
 import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
 import {Pressable} from "react-native";
 import {useWindowDimension} from "@/hooks/useWindowDimension";
+import {PostType} from "@/context/PostContext";
 
-export default function Post() {
+export default function Post({post}: {post: PostType}) {
     const {userId} = useAuth();
     const [dialogVisible, setDialogVisible] = useState(false);
     const [liked, setLiked] = useState(false);
@@ -32,13 +33,15 @@ export default function Post() {
                 <UserAvatar
                     size={10}
                     doLink={true}
-                    userId={"userIdFromList"}
+                    userId={post.author.id}
+                    imgUrl={post.author.imageUrl}
                 />
                 <ThemedText style={{backgroundColor: "transparent", marginLeft: 16}}
-                            textStyleName="big">Username</ThemedText>
+                            textStyleName="big">{post.author.username}</ThemedText>
             </HorizontalView>
 
             {/*IMAGE*/}
+            {post.imageUrl &&
             <ThemedView
                 style={{
                     width: percentToDP(80),
@@ -49,7 +52,7 @@ export default function Post() {
             >
                 <Image
                     source={{
-                        uri: "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
+                        uri: post.imageUrl,
                     }}
                     style={{
                         width: "100%",
@@ -58,14 +61,13 @@ export default function Post() {
                     }}
                 />
             </ThemedView>
+            }
 
             {/*TITLE AND DESCRIPTION*/}
             <ThemedText style={{backgroundColor: "transparent", marginBottom: 10}}
-                        textStyleName="big">Example post with
-                a cutie</ThemedText>
+                        textStyleName="big">{post.title}</ThemedText>
             <ThemedText style={{backgroundColor: "transparent", marginBottom: 36}}
-                        textStyleName="small">Oh what a great description! Surely written by a genius. Also look at this
-                cute doggo.</ThemedText>
+                        textStyleName="small">{post.description}</ThemedText>
 
 
             {/*COMMENTS AND LIKES*/}
@@ -80,13 +82,13 @@ export default function Post() {
                     }}
                     backgroundColorName="secondary"
                     onPress={() =>
-                        router.push("/user/Username/post/postId" as Href<string>)
+                        router.push(`/user/${post.author.username}/post/${post.id}` as Href<string>)
                     }
                 >
                     {/*Go to comment section*/}
                     <ThemedIcon name="chatbox" size={20} style={{marginRight: 10}}/>
                     <ThemedText style={{backgroundColor: "transparent"}}
-                                textStyleName="small" textColorName="primary">21 comments</ThemedText>
+                                textStyleName="small" textColorName="primary">{post.comments.length} comments</ThemedText>
                 </ThemedButton>
                 <Pressable onPress={() => setLiked(!liked)}>
                     <ThemedIcon
