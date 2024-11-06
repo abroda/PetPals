@@ -13,6 +13,8 @@ import { useAuth } from "@/hooks/useAuth";
 import {useNavigation, usePathname} from "expo-router";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 import PostFeed from "@/components/lists/PostFeed";
+import { router } from "expo-router";
+
 
 export default function UserProfileScreen() {
 const path = usePathname();
@@ -75,10 +77,10 @@ const handleMenuSelect = (option: string) => {
     setMenuVisible(false);
     if (option === "Edit") {
         // @ts-ignore
-        navigation.push("/user/me/editProfile");
+        router.push("/user/me/editProfile");
     } else if (option === "App Settings") {
         // @ts-ignore
-        navigation.push("/settings");
+        router.push("/settings");
     }
 };
 

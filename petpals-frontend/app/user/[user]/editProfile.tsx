@@ -159,14 +159,12 @@ export default function EditUserProfileScreen() {
                         justifyContent: 'center',
                         marginTop: heightPercentToPD(-20),
                     }}>
-                        <Button title="Change avatar" onPress={handleAvatarChange}/>
                         <UserAvatar
                             size={heightPercentToPD(7)}
                             userId={userProfile?.userId}
                             imageUrl={userProfile?.imageUrl || null}
                             doLink={false}
                         />
-
                     </View>
 
                     {/* Container for TextInputs and buttons */}
@@ -277,6 +275,16 @@ export default function EditUserProfileScreen() {
                             borderColor: accentTeal,
                         }}/>
 
+                        <ThemedButton label="Change avatar" onPress={handleAvatarChange} color={accentTeal} style={{
+                            width: widthPercentageToDP(80),
+                            backgroundColor: 'transparent',
+                            marginTop: heightPercentToPD(2),
+                            paddingHorizontal: percentToDP(6),
+                            paddingVertical: percentToDP(2),
+                            borderRadius: percentToDP(6),
+                            borderWidth: 1,
+                            borderColor: accentTeal,
+                        }}/>
                         <ThemedButton label="Change password" onPress={() => handleChangePassword()} color={accentGreen} style={{
                             width: widthPercentageToDP(80),
                             backgroundColor: 'transparent',
