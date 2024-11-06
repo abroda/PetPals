@@ -10,6 +10,10 @@ export type PostContextType = {
         size: number,
         asyncAbortController?: AbortController
     ) => Promise<{ success: boolean; returnValue: any }>;
+    getPostById: (
+        postId: string,
+        asyncAbortController?: AbortController
+    ) => Promise<{ success: boolean; returnValue: any }>;
 };
 
 export type PostType = {
@@ -74,12 +78,31 @@ export const PostProvider: FC<{ children: ReactNode }> = ({children}) => {
         });
     }
 
+    const getPostById = async (
+        postId: string,
+        asyncAbortController?: AbortController
+    ) => {
+        return await serverQuery({
+            path: apiPaths.posts.getPostById(postId),
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${authToken}`
+            },
+            payload: null,
+            onStart: () => setIsProcessing(true),
+            onEnd: () => setIsProcessing(false),
+            asyncAbortController: asyncAbortController,
+        });
+    }
+
     return (
         <PostContext.Provider
             value={
                 {
                     isProcessing,
-                    getFeed
+                    getFeed,
+                    getPostById
                 }
             }
         >

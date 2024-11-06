@@ -10,7 +10,8 @@ export const apiPaths = {
     login: databaseURL + "api/auth/login",
   },
   posts: {
-    getFeed: databaseURL + "api/posts"
+    getFeed: databaseURL + "api/posts",
+    getPostById: (postId: string) => databaseURL + `api/posts/${postId}`,
   },
   profiles: {},
   friends: {},
