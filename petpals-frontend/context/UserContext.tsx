@@ -17,6 +17,7 @@ export type UserContextType = {
     userProfile: UserProfile | null;
     getUserById: (id: string) => Promise<boolean>;
     updateUser: (id: string, data: Partial<UserProfile>) => Promise<boolean>;
+    changeUserAvatar: (id: string, file: File | Blob)=> Promise<false | true>;
 };
 
 export type UserProfile = {
@@ -179,6 +180,93 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
     };
 
 
+    const sendFileQuery = async (
+        path: string,
+        method: string = "POST",
+        file: File | Blob,
+        onOKResponse: (payload: any) => void = (payload: any) => {
+            setResponseMessage("OK: " + payload.message);
+        },
+        onBadResponse: (payload: any) => void = (payload: any) => {
+            setResponseMessage("Server error: " + payload.message);
+        },
+        onError: (error: Error) => void = (error: Error) => {
+            setResponseMessage("Fetch error: " + error.message);
+        }
+    ) => {
+        setResponseMessage("");
+        setIsProcessing(true);
+
+        const formData = new FormData();
+        formData.append("file", file); // The backend expects "file" as the key
+
+        const options: RequestInit = {
+            method: method,
+            mode: "cors",
+            headers: {
+                Authorization: `Bearer ${authToken}`, // Attach auth token for protected route
+            },
+            body: formData,
+        };
+
+        console.log(`Sending file upload request to: ${path}`);
+
+        return fetch(path, options)
+            .then((response: Response) => {
+                if (!response.ok) {
+                    return response.text().then((text) => {
+                        console.log("Error Response Text: ", text);
+                        onBadResponse({ message: text || response.statusText });
+                        return false;
+                    });
+                }
+                return response
+                    .json()
+                    .then((payload) => {
+                        onOKResponse(payload);
+                        setIsProcessing(false);
+                        return true;
+                    })
+                    .catch((error) => {
+                        onError(error);
+                        setIsProcessing(false);
+                        return false;
+                    });
+            })
+            .catch((error: Error) => {
+                onError(error);
+                setIsProcessing(false);
+                return false;
+            });
+    };
+
+    const changeUserAvatar = async (id: string, file: File | Blob) => {
+        console.log(`Updating user avatar for ID: ${id}`);
+
+        return sendFileQuery(
+            apiPaths.users.updateUserProfilePicture(id), // Assuming the path is correct in apiPaths
+            "PUT",
+            file,
+            (payload) => {
+                setUserProfile({
+                    id: payload.id,
+                    email: payload.email,
+                    username: payload.username,
+                    description: payload.description,
+                    imageUrl: payload.imageUrl,
+                    visibility: payload.visibility,
+                });
+                setResponseMessage("User avatar updated successfully!");
+                console.log("User avatar updated:", payload.imageUrl);
+            },
+            (payload) => {
+                setResponseMessage("Failed to update user avatar: " + payload.message);
+            }
+        );
+    };
+
+
+
     return (
         <UserContext.Provider
             value={{
@@ -187,6 +275,7 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
                 userProfile,
                 getUserById,
                 updateUser,
+                changeUserAvatar, // Add this line
             }}
         >
             {children}

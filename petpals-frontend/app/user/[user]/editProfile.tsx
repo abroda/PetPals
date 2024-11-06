@@ -4,16 +4,16 @@ import {ThemedView} from "@/components/basic/containers/ThemedView";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import {usePathname} from "expo-router";
 import {useWindowDimension} from "@/hooks/useWindowDimension";
-import {SafeAreaView} from "react-native-safe-area-context";
 import { useContext, useEffect, useState } from "react";
-
-import {TextInput} from 'react-native';
-
+import { SafeAreaView, View, TextInput, Alert, Pressable, Button } from "react-native";
 import { UserContext } from "@/context/UserContext";
 import {heightPercentageToDP, widthPercentageToDP} from "react-native-responsive-screen";
-import {Pressable, View} from "react-native";
 import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
 import {ThemedButton} from "@/components/inputs/ThemedButton";
+import * as ImagePicker from 'expo-image-picker';
+import {tls} from "node-forge";
+import {email} from "@sideway/address";
+
 
 
 export default function EditUserProfileScreen() {
@@ -22,60 +22,113 @@ export default function EditUserProfileScreen() {
     const percentToDP = useWindowDimension("shorter");
     const heightPercentToPD = useWindowDimension("height");
 
+    // Colours
     const darkGreen = '#0A2421'
     const lightGreen = '#1C302A'
     const accentGreen = '#B4D779'
     const accentTeal = '#52B8A3'
     const cream = '#FAF7EA'
 
-    const [usernameText, onChangeUsernameText] = useState('Username');
-    const [descriptionText, onChangeDescritpionText] = useState('Description');
-    const [emailText, onChangeEmailText] = useState('E-mail Address');
-
-
     // @ts-ignore
-    const {getUserById, userProfile, isProcessing, responseMessage} = useContext(UserContext);
+    const {getUserById, userProfile, updateUser, changeUserAvatar, isProcessing, responseMessage} = useContext(UserContext);
+
+    // States
+    const [usernameText, setUsernameText] = useState("");
+    const [descriptionText, setDescriptionText] = useState("");
+    const [emailText, setEmailText] = useState("");
+    const [image, setImage] = useState<string | null>(null);
+
 
     useEffect(() => {
         getUserById(userProfile.id);
     }, []);
 
-    const saveProfile = () => {
+    useEffect(() => {
+        if (userProfile) {
+            setUsernameText(userProfile.username);
+            setDescriptionText(userProfile.description);
+            setEmailText(userProfile.email);
+        }
+    }, [userProfile]);
 
-    }
+
+    const saveProfile = async () => {
+        // Set displayName (username) to "No Username" if empty
+        const displayNameToSave = usernameText.trim() || "No Username";
+        const descriptionToSave = descriptionText.trim() || "No Description";
+
+        // Prepare data to update
+        const updatedData = {
+            displayName: displayNameToSave,  // Ensure displayName is sent as expected by the backend
+            description: descriptionToSave,
+            visibility: userProfile.visibility,  // Include visibility if needed
+        };
+
+        console.log("Sending updated user data:", updatedData);
+
+        // Update user data
+        const updateSuccessful = await updateUser(userProfile.id, updatedData);
+
+        if (updateSuccessful) {
+            Alert.alert("Profile Updated", "Your profile has been successfully updated.");
+        } else {
+            Alert.alert("Update Failed", "There was an error updating your profile.");
+        }
+    };
+
+
+    const handleAvatarChange = async () => {
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            const file = {
+                uri: result.assets[0].uri,
+                name: "profile-picture.jpg",
+                type: "image/jpeg",
+            } as unknown as File;
+
+            await changeUserAvatar(userProfile.id, file);
+        }
+    };
 
     const handleChangePassword = () => {
 
     }
 
+    const handleChangeEmail = () => {
+
+    }
+
 
     return (
-        <SafeAreaView>
+        <SafeAreaView style={{flex: 1}}>
             <ThemedView
                 style={{
-                    width: widthPercentageToDP(100),
-                    height: heightPercentToPD(100),
+                    flex: 1,
                 }}
             >
                 <HorizontalView
                     justifyOption="flex-end"
                     style={{
-                        flex:0,
+                        flex:3,
                         width: widthPercentageToDP(100),
-                        height: heightPercentToPD(30),
                         paddingHorizontal: widthPercentageToDP(5),
-                        paddingVertical: heightPercentToPD(5),
+                        paddingTop: heightPercentToPD(5),
                         backgroundColor: lightGreen,
-
                 }}>
                     <Pressable
                         onPress={saveProfile}
                         style={{
                             position: 'absolute',
-                            top: 0,
-                            right: 0,
+                            top: heightPercentToPD(1),
+                            right: heightPercentToPD(1),
                             marginRight: percentToDP(5),
                             marginTop: percentToDP(5),
+                            zIndex: 2,
                         }}
                     >
                         <ThemedIcon name="checkmark-outline" size={percentToDP(10)} style={{
@@ -91,13 +144,12 @@ export default function EditUserProfileScreen() {
                 <HorizontalView
                     justifyOption="flex-start"
                     style={{
-                        flex:1,
+                        flex:7,
                         flexDirection: 'column',
                         width: widthPercentageToDP(100),
                         paddingHorizontal: widthPercentageToDP(5),
                         paddingVertical: heightPercentToPD(0),
                         backgroundColor: darkGreen,
-
                     }}
                 >
 
@@ -106,8 +158,8 @@ export default function EditUserProfileScreen() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         marginTop: heightPercentToPD(-20),
-
                     }}>
+                        <Button title="Change avatar" onPress={handleAvatarChange}/>
                         <UserAvatar
                             size={heightPercentToPD(7)}
                             userId={userProfile?.userId}
@@ -117,12 +169,13 @@ export default function EditUserProfileScreen() {
 
                     </View>
 
+                    {/* Container for TextInputs and buttons */}
                     <View style={{
                         flex: 1,
                         backgroundColor: darkGreen,
                         width: widthPercentageToDP(80),
-                        paddingVertical: heightPercentToPD(5),
-
+                        paddingVertical: heightPercentToPD(1),
+                        // alignContent: 'space-between'
                     }}>
                         {/* Username */}
                         <ThemedText style={{
@@ -140,7 +193,7 @@ export default function EditUserProfileScreen() {
                             maxLength={16}
                             style={{
                                 paddingHorizontal: percentToDP(6),
-                                paddingVertical: percentToDP(4),
+                                paddingVertical: percentToDP(3),
                                 borderRadius: percentToDP(6),
                                 borderWidth: 1,
                                 borderColor: lightGreen,
@@ -148,7 +201,7 @@ export default function EditUserProfileScreen() {
                                 fontSize: 16,
                                 letterSpacing: 0.5,
                             }}
-                            onChangeText={onChangeUsernameText}
+                            onChangeText={setUsernameText}
                             value={usernameText}
                         />
 
@@ -167,12 +220,12 @@ export default function EditUserProfileScreen() {
                         <TextInput
                             maxLength={48}
                             style={{
-                                height: heightPercentToPD(18),
+                                height: heightPercentToPD(15),
                                 justifyContent: 'flex-start',
                                 alignContent: 'flex-start',
                                 alignItems: 'flex-start',
                                 paddingHorizontal: percentToDP(6),
-                                paddingVertical: percentToDP(4),
+                                paddingVertical: percentToDP(3),
                                 textAlignVertical: 'top',
                                 borderRadius: percentToDP(6),
                                 borderWidth: 1,
@@ -181,7 +234,7 @@ export default function EditUserProfileScreen() {
                                 fontSize: 16,
                                 letterSpacing: 0.5,
                             }}
-                            onChangeText={onChangeDescritpionText}
+                            onChangeText={setDescriptionText}
                             value={descriptionText}
                         />
 
@@ -199,9 +252,10 @@ export default function EditUserProfileScreen() {
                         </ThemedText>
                         <TextInput
                             maxLength={32}
+                            editable={false}
                             style={{
                                 paddingHorizontal: percentToDP(6),
-                                paddingVertical: percentToDP(4),
+                                paddingVertical: percentToDP(3),
                                 borderRadius: percentToDP(6),
                                 borderWidth: 1,
                                 borderColor: lightGreen,
@@ -209,15 +263,26 @@ export default function EditUserProfileScreen() {
                                 fontSize: 16,
                                 letterSpacing: 0.5,
                             }}
-                            onChangeText={onChangeEmailText}
+                            onChangeText={setEmailText}
                             value={emailText}
                         />
+                        <ThemedButton label="Change e-mail" onPress={() => handleChangeEmail()} color={accentTeal} style={{
+                            width: widthPercentageToDP(80),
+                            backgroundColor: 'transparent',
+                            marginTop: heightPercentToPD(2),
+                            paddingHorizontal: percentToDP(6),
+                            paddingVertical: percentToDP(2),
+                            borderRadius: percentToDP(6),
+                            borderWidth: 1,
+                            borderColor: accentTeal,
+                        }}/>
 
                         <ThemedButton label="Change password" onPress={() => handleChangePassword()} color={accentGreen} style={{
                             width: widthPercentageToDP(80),
                             backgroundColor: 'transparent',
+                            marginTop: heightPercentToPD(2),
                             paddingHorizontal: percentToDP(6),
-                            paddingVertical: percentToDP(4),
+                            paddingVertical: percentToDP(2),
                             borderRadius: percentToDP(6),
                             borderWidth: 1,
                             borderColor: accentGreen,
