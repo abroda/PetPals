@@ -20,6 +20,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -50,6 +53,7 @@ public class PostService {
         post.setTitle(request.getTitle());
         post.setDescription(request.getDescription());
         post.setCreator(creator);
+        post.setCreatedAt(LocalDateTime.now());
         return postRepository.save(post);
     }
 
@@ -120,5 +124,10 @@ public class PostService {
         }
 
         postRepository.deleteById(postId);
+    }
+
+
+    public boolean checkForNewPosts(LocalDateTime time){
+        return postRepository.countByCreatedAtAfter(time) != 0;
     }
 }

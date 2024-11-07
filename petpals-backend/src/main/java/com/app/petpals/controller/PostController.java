@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -55,6 +57,13 @@ public class PostController {
     public ResponseEntity<PostResponse> getPostById(@PathVariable("postId") String postId) {
         Post post = postService.getPostById(postId);
         return ResponseEntity.ok(getPostResponse(post));
+    }
+
+    @GetMapping("/checkNew")
+    @Operation(summary = "Check for new posts.", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<BooleanResponse> checkForNewPosts(@RequestParam OffsetDateTime time) {
+        LocalDateTime localDateTime = time.toLocalDateTime();
+        return ResponseEntity.ok(BooleanResponse.builder().response(postService.checkForNewPosts(localDateTime)).build());
     }
 
     @CheckUserAuthorization(idField = "userId")
@@ -143,6 +152,7 @@ public class PostController {
                 .imageUrl(Optional.ofNullable(post.getPostPictureId())
                         .map(awsImageService::getPresignedUrl)
                         .orElse(null))
+                .createdAt(post.getCreatedAt())
                 .author(PostAuthorResponse.builder()
                         .userId(post.getCreator().getId())
                         .username(post.getCreator().getDisplayName())

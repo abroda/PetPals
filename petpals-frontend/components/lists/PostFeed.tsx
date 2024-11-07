@@ -23,6 +23,8 @@ export default function PostFeed({
     const [currentPage, setCurrentPage] = useState(0);
     const size = 10;
 
+    const [refreshing, setRefreshing] = useState(false);
+    const [newPostsAvailable, setNewPostsAvailable] = useState(false);
 
     // Initial load
     useEffect(() => {

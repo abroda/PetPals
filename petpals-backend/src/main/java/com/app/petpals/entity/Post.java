@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -25,6 +26,9 @@ public class Post {
 
     @Column(name = "post_picture_id", unique = true)
     private String postPictureId;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
     @JsonBackReference
     @ManyToOne
