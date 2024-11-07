@@ -1,14 +1,10 @@
 import {ThemedView, ThemedViewProps,} from "@/components/basic/containers/ThemedView";
 import {FlatList} from "react-native-gesture-handler";
-import {useWindowDimension} from "@/hooks/useWindowDimension";
 import Post from "@/components/display/Post";
-import {ActivityIndicator, ViewStyle} from "react-native";
+import {ViewStyle} from "react-native";
 import {useCallback, useEffect, useRef, useState} from "react";
 import {usePosts} from "@/hooks/usePosts";
 import {PostType} from "@/context/PostContext";
-import {ThemedText} from "@/components/basic/ThemedText";
-import {has} from "react-native-reanimated/lib/typescript/createAnimatedComponent/utils";
-import {View} from "react-native-ui-lib";
 
 export type PostFeedProps = {
     outerViewProps?: ThemedViewProps;
@@ -19,19 +15,18 @@ export default function PostFeed({
                                      outerViewProps,
                                      flatListStyle,
                                  }: PostFeedProps) {
-    const heightPercentToDP = useWindowDimension("height");
     const {getFeed, isProcessing} = usePosts();
     const asyncAbortController = useRef<AbortController | undefined>();
-    const [isLoading, setIsLoading] = useState(true)
+
     const [posts, setPosts] = useState<PostType[]>([])
     const [hasMore, setHasMore] = useState(true);
     const [currentPage, setCurrentPage] = useState(0);
-    const size = 2;
+    const size = 10;
 
 
     // Initial load
     useEffect(() => {
-        getData().then(() => setIsLoading(false));
+        getData()
 
         return () => {
             asyncAbortController.current?.abort();
@@ -73,7 +68,7 @@ export default function PostFeed({
             <FlatList
                 data={posts}
                 keyExtractor={(item) => item.id.toString()}
-                renderItem={({item}) => <Post post={item}/>}
+                renderItem={({item}) => <Post postFromFeed={item}/>}
                 contentContainerStyle={{paddingBottom: 50}}
                 {...flatListStyle}
                 onEndReached={() => {

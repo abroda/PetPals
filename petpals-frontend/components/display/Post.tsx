@@ -2,8 +2,7 @@ import HorizontalView from "@/components/basic/containers/HorizontalView";
 import {ThemedView} from "@/components/basic/containers/ThemedView";
 import {ThemedText} from "@/components/basic/ThemedText";
 import UserAvatar from "@/components/navigation/UserAvatar";
-import {useAuth} from "@/hooks/useAuth";
-import {useState} from "react";
+import React, {useCallback, useRef, useState} from "react";
 import {Image} from "react-native-ui-lib";
 import {ThemedButton} from "@/components/inputs/ThemedButton";
 import {Href, router} from "expo-router";
@@ -11,12 +10,45 @@ import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
 import {Pressable} from "react-native";
 import {useWindowDimension} from "@/hooks/useWindowDimension";
 import {PostType} from "@/context/PostContext";
+import {usePosts} from "@/hooks/usePosts";
+import {useAuth} from "@/hooks/useAuth";
 
-export default function Post({post}: {post: PostType}) {
-    const {userId} = useAuth();
-    const [dialogVisible, setDialogVisible] = useState(false);
-    const [liked, setLiked] = useState(false);
+export default function Post({postFromFeed}: { postFromFeed: PostType }) {
+    const {userId} = useAuth()
+    const [post, setPost] = useState(postFromFeed)
+    const {likePostById, removeLikePostById} = usePosts();
+    const [liked, setLiked] = useState(post.likes.includes(userId!));
     const percentToDP = useWindowDimension("shorter");
+    const asyncAbortController = useRef<AbortController | undefined>();
+
+
+    const handlePostLike = useCallback(async () => {
+        console.log("Start loading");
+        asyncAbortController.current = new AbortController();
+        let result;
+        console.log("LIKED: ", liked)
+        if (!liked) {
+            result = await likePostById(
+                postFromFeed.id,
+                asyncAbortController.current
+            );
+        } else {
+            result = await removeLikePostById(
+                postFromFeed.id,
+                asyncAbortController.current
+            );
+        }
+
+        console.log("result: ", result)
+
+        if (result.success) {
+            setPost(result.returnValue);
+            setLiked(!liked)
+        }
+        console.log("Stop loading");
+    }, [liked]);
+
+
     return (
         <ThemedView
             colorName="background"
@@ -42,25 +74,25 @@ export default function Post({post}: {post: PostType}) {
 
             {/*IMAGE*/}
             {post.imageUrl &&
-            <ThemedView
-                style={{
-                    width: percentToDP(80),
-                    height: percentToDP(80),
-                    marginBottom: 24,
-                    borderRadius: 30
-                }}
-            >
-                <Image
-                    source={{
-                        uri: post.imageUrl,
-                    }}
+                <ThemedView
                     style={{
-                        width: "100%",
-                        height: "100%",
-                        borderRadius: 10,
+                        width: percentToDP(80),
+                        height: percentToDP(80),
+                        marginBottom: 24,
+                        borderRadius: 30
                     }}
-                />
-            </ThemedView>
+                >
+                    <Image
+                        source={{
+                            uri: post.imageUrl,
+                        }}
+                        style={{
+                            width: "100%",
+                            height: "100%",
+                            borderRadius: 10,
+                        }}
+                    />
+                </ThemedView>
             }
 
             {/*TITLE AND DESCRIPTION*/}
@@ -88,18 +120,23 @@ export default function Post({post}: {post: PostType}) {
                     {/*Go to comment section*/}
                     <ThemedIcon name="chatbox" size={20} style={{marginRight: 10}}/>
                     <ThemedText style={{backgroundColor: "transparent"}}
-                                textStyleName="small" textColorName="primary">{post.comments.length} comments</ThemedText>
+                                textStyleName="small"
+                                textColorName="primary">{post.comments.length} comments</ThemedText>
                 </ThemedButton>
-                <Pressable onPress={() => setLiked(!liked)}>
-                    <ThemedIcon
-                        size={32}
-                        name={liked ? "heart" : "heart-outline"}
-                        style={{
-                            paddingRight: percentToDP(1),
-                            paddingBottom: percentToDP(1),
-                        }}
-                    />
-                </Pressable>
+                <HorizontalView justifyOption={"flex-end"}>
+                    <Pressable onPress={() => {
+                        handlePostLike()
+                    }
+                    }>
+                        <ThemedIcon
+                            name={liked ? "heart" : "heart-outline"}
+                            style={{
+                                paddingRight: 8,
+                            }}
+                        />
+                    </Pressable>
+                    <ThemedText style={{fontSize: 24}}>{post.likes.length}</ThemedText>
+                </HorizontalView>
             </HorizontalView>
 
 

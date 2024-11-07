@@ -14,6 +14,14 @@ export type PostContextType = {
         postId: string,
         asyncAbortController?: AbortController
     ) => Promise<{ success: boolean; returnValue: any }>;
+    likePostById: (
+        postId: string,
+        asyncAbortController?: AbortController
+    ) => Promise<{ success: boolean; returnValue: any }>;
+    removeLikePostById: (
+        postId: string,
+        asyncAbortController?: AbortController
+    ) => Promise<{ success: boolean; returnValue: any }>;
 };
 
 export type PostType = {
@@ -41,23 +49,11 @@ export type PostType = {
     likes: string[];
 };
 
-type Pagination = {
-    size: number;
-    number: number;
-    totalElements: number;
-    totalPages: number;
-};
-
-interface PostPageResponse {
-    content: PostType[];
-    page: Pagination;
-}
-
 export const PostContext = createContext<PostContextType | null>(null);
 
 export const PostProvider: FC<{ children: ReactNode }> = ({children}) => {
     const [isProcessing, setIsProcessing] = useState(false);
-    const {authToken} = useAuth();
+    const {authToken, userId} = useAuth();
 
     const getFeed = async (
         page: number,
@@ -96,13 +92,55 @@ export const PostProvider: FC<{ children: ReactNode }> = ({children}) => {
         });
     }
 
+    const likePostById = async  (
+        postId: string,
+        asyncAbortController?: AbortController
+    ) => {
+        return await serverQuery({
+            path: apiPaths.posts.likePostById(postId),
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${authToken}`
+            },
+            payload: {
+                userId: userId
+            },
+            onStart: () => setIsProcessing(true),
+            onEnd: () => setIsProcessing(false),
+            asyncAbortController: asyncAbortController,
+        });
+    }
+
+    const removeLikePostById = async  (
+        postId: string,
+        asyncAbortController?: AbortController
+    ) => {
+        return await serverQuery({
+            path: apiPaths.posts.likePostById(postId),
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${authToken}`
+            },
+            payload: {
+                userId: userId
+            },
+            onStart: () => setIsProcessing(true),
+            onEnd: () => setIsProcessing(false),
+            asyncAbortController: asyncAbortController,
+        });
+    }
+
     return (
         <PostContext.Provider
             value={
                 {
                     isProcessing,
                     getFeed,
-                    getPostById
+                    getPostById,
+                    likePostById,
+                    removeLikePostById
                 }
             }
         >
