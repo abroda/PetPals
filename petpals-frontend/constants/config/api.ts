@@ -13,6 +13,7 @@ export const apiPaths = {
     getFeed: databaseURL + "api/posts",
     getPostById: (postId: string) => databaseURL + `api/posts/${postId}`,
     likePostById: (postId: string) => databaseURL + `api/posts/${postId}/like`, // POST and DELETE
+    addPost: databaseURL + "api/posts",
   },
   profiles: {},
   friends: {},

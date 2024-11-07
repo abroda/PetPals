@@ -4,7 +4,7 @@ import {ThemedView} from "@/components/basic/containers/ThemedView";
 import {ThemedButton} from "@/components/inputs/ThemedButton";
 import {useAuth} from "@/hooks/useAuth";
 import {router, useNavigation, usePathname} from "expo-router";
-import React, {useLayoutEffect, useRef, useState} from "react";
+import React, {useCallback, useLayoutEffect, useRef, useState} from "react";
 import {useWindowDimension} from "@/hooks/useWindowDimension";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
@@ -15,17 +15,16 @@ import * as ImagePicker from 'expo-image-picker';
 import {ThemedText} from "@/components/basic/ThemedText";
 import {useThemeColor} from "@/hooks/theme/useThemeColor";
 import {View} from "react-native";
+import {usePosts} from "@/hooks/usePosts";
 
 export default function NewPostScreen() {
-    const path = usePathname();
-    const username = path.split("/")[2];
-    const {userEmail} = useAuth();
-    const [dialogVisible, setDialogVisible] = useState(false);
     const percentToDP = useWindowDimension("shorter");
     const heightPercentToDP = useWindowDimension("height");
     const secondaryColor = useThemeColor("secondary");
     const backgroundColor = useThemeColor("background");
-
+    const {userId} = useAuth();
+    const {addPost, isProcessing} = usePosts();
+    const asyncAbortController = useRef<AbortController | undefined>();
 
     // ERROR HANDLING
     const [validationMessage, setValidationMessage] = useState("")
@@ -46,6 +45,23 @@ export default function NewPostScreen() {
             headerShown: false,
         });
     }, [navigation]);
+
+
+
+    const addPostCallback = useCallback(async () => {
+        console.log("Start loading");
+        asyncAbortController.current = new AbortController();
+        return await addPost(
+            postTitle,
+            postDescription,
+            asyncAbortController.current
+        );
+        // if (result.success) {
+        //     console.log(result.returnValue)
+        // }
+        console.log("Stop loading");
+    }, [postTitle, postDescription]);
+
 
     const selectPhoto = async () => {
         const {canAskAgain, status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -82,7 +98,16 @@ export default function NewPostScreen() {
             // setValidationMessage("Input is invalid");
         } else {
             // TODO: connect to add post context function here, handle server side errors too
-            console.log("SUCCESSFULLY ADDED NEW POST")
+            addPostCallback().then((result) => {
+                if (result.success){
+                    console.log("SUCCESSFULLY ADDED NEW POST")
+                    console.log("POST ID:", result.returnValue.id)
+                    router.replace(`/user/${userId}/post/${result.returnValue.id}`);
+                } else {
+                    console.log("SOMETHING WENT WRONG")
+                }
+            })
+
 
             // let result = await login(email, password);
             // setValidationMessage(result.message);

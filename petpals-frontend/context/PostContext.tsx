@@ -22,6 +22,11 @@ export type PostContextType = {
         postId: string,
         asyncAbortController?: AbortController
     ) => Promise<{ success: boolean; returnValue: any }>;
+    addPost: (
+        title: string,
+        description: string,
+        asyncAbortController?: AbortController
+    ) => Promise<{ success: boolean; returnValue: any }>;
 };
 
 export type PostType = {
@@ -92,7 +97,7 @@ export const PostProvider: FC<{ children: ReactNode }> = ({children}) => {
         });
     }
 
-    const likePostById = async  (
+    const likePostById = async (
         postId: string,
         asyncAbortController?: AbortController
     ) => {
@@ -112,7 +117,7 @@ export const PostProvider: FC<{ children: ReactNode }> = ({children}) => {
         });
     }
 
-    const removeLikePostById = async  (
+    const removeLikePostById = async (
         postId: string,
         asyncAbortController?: AbortController
     ) => {
@@ -132,6 +137,29 @@ export const PostProvider: FC<{ children: ReactNode }> = ({children}) => {
         });
     }
 
+    const addPost = async (
+        title: string,
+        description: string,
+        asyncAbortController?: AbortController
+    ) => {
+        return await serverQuery({
+            path: apiPaths.posts.addPost,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${authToken}`
+            },
+            payload: {
+                title: title,
+                description: description,
+                userId: userId
+            },
+            onStart: () => setIsProcessing(true),
+            onEnd: () => setIsProcessing(false),
+            asyncAbortController: asyncAbortController,
+        });
+    }
+
     return (
         <PostContext.Provider
             value={
@@ -140,7 +168,8 @@ export const PostProvider: FC<{ children: ReactNode }> = ({children}) => {
                     getFeed,
                     getPostById,
                     likePostById,
-                    removeLikePostById
+                    removeLikePostById,
+                    addPost
                 }
             }
         >
