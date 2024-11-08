@@ -1,19 +1,24 @@
 package com.app.petpals.payload;
 
-import com.app.petpals.enums.UserVisibility;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccountResponse {
+public class PostResponse {
     private String id;
-    private String username;
+    private String title;
     private String description;
     private String imageUrl;
-    private UserVisibility visibility;
+    private LocalDateTime createdAt;
+    private PostAuthorResponse author;
+    private List<PostCommentResponse> comments;
+    private List<String> likes;
 }

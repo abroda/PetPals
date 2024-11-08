@@ -64,7 +64,9 @@ public class UserService {
         } else throw new UserDataException("Username can't be null or empty.");
 
         user.setDescription(request.getDescription());
-        user.setVisibility(request.getVisibility());
+        if (request.getVisibility() != null) {
+            user.setVisibility(request.getVisibility());
+        }
 
         return userRepository.save(user);
     }

@@ -75,6 +75,10 @@ public class User implements UserDetails {
     )
     private List<User> blockedUsers;
 
+    @JsonIgnore
+    @ManyToMany(mappedBy = "blockedUsers")
+    private List<User> blockedBy;
+
     @JsonManagedReference
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Friendship> sentFriendRequests;
@@ -83,6 +87,31 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Friendship> receivedFriendRequests;
 
+    @JsonManagedReference
+    @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Post> posts;
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "commenter", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostComment> postComments;
+
+    @JsonIgnore
+    @ManyToMany
+    @JoinTable(
+            name = "post_like",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "post_id")
+    )
+    private List<Post> likedPosts;
+
+    @JsonIgnore
+    @ManyToMany
+    @JoinTable(
+            name = "comment_like",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "comment_id")
+    )
+    private List<PostComment> likedComments;
 
     public User(String username, String displayName, String password) {
         this.username = username;

@@ -81,4 +81,10 @@ public class UserGlobalExceptionHandler {
         UserErrorResponse error = new UserErrorResponse(HttpStatus.CONFLICT.value(), e.getMessage(), System.currentTimeMillis());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
+
+    @ExceptionHandler(UserUnauthorizedException.class)
+    public ResponseEntity<UserErrorResponse> handleUserUnauthorizedException(UserUnauthorizedException e) {
+        UserErrorResponse error = new UserErrorResponse(HttpStatus.UNAUTHORIZED.value(), e.getMessage(), System.currentTimeMillis());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
 }

@@ -1,4 +1,4 @@
-export const databaseURL = "http://192.168.153.222:8080/";
+export const databaseURL = "http://10.182.46.5:8080/";
 
 export const apiPaths = {
   auth: {
@@ -9,7 +9,12 @@ export const apiPaths = {
     resetPassword: databaseURL + "api/account/password-reset", // POST
     login: databaseURL + "api/auth/login", // POST
   },
-  posts: {},
+  posts: {
+    getFeed: databaseURL + "api/posts",
+    getPostById: (postId: string) => databaseURL + `api/posts/${postId}`,
+    likePostById: (postId: string) => databaseURL + `api/posts/${postId}/like`, // POST and DELETE
+    addPost: databaseURL + "api/posts",
+  },
   profiles: {},
   friends: {},
   chats: {},
