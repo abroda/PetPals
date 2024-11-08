@@ -1,6 +1,7 @@
 package com.app.petpals.entity;
 
 import com.app.petpals.enums.UserVisibility;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -112,6 +113,10 @@ public class User implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "comment_id")
     )
     private List<PostComment> likedComments;
+
+    @JsonBackReference
+    @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GroupWalk> createdWalks;
 
     public User(String username, String displayName, String password) {
         this.username = username;

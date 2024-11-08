@@ -38,6 +38,10 @@ public class DogService {
         } else throw new DogNotFoundException("Dog not found.");
     }
 
+    public List<Dog> getAllDogsById(List<String> ids) {
+      return dogRepository.findAllById(ids);
+    }
+
     public List<Dog> getDogsByUser(User user) {
         return dogRepository.findAllByUser(user);
     }
