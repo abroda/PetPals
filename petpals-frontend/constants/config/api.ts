@@ -14,6 +14,8 @@ export const apiPaths = {
     getPostById: (postId: string) => databaseURL + `api/posts/${postId}`,
     likePostById: (postId: string) => databaseURL + `api/posts/${postId}/like`, // POST and DELETE
     addPost: databaseURL + "api/posts",
+    checkForNewPosts: databaseURL + "api/posts/checkNew",
+
   },
   profiles: {},
   friends: {},

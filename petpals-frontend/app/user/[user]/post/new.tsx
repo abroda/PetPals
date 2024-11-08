@@ -23,7 +23,7 @@ export default function NewPostScreen() {
     const secondaryColor = useThemeColor("secondary");
     const backgroundColor = useThemeColor("background");
     const {userId} = useAuth();
-    const {addPost, isProcessing} = usePosts();
+    const {addPost, setPostsChanged} = usePosts();
     const asyncAbortController = useRef<AbortController | undefined>();
 
     // ERROR HANDLING
@@ -56,9 +56,6 @@ export default function NewPostScreen() {
             postDescription,
             asyncAbortController.current
         );
-        // if (result.success) {
-        //     console.log(result.returnValue)
-        // }
         console.log("Stop loading");
     }, [postTitle, postDescription]);
 

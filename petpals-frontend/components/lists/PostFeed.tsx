@@ -1,10 +1,11 @@
 import {ThemedView, ThemedViewProps,} from "@/components/basic/containers/ThemedView";
 import {FlatList} from "react-native-gesture-handler";
 import Post from "@/components/display/Post";
-import {ViewStyle} from "react-native";
+import {RefreshControl, View, ViewStyle} from "react-native";
 import {useCallback, useEffect, useRef, useState} from "react";
 import {usePosts} from "@/hooks/usePosts";
 import {PostType} from "@/context/PostContext";
+import {ThemedText} from "@/components/basic/ThemedText";
 
 export type PostFeedProps = {
     outerViewProps?: ThemedViewProps;
@@ -21,13 +22,16 @@ export default function PostFeed({
     const [posts, setPosts] = useState<PostType[]>([])
     const [hasMore, setHasMore] = useState(true);
     const [currentPage, setCurrentPage] = useState(0);
-    const size = 10;
+    const size = 5;
 
     const [refreshing, setRefreshing] = useState(false);
-    const [newPostsAvailable, setNewPostsAvailable] = useState(false);
 
     // Initial load
     useEffect(() => {
+        console.log("INITIAL!")
+        setHasMore(true)
+        setCurrentPage(0)
+        setPosts([])
         getData()
 
         return () => {
@@ -66,11 +70,18 @@ export default function PostFeed({
             ]}
             {...outerViewProps}
         >
+            <ThemedText>{refreshing ? "true" : "false"}</ThemedText>
+
             {/* ACTUAL POST LIST */}
             <FlatList
                 data={posts}
                 keyExtractor={(item) => item.id.toString()}
-                renderItem={({item}) => <Post postFromFeed={item}/>}
+                renderItem={({item}) =>
+                    <Post postFromFeed={item}/>
+                    // <View>
+                    //     <ThemedText>TEST</ThemedText>
+                    // </View>
+            }
                 contentContainerStyle={{paddingBottom: 50}}
                 {...flatListStyle}
                 onEndReached={() => {
@@ -78,6 +89,13 @@ export default function PostFeed({
                         getData();
                     }
                 }}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={() => console.log("TESTING REFRESH!")}
+                        colors={['#009688']} // Customize loading indicator color (optional)
+                    />
+                }
             />
         </ThemedView>
     );

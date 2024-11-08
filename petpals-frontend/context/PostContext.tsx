@@ -5,6 +5,8 @@ import {serverQuery} from "@/hooks/serverQuery";
 
 export type PostContextType = {
     isProcessing: boolean;
+    postsChanged: boolean;
+    setPostsChanged: React.Dispatch<React.SetStateAction<boolean>>;
     getFeed: (
         page: number,
         size: number,
@@ -25,6 +27,10 @@ export type PostContextType = {
     addPost: (
         title: string,
         description: string,
+        asyncAbortController?: AbortController
+    ) => Promise<{ success: boolean; returnValue: any }>;
+    checkForNewPosts: (
+        time: string,
         asyncAbortController?: AbortController
     ) => Promise<{ success: boolean; returnValue: any }>;
 };
@@ -59,6 +65,7 @@ export const PostContext = createContext<PostContextType | null>(null);
 export const PostProvider: FC<{ children: ReactNode }> = ({children}) => {
     const [isProcessing, setIsProcessing] = useState(false);
     const {authToken, userId} = useAuth();
+    const [postsChanged, setPostsChanged] = useState(false);
 
     const getFeed = async (
         page: number,
@@ -160,16 +167,37 @@ export const PostProvider: FC<{ children: ReactNode }> = ({children}) => {
         });
     }
 
+    const checkForNewPosts = async (
+        time: string,
+        asyncAbortController?: AbortController
+    ) => {
+        return await serverQuery({
+            path: apiPaths.posts.checkForNewPosts + `?time=${time}`,
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${authToken}`
+            },
+            payload: null,
+            onStart: () => setIsProcessing(true),
+            onEnd: () => setIsProcessing(false),
+            asyncAbortController: asyncAbortController,
+        });
+    }
+
     return (
         <PostContext.Provider
             value={
                 {
                     isProcessing,
+                    postsChanged,
+                    setPostsChanged,
                     getFeed,
                     getPostById,
                     likePostById,
                     removeLikePostById,
-                    addPost
+                    addPost,
+                    checkForNewPosts
                 }
             }
         >
