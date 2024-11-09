@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -48,9 +50,20 @@ public class GroupWalkController {
     }
 
     @PostMapping("/{groupWalkId}/join")
-    @Operation(summary = "Edit group walk by id.", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Join walk by id.", security = @SecurityRequirement(name = "bearerAuth"))
     private ResponseEntity<GroupWalkResponse> joinGroupWalkById(@PathVariable String groupWalkId, @RequestBody GroupWalkJoinRequest request) {
-        GroupWalk groupWalkList = groupWalkService.joinWalk(groupWalkId, request);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User authUser = (User) auth.getPrincipal();
+        GroupWalk groupWalkList = groupWalkService.joinWalk(groupWalkId, authUser.getId(), request);
+        return ResponseEntity.ok(createGroupWalkResponse(groupWalkList));
+    }
+
+    @PostMapping("/{groupWalkId}/leave")
+    @Operation(summary = "Leave walk by id.", security = @SecurityRequirement(name = "bearerAuth"))
+    private ResponseEntity<GroupWalkResponse> joinGroupWalkById(@PathVariable String groupWalkId, @RequestBody GroupWalkLeaveRequest request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User authUser = (User) auth.getPrincipal();
+        GroupWalk groupWalkList = groupWalkService.leaveWalk(groupWalkId, authUser.getId(), request);
         return ResponseEntity.ok(createGroupWalkResponse(groupWalkList));
     }
 

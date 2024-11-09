@@ -8,6 +8,7 @@ import com.app.petpals.exception.GroupWalkNotFoundException;
 import com.app.petpals.payload.GroupWalkAddRequest;
 import com.app.petpals.payload.GroupWalkEditRequest;
 import com.app.petpals.payload.GroupWalkJoinRequest;
+import com.app.petpals.payload.GroupWalkLeaveRequest;
 import com.app.petpals.repository.GroupWalkRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -45,13 +48,19 @@ public class GroupWalkService {
         groupWalk.setDatetime(checkDatetime(request.getDatetime()));
         groupWalk.setLocation(request.getLocation());
         groupWalk.setCreator(creator);
-        groupWalk.setTags(request.getTags());
 
-        List<Dog> dogs = dogService.getAllDogsById(request.getParticipatingDogsIds());
-        groupWalk.setParticipants(dogs);
-        for (Dog dog : dogs) {
-            dog.getJoinedWalks().add(groupWalk);
-        }
+        if (request.getTags() != null && !request.getTags().isEmpty()) {
+            groupWalk.setTags(request.getTags());
+        } else groupWalk.setTags(new ArrayList<>());
+
+        if (request.getParticipatingDogsIds() != null && !request.getParticipatingDogsIds().isEmpty()) {
+            List<Dog> dogs = dogService.getAllDogsById(request.getParticipatingDogsIds());
+            groupWalk.setParticipants(dogs);
+            for (Dog dog : dogs) {
+                dog.getJoinedWalks().add(groupWalk);
+            }
+        } else groupWalk.setParticipants(new ArrayList<>());
+
         return groupWalkRepository.save(groupWalk);
     }
 
@@ -79,24 +88,33 @@ public class GroupWalkService {
     }
 
     @Transactional
-    public GroupWalk joinWalk(String walkId, GroupWalkJoinRequest request) {
+    public GroupWalk joinWalk(String walkId, String userId, GroupWalkJoinRequest request) {
         GroupWalk groupWalk = getGroupWalkById(walkId);
-        String ownerId = null;
         for (String dogId : request.getDogIds()) {
             Dog dog = dogService.getDogById(dogId);
-            String currentOwnerId = dog.getUser().getId();
-            if (ownerId == null) {
-                ownerId = currentOwnerId;
-            } else if (!ownerId.equals(currentOwnerId)) {
-                throw new GroupWalkDataException("All dogs must belong to the same owner");
-            }
-
-            if (groupWalk.getParticipants().contains(dog)) throw new GroupWalkDataException("Dog already is a participant.");
-
+            if (!Objects.equals(dog.getUser().getId(), userId))
+                throw new GroupWalkDataException("All dogs must belong to the user.");
+            if (groupWalk.getParticipants().contains(dog))
+                throw new GroupWalkDataException("Dog already is a participant.");
             dog.getJoinedWalks().add(groupWalk);
             groupWalk.getParticipants().add(dog);
         }
 
+        return groupWalkRepository.save(groupWalk);
+    }
+
+    @Transactional
+    public GroupWalk leaveWalk(String walkId, String userId, GroupWalkLeaveRequest request) {
+        GroupWalk groupWalk = getGroupWalkById(walkId);
+        for (String dogId : request.getDogIds()) {
+            Dog dog = dogService.getDogById(dogId);
+            if (!Objects.equals(dog.getUser().getId(), userId))
+                throw new GroupWalkDataException("All dogs must belong to the user.");
+            if (!groupWalk.getParticipants().contains(dog))
+                throw new GroupWalkDataException("Dog is not a participant.");
+            dog.getJoinedWalks().remove(groupWalk);
+            groupWalk.getParticipants().remove(dog);
+        }
         return groupWalkRepository.save(groupWalk);
     }
 
