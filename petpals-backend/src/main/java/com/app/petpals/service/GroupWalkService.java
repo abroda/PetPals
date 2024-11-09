@@ -72,6 +72,8 @@ public class GroupWalkService {
     @Transactional
     public void deleteGroupWalk(String id) {
         GroupWalk groupWalk = getGroupWalkById(id);
+        groupWalk.getCreator().getCreatedWalks().remove(groupWalk);
+        groupWalk.getParticipants().forEach((dog) -> dog.getJoinedWalks().remove(groupWalk));
         groupWalkRepository.delete(groupWalk);
     }
 

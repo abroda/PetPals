@@ -54,6 +54,13 @@ public class GroupWalkController {
         return ResponseEntity.ok(createGroupWalkResponse(groupWalkList));
     }
 
+    @DeleteMapping("/{groupWalkId}")
+    @Operation(summary = "Delete group walk by id.", security = @SecurityRequirement(name = "bearerAuth"))
+    private ResponseEntity<TextResponse> deleteGroupWalkById(@PathVariable String groupWalkId) {
+        groupWalkService.deleteGroupWalk(groupWalkId);
+        return ResponseEntity.ok(TextResponse.builder().message("Group walk deleted successfully.").build());
+    }
+
     private GroupWalkResponse createGroupWalkResponse(GroupWalk groupWalk) {
         return GroupWalkResponse.builder()
                 .id(groupWalk.getId())
