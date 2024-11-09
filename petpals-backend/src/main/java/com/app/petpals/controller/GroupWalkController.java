@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/walks")
+@RequestMapping("/api/groupWalks")
 @Tag(name = "Walks")
 public class GroupWalkController {
     private final GroupWalkService groupWalkService;
@@ -32,12 +32,26 @@ public class GroupWalkController {
         return ResponseEntity.ok(groupWalkList.stream().map(this::createGroupWalkResponse).collect(Collectors.toList()));
     }
 
+    @GetMapping("/{groupWalkId}")
+    @Operation(summary = "Get group walk by id.", security = @SecurityRequirement(name = "bearerAuth"))
+    private ResponseEntity<GroupWalkResponse> getGroupWalkById(@PathVariable String groupWalkId) {
+        GroupWalk groupWalkList = groupWalkService.getGroupWalkById(groupWalkId);
+        return ResponseEntity.ok(createGroupWalkResponse(groupWalkList));
+    }
+
     @PostMapping()
     @Operation(summary = "Create new walk.", security = @SecurityRequirement(name = "bearerAuth"))
     private ResponseEntity<GroupWalkResponse> createNewWalk(@RequestBody GroupWalkAddRequest request) {
         System.out.println(request);
         GroupWalk groupWalk = groupWalkService.saveGroupWalk(request);
         return ResponseEntity.ok(createGroupWalkResponse(groupWalk));
+    }
+
+    @PutMapping("/{groupWalkId}")
+    @Operation(summary = "Edit group walk by id.", security = @SecurityRequirement(name = "bearerAuth"))
+    private ResponseEntity<GroupWalkResponse> editGroupWalkById(@PathVariable String groupWalkId, @RequestBody GroupWalkEditRequest request) {
+        GroupWalk groupWalkList = groupWalkService.editGroupWalk(groupWalkId, request);
+        return ResponseEntity.ok(createGroupWalkResponse(groupWalkList));
     }
 
     private GroupWalkResponse createGroupWalkResponse(GroupWalk groupWalk) {

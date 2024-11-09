@@ -14,4 +14,10 @@ public class GroupWalkExceptionHandler {
         GroupWalkErrorResponse error = new GroupWalkErrorResponse(HttpStatus.NOT_FOUND.value(), e.getMessage(), System.currentTimeMillis());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
+
+    @ExceptionHandler(GroupWalkDataException.class)
+    public ResponseEntity<GroupWalkErrorResponse> handleGroupWalkDataException(GroupWalkDataException e) {
+        GroupWalkErrorResponse error = new GroupWalkErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage(), System.currentTimeMillis());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
 }

@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @Service
@@ -32,19 +33,15 @@ public class GroupWalkService {
 
     @Transactional
     public GroupWalk saveGroupWalk(GroupWalkAddRequest request) {
-        System.out.println("SAVING GROUP WALK");
         User creator = userService.getById(request.getCreatorId());
         if (request.getTitle() == null) throw new GroupWalkDataException("Title is required.");
         if (request.getLocation() == null) throw new GroupWalkDataException("Location is required");
         if (request.getDatetime() == null) throw new GroupWalkDataException("Datetime is required");
-        System.out.println("PASSED CHECKS");
 
         GroupWalk groupWalk = new GroupWalk();
         groupWalk.setTitle(request.getTitle());
         groupWalk.setDescription(request.getDescription());
-        System.out.println("DATETIME 1");
-        groupWalk.setDatetime(LocalDateTime.parse(request.getDatetime()));
-        System.out.println("DATETIME 2");
+        groupWalk.setDatetime(checkDatetime(request.getDatetime()));
         groupWalk.setLocation(request.getLocation());
         groupWalk.setCreator(creator);
         groupWalk.setTags(request.getTags());
@@ -65,7 +62,7 @@ public class GroupWalkService {
 
         groupWalk.setTitle(request.getTitle());
         groupWalk.setDescription(request.getDescription());
-        groupWalk.setDatetime(LocalDateTime.parse(request.getDatetime()));
+        groupWalk.setDatetime(checkDatetime(request.getDatetime()));
         groupWalk.setLocation(request.getLocation());
         groupWalk.setTags(request.getTags());
 
@@ -76,5 +73,13 @@ public class GroupWalkService {
     public void deleteGroupWalk(String id) {
         GroupWalk groupWalk = getGroupWalkById(id);
         groupWalkRepository.delete(groupWalk);
+    }
+
+    public LocalDateTime checkDatetime(String datetime) {
+        try {
+            return LocalDateTime.parse(datetime);
+        } catch (DateTimeParseException e) {
+            throw new GroupWalkDataException("Datetime has to be in correct format. For example 2023-11-08T14:30:00");
+        }
     }
 }
