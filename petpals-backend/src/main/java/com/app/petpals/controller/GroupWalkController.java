@@ -47,6 +47,13 @@ public class GroupWalkController {
         return ResponseEntity.ok(createGroupWalkResponse(groupWalk));
     }
 
+    @PostMapping("/{groupWalkId}/join")
+    @Operation(summary = "Edit group walk by id.", security = @SecurityRequirement(name = "bearerAuth"))
+    private ResponseEntity<GroupWalkResponse> joinGroupWalkById(@PathVariable String groupWalkId, @RequestBody GroupWalkJoinRequest request) {
+        GroupWalk groupWalkList = groupWalkService.joinWalk(groupWalkId, request);
+        return ResponseEntity.ok(createGroupWalkResponse(groupWalkList));
+    }
+
     @PutMapping("/{groupWalkId}")
     @Operation(summary = "Edit group walk by id.", security = @SecurityRequirement(name = "bearerAuth"))
     private ResponseEntity<GroupWalkResponse> editGroupWalkById(@PathVariable String groupWalkId, @RequestBody GroupWalkEditRequest request) {

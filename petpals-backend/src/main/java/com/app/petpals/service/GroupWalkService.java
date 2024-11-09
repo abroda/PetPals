@@ -7,6 +7,7 @@ import com.app.petpals.exception.GroupWalkDataException;
 import com.app.petpals.exception.GroupWalkNotFoundException;
 import com.app.petpals.payload.GroupWalkAddRequest;
 import com.app.petpals.payload.GroupWalkEditRequest;
+import com.app.petpals.payload.GroupWalkJoinRequest;
 import com.app.petpals.repository.GroupWalkRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +28,8 @@ public class GroupWalkService {
         return groupWalkRepository.findAll();
     }
 
-    public GroupWalk getGroupWalkById(String id) {
-        return groupWalkRepository.findById(id).orElseThrow(() -> new GroupWalkNotFoundException("GroupWalk not found"));
+    public GroupWalk getGroupWalkById(String walkId) {
+        return groupWalkRepository.findById(walkId).orElseThrow(() -> new GroupWalkNotFoundException("GroupWalk not found"));
     }
 
     @Transactional
@@ -54,8 +55,8 @@ public class GroupWalkService {
         return groupWalkRepository.save(groupWalk);
     }
 
-    public GroupWalk editGroupWalk(String id, GroupWalkEditRequest request) {
-        GroupWalk groupWalk = getGroupWalkById(id);
+    public GroupWalk editGroupWalk(String walkId, GroupWalkEditRequest request) {
+        GroupWalk groupWalk = getGroupWalkById(walkId);
         if (request.getTitle() == null) throw new GroupWalkDataException("Title is required.");
         if (request.getLocation() == null) throw new GroupWalkDataException("Location is required");
         if (request.getDatetime() == null) throw new GroupWalkDataException("Datetime is required");
@@ -70,11 +71,33 @@ public class GroupWalkService {
     }
 
     @Transactional
-    public void deleteGroupWalk(String id) {
-        GroupWalk groupWalk = getGroupWalkById(id);
+    public void deleteGroupWalk(String walkId) {
+        GroupWalk groupWalk = getGroupWalkById(walkId);
         groupWalk.getCreator().getCreatedWalks().remove(groupWalk);
         groupWalk.getParticipants().forEach((dog) -> dog.getJoinedWalks().remove(groupWalk));
         groupWalkRepository.delete(groupWalk);
+    }
+
+    @Transactional
+    public GroupWalk joinWalk(String walkId, GroupWalkJoinRequest request) {
+        GroupWalk groupWalk = getGroupWalkById(walkId);
+        String ownerId = null;
+        for (String dogId : request.getDogIds()) {
+            Dog dog = dogService.getDogById(dogId);
+            String currentOwnerId = dog.getUser().getId();
+            if (ownerId == null) {
+                ownerId = currentOwnerId;
+            } else if (!ownerId.equals(currentOwnerId)) {
+                throw new GroupWalkDataException("All dogs must belong to the same owner");
+            }
+
+            if (groupWalk.getParticipants().contains(dog)) throw new GroupWalkDataException("Dog already is a participant.");
+
+            dog.getJoinedWalks().add(groupWalk);
+            groupWalk.getParticipants().add(dog);
+        }
+
+        return groupWalkRepository.save(groupWalk);
     }
 
     public LocalDateTime checkDatetime(String datetime) {
