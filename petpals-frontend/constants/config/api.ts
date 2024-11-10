@@ -23,12 +23,15 @@ export const apiPaths = {
 		updateUserProfilePicture: (id: string) => databaseURL + "api/users/" + id + "/picture",
 		deleteUserPicture: (id: string) => databaseURL + "api/users/" + id + "/picture",
 		deleteUser: (id: string) => databaseURL + "api/users/" + id,
-		// Dog endpoints
 		addDog: (userId: string) => databaseURL + "api/users/"+ userId +"/dogs",
+		getDogsByUserId: (userId: string) => databaseURL + "api/users/" + userId + "/dogs",
+	},
+	dogs: {
 		getDogById: (id: string) => databaseURL + "api/dogs/" + id,
 		updateDog: (id: string) => databaseURL + "api/dogs/" + id,
-		deleteDog: (id: string) => databaseURL + "api/dogs/" + id,
 		updateDogPicture: (id: string) => databaseURL + "api/dogs/" + id + "/picture",
 		deleteDogPicture: (id: string) => databaseURL + "api/dogs/" + id + "/picture",
+		deleteDog: (id: string) => databaseURL + "api/dogs/" + id,
+		getDogsByTagId: (tagId: string) => databaseURL + "api/dogs/tags/" + tagId,
 	},
 };

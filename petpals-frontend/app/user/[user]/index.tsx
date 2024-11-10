@@ -14,7 +14,9 @@ import {useNavigation, usePathname} from "expo-router";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 import PostFeed from "@/components/lists/PostFeed";
 import { router } from "expo-router";
-import {useDog} from "@/context/DogContext";
+import {Dog, useDog} from "@/context/DogContext";
+// @ts-ignore
+import DogPlaceholderImage from "@/assets/images/dog_placeholder_theme-color-fair.png"
 
 
 export default function UserProfileScreen() {
@@ -25,9 +27,11 @@ const percentToDP = useWindowDimension("shorter");
 const heightPercentToPD = useWindowDimension("height");
 const navigation = useNavigation();
 const [menuVisible, setMenuVisible] = useState(false);
-const {addDog} = useDog();
+const {addDog, getDogsByUserId} = useDog();
 const [dogName, setDogName] = useState("");
 const [dogDescription, setDogDescription] = useState("");
+const [dogs, setDogs] = useState<Dog[]>([]);
+const { userId } = useAuth();
 
 
 // Colours
@@ -54,6 +58,16 @@ const { getUserById, userProfile, isProcessing } = useContext(UserContext);
 useEffect(() => {
     getUserById(username);
 }, [username]);
+
+useEffect(() => {
+    const fetchDogs = async () => {
+        // @ts-ignore
+        const userDogs = await getDogsByUserId(userId);
+        setDogs(userDogs);
+    };
+    fetchDogs();
+}, [userId]);
+
 
 
 useLayoutEffect(() => {
@@ -264,7 +278,7 @@ return (
                     <ThemedText style={{
                         fontSize: 30,
                         color: cream,
-                        marginLeft: 30
+                        marginLeft: widthPercentageToDP(7.5),
                     }}>
                         Dogs
                     </ThemedText>
@@ -275,7 +289,7 @@ return (
                         style={{
                             width: percentToDP(25),
                             height: percentToDP(13),
-                            marginRight: 30,
+                            marginRight: widthPercentageToDP(7.5),
                             backgroundColor: accentGreen,
                             borderWidth: 2,
                             paddingHorizontal: widthPercentageToDP(1),
@@ -285,20 +299,68 @@ return (
                 </View>
                 <FlatList
                     horizontal
-                    data={pets}
+                    data={dogs}
                     keyExtractor={(item) => item.id}
+                    style={{
+                        marginHorizontal: widthPercentageToDP(7.5),
+                        marginTop: heightPercentToPD(1),
+                    }}
                     renderItem={({ item }) => (
-                        <View style={{ marginRight: 10, paddingVertical: 10 }}>
-                            <View style={{ backgroundColor: darkGreen, padding: 10, borderRadius: 10, alignItems: 'center' }}>
-                                <PetAvatar size={32} username={userProfile?.username} pet={item.name} doLink={false} />
-                                <ThemedText style={{ fontSize: 22, color: cream, fontWeight: 'bold' }}>{item.name}</ThemedText>
-                                <ThemedText style={{ fontSize: 12, fontStyle: 'italic', color: cream }}>{item.breed}</ThemedText>
+                        <View style={{
+
+                            marginRight: 8,
+                            paddingVertical: 10
+                        }}>
+                            <View style={{
+                                width: widthPercentageToDP(40),
+                                height: widthPercentageToDP(63),
+                                backgroundColor: darkGreen,
+                                padding: widthPercentageToDP(3),
+                                borderRadius: 10,
+                                alignItems: 'center'
+                            }}>
+                                <PetAvatar
+                                    size={35}
+                                    source={item.imageUrl}
+                                    username={userProfile?.username}
+                                    pet={item.name} doLink={false} />
+
+                                {/* Dog name */}
+                                <ThemedText style={{
+                                    fontSize: 22,
+                                    color: cream,
+                                    fontWeight: 'bold',
+                                    marginTop: heightPercentToPD(1),
+                                }}>
+                                    {item.name}
+                                </ThemedText>
+
+                                {/* Dog description */}
+                                <ThemedText
+                                    numberOfLines={2} // Limit description to 2 lines
+                                    ellipsizeMode="tail" // Show "..." at the end if truncated
+                                    style={{
+                                    fontSize: 14,
+                                    color: cream,
+                                    fontWeight: 'regular',
+                                    marginBottom: heightPercentToPD(2),
+                                }}>
+                                    {item.description}
+                                </ThemedText>
+
                             </View>
                         </View>
                     )}
                 />
 
-                <ThemedText style={{ fontSize: 30, color: cream, marginLeft: 30, marginTop: 20 }}>Posts</ThemedText>
+                <ThemedText style={{
+                    fontSize: 30,
+                    color: cream,
+                    marginLeft: widthPercentageToDP(7.5),
+                    marginTop: 20
+                }}>
+                    Posts
+                </ThemedText>
                 <PostFeed />
             </ScrollView>
 

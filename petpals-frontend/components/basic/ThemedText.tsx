@@ -15,38 +15,44 @@ export type ThemedTextProps = TextProps & {
   backgroundColorName?: ColorName;
   backgroundThemedColor?: ThemedColor;
   textStyleName?: TextStyleName;
+  numberOfLines?: number;
+  ellipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
 };
 
 export function ThemedText({
-  style,
-  center = false,
-  textColorName = "text",
-  textThemedColor,
-  backgroundColorName = "background",
-  backgroundThemedColor,
-  textStyleName = "default",
-  ...rest
-}: ThemedTextProps) {
+                             style,
+                             center = false,
+                             textColorName = "text",
+                             textThemedColor,
+                             backgroundColorName = "background",
+                             backgroundThemedColor,
+                             textStyleName = "default",
+                             numberOfLines,
+                             ellipsizeMode = 'tail',
+                             ...rest
+                           }: ThemedTextProps) {
   const textColor = useThemeColor(textColorName, textThemedColor);
   const backgroundColor = useThemeColor(
-    backgroundColorName,
-    backgroundThemedColor
+      backgroundColorName,
+      backgroundThemedColor
   );
 
   return (
-    <Text
-      center={center}
-      style={[
-        {
-          color: textColor,
-          backgroundColor: 'none',
-          flexWrap: "wrap",
-          flexShrink: 1,
-        },
-        useTextStyle(textStyleName),
-        style,
-      ]}
-      {...rest}
-    />
+      <Text
+          center={center}
+          style={[
+            {
+              color: textColor,
+              backgroundColor: 'none',
+              flexWrap: "wrap",
+              flexShrink: 1,
+            },
+            useTextStyle(textStyleName),
+            style,
+          ]}
+          numberOfLines={numberOfLines}
+          ellipsizeMode={ellipsizeMode}
+          {...rest}
+      />
   );
 }

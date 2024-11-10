@@ -14,7 +14,8 @@ export interface Dog {
 
 interface DogContextProps {
     addDog: (userId: string, dogData: Partial<Dog>) => Promise<Dog | null>;
-    updateDogPicture: (dogId: string, file: File | Blob) => Promise<boolean>;
+    updateDogPicture: (dogId: string, formData: FormData) => Promise<void>
+    getDogsByUserId: (userId: string) => Promise<Dog[]>;
     getDogById: (id: string) => Promise<Dog | null>;
     deleteDog: (id: string) => Promise<void>;
     responseMessage: string;
@@ -122,7 +123,7 @@ export const DogProvider: React.FC = ({ children }) => {
 
         console.log(`Uploading picture for dog ID: ${dogId}`);
 
-        const response = await fetch(apiPaths.users.updateDogPicture(dogId), options);
+        const response = await fetch(apiPaths.dogs.updateDogPicture(dogId), options);
 
         setIsProcessing(false);
 
@@ -135,12 +136,10 @@ export const DogProvider: React.FC = ({ children }) => {
         console.log("Dog picture upload response:", await response.json());
     };
 
-
     // Get dog by ID
     const getDogById = async (id: string): Promise<Dog | null> => {
         try {
-            const dog = await sendJsonQuery(apiPaths.users.getDogById(id), "GET");
-            return dog;
+            return await sendJsonQuery(apiPaths.dogs.getDogById(id), "GET");
         } catch (error) {
             console.error("Failed to fetch dog:", error);
             return null;
@@ -150,7 +149,7 @@ export const DogProvider: React.FC = ({ children }) => {
     // Delete a dog by ID
     const deleteDog = async (id: string): Promise<void> => {
         try {
-            await sendJsonQuery(apiPaths.users.deleteDog(id), "DELETE");
+            await sendJsonQuery(apiPaths.dogs.deleteDog(id), "DELETE");
             setResponseMessage("Dog deleted successfully!");
         } catch (error) {
             console.error("Failed to delete dog:", error);
@@ -158,13 +157,24 @@ export const DogProvider: React.FC = ({ children }) => {
         }
     };
 
+    const getDogsByUserId = async (userId: string): Promise<Dog[]> => {
+        const response = await fetch(apiPaths.users.getDogsByUserId(userId), {
+            method: "GET",
+            headers: { Authorization: `Bearer ${authToken}` },
+        });
+        if (!response.ok) throw new Error("Failed to fetch dogs");
+        return response.json();
+    };
+
     return (
         <DogContext.Provider
             value={{
                 addDog,
                 updateDogPicture,
+                getDogsByUserId,
                 getDogById,
                 deleteDog,
+                // getDogsByUserId,
                 responseMessage,
                 isProcessing,
             }}

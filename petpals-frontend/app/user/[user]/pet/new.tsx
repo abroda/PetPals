@@ -44,6 +44,7 @@ export default function NewPetScreen() {
         if (!result.canceled) {
             setImage(result.assets[0].uri);
         }
+        // @ts-ignore
         console.log("New image was set to const: ", result.assets[0].uri);
     };
 
@@ -62,6 +63,7 @@ export default function NewPetScreen() {
             };
 
             // Add the dog without the image first
+            // @ts-ignore
             const newDog = await addDog(userId, dogData);
             console.log("New dog data: ", newDog);
             console.log("New dog id: ", newDog?.id);
