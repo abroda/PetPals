@@ -11,6 +11,7 @@ export default function PetAvatar(props: {
   source: string | null; // Make source nullable to handle missing images
   username: string;
   pet: string;
+  petId: string;
   doLink: boolean;
 }) {
   const { userEmail } = useAuth();
@@ -20,7 +21,7 @@ export default function PetAvatar(props: {
       <Pressable
           onPress={() =>
               props.doLink
-                  ? router.push(`/user/${props.username}/pet/${props.pet}`)
+                  ? router.push(`/user/${props.username}/pet/${props.petId}`)
                   : {}
           }
       >

@@ -139,7 +139,8 @@ export const DogProvider: React.FC = ({ children }) => {
     // Get dog by ID
     const getDogById = async (id: string): Promise<Dog | null> => {
         try {
-            return await sendJsonQuery(apiPaths.dogs.getDogById(id), "GET");
+            const response = await sendJsonQuery(apiPaths.dogs.getDogById(id), "GET");
+            return response as Dog;
         } catch (error) {
             console.error("Failed to fetch dog:", error);
             return null;

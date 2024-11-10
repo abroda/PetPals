@@ -20,6 +20,7 @@ import DogPlaceholderImage from "@/assets/images/dog_placeholder_theme-color-fai
 
 
 export default function UserProfileScreen() {
+
 const path = usePathname();
 const [username, setUsername] = useState(path.slice(path.lastIndexOf("/") + 1));
 const { logout } = useAuth();
@@ -41,15 +42,6 @@ const accentGreen = '#B4D779'
 const accentTeal = '#52B8A3'
 const cream = '#FAF7EA'
 
-
-// Sample pet data
-const pets = [
-    { name: "Tori", breed: "Golden Retriever", id: "1" },
-    { name: "Abi", breed: "Leonberger", id: "2" },
-    { name: "Fibi", breed: "Mixed", id: "3" },
-    { name: "Toby", breed: "Mixed", id: "4" },
-    { name: "Ronnie", breed: "Mixed", id: "5" },
-];
 
 // @ts-ignore
 const { getUserById, userProfile, isProcessing } = useContext(UserContext);
@@ -323,7 +315,10 @@ return (
                                     size={35}
                                     source={item.imageUrl}
                                     username={userProfile?.username}
-                                    pet={item.name} doLink={false} />
+                                    pet={item.name}
+                                    petId={item.id}
+                                    doLink={true}
+                                />
 
                                 {/* Dog name */}
                                 <ThemedText style={{
