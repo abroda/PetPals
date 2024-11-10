@@ -18,6 +18,7 @@ import { PostProvider } from "@/context/PostContext";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { UserProvider } from "@/context/UserContext";
 import { Provider as PaperProvider } from 'react-native-paper';
+import {DogProvider} from "@/context/DogContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -44,7 +45,7 @@ export default function RootLayout() {
         <AuthProvider>
             <UserProvider>
                 <PostProvider>
-
+                    <DogProvider>
                         <Stack
                             screenOptions={{
                                 headerShown: true,
@@ -63,7 +64,7 @@ export default function RootLayout() {
                             />
                             <Stack.Screen name="+not-found" />
                         </Stack>
-
+                    </DogProvider>
                 </PostProvider>
             </UserProvider>
         </AuthProvider>

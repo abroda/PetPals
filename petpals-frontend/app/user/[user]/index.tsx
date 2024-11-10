@@ -14,6 +14,7 @@ import {useNavigation, usePathname} from "expo-router";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 import PostFeed from "@/components/lists/PostFeed";
 import { router } from "expo-router";
+import {useDog} from "@/context/DogContext";
 
 
 export default function UserProfileScreen() {
@@ -24,11 +25,17 @@ const percentToDP = useWindowDimension("shorter");
 const heightPercentToPD = useWindowDimension("height");
 const navigation = useNavigation();
 const [menuVisible, setMenuVisible] = useState(false);
+const {addDog} = useDog();
+const [dogName, setDogName] = useState("");
+const [dogDescription, setDogDescription] = useState("");
 
-const darkGreen = '#0A2421';
-const accentGreen = '#B4D779';
-const cream = '#FAF7EA';
-const lightGreen = '#1C302A';
+
+// Colours
+const darkGreen = '#0A2421'
+const lightGreen = '#1C302A'
+const accentGreen = '#B4D779'
+const accentTeal = '#52B8A3'
+const cream = '#FAF7EA'
 
 
 // Sample pet data
@@ -43,9 +50,11 @@ const pets = [
 // @ts-ignore
 const { getUserById, userProfile, isProcessing } = useContext(UserContext);
 
+
 useEffect(() => {
     getUserById(username);
 }, [username]);
+
 
 useLayoutEffect(() => {
     // Customize the header with icons in the right corner
@@ -87,6 +96,7 @@ const handleMenuSelect = (option: string) => {
 if (isProcessing) {
     return <Text>Loading...</Text>;
 }
+
 
 return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -245,10 +255,34 @@ return (
 
                 </View>
 
-
-
-
-                <ThemedText style={{ fontSize: 30, color: cream, marginLeft: 30 }}>Dogs</ThemedText>
+                <View style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    alignContent: 'space-between',
+                    justifyContent: 'space-between',
+                }}>
+                    <ThemedText style={{
+                        fontSize: 30,
+                        color: cream,
+                        marginLeft: 30
+                    }}>
+                        Dogs
+                    </ThemedText>
+                    <ThemedButton
+                        label="Add dog"
+                        onPress={() => router.push(`/user/${username}/pet/new`)}
+                        color={darkGreen}
+                        style={{
+                            width: percentToDP(25),
+                            height: percentToDP(13),
+                            marginRight: 30,
+                            backgroundColor: accentGreen,
+                            borderWidth: 2,
+                            paddingHorizontal: widthPercentageToDP(1),
+                            borderRadius: 15,
+                        }}
+                    />
+                </View>
                 <FlatList
                     horizontal
                     data={pets}

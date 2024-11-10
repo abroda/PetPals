@@ -63,7 +63,8 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     setIsProcessing(true);
     setResponseMessage("");
 
-    return sendJsonQuery(apiPaths.checkConnection, "GET")
+    // @ts-ignore
+      return sendJsonQuery(apiPaths.checkConnection, "GET")
       .then((_) => {
         setIsProcessing(false);
         return true;
