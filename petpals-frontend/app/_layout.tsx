@@ -10,12 +10,16 @@ import * as SplashScreen from "expo-splash-screen";
 import {useEffect} from "react";
 import "react-native-reanimated";
 
-import {useColorScheme} from "@/hooks/theme/useColorScheme";
-import {assetsFonts} from "@/constants/theme/TextStyles";
-import {AuthProvider} from "@/context/AuthContext";
-import {useThemeColor} from "@/hooks/theme/useThemeColor";
-import {PostProvider} from "@/context/PostContext";
-import {GestureHandlerRootView} from "react-native-gesture-handler";
+import { useColorScheme } from "@/hooks/theme/useColorScheme";
+import { assetsFonts } from "@/constants/theme/TextStyles";
+import { AuthProvider } from "@/context/AuthContext";
+import { useThemeColor } from "@/hooks/theme/useThemeColor";
+import HomeLayout from "./home/_layout";
+import { PostProvider } from "@/context/PostContext";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { UserProvider } from "@/context/UserContext";
+import { Provider as PaperProvider } from 'react-native-paper';
+import {DogProvider} from "@/context/DogContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -35,32 +39,42 @@ export default function RootLayout() {
         return null;
     }
 
-    return (
-        <GestureHandlerRootView style={{flex: 1}}>
-            <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-                <AuthProvider>
-                    <PostProvider>
+  if (!loaded) {
+    return null;
+  }
+
+  return (
+      <PaperProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <AuthProvider>
+            <UserProvider>
+                <PostProvider>
+                    <DogProvider>
                         <Stack
                             screenOptions={{
                                 headerShown: true,
                                 headerShadowVisible: false,
                                 headerTransparent: true,
-                                headerTintColor: textColor,
+                                headerTintColor: 'white',
                                 headerTitle: "",
-                                headerBackVisible: true, // removed back arrows for centering with our components!
-                                // headerLeft: () => null,
+                                headerBackVisible: true,
                                 headerBackTitleVisible: false,
+
                             }}
                         >
                             <Stack.Screen
                                 name="index"
-                                options={{title: "PetPals"}}
+                                options={{ title: "PetPals" }}
                             />
-                            <Stack.Screen name="+not-found"/>
+                            <Stack.Screen name="+not-found" />
                         </Stack>
-                    </PostProvider>
-                </AuthProvider>
-            </ThemeProvider>
-        </GestureHandlerRootView>
-    );
+                    </DogProvider>
+                </PostProvider>
+            </UserProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </GestureHandlerRootView>
+      </PaperProvider>
+  );
 }

@@ -63,6 +63,35 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const codeRegex = "^[0-9]{6}$";
   const passwordRegex =
     "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$";
+  // const codeRegex = "^[0-9]{6}$";
+
+  // const sendJsonQuery = (path: string, method: string, payload?: any) =>
+  //   fetch(path, {
+  //     method: method,
+  //     mode: "cors",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify(payload),
+  //   }).then((response) => response.json());
+
+  // const checkConnection = async () => {
+  //   setIsProcessing(true);
+  //   setResponseMessage("");
+
+  //   // @ts-ignore
+  //     return sendJsonQuery(apiPaths.checkConnection, "GET")
+  //     .then((_) => {
+  //       setIsProcessing(false);
+  //       return true;
+  //     })
+  //     .catch((err: Error) => {
+  //       console.error(err.message);
+  //       setResponseMessage("Check connection: " + err.message);
+  //       setIsProcessing(false);
+  //       return false;
+  //     });
+  // };
 
   const register = async (
     displayName: string,

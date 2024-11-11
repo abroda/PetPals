@@ -37,7 +37,7 @@ export function ThemedIcon({
       <Icon
         size={percentToDP(rest.size ?? 8)}
         source={asset}
-        style={[{ marginBottom: -3 }]}
+        style={[{ marginTop: 10,}]}
         {...rest}
       />
     );
@@ -46,7 +46,7 @@ export function ThemedIcon({
       <Ionicons
         size={percentToDP(rest.size ?? 8)}
         name={name}
-        style={[{ color: color, marginBottom: -3 }, style]}
+        style={[{ marginTop: 10, color: color}, style]}
         {...rest}
       />
     );

@@ -62,6 +62,8 @@ public class AccountController {
     public ResponseEntity<AccountResponse> getUserById(@PathVariable String id) {
         User user = userService.getById(id);
 
+        System.out.println("Fetched user: " + user);
+
         return ResponseEntity.ok(AccountResponse.builder()
                 .id(user.getId())
                 .email(user.getUsername())
