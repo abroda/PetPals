@@ -17,6 +17,7 @@ interface DogContextProps {
     updateDogPicture: (dogId: string, formData: FormData) => Promise<void>
     getDogsByUserId: (userId: string) => Promise<Dog[]>;
     getDogById: (id: string) => Promise<Dog | null>;
+    updateDog: (id: string, data: Partial<Dog>) => Promise<any>
     deleteDog: (id: string) => Promise<void>;
     responseMessage: string;
     isProcessing: boolean;
@@ -27,7 +28,7 @@ const DogContext = createContext<DogContextProps | undefined>(undefined);
 export const useDog = () => {
     const context = useContext(DogContext);
     if (!context) {
-        throw new Error("useDog must be used within a DogProvider");
+        throw new Error("[DogContext] useDog must be used within a DogProvider");
     }
     return context;
 };
@@ -85,7 +86,7 @@ export const DogProvider: React.FC = ({ children }) => {
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error("File upload error:", errorText);
+            console.error("[DogContext] File upload error:", errorText);
             onFailure({ message: errorText });
             return false;
         }
@@ -121,7 +122,7 @@ export const DogProvider: React.FC = ({ children }) => {
             body: formData,
         };
 
-        console.log(`Uploading picture for dog ID: ${dogId}`);
+        console.log(`[DogContext] Uploading picture for dog ID: ${dogId}`);
 
         const response = await fetch(apiPaths.dogs.updateDogPicture(dogId), options);
 
@@ -129,11 +130,11 @@ export const DogProvider: React.FC = ({ children }) => {
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error("Failed to upload dog picture:", errorText);
+            console.error("[DogContext] Failed to upload dog picture:", errorText);
             throw new Error(errorText);
         }
 
-        console.log("Dog picture upload response:", await response.json());
+        console.log("[DogContext] Dog picture upload response:", await response.json());
     };
 
     // Get dog by ID
@@ -142,19 +143,24 @@ export const DogProvider: React.FC = ({ children }) => {
             const response = await sendJsonQuery(apiPaths.dogs.getDogById(id), "GET");
             return response as Dog;
         } catch (error) {
-            console.error("Failed to fetch dog:", error);
+            console.error("[DogContext] Failed to fetch dog:", error);
             return null;
         }
     };
+
+    const updateDog = async (id: string, data: Partial<Dog>) => {
+        return await sendJsonQuery(apiPaths.dogs.updateDog(id), "PUT", data);
+    };
+
 
     // Delete a dog by ID
     const deleteDog = async (id: string): Promise<void> => {
         try {
             await sendJsonQuery(apiPaths.dogs.deleteDog(id), "DELETE");
-            setResponseMessage("Dog deleted successfully!");
+            setResponseMessage("[DogContext] Dog deleted successfully!");
         } catch (error) {
-            console.error("Failed to delete dog:", error);
-            setResponseMessage("Failed to delete dog");
+            console.error("[DogContext] Failed to delete dog:", error);
+            setResponseMessage("[DogContext] Failed to delete dog");
         }
     };
 
@@ -163,7 +169,7 @@ export const DogProvider: React.FC = ({ children }) => {
             method: "GET",
             headers: { Authorization: `Bearer ${authToken}` },
         });
-        if (!response.ok) throw new Error("Failed to fetch dogs");
+        if (!response.ok) throw new Error("[DogContext] Failed to fetch dogs");
         return response.json();
     };
 
@@ -175,7 +181,7 @@ export const DogProvider: React.FC = ({ children }) => {
                 getDogsByUserId,
                 getDogById,
                 deleteDog,
-                // getDogsByUserId,
+                updateDog,
                 responseMessage,
                 isProcessing,
             }}

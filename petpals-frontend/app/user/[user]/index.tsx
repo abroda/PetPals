@@ -66,7 +66,12 @@ useLayoutEffect(() => {
     // Customize the header with icons in the right corner
     navigation.setOptions({
         headerRight: () => (
-            <View style={{ flexDirection: "row", padding: percentToDP(2), borderRadius: percentToDP(100) }}>
+            <View style={{
+                flexDirection: "row",
+                backgroundColor: darkGreen,
+                padding: percentToDP(2),
+                borderRadius: 100,
+            }}>
                 {username === "me" && (
                     <Pressable onPress={() => Alert.alert("Notifications")}>
                         <ThemedIcon name="notifications-outline" style={{ marginHorizontal: 10 }} />
@@ -108,14 +113,15 @@ return (
     <SafeAreaView style={{ flex: 1 }}>
         <ThemedView style={{ flex: 1, paddingTop: heightPercentToPD(6) }}>
             <ScrollView horizontal={false}>
-                <HorizontalView justifyOption="flex-end" style={{ marginHorizontal: percentToDP(5) }}>
-                    <View style={{ flexDirection: 'row', backgroundColor: darkGreen, padding: percentToDP(2), borderRadius: percentToDP(100) }}>
-                        {/* Empty space for headerRight buttons */}
-                    </View>
-                </HorizontalView>
 
                 {/* User Data Segment */}
-                <View style={{ height: heightPercentToPD(65), marginTop: 160, marginBottom: 20, backgroundColor: darkGreen, paddingBottom: 20 }}>
+                <View style={{
+                    // height: heightPercentToPD(65),
+                    marginTop: heightPercentToPD(20),
+                    marginBottom: heightPercentToPD(3),
+                    backgroundColor: darkGreen,
+                    paddingBottom: heightPercentToPD(5),
+                }}>
 
                     {/* User Avatar & Username & Description */}
                     <View style={{ alignItems: "center" }}>
@@ -123,24 +129,31 @@ return (
                             marginTop: heightPercentToPD(-10),
                             marginBottom: heightPercentToPD(1),
                         }}>
-                            <UserAvatar size={40} userId={userProfile?.id} imageUrl={userProfile?.imageUrl || null} doLink={false}/>
+                            <UserAvatar
+                                size={50}
+                                userId={userProfile?.id}
+                                imageUrl={userProfile?.imageUrl || null}
+                                doLink={false}
+                            />
                         </View>
                         <ThemedText style={{
-                            fontSize: 34,
+                            width: widthPercentageToDP(85),
+                            textAlign: 'center',
+                            fontSize: 36,
                             fontFamily: 'JosefinSans-Bold',
-                            letterSpacing: 1,
                             color: cream,
-                            marginBottom: heightPercentToPD(1),
+                            marginVertical: heightPercentToPD(1),
                         }}>
                             {userProfile?.username}
                         </ThemedText>
+
                         <ThemedText style={{
-                            fontSize: 16,
+                            width: widthPercentageToDP(85),
+                            fontSize: 15,
                             fontFamily: 'JosefinSans-SemiBold',
                             textAlign: "center",
                             color: cream,
-                            marginBottom: heightPercentToPD(1),
-                            height: heightPercentToPD(8),
+                            marginBottom: heightPercentToPD(5),
                         }}>
                             {userProfile?.description || "No description"}
                         </ThemedText>
@@ -148,11 +161,11 @@ return (
 
                     {/* User Info: Friends, KM, Dogs */}
                     <HorizontalView justifyOption="space-evenly" style={{
-                        backgroundColor: '#0A2421',
+                        marginBottom: heightPercentToPD(5),
+                        backgroundColor: 'transparent',
                     }}>
                         {/* Number of friends */}
                         <View style={{
-                            marginVertical: 10,
                             justifyContent: 'center',
                             alignItems: 'center',
                             backgroundColor: 'none',
@@ -175,7 +188,6 @@ return (
 
                         {/* Km this week */}
                         <View style={{
-                            marginVertical: 10,
                             alignItems: 'center',
                             backgroundColor: 'none',
                         }}>
@@ -197,7 +209,6 @@ return (
 
                         {/* Number of dogs */}
                         <View style={{
-                            marginVertical: 10,
                             alignItems: 'center',
                             backgroundColor: 'none',
                         }}>
@@ -219,42 +230,35 @@ return (
 
                     {/* Buttons */}
                     <HorizontalView justifyOption="center" style={{
-                        marginTop: 20,
-                        backgroundColor: '#0A2421',
+                        marginBottom: heightPercentToPD(2),
+                        backgroundColor: 'transparent',
                     }}>
-                        <ThemedButton label="Send invitation" color="#B4D779" style={{
-                            width: percentToDP(40),
-                            height: percentToDP(13),
-                            backgroundColor: 'none',
-                            borderWidth: 2,
-                            borderColor: '#B4D779',
-                            marginHorizontal: 10,
-                            paddingHorizontal: 20,
-                            borderRadius: 15,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            alignContent: 'center',
+                        <ThemedButton label="Send invitation" color={darkGreen} style={{
+                            width: widthPercentageToDP(35),
+                            height: widthPercentageToDP(12),
+                            marginHorizontal: widthPercentageToDP(2.5),
+                            backgroundColor: accentGreen,
+                            paddingHorizontal: widthPercentageToDP(1),
+                            borderRadius: 100,
                         }} />
 
-                        <ThemedButton label="Message" color="#B4D779" style={{
-                            width: percentToDP(40),
-                            height: percentToDP(13),
-                            backgroundColor: 'none',
-                            borderWidth: 2,
-                            borderColor: '#B4D779',
-                            marginHorizontal: 10,
-                            paddingHorizontal: 20,
-                            borderRadius: 15,
+                        <ThemedButton label="Message" color={darkGreen} style={{
+                            width: widthPercentageToDP(35),
+                            height: widthPercentageToDP(12),
+                            marginHorizontal: widthPercentageToDP(2.5),
+                            backgroundColor: accentGreen,
+                            paddingHorizontal: widthPercentageToDP(1),
+                            borderRadius: 100,
                         }} />
+
                     </HorizontalView>
 
-                    <ThemedButton label="Block" color="#52B8A3" style={{
-                        width: percentToDP(85),
-                        height: percentToDP(13),
-                        backgroundColor: 'none',
-                        borderWidth: 2,
-                        borderColor: '#52B8A3',
-                        borderRadius: 15,
+                    <ThemedButton label="Block" color={darkGreen} style={{
+                        marginVertical: 'auto',
+                        width: widthPercentageToDP(75),
+                        height: widthPercentageToDP(12),
+                        backgroundColor: accentTeal,
+                        borderRadius: 100,
                         marginHorizontal: "auto",
                         paddingHorizontal: 20,
                     }}/>
@@ -270,36 +274,37 @@ return (
                     <ThemedText style={{
                         fontSize: 30,
                         color: cream,
-                        marginLeft: widthPercentageToDP(7.5),
+                        marginLeft: widthPercentageToDP(5),
                     }}>
                         Dogs
                     </ThemedText>
+
                     <ThemedButton
                         label="Add dog"
                         onPress={() => router.push(`/user/${username}/pet/new`)}
                         color={darkGreen}
                         style={{
                             width: percentToDP(25),
-                            height: percentToDP(13),
-                            marginRight: widthPercentageToDP(7.5),
+                            height: percentToDP(12),
+                            marginRight: widthPercentageToDP(5),
                             backgroundColor: accentGreen,
-                            borderWidth: 2,
                             paddingHorizontal: widthPercentageToDP(1),
-                            borderRadius: 15,
+                            borderRadius: 100,
                         }}
                     />
                 </View>
+
                 <FlatList
                     horizontal
                     data={dogs}
                     keyExtractor={(item) => item.id}
                     style={{
-                        marginHorizontal: widthPercentageToDP(7.5),
+                        marginHorizontal: widthPercentageToDP(5),
                         marginTop: heightPercentToPD(1),
                     }}
                     renderItem={({ item }) => (
-                        <View style={{
 
+                        <View style={{
                             marginRight: 8,
                             paddingVertical: 10
                         }}>
@@ -351,8 +356,8 @@ return (
                 <ThemedText style={{
                     fontSize: 30,
                     color: cream,
-                    marginLeft: widthPercentageToDP(7.5),
-                    marginTop: 20
+                    marginLeft: widthPercentageToDP(5),
+                    marginTop: heightPercentToPD(4),
                 }}>
                     Posts
                 </ThemedText>
@@ -368,7 +373,6 @@ return (
                     top: heightPercentToPD(15),
                     right: widthPercentageToDP(8),
                     width: widthPercentageToDP(40),
-                    height: percentToDP(30),
                     backgroundColor: darkGreen,
                     padding: 10,
                     borderRadius: 5,

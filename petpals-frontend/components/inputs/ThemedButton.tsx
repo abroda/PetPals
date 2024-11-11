@@ -42,7 +42,7 @@ export const ThemedButton = ({
       color={textColor}
       labelStyle={[
         useTextStyle("default"),
-        { paddingBottom: percentToDP(1.5), fontSize: percentToDP(4), },
+        { padding: 0, fontSize: percentToDP(4), },
       ]}
       style={[
         {
