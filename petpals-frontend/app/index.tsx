@@ -15,6 +15,13 @@ export default function WelcomeScreen() {
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToPD = useWindowDimension("height");
 
+    // Colours
+    const darkGreen = '#0A2421'
+    const lightGreen = '#1C302A'
+    const accentGreen = '#B4D779'
+    const accentTeal = '#52B8A3'
+    const cream = '#FAF7EA'
+
   useEffect(() => {
     if (!isLoading && !isProcessing && userId && authToken) {
       router.replace("/home");
@@ -22,9 +29,9 @@ export default function WelcomeScreen() {
   }, []);
 
   return (
-    <SafeAreaView>
+      <SafeAreaView style={{ flex: 1, margin:0, padding: 0, backgroundColor: lightGreen}} edges={['left', 'right', 'bottom']}>
       <ThemedScrollView
-        style={{ height: heightPercentToPD(100), paddingTop: percentToDP(20) }}
+        style={{ flex: 1}}
       >
         {isLoading && (
           <ThemedLoadingIndicator
@@ -38,6 +45,7 @@ export default function WelcomeScreen() {
           <ThemedView
             style={{
               alignSelf: "center",
+              flex: 1,
             }}
           >
             <AppLogo
@@ -61,8 +69,8 @@ export default function WelcomeScreen() {
             </HorizontalView>
             <ThemedButton
               style={{ marginBottom: percentToDP(5) }}
-              backgroundColorName="secondary"
-              textColorName="textOnSecondary"
+              backgroundColorName="primary"
+              textColorName="textOnPrimary"
               label="Register"
               onPress={() => router.push("/register")}
             />

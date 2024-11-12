@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useLayoutEffect, useState } from "react";
-import { SafeAreaView, ScrollView, View, Pressable, Text, FlatList, Alert } from "react-native";
+import { SafeAreaView, ScrollView, View, Pressable, Text, FlatList, Alert, TouchableWithoutFeedback } from "react-native";
 import { ThemedText } from "@/components/basic/ThemedText";
 import HorizontalView from "@/components/basic/containers/HorizontalView";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
@@ -34,14 +34,12 @@ const [dogDescription, setDogDescription] = useState("");
 const [dogs, setDogs] = useState<Dog[]>([]);
 const { userId } = useAuth();
 
-
 // Colours
 const darkGreen = '#0A2421'
 const lightGreen = '#1C302A'
 const accentGreen = '#B4D779'
 const accentTeal = '#52B8A3'
 const cream = '#FAF7EA'
-
 
 // @ts-ignore
 const { getUserById, userProfile, isProcessing } = useContext(UserContext);
@@ -51,15 +49,23 @@ useEffect(() => {
     getUserById(username);
 }, [username]);
 
+
 useEffect(() => {
     const fetchDogs = async () => {
         // @ts-ignore
         const userDogs = await getDogsByUserId(userId);
-        setDogs(userDogs);
+
+        // Sorting dogs to be displayed by alphabetical order
+        const sortedDogs = userDogs
+            .map(dog => ({
+                ...dog,
+                name: dog.name || "Unknown Dog"
+            }))
+            .sort((a, b) => a.name.localeCompare(b.name));
+        setDogs(sortedDogs);
     };
     fetchDogs();
 }, [userId]);
-
 
 
 useLayoutEffect(() => {
@@ -71,27 +77,33 @@ useLayoutEffect(() => {
                 backgroundColor: darkGreen,
                 padding: percentToDP(2),
                 borderRadius: 100,
+                alignItems: 'center',
+                justifyContent: 'center',
+                alignContent: 'center',
+                marginTop: 2, // needed for header padding
+                marginBottom: 5, // header padding
             }}>
                 {username === "me" && (
                     <Pressable onPress={() => Alert.alert("Notifications")}>
-                        <ThemedIcon name="notifications-outline" style={{ marginHorizontal: 10 }} />
+                        <ThemedIcon name="notifications-outline" style={{marginHorizontal: widthPercentageToDP(1) }} />
                     </Pressable>
                 )}
                 <UserAvatar
                     userId={userProfile?.id}
                     imageUrl={userProfile?.imageUrl || null}
-                    size={12}
+                    size={10}
                     doLink={false}
-                    style={{ alignItems: "center", padding: percentToDP(2), justifyContent: "center" }}
+                    style={{}}
                 />
                 <Pressable onPress={() => setMenuVisible(!menuVisible)}>
-                    <ThemedIcon name="ellipsis-vertical-outline" />
+                    <ThemedIcon name="ellipsis-vertical-outline" style={{ marginHorizontal: widthPercentageToDP(1) }} />
                 </Pressable>
             </View>
         ),
         headerTitle: username,
     });
 }, [navigation, username, menuVisible]);
+
 
 const handleMenuSelect = (option: string) => {
     setMenuVisible(false);
@@ -104,14 +116,23 @@ const handleMenuSelect = (option: string) => {
     }
 };
 
+// Close the menu when clicking outside
+const closeMenu = () => {
+    if (menuVisible) {
+        setMenuVisible(false);
+    }
+};
+
+
 if (isProcessing) {
     return <Text>Loading...</Text>;
 }
 
 
 return (
+    <TouchableWithoutFeedback onPress={closeMenu}>
     <SafeAreaView style={{ flex: 1 }}>
-        <ThemedView style={{ flex: 1, paddingTop: heightPercentToPD(6) }}>
+        <ThemedView style={{ flex: 1, }}>
             <ScrollView horizontal={false}>
 
                 {/* User Data Segment */}
@@ -126,11 +147,11 @@ return (
                     {/* User Avatar & Username & Description */}
                     <View style={{ alignItems: "center" }}>
                         <View style={{
-                            marginTop: heightPercentToPD(-10),
+                            marginTop: heightPercentToPD(-15),
                             marginBottom: heightPercentToPD(1),
                         }}>
                             <UserAvatar
-                                size={50}
+                                size={55}
                                 userId={userProfile?.id}
                                 imageUrl={userProfile?.imageUrl || null}
                                 doLink={false}
@@ -144,7 +165,7 @@ return (
                             color: cream,
                             marginVertical: heightPercentToPD(1),
                         }}>
-                            {userProfile?.username}
+                            {userProfile?.username || "Unknown User"}
                         </ThemedText>
 
                         <ThemedText style={{
@@ -366,15 +387,16 @@ return (
 
             {/* Dropdown Menu */}
             {menuVisible && (
+
                 <View style={{
                     position: "absolute",
                     zIndex: 100,
                     elevation: 100,
-                    top: heightPercentToPD(15),
-                    right: widthPercentageToDP(8),
-                    width: widthPercentageToDP(40),
+                    top: heightPercentToPD(0),
+                    right: widthPercentageToDP(5),
+                    width: widthPercentageToDP(50),
                     backgroundColor: darkGreen,
-                    padding: 10,
+
                     borderRadius: 5,
                     shadowOpacity: 0.3,
                     shadowRadius: 10,
@@ -385,7 +407,7 @@ return (
                 }}>
                     <Pressable onPress={() => handleMenuSelect("Edit")}>
                         <Text style={{
-                            paddingVertical: 10,
+                            padding: 20,
                             color: cream,
                             borderBottomWidth: 1,
                             borderColor: accentGreen,
@@ -394,15 +416,17 @@ return (
                     </Pressable>
                     <Pressable onPress={() => handleMenuSelect("App Settings")}>
                         <Text style={{
-                            paddingVertical: 10,
+                            padding: 20,
                             color: cream,
                             fontSize: 18,
                         }}>App Settings</Text>
                     </Pressable>
                 </View>
+
             )}
         </ThemedView>
     </SafeAreaView>
+    </TouchableWithoutFeedback>
 );
 }
 

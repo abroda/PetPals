@@ -20,8 +20,17 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { UserProvider } from "@/context/UserContext";
 import { Provider as PaperProvider } from 'react-native-paper';
 import {DogProvider} from "@/context/DogContext";
+import {heightPercentageToDP} from "react-native-responsive-screen";
 
 SplashScreen.preventAutoHideAsync();
+
+// Colours
+const darkGreen = '#0A2421'
+const lightGreen = '#1C302A'
+const accentGreen = '#B4D779'
+const accentTeal = '#52B8A3'
+const cream = '#FAF7EA'
+
 
 export default function RootLayout() {
     const colorScheme = useColorScheme();
@@ -55,12 +64,14 @@ export default function RootLayout() {
                             screenOptions={{
                                 headerShown: true,
                                 headerShadowVisible: false,
-                                headerTransparent: true,
-                                headerTintColor: 'white',
+                                headerTransparent: false, // Changed background color
+                                headerStyle: {
+                                    backgroundColor: lightGreen, // Changed background color
+                                },
+                                headerTintColor: cream, // Set icon and text color
                                 headerTitle: "",
                                 headerBackVisible: true,
                                 headerBackTitleVisible: false,
-
                             }}
                         >
                             <Stack.Screen

@@ -1,14 +1,21 @@
-const primaryColor = "#b4d779";
-const secondaryColor = "#1c302a";
+const darkGreen = '#0A2421'
+const lightGreen = '#1C302A'
+const accentGreen = '#B4D779'
+const accentTeal = '#52B8A3'
+const cream = '#FAF7EA'
+
+const primaryColor = accentGreen;
+const secondaryColor = lightGreen;
 const tertiaryColor = "#162521";
-const accentColor = "#52b8a3";
+const accentColor = accentTeal;
 const alarmColor = "#c54835";
 
-const lightColor = "#1C302A";
+const lightColor = lightGreen;
 const lightGreyColor = "#d3dedc";
 const greyColor = "#617c78";
 const darkGreyColor = "#3b4e4a";
-const darkColor = "#131c1b";
+const darkColor = darkGreen;
+
 
 export const ThemeColors = {
   light: {
