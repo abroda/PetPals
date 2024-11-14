@@ -60,84 +60,84 @@ export default function Post({postFromFeed}: { postFromFeed: PostType }) {
                 paddingBottom: 24
             }}
         >
-            {/*/!*POST HEADER*!/*/}
-            {/*<HorizontalView justifyOption="flex-start" colorName="transparent" style={{marginBottom: 16}}>*/}
-            {/*    <UserAvatar*/}
-            {/*        size={10}*/}
-            {/*        doLink={true}*/}
-            {/*        userId={post.author.id}*/}
-            {/*        imgUrl={post.author.imageUrl}*/}
-            {/*    />*/}
-            {/*    <ThemedText style={{backgroundColor: "transparent", marginLeft: 16}}*/}
-            {/*                textStyleName="big">{post.author.username}</ThemedText>*/}
-            {/*</HorizontalView>*/}
+            {/*POST HEADER*/}
+            <HorizontalView justifyOption="flex-start" colorName="transparent" style={{marginBottom: 16}}>
+                <UserAvatar
+                    size={10}
+                    doLink={true}
+                    userId={post.author.id}
+                    imgUrl={post.author.imageUrl}
+                />
+                <ThemedText style={{backgroundColor: "transparent", marginLeft: 16}}
+                            textStyleName="big">{post.author.username}</ThemedText>
+            </HorizontalView>
 
-            {/*/!*IMAGE*!/*/}
-            {/*{post.imageUrl &&*/}
-            {/*    <ThemedView*/}
-            {/*        style={{*/}
-            {/*            width: percentToDP(80),*/}
-            {/*            height: percentToDP(80),*/}
-            {/*            marginBottom: 24,*/}
-            {/*            borderRadius: 30*/}
-            {/*        }}*/}
-            {/*    >*/}
-            {/*        <Image*/}
-            {/*            source={{*/}
-            {/*                uri: post.imageUrl,*/}
-            {/*            }}*/}
-            {/*            style={{*/}
-            {/*                width: "100%",*/}
-            {/*                height: "100%",*/}
-            {/*                borderRadius: 10,*/}
-            {/*            }}*/}
-            {/*        />*/}
-            {/*    </ThemedView>*/}
-            {/*}*/}
+            {/*IMAGE*/}
+            {post.imageUrl &&
+                <ThemedView
+                    style={{
+                        width: percentToDP(80),
+                        height: percentToDP(80),
+                        marginBottom: 24,
+                        borderRadius: 30
+                    }}
+                >
+                    <Image
+                        source={{
+                            uri: post.imageUrl,
+                        }}
+                        style={{
+                            width: "100%",
+                            height: "100%",
+                            borderRadius: 10,
+                        }}
+                    />
+                </ThemedView>
+            }
 
-            {/*/!*TITLE AND DESCRIPTION*!/*/}
-            {/*<ThemedText style={{backgroundColor: "transparent", marginBottom: 10}}*/}
-            {/*            textStyleName="big">{post.title}</ThemedText>*/}
-            {/*<ThemedText style={{backgroundColor: "transparent", marginBottom: 36}}*/}
-            {/*            textStyleName="small">{post.description}</ThemedText>*/}
+            {/*TITLE AND DESCRIPTION*/}
+            <ThemedText style={{backgroundColor: "transparent", marginBottom: 10}}
+                        textStyleName="big">{post.title}</ThemedText>
+            <ThemedText style={{backgroundColor: "transparent", marginBottom: 36}}
+                        textStyleName="small">{post.description}</ThemedText>
 
 
-            {/*/!*COMMENTS AND LIKES*!/*/}
-            {/*<HorizontalView colorName="transparent" style={{alignItems: "flex-start"}} justifyOption={"space-between"}>*/}
-            {/*    <ThemedButton*/}
-            {/*        style={{*/}
-            {/*            flexDirection: "row",*/}
-            {/*            alignItems: "flex-end",*/}
-            {/*            justifyContent: "center",*/}
-            {/*            width: null,*/}
-            {/*            paddingHorizontal: percentToDP(6)*/}
-            {/*        }}*/}
-            {/*        backgroundColorName="secondary"*/}
-            {/*        onPress={() =>*/}
-            {/*            router.push(`/user/${post.author.username}/post/${post.id}` as Href<string>)*/}
-            {/*        }*/}
-            {/*    >*/}
-            {/*        /!*Go to comment section*!/*/}
-            {/*        <ThemedIcon name="chatbox" size={20} style={{marginRight: 10}}/>*/}
-            {/*        <ThemedText style={{backgroundColor: "transparent"}}*/}
-            {/*                    textStyleName="small"*/}
-            {/*                    textColorName="primary">{post.comments.length} comments</ThemedText>*/}
-            {/*    </ThemedButton>*/}
-            {/*    <HorizontalView justifyOption={"flex-end"}>*/}
-            {/*        <Pressable onPress={() => {*/}
-            {/*            handlePostLike()*/}
-            {/*        }*/}
-            {/*        }>*/}
-            {/*            <ThemedIcon*/}
-            {/*                name={liked ? "heart" : "heart-outline"}*/}
-            {/*                style={{*/}
-            {/*                    paddingRight: 8,*/}
-            {/*                }}*/}
-            {/*            />*/}
-            {/*        </Pressable>*/}
-            {/*        <ThemedText style={{fontSize: 24}}>{post.likes.length}</ThemedText>*/}
-            {/*    </HorizontalView>*/}
-            {/*</HorizontalView>*/}
+            {/*COMMENTS AND LIKES*/}
+            <HorizontalView colorName="transparent" style={{alignItems: "flex-start"}} justifyOption={"space-between"}>
+                <ThemedButton
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "flex-end",
+                        justifyContent: "center",
+                        width: null,
+                        paddingHorizontal: percentToDP(6)
+                    }}
+                    backgroundColorName="secondary"
+                    onPress={() =>
+                        router.push(`/user/${post.author.username}/post/${post.id}` as Href<string>)
+                    }
+                >
+                    {/*Go to comment section*/}
+                    <ThemedIcon name="chatbox" size={20} style={{marginRight: 10}}/>
+                    <ThemedText style={{backgroundColor: "transparent"}}
+                                textStyleName="small"
+                                textColorName="primary">{post.comments.length} comments</ThemedText>
+                </ThemedButton>
+                <HorizontalView justifyOption={"flex-end"}>
+                    <Pressable onPress={() => {
+                        handlePostLike()
+                    }
+                    }>
+                        <ThemedIcon
+                            name={liked ? "heart" : "heart-outline"}
+                            style={{
+                                paddingRight: 8,
+                            }}
+                        />
+                    </Pressable>
+                    <ThemedText style={{fontSize: 24}}>{post.likes.length}</ThemedText>
+                </HorizontalView>
+            </HorizontalView>
         </ThemedView>
     );
 }
