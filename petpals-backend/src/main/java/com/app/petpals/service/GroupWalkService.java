@@ -5,10 +5,7 @@ import com.app.petpals.entity.GroupWalk;
 import com.app.petpals.entity.User;
 import com.app.petpals.exception.GroupWalkDataException;
 import com.app.petpals.exception.GroupWalkNotFoundException;
-import com.app.petpals.payload.GroupWalkAddRequest;
-import com.app.petpals.payload.GroupWalkEditRequest;
-import com.app.petpals.payload.GroupWalkJoinRequest;
-import com.app.petpals.payload.GroupWalkLeaveRequest;
+import com.app.petpals.payload.*;
 import com.app.petpals.repository.GroupWalkRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +16,8 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +25,7 @@ public class GroupWalkService {
     private final GroupWalkRepository groupWalkRepository;
     private final UserService userService;
     private final DogService dogService;
+    private final AWSImageService awsImageService;
 
     public List<GroupWalk> getAllGroupWalks() {
         return groupWalkRepository.findAll();
@@ -33,6 +33,10 @@ public class GroupWalkService {
 
     public GroupWalk getGroupWalkById(String walkId) {
         return groupWalkRepository.findById(walkId).orElseThrow(() -> new GroupWalkNotFoundException("GroupWalk not found"));
+    }
+
+    public List<GroupWalk> getAllCreatedGroupWalks(User creator) {
+        return groupWalkRepository.findAllByCreator(creator);
     }
 
     @Transactional
@@ -124,5 +128,54 @@ public class GroupWalkService {
         } catch (DateTimeParseException e) {
             throw new GroupWalkDataException("Datetime has to be in correct format. For example 2023-11-08T14:30:00");
         }
+    }
+
+    public GroupWalkResponse createGroupWalkResponse(GroupWalk groupWalk) {
+        return GroupWalkResponse.builder()
+                .id(groupWalk.getId())
+                .title(groupWalk.getTitle())
+                .description(groupWalk.getDescription())
+                .location(groupWalk.getLocation())
+                .datetime(groupWalk.getDatetime().toString())
+                .creator(
+                        GroupWalkCreatorResponse.builder()
+                                .userId(groupWalk.getCreator().getId())
+                                .username(groupWalk.getCreator().getDisplayName())
+                                .imageUrl(Optional.ofNullable(groupWalk.getCreator().getProfilePictureId())
+                                        .map(awsImageService::getPresignedUrl)
+                                        .orElse(null))
+                                .build()
+                )
+                .tags(groupWalk.getTags())
+                .participants(getGroupWalkParticipants(groupWalk))
+                .build();
+    }
+
+    public List<GroupWalkParticipantResponse> getGroupWalkParticipants(GroupWalk groupWalk) {
+        return groupWalk.getParticipants().stream()
+                .collect(Collectors.groupingBy(Dog::getUser))
+                .entrySet().stream()
+                .map(entry -> {
+                    User owner = entry.getKey();
+                    List<GroupWalkParticipantDogResponse> dogs = entry.getValue().stream()
+                            .map(dog -> GroupWalkParticipantDogResponse.builder()
+                                    .dogId(dog.getId())
+                                    .name(dog.getName())
+                                    .imageUrl(Optional.ofNullable(dog.getImageId())
+                                            .map(awsImageService::getPresignedUrl)
+                                            .orElse(null))
+                                    .build())
+                            .collect(Collectors.toList());
+
+                    return GroupWalkParticipantResponse.builder()
+                            .userId(owner.getId())
+                            .username(owner.getUsername())
+                            .imageUrl((Optional.ofNullable(owner.getProfilePictureId())
+                                    .map(awsImageService::getPresignedUrl)
+                                    .orElse(null)))
+                            .dogs(dogs)
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 }
