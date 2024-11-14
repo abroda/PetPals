@@ -1,11 +1,12 @@
 package com.app.petpals.controller;
 
 import com.app.petpals.entity.User;
-import com.app.petpals.payload.AccountEditRequest;
-import com.app.petpals.payload.AccountResponse;
+import com.app.petpals.payload.account.AccountEditRequest;
+import com.app.petpals.payload.account.AccountResponse;
 import com.app.petpals.payload.TextResponse;
 import com.app.petpals.service.AWSImageService;
 import com.app.petpals.service.UserService;
+import com.app.petpals.utils.CheckUserAuthorization;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,7 +39,6 @@ public class AccountController {
                 .stream()
                 .map(user -> AccountResponse.builder()
                         .id(user.getId())
-                        .email(user.getUsername())
                         .username(user.getDisplayName())
                         .description(user.getDescription())
                         .imageUrl(Optional.ofNullable(user.getProfilePictureId())
@@ -57,14 +57,12 @@ public class AccountController {
         return ResponseEntity.ok(users);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{userId}")
     @Operation(summary = "Get user account by id.", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<AccountResponse> getUserById(@PathVariable String id) {
-        User user = userService.getById(id);
-
+    public ResponseEntity<AccountResponse> getUserById(@PathVariable("userId") String userId) {
+        User user = userService.getById(userId);
         return ResponseEntity.ok(AccountResponse.builder()
                 .id(user.getId())
-                .email(user.getUsername())
                 .username(user.getDisplayName())
                 .description(user.getDescription())
                 .imageUrl(Optional.ofNullable(user.getProfilePictureId())
@@ -81,7 +79,6 @@ public class AccountController {
         User authUser = (User) auth.getPrincipal();
         return ResponseEntity.ok(AccountResponse.builder()
                 .id(authUser.getId())
-                .email(authUser.getUsername())
                 .username(authUser.getDisplayName())
                 .description(authUser.getDescription())
                 .imageUrl(Optional.ofNullable(authUser.getProfilePictureId())
@@ -91,13 +88,14 @@ public class AccountController {
                 .build());
     }
 
-    @PutMapping(path = "/{id}")
+    @CheckUserAuthorization(pathVariable = "userId")
+    @PutMapping(path = "/{userId}")
     @Operation(summary = "Update user data by id.", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<AccountResponse> updateUserData(@PathVariable String id, @RequestBody AccountEditRequest accountEditRequest) {
-        User user = userService.updateUserData(id, accountEditRequest);
+    public ResponseEntity<AccountResponse> updateUserData(@PathVariable("userId") String userId, @RequestBody AccountEditRequest accountEditRequest) {
+        System.out.println(accountEditRequest);
+        User user = userService.updateUserData(userId, accountEditRequest);
         return ResponseEntity.ok(AccountResponse.builder()
                 .id(user.getId())
-                .email(user.getUsername())
                 .username(user.getDisplayName())
                 .description(user.getDescription())
                 .imageUrl(Optional.ofNullable(user.getProfilePictureId())
@@ -107,10 +105,11 @@ public class AccountController {
                 .build());
     }
 
-    @PutMapping(path = "/{id}/picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @CheckUserAuthorization(pathVariable = "userId")
+    @PutMapping(path = "/{userId}/picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Update user profile picture by id.", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<AccountResponse> updateUserProfilePicture(@PathVariable String id, @RequestParam("file") MultipartFile file) throws IOException {
-        User user = userService.getById(id);
+    public ResponseEntity<AccountResponse> updateUserProfilePicture(@PathVariable("userId") String userId, @RequestParam("file") MultipartFile file) throws IOException {
+        User user = userService.getById(userId);
         String imageId = null;
         if (file != null && !file.isEmpty()) {
             if (user.getProfilePictureId() != null) {
@@ -118,10 +117,9 @@ public class AccountController {
             }
             imageId = awsImageService.uploadImage(file.getBytes(), file.getContentType());
         }
-        User updatedUser = userService.updateUserProfilePicture(id, imageId);
+        User updatedUser = userService.updateUserProfilePicture(userId, imageId);
         return ResponseEntity.ok(AccountResponse.builder()
                 .id(updatedUser.getId())
-                .email(updatedUser.getUsername())
                 .username(updatedUser.getDisplayName())
                 .description(updatedUser.getDescription())
                 .imageUrl(Optional.ofNullable(updatedUser.getProfilePictureId())
@@ -131,17 +129,17 @@ public class AccountController {
                 .build());
     }
 
-    @DeleteMapping(path = "/{id}/picture")
+    @CheckUserAuthorization(pathVariable = "userId")
+    @DeleteMapping(path = "/{userId}/picture")
     @Operation(summary = "Delete user profile picture by id.", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<AccountResponse> deleteUserProfilePicture(@PathVariable String id) {
-        User user = userService.getById(id);
+    public ResponseEntity<AccountResponse> deleteUserProfilePicture(@PathVariable("userId") String userId) {
+        User user = userService.getById(userId);
         if (user.getProfilePictureId() != null) {
             awsImageService.deleteImage(user.getProfilePictureId());
-            user = userService.deleteUserPicture(id);
+            user = userService.deleteUserPicture(userId);
         }
         return ResponseEntity.ok(AccountResponse.builder()
                 .id(user.getId())
-                .email(user.getUsername())
                 .username(user.getDisplayName())
                 .description(user.getDescription())
                 .imageUrl(Optional.ofNullable(user.getProfilePictureId())
@@ -151,10 +149,11 @@ public class AccountController {
                 .build());
     }
 
-    @DeleteMapping("/{id}")
+    @CheckUserAuthorization(pathVariable = "userId")
+    @DeleteMapping("/{userId}")
     @Operation(summary = "Delete user.", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<TextResponse> deleteAccount(@PathVariable String id) {
-        User user = userService.getById(id);
+    public ResponseEntity<TextResponse> deleteAccount(@PathVariable("userId") String userId) {
+        User user = userService.getById(userId);
         if (user.getProfilePictureId() != null) {
             awsImageService.deleteImage(user.getProfilePictureId());
         }
@@ -163,7 +162,7 @@ public class AccountController {
                 awsImageService.deleteImage(dog.getImageId());
             }
         });
-        userService.deleteUser(id);
+        userService.deleteUser(userId);
         TextResponse textResponse = new TextResponse("User deleted successfully.");
         return ResponseEntity.ok(textResponse);
     }

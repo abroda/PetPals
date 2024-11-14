@@ -11,6 +11,9 @@ import UserAvatar from "@/components/navigation/UserAvatar";
 import PostFeed from "@/components/lists/PostFeed";
 import Post from "@/components/display/Post";
 import NotificationsPopup from "@/components/popups/NotificationsPopup";
+import { ThemedButton } from "@/components/inputs/ThemedButton";
+import { ThemedText } from "@/components/basic/ThemedText";
+import { Href, router } from "expo-router";
 
 export default function HomeScreen() {
   const { userId } = useAuth();
@@ -27,15 +30,9 @@ export default function HomeScreen() {
       >
         <ThemedView
           colorName="secondary"
-          style={{ height: 80 }}
+          style={{ height: heightPercentToDP(10) }}
         >
-          <HorizontalView style={{ paddingHorizontal: 10 }}>
-            {/* APP LOGO */}
-            <AppLogo
-              size={10}
-              version="horizontal"
-            />
-
+          <HorizontalView style={{ paddingHorizontal: percentToDP(5) }}>
             {/* NOTIFICATIONS ICON */}
             <Pressable
               onPress={() => {
@@ -60,15 +57,22 @@ export default function HomeScreen() {
           </HorizontalView>
         </ThemedView>
 
+        <ThemedView>
+          <ThemedButton
+            onPress={() =>
+              router.push("/user/Username/post/new" as Href<string>)
+            }
+          >
+            <ThemedText>TEMPORARY ADD</ThemedText>
+          </ThemedButton>
+        </ThemedView>
         {/* POST FEED */}
         <PostFeed></PostFeed>
-
-        {notificationsVisible && (
-          <NotificationsPopup
-            onDismiss={() => setNotificationsVisible(false)}
-          />
-        )}
       </ThemedView>
+
+      {notificationsVisible && (
+        <NotificationsPopup onDismiss={() => setNotificationsVisible(false)} />
+      )}
       {/*/!* BACKGROUND BEHIND ALL POSTS AND TOP BAR - COLOR VISIBLE BELOW NAVBAR*!/*/}
       {/*<ThemedView colorName="transparent" style={{height: heightPercentToDP(100)}}>*/}
 
