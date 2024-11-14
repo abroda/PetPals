@@ -10,14 +10,14 @@ import { useWindowDimension } from "@/hooks/useWindowDimension";
 
 export default function FriendListItem(props: { username: string }) {
   const [selected, setSelected] = useState("");
-  const percentToPD = useWindowDimension("shorter");
+  const percentToDP = useWindowDimension("shorter");
 
   return (
     <ThemedView
       style={{
         flexDirection: "row",
-        width: percentToPD(100),
-        margin: percentToPD(4),
+        width: percentToDP(100),
+        margin: percentToDP(4),
         justifyContent: "flex-start",
       }}
     >
@@ -31,10 +31,10 @@ export default function FriendListItem(props: { username: string }) {
       <ThemedView style={{ justifyContent: "center" }}>
         <ThemedText
           style={{
-            paddingHorizontal: percentToPD(2),
-            fontSize: percentToPD(8),
+            paddingHorizontal: percentToDP(2),
+            fontSize: percentToDP(8),
           }}
-          textStyleName="bigBold"
+          textStyleOptions={{ size: "big", weight: "bold" }}
           textColorName="link"
         >
           {props.username}

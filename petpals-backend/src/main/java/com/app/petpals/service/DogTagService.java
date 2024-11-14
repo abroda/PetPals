@@ -1,7 +1,7 @@
 package com.app.petpals.service;
 
 import com.app.petpals.entity.DogTag;
-import com.app.petpals.exception.DogTagNotFoundException;
+import com.app.petpals.exception.dog.DogTagNotFoundException;
 import com.app.petpals.repository.DogTagRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

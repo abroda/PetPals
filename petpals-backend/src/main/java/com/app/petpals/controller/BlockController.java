@@ -1,6 +1,6 @@
 package com.app.petpals.controller;
 
-import com.app.petpals.payload.BlockRequest;
+import com.app.petpals.payload.account.BlockRequest;
 import com.app.petpals.payload.BooleanResponse;
 import com.app.petpals.payload.TextResponse;
 import com.app.petpals.service.BlockService;

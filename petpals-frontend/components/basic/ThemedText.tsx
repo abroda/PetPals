@@ -6,7 +6,7 @@ import {
   ThemedColor,
   useThemeColor,
 } from "@/hooks/theme/useThemeColor";
-import { TextStyleName, useTextStyle } from "@/hooks/theme/useTextStyle";
+import { TextStyleOptions, useTextStyle } from "@/hooks/theme/useTextStyle";
 
 export type ThemedTextProps = TextProps & {
   center?: boolean;
@@ -14,45 +14,39 @@ export type ThemedTextProps = TextProps & {
   textThemedColor?: ThemedColor;
   backgroundColorName?: ColorName;
   backgroundThemedColor?: ThemedColor;
-  textStyleName?: TextStyleName;
-  numberOfLines?: number;
-  ellipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
+  textStyleOptions?: TextStyleOptions;
 };
 
 export function ThemedText({
-                             style,
-                             center = false,
-                             textColorName = "text",
-                             textThemedColor,
-                             backgroundColorName = "background",
-                             backgroundThemedColor,
-                             textStyleName = "default",
-                             numberOfLines,
-                             ellipsizeMode = 'tail',
-                             ...rest
-                           }: ThemedTextProps) {
+  style,
+  center = false,
+  textColorName = "text",
+  textThemedColor,
+  backgroundColorName = "background",
+  backgroundThemedColor,
+  textStyleOptions = {},
+  ...rest
+}: ThemedTextProps) {
   const textColor = useThemeColor(textColorName, textThemedColor);
   const backgroundColor = useThemeColor(
-      backgroundColorName,
-      backgroundThemedColor
+    backgroundColorName,
+    backgroundThemedColor
   );
 
   return (
-      <Text
-          center={center}
-          style={[
-            {
-              color: textColor,
-              backgroundColor: 'none',
-              flexWrap: "wrap",
-              flexShrink: 1,
-            },
-            useTextStyle(textStyleName),
-            style,
-          ]}
-          numberOfLines={numberOfLines}
-          ellipsizeMode={ellipsizeMode}
-          {...rest}
-      />
+    <Text
+      center={center}
+      style={[
+        {
+          color: textColor,
+          backgroundColor: "none",
+          flexWrap: "wrap",
+          flexShrink: 1,
+        },
+        useTextStyle(textStyleOptions),
+        style,
+      ]}
+      {...rest}
+    />
   );
 }

@@ -1,9 +1,9 @@
 package com.app.petpals.service;
 
-import com.app.petpals.exception.AWSFailedToDeleteException;
-import com.app.petpals.exception.AWSGetImageException;
-import com.app.petpals.exception.AWSPresignUrlException;
-import com.app.petpals.exception.AWSUploadImageException;
+import com.app.petpals.exception.aws.AWSFailedToDeleteException;
+import com.app.petpals.exception.aws.AWSGetImageException;
+import com.app.petpals.exception.aws.AWSPresignUrlException;
+import com.app.petpals.exception.aws.AWSUploadImageException;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.beans.factory.annotation.Value;

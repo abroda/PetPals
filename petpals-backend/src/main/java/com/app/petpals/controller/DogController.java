@@ -1,8 +1,8 @@
 package com.app.petpals.controller;
 
 import com.app.petpals.entity.Dog;
-import com.app.petpals.payload.DogEditRequest;
-import com.app.petpals.payload.DogResponse;
+import com.app.petpals.payload.dog.DogEditRequest;
+import com.app.petpals.payload.dog.DogResponse;
 import com.app.petpals.service.AWSImageService;
 import com.app.petpals.service.DogService;
 import io.swagger.v3.oas.annotations.Operation;

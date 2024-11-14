@@ -57,7 +57,7 @@ export const ThemedMultilineTextField = forwardRef<TextFieldRef, ThemedMultiline
         const percentToDP = useWindowDimension("shorter");
 
         return (
-            <View>
+            <View style={[{marginBottom: percentToDP(2)}, rest.style]}>
                 <ThemedText style={{paddingLeft: percentToDP(1), marginBottom: 8}}>{label}</ThemedText>
                 <View style={{
                     backgroundColor: backgroundColor,

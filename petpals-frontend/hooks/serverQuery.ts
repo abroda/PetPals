@@ -31,6 +31,7 @@ export const serverQuery = async ({
   retriesCount = 3, // minimum 1
   timeout = 5000,
 }: AsyncQuery) => {
+  console.log("Query: " + method + " " + path);
   onStart();
 
   let abortController = asyncAbortController ?? new AbortController();
@@ -51,7 +52,7 @@ export const serverQuery = async ({
       method: method,
       mode: "cors", // always uses cors
       headers: headers,
-      body: JSON.stringify(payload),
+      body: payload ? JSON.stringify(payload) : undefined,
       signal: abortController.signal, // aborts fetch when signal is received (timeout or send by the component on unmount)
     })
       .then((response: Response) => {

@@ -6,7 +6,7 @@ import {
   UseMutationOptions,
 } from "react-query";
 import { ReactElement } from "react";
-import { UseMutateAsyncFunction } from "@tanstack/react-query";
+import { UseMutateAsyncFunction } from "react-query";
 
 export type ServerQueryDisplayProps = UseMutationOptions & {
   onIdleShow: (

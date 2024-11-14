@@ -3,12 +3,12 @@ package com.app.petpals.service;
 import com.app.petpals.entity.Dog;
 import com.app.petpals.entity.DogTag;
 import com.app.petpals.entity.User;
-import com.app.petpals.exception.DogDataException;
-import com.app.petpals.exception.DogNotFoundException;
-import com.app.petpals.exception.DogTagNotFoundException;
-import com.app.petpals.exception.UserNotFoundException;
-import com.app.petpals.payload.DogAddRequest;
-import com.app.petpals.payload.DogEditRequest;
+import com.app.petpals.exception.dog.DogDataException;
+import com.app.petpals.exception.dog.DogNotFoundException;
+import com.app.petpals.exception.dog.DogTagNotFoundException;
+import com.app.petpals.exception.account.UserNotFoundException;
+import com.app.petpals.payload.dog.DogAddRequest;
+import com.app.petpals.payload.dog.DogEditRequest;
 import com.app.petpals.repository.DogRepository;
 import com.app.petpals.repository.DogTagRepository;
 import com.app.petpals.repository.UserRepository;
@@ -36,6 +36,10 @@ public class DogService {
         if (dog.isPresent()) {
             return dog.get();
         } else throw new DogNotFoundException("Dog not found.");
+    }
+
+    public List<Dog> getAllDogsById(List<String> ids) {
+      return dogRepository.findAllById(ids);
     }
 
     public List<Dog> getDogsByUser(User user) {

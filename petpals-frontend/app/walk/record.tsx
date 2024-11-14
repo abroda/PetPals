@@ -14,11 +14,11 @@ export default function RecordWalkScreen() {
   const buttonColor = useThemeColor("link");
   const iconColor = useThemeColor("text");
   const percentToDP = useWindowDimension("shorter");
-  const heightPercentToPD = useWindowDimension("height");
+  const heightPercentToDP = useWindowDimension("height");
   return (
     <SafeAreaView>
       <ThemedScrollView
-        style={{ height: heightPercentToPD(100), paddingTop: 50 }}
+        style={{ height: heightPercentToDP(100), paddingTop: 50 }}
       >
         <ThemedText>TODO: Record a walk</ThemedText>
         <ThemedText>Clickable on Map:</ThemedText>
@@ -32,11 +32,13 @@ export default function RecordWalkScreen() {
             size={40}
           ></ThemedIcon>
         </Pressable>
-        <ThemedText textStyleName="bigBold">TODO</ThemedText>
+        <ThemedText textStyleOptions={{ size: "big", weight: "bold" }}>
+          TODO
+        </ThemedText>
         <ThemedText>Visible users</ThemedText>
         <UserAvatar
           size={13}
-          username={"OtherUser"}
+          userId={"OtherUser"}
           doLink={true}
         />
         <ThemedText>Ongoing group walk</ThemedText>

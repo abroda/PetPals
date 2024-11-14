@@ -3,36 +3,50 @@ import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { FlatList } from "react-native-gesture-handler";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
 import Comment from "../display/Comment";
+import { CommentContent } from "@/context/WalksContext";
 
-export default function CommentSection() {
+export default function CommentSection({
+  commentsData,
+}: {
+  commentsData: CommentContent[];
+}) {
   const percentToDP = useWindowDimension("shorter");
   return (
     <ThemedView
-      colorName="tertiary"
+      colorName="transparent" //"secondary"
       style={{
         borderRadius: percentToDP(10),
-        margin: percentToDP(2),
-        paddingVertical: percentToDP(4),
-        paddingHorizontal: percentToDP(3),
+        paddingVertical: 0, //percentToDP(4),
+        paddingHorizontal: 0, //percentToDP(4),
         marginBottom: percentToDP(30),
+        borderColor: "red",
       }}
     >
       <ThemedText
-        textStyleName="bigBold"
+        textStyleOptions={{ weight: "semibold" }}
         backgroundColorName="transparent"
-        style={{ paddingLeft: percentToDP(3), paddingBottom: percentToDP(4) }}
+        style={{
+          paddingLeft: 0, //percentToDP(3),
+          margin: 0,
+          paddingBottom: percentToDP(4),
+        }}
       >
         Comments
       </ThemedText>
       <FlatList
         scrollEnabled={false}
         data={
-          ["1", "2", "3"]
+          commentsData
           // TODO: what happens if there is a lot of comments?
           // add floating button "scroll to the top" after certain height?
           // or pagination?
         }
-        renderItem={(commentId) => <Comment commentId={commentId.item} />}
+        renderItem={(rowData) => (
+          <Comment
+            commentId={rowData.item?.id}
+            comment={rowData.item}
+          />
+        )}
       />
     </ThemedView>
   );

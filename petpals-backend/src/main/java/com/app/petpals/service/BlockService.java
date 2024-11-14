@@ -2,8 +2,8 @@ package com.app.petpals.service;
 
 import com.app.petpals.entity.Friendship;
 import com.app.petpals.entity.User;
-import com.app.petpals.exception.UserDataException;
-import com.app.petpals.exception.UserNotFoundException;
+import com.app.petpals.exception.account.UserDataException;
+import com.app.petpals.exception.account.UserNotFoundException;
 import com.app.petpals.repository.FriendshipRepository;
 import com.app.petpals.repository.UserRepository;
 import jakarta.transaction.Transactional;

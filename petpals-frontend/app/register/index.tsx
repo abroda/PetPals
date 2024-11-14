@@ -40,7 +40,7 @@ export default function RegisterScreen() {
   const repeatPasswordRef = useRef<TextFieldRef>(null);
 
   const textColor = useThemeColor("text");
-  const textStyle = useTextStyle("small");
+  const textStyle = useTextStyle({ size: "small" });
   const accentColor = useThemeColor("accent");
   const percentToDP = useWindowDimension("shorter");
   const heighPercentToDP = useWindowDimension("height");
@@ -122,7 +122,7 @@ export default function RegisterScreen() {
 
             {validationMessage && (
               <ThemedText
-                textStyleName="small"
+                textStyleOptions={{ size: "small" }}
                 textColorName="alarm"
                 style={{
                   marginBottom: percentToDP(3),
@@ -209,7 +209,7 @@ export default function RegisterScreen() {
               />
               <ThemedText
                 textColorName="link"
-                textStyleName="smallBold"
+                textStyleOptions={{ size: "small", weight: "bold" }}
                 onPress={() => setDialogVisible(true)}
               >
                 Terms of Use.
@@ -236,7 +236,7 @@ export default function RegisterScreen() {
             {(!isProcessing || dialogVisible) && (
               <ThemedText
                 textColorName="link"
-                textStyleName="small"
+                textStyleOptions={{ size: "small" }}
                 onPress={() => router.push("/register/verifyEmail")}
                 style={{
                   marginBottom: percentToDP(14),

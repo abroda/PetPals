@@ -1,25 +1,26 @@
-import { TextStyle } from "react-native";
-import { Dictionary } from "react-native-ui-lib/src/typings/common";
-
 export const assetsFonts = {
-  SpaceMono: require("../../assets/fonts/SpaceMono-Regular.ttf"),
   "JosefinSans-Regular": require("../../assets/fonts/JosefinSans-Regular.ttf"),
   "JosefinSans-SemiBold": require("../../assets/fonts/JosefinSans-SemiBold.ttf"),
   "JosefinSans-Bold": require("../../assets/fonts/JosefinSans-Bold.ttf"),
   "LeagueSpartan-Regular": require("../../assets/fonts/LeagueSpartan-Regular.ttf"),
+  "LeagueSpartan-SemiBold": require("../../assets/fonts/LeagueSpartan-SemiBold.ttf"),
+  "LeagueSpartan-Bold": require("../../assets/fonts/LeagueSpartan-Bold.ttf"),
 };
 
-const defaultFont = "LeagueSpartan-Regular";
-const logoFont = "JosefinSans-Bold";
-
-export const TextStyles: Dictionary<TextStyle> = {
-  tiny: { fontFamily: defaultFont, fontSize: 12 },
-  tinyBold: { fontFamily: defaultFont, fontWeight: "bold", fontSize: 12 },
-  small: { fontFamily: defaultFont, fontSize: 16 },
-  smallBold: { fontFamily: defaultFont, fontWeight: "bold", fontSize: 16 },
-  default: { fontFamily: defaultFont, fontSize: 18 },
-  defaultBold: { fontFamily: defaultFont, fontWeight: "bold", fontSize: 18 },
-  big: { fontFamily: defaultFont, fontSize: 20 },
-  bigBold: { fontFamily: defaultFont, fontWeight: "bold", fontSize: 20 },
-  logo: { fontFamily: logoFont },
+export const TextStyleConstants = {
+  // weights
+  thin: "-Thin",
+  light: "-Light",
+  regular: "-Regular",
+  semibold: "-SemiBold",
+  bold: "-Bold",
+  // sizes
+  tiny: 14,
+  small: 16,
+  medium: 18,
+  big: 20,
+  veryBig: 22,
+  // families
+  default: "LeagueSpartan",
+  logo: "JosefinSans",
 };

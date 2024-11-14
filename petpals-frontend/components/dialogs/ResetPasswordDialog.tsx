@@ -22,7 +22,7 @@ export default function ResetPasswordDialog({
   const [validationMessage, setValidationMessage] = useState("");
   const { sendPasswordResetCode, isProcessing } = useAuth();
 
-  const smallTheme = useTextStyle("small");
+  const smallTheme = useTextStyle({ size: "small" });
   const alarmColor = useThemeColor("alarm");
 
   const percentToDP = useWindowDimension("shorter");
@@ -62,7 +62,7 @@ export default function ResetPasswordDialog({
         style={{ padding: percentToDP(2), alignContent: "center" }}
       >
         <ThemedText
-          textStyleName="bigBold"
+          textStyleOptions={{ size: "big", weight: "bold" }}
           style={{ marginBottom: percentToDP(4) }}
         >
           Reset password
@@ -75,7 +75,7 @@ export default function ResetPasswordDialog({
 
         {validationMessage && (
           <ThemedText
-            textStyleName="small"
+            textStyleOptions={{ size: "small" }}
             textColorName="alarm"
             style={{ marginBottom: percentToDP(3), marginLeft: percentToDP(1) }}
           >

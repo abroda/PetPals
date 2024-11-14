@@ -27,7 +27,7 @@ export default function VerifyEmailScreen() {
   const [email, setEmail] = useState(userEmail ?? "");
 
   const percentToDP = useWindowDimension("shorter");
-  const heightPercentToPD = useWindowDimension("height");
+  const heightPercentToDP = useWindowDimension("height");
 
   const emailRef = useRef<TextFieldRef>(null);
   const codeRef = useRef<TextFieldRef>(null);
@@ -71,7 +71,7 @@ export default function VerifyEmailScreen() {
 
   return (
     <ThemedScrollView
-      style={{ height: heightPercentToPD(100), paddingTop: percentToDP(10) }}
+      style={{ height: heightPercentToDP(100), paddingTop: percentToDP(10) }}
     >
       {isLoading && (
         <ThemedLoadingIndicator
@@ -94,7 +94,7 @@ export default function VerifyEmailScreen() {
           />
           {validationMessage && (
             <ThemedText
-              textStyleName="small"
+              textStyleOptions={{ size: "small" }}
               textColorName="alarm"
               style={{
                 marginBottom: percentToDP(3),
@@ -106,7 +106,7 @@ export default function VerifyEmailScreen() {
             </ThemedText>
           )}
           <ThemedText
-            textStyleName="bigBold"
+            textStyleOptions={{ size: "big", weight: "bold" }}
             style={{ marginBottom: percentToDP(3) }}
           >
             Verify email

@@ -1,7 +1,5 @@
 package com.app.petpals.controller;
 
-import com.app.petpals.entity.Dog;
-import com.app.petpals.payload.DogResponse;
 import com.app.petpals.payload.TextResponse;
 import com.app.petpals.service.DogTagService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,9 +8,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.w3c.dom.Text;
-
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/dogtags")

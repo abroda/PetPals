@@ -8,13 +8,15 @@ import { ThemedIcon } from "../decorations/static/ThemedIcon";
 import { Pressable } from "react-native";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
 export default function NotificationsPopup({ onDismiss = () => {} }) {
-  const percentToPD = useWindowDimension("shorter");
-  const heightPercentToPD = useWindowDimension("height");
+  const percentToDP = useWindowDimension("shorter");
+  const heightPercentToDP = useWindowDimension("height");
 
   return (
     <ThemedPopup onDismiss={onDismiss}>
       <HorizontalView>
-        <ThemedText textStyleName="bigBold">Notifications</ThemedText>
+        <ThemedText textStyleOptions={{ size: "big", weight: "bold" }}>
+          Notifications
+        </ThemedText>
         <Pressable onPress={onDismiss}>
           <ThemedIcon
             name="close"

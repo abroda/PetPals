@@ -2,10 +2,10 @@ package com.app.petpals.service;
 
 import com.app.petpals.entity.User;
 import com.app.petpals.entity.UserPasswordReset;
-import com.app.petpals.exception.*;
-import com.app.petpals.payload.ConfirmResetPasswordCodeRequest;
-import com.app.petpals.payload.CreateResetPasswordCodeRequest;
-import com.app.petpals.payload.ResetPasswordRequest;
+import com.app.petpals.exception.account.*;
+import com.app.petpals.payload.auth.ConfirmResetPasswordCodeRequest;
+import com.app.petpals.payload.auth.CreateResetPasswordCodeRequest;
+import com.app.petpals.payload.account.ResetPasswordRequest;
 import com.app.petpals.repository.UserPasswordResetRepository;
 import com.app.petpals.repository.UserRepository;
 import jakarta.mail.MessagingException;

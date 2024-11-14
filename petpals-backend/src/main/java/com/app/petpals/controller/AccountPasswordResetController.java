@@ -1,8 +1,8 @@
 package com.app.petpals.controller;
 
-import com.app.petpals.payload.ConfirmResetPasswordCodeRequest;
-import com.app.petpals.payload.CreateResetPasswordCodeRequest;
-import com.app.petpals.payload.ResetPasswordRequest;
+import com.app.petpals.payload.auth.ConfirmResetPasswordCodeRequest;
+import com.app.petpals.payload.auth.CreateResetPasswordCodeRequest;
+import com.app.petpals.payload.account.ResetPasswordRequest;
 import com.app.petpals.payload.TextResponse;
 import com.app.petpals.service.UserPasswordResetService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,7 +11,6 @@ import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.w3c.dom.Text;
 
 @RestController
 @RequestMapping("/api/account/password-reset")

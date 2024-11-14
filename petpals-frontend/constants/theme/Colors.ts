@@ -42,7 +42,7 @@ export const ThemeColors = {
     secondary: secondaryColor,
     tertiary: tertiaryColor,
     accent: accentColor,
-    background: darkColor,
+    background: tertiaryColor,
     textField: darkGreyColor,
     border: greyColor,
     text: lightColor,
