@@ -3,6 +3,7 @@ package com.app.petpals.controller;
 import com.app.petpals.entity.GroupWalk;
 import com.app.petpals.entity.User;
 import com.app.petpals.payload.*;
+import com.app.petpals.payload.groupWalk.*;
 import com.app.petpals.service.GroupWalkService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

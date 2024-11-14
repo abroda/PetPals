@@ -1,9 +1,9 @@
 package com.app.petpals.controller;
 
 import com.app.petpals.entity.User;
-import com.app.petpals.payload.AccountResponse;
-import com.app.petpals.payload.FriendshipDeleteRequest;
-import com.app.petpals.payload.FriendshipRequest;
+import com.app.petpals.payload.account.AccountResponse;
+import com.app.petpals.payload.account.FriendshipDeleteRequest;
+import com.app.petpals.payload.account.FriendshipRequest;
 import com.app.petpals.payload.TextResponse;
 import com.app.petpals.service.AWSImageService;
 import com.app.petpals.service.FriendshipService;

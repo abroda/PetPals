@@ -2,10 +2,10 @@ package com.app.petpals.service;
 
 import com.app.petpals.entity.User;
 import com.app.petpals.enums.UserVisibility;
-import com.app.petpals.exception.*;
-import com.app.petpals.payload.AuthenticationRequest;
-import com.app.petpals.payload.RegisterRequest;
-import com.app.petpals.payload.VerifyUserRequest;
+import com.app.petpals.exception.account.*;
+import com.app.petpals.payload.auth.AuthenticationRequest;
+import com.app.petpals.payload.account.RegisterRequest;
+import com.app.petpals.payload.account.VerifyUserRequest;
 import com.app.petpals.repository.UserRepository;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;

@@ -2,8 +2,8 @@ package com.app.petpals.controller;
 
 import com.app.petpals.entity.Dog;
 import com.app.petpals.entity.User;
-import com.app.petpals.payload.DogAddRequest;
-import com.app.petpals.payload.DogResponse;
+import com.app.petpals.payload.dog.DogAddRequest;
+import com.app.petpals.payload.dog.DogResponse;
 import com.app.petpals.service.AWSImageService;
 import com.app.petpals.service.DogService;
 import com.app.petpals.service.UserService;

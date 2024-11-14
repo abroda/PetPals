@@ -3,26 +3,22 @@ package com.app.petpals.service;
 import com.app.petpals.entity.Post;
 import com.app.petpals.entity.PostComment;
 import com.app.petpals.entity.User;
-import com.app.petpals.exception.PostDataException;
-import com.app.petpals.exception.PostLikeException;
-import com.app.petpals.exception.PostNotFoundException;
-import com.app.petpals.exception.UserUnauthorizedException;
-import com.app.petpals.payload.LikePostRequest;
-import com.app.petpals.payload.PostAddRequest;
-import com.app.petpals.payload.PostEditRequest;
-import com.app.petpals.repository.PostCommentRepository;
+import com.app.petpals.exception.post.PostDataException;
+import com.app.petpals.exception.post.PostLikeException;
+import com.app.petpals.exception.post.PostNotFoundException;
+import com.app.petpals.exception.account.UserUnauthorizedException;
+import com.app.petpals.payload.post.LikePostRequest;
+import com.app.petpals.payload.post.PostAddRequest;
+import com.app.petpals.payload.post.PostEditRequest;
 import com.app.petpals.repository.PostRepository;
 import com.app.petpals.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -118,7 +114,7 @@ public class PostService {
 
         for (PostComment comment : post.getComments()) {
             for (User user : comment.getLikes()) {
-                user.getLikedComments().remove(comment);
+                user.getLikedPostComments().remove(comment);
             }
             comment.getLikes().clear();
         }

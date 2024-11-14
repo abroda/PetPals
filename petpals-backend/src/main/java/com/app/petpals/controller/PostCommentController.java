@@ -3,6 +3,7 @@ package com.app.petpals.controller;
 import com.app.petpals.entity.PostComment;
 import com.app.petpals.entity.User;
 import com.app.petpals.payload.*;
+import com.app.petpals.payload.post.*;
 import com.app.petpals.service.AWSImageService;
 import com.app.petpals.service.PostCommentService;
 import com.app.petpals.utils.CheckUserAuthorization;

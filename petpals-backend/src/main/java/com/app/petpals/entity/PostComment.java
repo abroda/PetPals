@@ -34,6 +34,6 @@ public class PostComment {
     private Post post;
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "likedComments")
+    @ManyToMany(mappedBy = "likedPostComments")
     private List<User> likes;
 }

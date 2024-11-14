@@ -1,7 +1,7 @@
 package com.app.petpals.utils;
 
 import com.app.petpals.entity.User;
-import com.app.petpals.exception.UserUnauthorizedException;
+import com.app.petpals.exception.account.UserUnauthorizedException;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;

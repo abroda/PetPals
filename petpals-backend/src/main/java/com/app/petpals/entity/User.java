@@ -108,25 +108,37 @@ public class User implements UserDetails {
     @JsonIgnore
     @ManyToMany
     @JoinTable(
-            name = "comment_like",
+            name = "post_comment_like",
             joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "comment_id")
+            inverseJoinColumns = @JoinColumn(name = "post_comment_id")
     )
-    private List<PostComment> likedComments;
+    private List<PostComment> likedPostComments;
 
     @JsonBackReference
     @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GroupWalk> createdWalks;
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "commenter", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GroupWalkComment> groupWalkComments;
+
+    @JsonIgnore
+    @ManyToMany
+    @JoinTable(
+            name = "group_walk_comment_like",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "group_walk_comment_id")
+    )
+    private List<GroupWalkComment> likedGroupWalkComments;
+
+    public User() {
+    }
 
     public User(String username, String displayName, String password) {
         this.username = username;
         this.displayName = displayName;
         this.password = password;
     }
-
-    public User() {
-    }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();

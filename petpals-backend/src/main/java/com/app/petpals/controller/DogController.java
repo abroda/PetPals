@@ -1,15 +1,14 @@
 package com.app.petpals.controller;
 
 import com.app.petpals.entity.Dog;
-import com.app.petpals.payload.DogEditRequest;
-import com.app.petpals.payload.DogResponse;
+import com.app.petpals.payload.dog.DogEditRequest;
+import com.app.petpals.payload.dog.DogResponse;
 import com.app.petpals.service.AWSImageService;
 import com.app.petpals.service.DogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

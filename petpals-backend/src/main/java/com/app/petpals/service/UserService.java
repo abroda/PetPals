@@ -1,10 +1,9 @@
 package com.app.petpals.service;
 
 import com.app.petpals.entity.User;
-import com.app.petpals.exception.UserDataException;
-import com.app.petpals.exception.UserNotFoundException;
-import com.app.petpals.payload.AccountEditRequest;
-import com.app.petpals.payload.UserResponse;
+import com.app.petpals.exception.account.UserDataException;
+import com.app.petpals.exception.account.UserNotFoundException;
+import com.app.petpals.payload.account.AccountEditRequest;
 import com.app.petpals.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

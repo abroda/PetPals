@@ -1,13 +1,10 @@
 package com.app.petpals.controller;
 
-import com.app.petpals.entity.GroupWalk;
 import com.app.petpals.entity.User;
-import com.app.petpals.payload.AccountEditRequest;
-import com.app.petpals.payload.AccountResponse;
-import com.app.petpals.payload.GroupWalkResponse;
+import com.app.petpals.payload.account.AccountEditRequest;
+import com.app.petpals.payload.account.AccountResponse;
 import com.app.petpals.payload.TextResponse;
 import com.app.petpals.service.AWSImageService;
-import com.app.petpals.service.GroupWalkService;
 import com.app.petpals.service.UserService;
 import com.app.petpals.utils.CheckUserAuthorization;
 import io.swagger.v3.oas.annotations.Operation;

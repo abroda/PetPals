@@ -2,7 +2,7 @@ package com.app.petpals.controller;
 
 import com.app.petpals.entity.GroupWalk;
 import com.app.petpals.entity.User;
-import com.app.petpals.payload.GroupWalkResponse;
+import com.app.petpals.payload.groupWalk.GroupWalkResponse;
 import com.app.petpals.service.GroupWalkService;
 import com.app.petpals.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;

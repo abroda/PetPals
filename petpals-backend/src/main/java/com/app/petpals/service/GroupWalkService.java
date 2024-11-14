@@ -3,9 +3,9 @@ package com.app.petpals.service;
 import com.app.petpals.entity.Dog;
 import com.app.petpals.entity.GroupWalk;
 import com.app.petpals.entity.User;
-import com.app.petpals.exception.GroupWalkDataException;
-import com.app.petpals.exception.GroupWalkNotFoundException;
-import com.app.petpals.payload.*;
+import com.app.petpals.exception.groupWalk.GroupWalkDataException;
+import com.app.petpals.exception.groupWalk.GroupWalkNotFoundException;
+import com.app.petpals.payload.groupWalk.*;
 import com.app.petpals.repository.GroupWalkRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -136,6 +136,8 @@ public class GroupWalkService {
             return groupWalkRepository.findByTags(tags, tags.size(), pageable);
         }
     }
+
+
 
 
     public LocalDateTime checkDatetime(String datetime) {

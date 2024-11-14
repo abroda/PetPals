@@ -2,6 +2,11 @@ package com.app.petpals.controller;
 
 import com.app.petpals.entity.User;
 import com.app.petpals.payload.*;
+import com.app.petpals.payload.account.RegisterRequest;
+import com.app.petpals.payload.account.ResendRequest;
+import com.app.petpals.payload.account.VerifyUserRequest;
+import com.app.petpals.payload.auth.AuthenticationRequest;
+import com.app.petpals.payload.auth.AuthenticationResponse;
 import com.app.petpals.service.AuthenticationService;
 import com.app.petpals.service.JwtService;
 import io.swagger.v3.oas.annotations.Operation;

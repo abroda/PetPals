@@ -3,13 +3,13 @@ package com.app.petpals.service;
 import com.app.petpals.entity.Post;
 import com.app.petpals.entity.PostComment;
 import com.app.petpals.entity.User;
-import com.app.petpals.exception.PostCommentDataException;
-import com.app.petpals.exception.PostCommentLikeException;
-import com.app.petpals.exception.PostCommentNotFoundException;
-import com.app.petpals.exception.UserUnauthorizedException;
-import com.app.petpals.payload.LikePostCommentRequest;
-import com.app.petpals.payload.PostCommentAddRequest;
-import com.app.petpals.payload.PostCommentEditRequest;
+import com.app.petpals.exception.post.PostCommentDataException;
+import com.app.petpals.exception.post.PostCommentLikeException;
+import com.app.petpals.exception.post.PostCommentNotFoundException;
+import com.app.petpals.exception.account.UserUnauthorizedException;
+import com.app.petpals.payload.post.LikePostCommentRequest;
+import com.app.petpals.payload.post.PostCommentAddRequest;
+import com.app.petpals.payload.post.PostCommentEditRequest;
 import com.app.petpals.repository.PostCommentRepository;
 import com.app.petpals.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -76,8 +76,8 @@ public class PostCommentService {
     public PostComment likePostComment(String commentId, LikePostCommentRequest request) {
         User user = userService.getById(request.getUserId());
         PostComment postComment = getPostCommentById(commentId);
-        if (!user.getLikedComments().contains(postComment) || !postComment.getLikes().contains(user)) {
-            user.getLikedComments().add(postComment);
+        if (!user.getLikedPostComments().contains(postComment) || !postComment.getLikes().contains(user)) {
+            user.getLikedPostComments().add(postComment);
             postComment.getLikes().add(user);
             userRepository.save(user);
             return postCommentRepository.save(postComment);
@@ -88,8 +88,8 @@ public class PostCommentService {
     public PostComment removeLikePostComment(String commentId, LikePostCommentRequest request) {
         User user = userService.getById(request.getUserId());
         PostComment postComment = getPostCommentById(commentId);
-        if (user.getLikedComments().contains(postComment) || postComment.getLikes().contains(user)) {
-            user.getLikedComments().remove(postComment);
+        if (user.getLikedPostComments().contains(postComment) || postComment.getLikes().contains(user)) {
+            user.getLikedPostComments().remove(postComment);
             postComment.getLikes().remove(user);
             userRepository.save(user);
             return postCommentRepository.save(postComment);

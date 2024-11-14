@@ -39,9 +39,9 @@ public class GroupWalk {
 
     @ElementCollection
     private List<String> tags;
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "groupWalk", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GroupWalkComment> comments;
 }
-
-
-
-//tags: GroupWalkTag[];
 
