@@ -24,7 +24,7 @@ export type TagProps = ButtonProps & {
 export const Tag = ({
   style,
   label,
-  backgroundColorName = "background",
+  backgroundColorName = "secondary",
   backgroundThemedColor,
   textColorName = "text",
   textThemedColor,

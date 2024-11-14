@@ -14,7 +14,7 @@ import "react-native-get-random-values";
 export default function WelcomeScreen() {
   const { isLoading, isProcessing, userId, authToken } = useAuth();
   const percentToDP = useWindowDimension("shorter");
-  const heightPercentToPD = useWindowDimension("height");
+  const heightPercentToDP = useWindowDimension("height");
 
   useEffect(() => {
     if (!isLoading && !isProcessing && userId && authToken) {
@@ -25,7 +25,7 @@ export default function WelcomeScreen() {
   return (
     <SafeAreaView>
       <ThemedScrollView
-        style={{ height: heightPercentToPD(100), paddingTop: percentToDP(20) }}
+        style={{ height: heightPercentToDP(100), paddingTop: percentToDP(20) }}
       >
         {isLoading && (
           <ThemedLoadingIndicator

@@ -29,9 +29,12 @@ export default function AppLogo(props: {
         {(props.showName ?? true) && (
           <ThemedText
             textColorName="title"
-            textStyleOptions={{ font: "logo", weight: "bold" }}
+            textStyleOptions={{
+              font: "logo",
+              weight: "bold",
+              size: percentToDP(0.65 * props.size),
+            }}
             style={{
-              fontSize: percentToDP(0.65 * props.size),
               marginLeft: percentToDP(0.08 * props.size),
               marginBottom: percentToDP(0.08 * props.size),
             }}
@@ -66,9 +69,12 @@ export default function AppLogo(props: {
         {(props.showName ?? true) && (
           <ThemedText
             textColorName="title"
-            textStyleOptions={{ font: "logo", weight: "bold" }}
+            textStyleOptions={{
+              font: "logo",
+              weight: "bold",
+              size: percentToDP(0.17 * props.size),
+            }}
             style={{
-              fontSize: percentToDP(0.17 * props.size),
               marginBottom: percentToDP(0.045 * props.size),
             }}
           >

@@ -31,6 +31,9 @@
     "plugins": ["expo-router", "expo-font"],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "googleMapsApiKey": "AIzaSyCg5sYswxH3xIPAjnpbsMQpKH58U2ePg_M"
     }
   }
 }

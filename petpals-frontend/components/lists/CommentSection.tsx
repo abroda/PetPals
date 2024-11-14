@@ -13,18 +13,23 @@ export default function CommentSection({
   const percentToDP = useWindowDimension("shorter");
   return (
     <ThemedView
-      colorName="secondary"
+      colorName="transparent" //"secondary"
       style={{
         borderRadius: percentToDP(10),
-        paddingVertical: percentToDP(4),
-        paddingHorizontal: percentToDP(4),
+        paddingVertical: 0, //percentToDP(4),
+        paddingHorizontal: 0, //percentToDP(4),
         marginBottom: percentToDP(30),
+        borderColor: "red",
       }}
     >
       <ThemedText
-        textStyleOptions={{ size: "big", weight: "bold" }}
+        textStyleOptions={{ weight: "semibold" }}
         backgroundColorName="transparent"
-        style={{ paddingLeft: percentToDP(3), paddingBottom: percentToDP(4) }}
+        style={{
+          paddingLeft: 0, //percentToDP(3),
+          margin: 0,
+          paddingBottom: percentToDP(4),
+        }}
       >
         Comments
       </ThemedText>

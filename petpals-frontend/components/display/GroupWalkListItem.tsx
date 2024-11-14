@@ -14,6 +14,7 @@ import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
 import { Tag } from "./Tag";
 import { format } from "date-fns";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function GroupWalkListItem({
   groupWalk,
@@ -21,9 +22,12 @@ export default function GroupWalkListItem({
   groupWalk: GroupWalk;
 }) {
   const [selected, setSelected] = useState("");
-  const percentToPD = useWindowDimension("shorter");
-  const heightpercentToPD = useWindowDimension("height");
-  const backgroundColor = useThemeColor("text") + "16";
+  const percentToDP = useWindowDimension("shorter");
+  const heightpercentToDP = useWindowDimension("height");
+  const { userId } = useAuth();
+  const backgroundColor = useThemeColor("accent") + "28";
+  const borderColor =
+    groupWalk.creator.id === userId ? useThemeColor("accent") : "transparent";
 
   // TODO: fix when backend works
   const getWalkId = () => {
@@ -49,12 +53,15 @@ export default function GroupWalkListItem({
   return (
     <Card
       backgroundColor={backgroundColor}
-      borderRadius={percentToPD(10)}
+      borderRadius={percentToDP(10)}
       enableShadow={false}
       style={{
-        paddingHorizontal: percentToPD(4.7),
-        paddingVertical: percentToPD(3.7),
-        marginBottom: percentToPD(2.5),
+        paddingHorizontal: percentToDP(4.7),
+        paddingVertical: percentToDP(3.7),
+        marginBottom: percentToDP(2.5),
+        borderColor: borderColor,
+
+        borderWidth: 2,
       }}
       onPress={() => router.push(`/walk/event/${getWalkId()}` as Href<string>)}
     >
@@ -79,17 +86,17 @@ export default function GroupWalkListItem({
           <ThemedView
             colorName="primary"
             style={{
-              height: percentToPD(1),
-              borderRadius: percentToPD(10),
-              marginTop: percentToPD(2),
-              marginBottom: percentToPD(3),
+              height: percentToDP(1),
+              borderRadius: percentToDP(10),
+              marginTop: percentToDP(2),
+              marginBottom: percentToDP(3),
             }}
           />
           {/* UNDER DIVIDER */}
           <HorizontalView
             justifyOption="space-between"
             colorName="transparent"
-            style={{ marginBottom: percentToPD(5) }}
+            style={{ marginBottom: percentToDP(5) }}
           >
             {/* LOCATION */}
             <HorizontalView
@@ -98,7 +105,7 @@ export default function GroupWalkListItem({
             >
               <ThemedIcon
                 size={22}
-                style={{ marginLeft: percentToPD(-0.7) }}
+                style={{ marginLeft: percentToDP(-0.7) }}
                 name="location"
               />
               <ThemedText
@@ -106,8 +113,8 @@ export default function GroupWalkListItem({
                 backgroundColorName="transparent"
                 numberOfLines={1}
                 style={{
-                  paddingLeft: percentToPD(1),
-                  paddingRight: percentToPD(2),
+                  paddingLeft: percentToDP(1),
+                  paddingRight: percentToDP(2),
                 }}
               >
                 {getLocation()}
@@ -118,7 +125,7 @@ export default function GroupWalkListItem({
               justifyOption="flex-end"
               colorName="transparent"
               style={{
-                width: percentToPD(14),
+                width: percentToDP(14),
                 flex: 0,
               }}
             >
@@ -129,7 +136,7 @@ export default function GroupWalkListItem({
               <ThemedText
                 textStyleOptions={{ size: "small" }}
                 backgroundColorName="transparent"
-                style={{ paddingLeft: percentToPD(1) }}
+                style={{ paddingLeft: percentToDP(1) }}
               >
                 {getParticipantsCount()}
               </ThemedText>
@@ -143,8 +150,8 @@ export default function GroupWalkListItem({
             justifyContent: "flex-end",
             alignContent: "flex-end",
             alignSelf: "flex-end",
-            marginBottom: percentToPD(11.7),
-            paddingLeft: percentToPD(4),
+            marginBottom: percentToDP(11.7),
+            paddingLeft: percentToDP(4),
           }}
         >
           {getHour()}
@@ -156,7 +163,7 @@ export default function GroupWalkListItem({
         colorName="transparent"
         style={{
           flexWrap: "wrap",
-          marginRight: percentToPD(-1),
+          marginRight: percentToDP(-1),
         }}
       >
         {groupWalk.tags.map((tag) => (

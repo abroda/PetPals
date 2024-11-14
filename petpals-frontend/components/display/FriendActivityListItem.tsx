@@ -11,7 +11,7 @@ import { useWindowDimension } from "@/hooks/useWindowDimension";
 
 export default function FriendActivityListItem(props: { username: string }) {
   const [selected, setSelected] = useState("");
-  const percentToPD = useWindowDimension("shorter");
+  const percentToDP = useWindowDimension("shorter");
 
   return (
     <Pressable onPress={() => router.push(`/user/${props.username}`)}>
@@ -23,13 +23,13 @@ export default function FriendActivityListItem(props: { username: string }) {
         />
         <ThemedView style={{ justifyContent: "center" }}>
           <ThemedText
-            style={{ paddingHorizontal: percentToPD(8) }}
+            style={{ paddingHorizontal: percentToDP(8) }}
             textStyleOptions={{ size: "big", weight: "bold" }}
           >
             {props.username}
           </ThemedText>
           <ThemedText
-            style={{ paddingHorizontal: percentToPD(8) }}
+            style={{ paddingHorizontal: percentToDP(8) }}
             textStyleOptions={{ size: "small" }}
           >
             {props.username}

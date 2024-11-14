@@ -10,13 +10,13 @@ export default function EditUserProfileScreen() {
   const path = usePathname();
   const userId = path.slice(path.lastIndexOf("/") + 1);
   const percentToDP = useWindowDimension("shorter");
-  const heightPercentToPD = useWindowDimension("height");
+  const heightPercentToDP = useWindowDimension("height");
   return (
     <SafeAreaView>
       <ThemedView
         style={{
-          height: heightPercentToPD(100),
-          paddingTop: heightPercentToPD(6),
+          height: heightPercentToDP(100),
+          paddingTop: heightPercentToDP(6),
         }}
       >
         <HorizontalView justifyOption="flex-end">

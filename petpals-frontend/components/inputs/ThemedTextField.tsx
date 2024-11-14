@@ -1,4 +1,4 @@
-import { forwardRef, useEffect } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import { TextField, TextFieldProps, TextFieldRef } from "react-native-ui-lib";
 import {
   ColorName,
@@ -62,6 +62,18 @@ export const ThemedTextField = forwardRef<TextFieldRef, ThemedTextFieldProps>(
     );
     const alarmColor = useThemeColor("alarm");
     const percentToDP = useWindowDimension("shorter");
+    const [height, setHeight] = useState(percentToDP(16));
+
+    const adjustHeightToContent = (e: any) => {
+      if (
+        (rest.value?.length ?? 0) > 0 &&
+        e.nativeEvent.contentSize.height > percentToDP(10)
+      ) {
+        setHeight(e.nativeEvent.contentSize.height + percentToDP(9));
+      } else {
+        setHeight(percentToDP(16));
+      }
+    };
 
     return (
       <ThemedView style={{ marginBottom: percentToDP(2), alignSelf: "center" }}>
@@ -69,14 +81,15 @@ export const ThemedTextField = forwardRef<TextFieldRef, ThemedTextFieldProps>(
           label={label}
           labelColor={textColor}
           labelStyle={[
-            useTextStyle(textStyleOptions),
+            useTextStyle({ weight: "semibold" }),
             { paddingLeft: percentToDP(1) },
           ]}
+          placeholderTextColor={textColor + "70"}
           style={[
             {
               color: textColor,
               backgroundColor: backgroundColor,
-              height: percentToDP(16),
+              height: height,
               width: percentToDP(width ?? 89),
               borderRadius: percentToDP(10),
               borderColor: textColor,
@@ -86,6 +99,7 @@ export const ThemedTextField = forwardRef<TextFieldRef, ThemedTextFieldProps>(
             useTextStyle(textStyleOptions),
             rest.style,
           ]}
+          placeholder=" "
           secureTextEntry={isSecret}
           validationMessagePosition="bottom"
           enableErrors={withValidation}
@@ -101,6 +115,7 @@ export const ThemedTextField = forwardRef<TextFieldRef, ThemedTextFieldProps>(
           ]}
           validate={validate}
           validationMessage={validationMessage}
+          onContentSizeChange={adjustHeightToContent}
           {...rest}
           ref={ref}
         />

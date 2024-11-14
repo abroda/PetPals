@@ -88,32 +88,23 @@ export default function Post() {
         justifyOption={"space-between"}
       >
         <ThemedButton
-          style={{
-            flexDirection: "row",
-            alignItems: "flex-end",
-            justifyContent: "center",
-            width: null,
-            paddingHorizontal: percentToDP(6),
-          }}
+          shape="short"
           backgroundColorName="secondary"
+          textStyleOptions={{ size: "small" }}
+          textColorName="primary"
+          style={{ width: percentToDP(40) }}
+          label="21 comments"
+          iconSource={() => (
+            <ThemedIcon
+              name="chatbox"
+              size={20}
+              style={{ marginRight: 10 }}
+            />
+          )}
           onPress={() =>
             router.push("/user/Username/post/postId" as Href<string>)
           }
-        >
-          {/*Go to comment section*/}
-          <ThemedIcon
-            name="chatbox"
-            size={20}
-            style={{ marginRight: 10 }}
-          />
-          <ThemedText
-            style={{ backgroundColor: "transparent" }}
-            textStyleOptions={{ size: "small" }}
-            textColorName="primary"
-          >
-            21 comments
-          </ThemedText>
-        </ThemedButton>
+        />
         <Pressable onPress={() => setLiked(!liked)}>
           <ThemedIcon
             size={32}

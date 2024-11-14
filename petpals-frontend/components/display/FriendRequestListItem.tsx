@@ -10,15 +10,15 @@ import { useWindowDimension } from "@/hooks/useWindowDimension";
 
 export default function FriendRequestListItem(props: { username: string }) {
   const [selected, setSelected] = useState("");
-  const percentToPD = useWindowDimension("shorter");
-  const heighPercentToPD = useWindowDimension("height");
+  const percentToDP = useWindowDimension("shorter");
+  const heighPercentToDP = useWindowDimension("height");
 
   return (
     <ThemedView
       style={{
         flexDirection: "row",
-        width: percentToPD(100),
-        margin: percentToPD(4),
+        width: percentToDP(100),
+        margin: percentToDP(4),
         justifyContent: "flex-start",
       }}
     >
@@ -32,8 +32,8 @@ export default function FriendRequestListItem(props: { username: string }) {
       <ThemedView style={{ justifyContent: "center" }}>
         <ThemedText
           style={{
-            paddingHorizontal: percentToPD(2),
-            fontSize: percentToPD(8),
+            paddingHorizontal: percentToDP(2),
+            fontSize: percentToDP(8),
           }}
           textStyleOptions={{ size: "big", weight: "bold" }}
           textColorName="link"

@@ -52,7 +52,7 @@ export const serverQuery = async ({
       method: method,
       mode: "cors", // always uses cors
       headers: headers,
-      body: JSON.stringify(payload),
+      body: payload ? JSON.stringify(payload) : undefined,
       signal: abortController.signal, // aborts fetch when signal is received (timeout or send by the component on unmount)
     })
       .then((response: Response) => {

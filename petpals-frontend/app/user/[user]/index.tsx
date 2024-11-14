@@ -18,13 +18,13 @@ export default function UserProfileScreen() {
   const username = path.slice(path.lastIndexOf("/") + 1);
   const { logout } = useAuth();
   const percentToDP = useWindowDimension("shorter");
-  const heightPercentToPD = useWindowDimension("height");
+  const heightPercentToDP = useWindowDimension("height");
   return (
     <SafeAreaView>
       <ThemedView
         style={{
-          height: heightPercentToPD(100),
-          paddingTop: heightPercentToPD(6),
+          height: heightPercentToDP(100),
+          paddingTop: heightPercentToDP(6),
         }}
       >
         <HorizontalView justifyOption="flex-end">
@@ -72,12 +72,12 @@ export default function UserProfileScreen() {
         </HorizontalView>
         <ThemedView
           style={{
-            height: heightPercentToPD(70),
+            height: heightPercentToDP(70),
           }}
         >
           <ThemedView
             style={{
-              height: heightPercentToPD(18),
+              height: heightPercentToDP(18),
               paddingBottom: percentToDP(2),
             }}
           >
@@ -85,7 +85,7 @@ export default function UserProfileScreen() {
               <HorizontalView
                 justifyOption="space-evenly"
                 style={{
-                  height: heightPercentToPD(10),
+                  height: heightPercentToDP(10),
                   marginBottom: percentToDP(1),
                 }}
               >
@@ -111,7 +111,7 @@ export default function UserProfileScreen() {
               <HorizontalView
                 justifyOption="space-evenly"
                 style={{
-                  height: heightPercentToPD(10),
+                  height: heightPercentToDP(10),
                   marginBottom: percentToDP(1),
                 }}
               >
@@ -134,7 +134,7 @@ export default function UserProfileScreen() {
             {username !== "me" && (
               <HorizontalView
                 style={{
-                  height: heightPercentToPD(10),
+                  height: heightPercentToDP(10),
                   marginBottom: percentToDP(4),
                 }}
               >
@@ -155,7 +155,7 @@ export default function UserProfileScreen() {
             {username !== "me" && (
               <HorizontalView
                 style={{
-                  height: heightPercentToPD(20),
+                  height: heightPercentToDP(20),
                   marginBottom: percentToDP(4),
                 }}
               >

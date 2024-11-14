@@ -11,11 +11,11 @@ export default function PinDetailsScreen() {
   const buttonColor = useThemeColor("link");
   const iconColor = useThemeColor("text");
   const percentToDP = useWindowDimension("shorter");
-  const heightPercentToPD = useWindowDimension("height");
+  const heightPercentToDP = useWindowDimension("height");
   return (
     <SafeAreaView>
       <ThemedScrollView
-        style={{ height: heightPercentToPD(100), paddingTop: 50 }}
+        style={{ height: heightPercentToDP(100), paddingTop: 50 }}
       >
         <ThemedText>TODO: Pin details</ThemedText>
       </ThemedScrollView>

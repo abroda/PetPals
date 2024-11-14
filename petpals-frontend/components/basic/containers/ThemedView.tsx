@@ -5,13 +5,16 @@ import {
   ThemedColor,
   useThemeColor,
 } from "@/hooks/theme/useThemeColor";
+import { Ref } from "react";
 
 export type ThemedViewProps = ViewProps & {
+  ref?: Ref<View>;
   colorName?: ColorName;
   themedColor?: ThemedColor;
 };
 
 export function ThemedView({
+  ref,
   style,
   colorName = "background",
   themedColor,
@@ -21,6 +24,7 @@ export function ThemedView({
 
   return (
     <View
+      ref={ref}
       style={[{ backgroundColor: backgroundColor }, style]}
       {...otherProps}
     />

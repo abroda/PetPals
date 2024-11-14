@@ -45,6 +45,7 @@ export type GroupWalk = {
 
 export type WalksContextType = {
   isProcessing: boolean;
+  shouldRefresh: boolean;
   getGroupWalk: (
     walkId: string,
     asyncAbortController?: AbortController
@@ -100,6 +101,7 @@ export const WalksContext = createContext<WalksContextType | null>(null);
 
 export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [shouldRefresh, setShouldRefresh] = useState(true);
   const { userId } = useAuth();
 
   const getGroupWalk = async (
@@ -122,6 +124,10 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return serverQuery({
       path: apiPaths.groupWalks.create,
       payload: data,
+      onOKResponse: (payload) => {
+        setShouldRefresh(true);
+        return payload;
+      },
       onStart: () => setIsProcessing(true),
       onEnd: () => setIsProcessing(false),
       asyncAbortController: asyncAbortController,
@@ -137,6 +143,10 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
       path: apiPaths.groupWalks.walk(walkId),
       method: "PUT",
       payload: data,
+      onOKResponse: (payload) => {
+        setShouldRefresh(true);
+        return payload;
+      },
       onStart: () => setIsProcessing(true),
       onEnd: () => setIsProcessing(false),
       asyncAbortController: asyncAbortController,
@@ -150,6 +160,10 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return serverQuery({
       path: apiPaths.groupWalks.walk(walkId),
       method: "DELETE",
+      onOKResponse: (payload) => {
+        setShouldRefresh(true);
+        return payload;
+      },
       onStart: () => setIsProcessing(true),
       onEnd: () => setIsProcessing(false),
       asyncAbortController: asyncAbortController,
@@ -164,6 +178,10 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return serverQuery({
       path: apiPaths.groupWalks.join(walkId),
       payload: joinedWithPets,
+      onOKResponse: (payload) => {
+        setShouldRefresh(true);
+        return payload;
+      },
       onStart: () => setIsProcessing(true),
       onEnd: () => setIsProcessing(false),
       asyncAbortController: asyncAbortController,
@@ -176,6 +194,10 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
   ) => {
     return serverQuery({
       path: apiPaths.groupWalks.leave(walkId),
+      onOKResponse: (payload) => {
+        setShouldRefresh(true);
+        return payload;
+      },
       onStart: () => setIsProcessing(true),
       onEnd: () => setIsProcessing(false),
       asyncAbortController: asyncAbortController,
@@ -219,6 +241,10 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return serverQuery({
       path: apiPaths.groupWalks.addComment(walkId),
       payload: data,
+      onOKResponse: (payload) => {
+        setShouldRefresh(true);
+        return payload;
+      },
       onStart: () => setIsProcessing(true),
       onEnd: () => setIsProcessing(false),
       asyncAbortController: asyncAbortController,
@@ -232,6 +258,10 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return serverQuery({
       path: apiPaths.groupWalks.comment(walkId, commentId),
       method: "DELETE",
+      onOKResponse: (payload) => {
+        setShouldRefresh(true);
+        return payload;
+      },
       onStart: () => setIsProcessing(true),
       onEnd: () => setIsProcessing(false),
       asyncAbortController: asyncAbortController,
@@ -245,6 +275,10 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
   ) => {
     return serverQuery({
       path: apiPaths.groupWalks.commentToggleLike(walkId, commentId),
+      onOKResponse: (payload) => {
+        setShouldRefresh(true);
+        return payload;
+      },
       onStart: () => setIsProcessing(true),
       onEnd: () => setIsProcessing(false),
       asyncAbortController: asyncAbortController,
@@ -255,6 +289,7 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
     <WalksContext.Provider
       value={{
         isProcessing,
+        shouldRefresh,
         getGroupWalk,
         createGroupWalk,
         updateGroupWalk,

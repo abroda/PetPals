@@ -26,7 +26,7 @@ export const ThemedButton = ({
   style,
   backgroundColorName = "primary",
   backgroundThemedColor,
-  textColorName = "text",
+  textColorName = "textOnPrimary",
   textThemedColor,
   textStyleOptions = {},
   shape = "long",

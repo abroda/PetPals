@@ -16,9 +16,12 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.3",
+    "@googlemaps/js-api-loader": "^1.16.8",
+    "@react-google-maps/api": "^2.20.3",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-native-community/datetimepicker": "^8.2.0",
     "@react-navigation/native": "^6.0.2",
+    "axios": "^1.7.7",
     "data-fns": "^1.1.0",
     "date-fns": "^4.1.0",
     "datepicker": "^0.0.0",
@@ -37,6 +40,7 @@
     "react-native": "0.74.5",
     "react-native-async-storage": "^0.0.1",
     "react-native-crypto": "^2.2.0",
+    "react-native-geocoding": "^0.5.0",
     "react-native-gesture-handler": "~2.16.1",
     "react-native-get-random-values": "^1.11.0",
     "react-native-google-places-autocomplete": "^2.5.7",
@@ -48,6 +52,7 @@
     "react-native-timeline-flatlist": "^0.8.0",
     "react-native-ui-lib": "^7.32.0",
     "react-native-web": "~0.19.10",
+    "react-native-webview": "^13.12.3",
     "react-query": "^3.39.3"
   },
   "devDependencies": {

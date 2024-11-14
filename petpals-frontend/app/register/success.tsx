@@ -14,11 +14,11 @@ import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoad
 
 export default function RegisterSuccessScreen() {
   const percentToDP = useWindowDimension("shorter");
-  const heightPercentToPD = useWindowDimension("height");
+  const heightPercentToDP = useWindowDimension("height");
 
   return (
     <ThemedScrollView
-      style={{ height: heightPercentToPD(100), paddingTop: percentToDP(10) }}
+      style={{ height: heightPercentToDP(100), paddingTop: percentToDP(10) }}
     >
       <ThemedView
         style={{

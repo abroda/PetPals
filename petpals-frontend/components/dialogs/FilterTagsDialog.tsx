@@ -16,13 +16,15 @@ import { KeyboardAwareScrollView, TextFieldRef } from "react-native-ui-lib";
 import { GroupWalkTag, tagRegex } from "@/context/WalksContext";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
 import { Tag } from "../display/Tag";
+import TagList from "../lists/TagList";
 
 export default function FilterTagsDialog({
   onDismiss = () => {},
   onSubmit = (tags: GroupWalkTag[]) => {},
   emailFilled = "",
+  filter = [] as GroupWalkTag[],
 }) {
-  const [tags, setTags] = useState([] as GroupWalkTag[]);
+  const [tags, setTags] = useState(filter);
   const [tagInput, setTagInput] = useState("");
   const [validationMessage, setValidationMessage] = useState("");
   const percentToDP = useWindowDimension("shorter");
@@ -118,26 +120,12 @@ export default function FilterTagsDialog({
           }
         />
 
-        <HorizontalView
-          justifyOption="flex-start"
-          colorName="disabled"
-          style={{
-            flexWrap: "wrap",
-            borderRadius: percentToDP(10),
-            marginBottom: percentToDP(5),
-            padding: percentToDP(2),
+        <TagList
+          tags={tags}
+          onPressTag={(tag) => {
+            setTags(tags.filter((e) => e !== tag));
           }}
-        >
-          {Array.from(tags).map((tag: GroupWalkTag) => (
-            <Tag
-              key={tag}
-              label={tag}
-              onPress={() => {
-                setTags(tags.filter((e) => e !== tag));
-              }}
-            />
-          ))}
-        </HorizontalView>
+        />
         <ThemedButton
           label="Save"
           shape="half"

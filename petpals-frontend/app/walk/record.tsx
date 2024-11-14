@@ -14,11 +14,11 @@ export default function RecordWalkScreen() {
   const buttonColor = useThemeColor("link");
   const iconColor = useThemeColor("text");
   const percentToDP = useWindowDimension("shorter");
-  const heightPercentToPD = useWindowDimension("height");
+  const heightPercentToDP = useWindowDimension("height");
   return (
     <SafeAreaView>
       <ThemedScrollView
-        style={{ height: heightPercentToPD(100), paddingTop: 50 }}
+        style={{ height: heightPercentToDP(100), paddingTop: 50 }}
       >
         <ThemedText>TODO: Record a walk</ThemedText>
         <ThemedText>Clickable on Map:</ThemedText>

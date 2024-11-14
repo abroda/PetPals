@@ -1,6 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
-import { router } from "expo-router";
+import { Href, router, useNavigation, usePathname } from "expo-router";
 import { useAuth } from "@/hooks/useAuth";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import { ThemedTextField } from "@/components/inputs/ThemedTextField";
@@ -11,248 +17,272 @@ import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoad
 import HorizontalView from "@/components/basic/containers/HorizontalView";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import TermsOfUseDialog from "@/components/dialogs/TermsOfUseDialog";
-import { Checkbox, TextFieldRef } from "react-native-ui-lib";
+import {
+  Checkbox,
+  KeyboardAwareScrollView,
+  TextFieldRef,
+} from "react-native-ui-lib";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useWalks } from "@/hooks/useWalks";
 import { testData } from "../testData";
 import { isLoaded } from "expo-font";
+import { LocationMap } from "@/components/display/LocationMap";
+import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
+import TagList from "@/components/lists/TagList";
+import { GroupWalk } from "@/context/WalksContext";
+import TagListInput from "@/components/inputs/TagListInput";
 
-export default function EditGroupWalkScreen() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [walkData, setWalkData] = useState(testData[0]);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [repeatPassword, setRepeatPassword] = useState("");
-  const [termsAgreedTo, setTermsAgreedTo] = useState(false);
-  const [validationMessage, setValidationMessage] = useState("");
-  const [dialogVisible, setDialogVisible] = useState(false);
-  const { isProcessing, updateGroupWalk } = useWalks();
+export default function EditGroupWalkScreen(props: { create: boolean }) {
+  const now = new Date();
+  const path = usePathname();
 
-  // to have all fields get validated at once on submit
-  const nameRef = useRef<TextFieldRef>(null);
-  const emailRef = useRef<TextFieldRef>(null);
-  const passwordRef = useRef<TextFieldRef>(null);
-  const repeatPasswordRef = useRef<TextFieldRef>(null);
+  const walkId = props.create
+    ? ""
+    : path.slice(
+        path.slice(0, path.length - 5).lastIndexOf("/"),
+        path.length - 5
+      );
 
-  const textColor = useThemeColor("text");
-  const textStyle = useTextStyle({ size: "small" });
-  const accentColor = useThemeColor("accent");
+  const [title, setTitle] = useState(" ");
+  const [description, setDescription] = useState("");
+  const [datetime, setDatetime] = useState(now);
+  const [location, setLocation] = useState("");
+  const [currentTag, setCurrentTag] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const { userId } = useAuth();
+  const { isProcessing, createGroupWalk, getGroupWalk, updateGroupWalk } =
+    useWalks();
+
+  const buttonColor = useThemeColor("link");
+  const iconColor = useThemeColor("text");
   const percentToDP = useWindowDimension("shorter");
-  const heighPercentToDP = useWindowDimension("height");
+  const heightPercentToDP = useWindowDimension("height");
 
-  // to cancel async calls still being processed on unmount,
-  // to avoid them executing unwanted effects in the background
-  const asyncAbortController = useRef<AbortController | undefined>(undefined);
+  const navigation = useNavigation();
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: `${props.create ? "Create a" : "Edit"} group walk`,
+      headerShown: true,
+    });
+  }, [navigation]);
+
+  const asyncAbortController = useRef<AbortController | undefined>();
+
   useEffect(() => {
-    asyncAbortController.current = new AbortController();
+    if (!props.create) {
+      getData();
+    }
+
     return () => {
       asyncAbortController.current?.abort();
     };
   }, []);
 
-  // update repeat password validation message on password change
-  useEffect(() => {
-    if (isLoading) {
-      // TODO: get post data
-    }
+  const getData = useCallback(async () => {
+    console.log("Start loading");
+    asyncAbortController.current = new AbortController();
+    let result = await getGroupWalk(walkId, asyncAbortController.current);
   }, []);
 
-  function validate() {
-    let res = nameRef.current?.validate();
-    res = emailRef.current?.validate() && res;
-    res = passwordRef.current?.validate() && res;
-    return repeatPasswordRef.current?.validate() && res;
-  }
+  const submit = async () => {
+    let data = {
+      id: walkId,
+      creator: {
+        id: userId,
+        name: "",
+        avatarURL: "",
+      },
+      title: title,
+      description: description,
+      datetime: datetime,
+      location: location,
+      tags: tags,
+      participantsCount: 0,
+      petsCount: 0,
+      joinedWithPets: [],
+    } as GroupWalk;
 
-  async function submit() {
-    setValidationMessage("");
-
-    if (validate()) {
-      if (!termsAgreedTo) {
-        setValidationMessage("You have to accept Terms of Use.");
+    if (props.create) {
+      let result = props.create
+        ? await createGroupWalk(data, asyncAbortController.current)
+        : await updateGroupWalk(walkId, data, asyncAbortController.current);
+      if (result.success) {
+        router.dismiss();
+        router.push(
+          `/walk/event/${props.create ? result.returnValue : walkId}`
+        );
       } else {
-        let result = { success: true, returnValue: testData[0] as any }; // await updateGroupWalk(walkId, {}, asyncAbortController);
-
-        if (result.success) {
-          setDialogVisible(false);
-          router.push("..");
-        } else {
-          setValidationMessage(result.returnValue);
-          asyncAbortController.current = new AbortController();
-          // get a new abortController in case old one was called
-          // (once the abort signal is set through .abort() it stays on)
-        }
+        setErrorMessage(result.returnValue);
       }
     }
-  }
+  };
 
   return (
     <SafeAreaView>
-      <ThemedScrollView
+      {/* <ThemedScrollView
         style={{
-          height: heighPercentToDP(100),
-          paddingTop: percentToDP(10),
+          height: heightPercentToDP(100),
+          paddingTop: percentToDP(15),
+          paddingHorizontal: percentToDP(5),
+          alignContent: "center",
         }}
       >
-        {dialogVisible && (
-          <TermsOfUseDialog onDismiss={() => setDialogVisible(false)} />
-        )}
-        {isLoading && (
-          <ThemedLoadingIndicator
-            size="large"
-            fullScreen={true}
-            message="Loading..."
-          />
-        )}
-        {!isLoading && (
-          <ThemedView
-            style={{
-              padding: 24,
-              flex: 1,
-              alignSelf: "center",
+        <ThemedTextField
+          label="Title"
+          withValidation
+          validate={["required", (value) => (value?.length ?? 0) < 5]}
+          validationMessage={["Title is required", "Title is too short."]}
+          maxLength={250}
+        />
+
+        <ThemedTextField
+          label="Description"
+          maxLength={500}
+          multiline
+        />
+
+        <ThemedDatetimePicker />
+        <LocationPicker />
+
+        <ThemedTextField
+          label="Tags"
+          maxLength={250}
+          onChangeText={(newText) => setCurrentTag(newText)}
+          value={currentTag}
+        />
+        <ThemedButton
+          iconSource={() => (
+            <ThemedIcon
+              name="add"
+              colorName="textOnPrimary"
+            />
+          )}
+          shape="round"
+          onPress={() => {
+            setTags([...tags, currentTag]);
+            setCurrentTag("");
+          }}
+        />
+        <HorizontalView
+          justifyOption="flex-start"
+          colorName="disabled"
+          style={{
+            flexWrap: "wrap",
+            marginRight: percentToDP(-1),
+            marginBottom: percentToDP(10),
+          }}
+        >
+          {tags.map((tag) => (
+            <Tag
+              key={tag}
+              label={tag}
+            />
+          ))}
+        </HorizontalView>
+
+        <ThemedButton
+          shape="long"
+          label="Save"
+          style={{ alignSelf: "center" }}
+          onPress={() => router.replace("/walk/event/xyz/" as Href<string>)}
+        ></ThemedButton>
+      </ThemedScrollView> */}
+      <ThemedScrollView
+        scrollEnabled={true}
+        style={{
+          height: heightPercentToDP(100),
+          paddingTop: percentToDP(20),
+          paddingHorizontal: percentToDP(5),
+        }}
+      >
+        <ThemedText textColorName="alarm">{errorMessage}</ThemedText>
+        <ThemedView
+          colorName="transparent"
+          style={{
+            flex: 1,
+            marginBottom: percentToDP(7),
+          }}
+        >
+          <LocationMap
+            initialLocation={{ latitude: 51.1316313, longitude: 17.0417013 }}
+            mapProps={{
+              pitchEnabled: false,
+              rotateEnabled: false,
             }}
+            viewStyle={{
+              height: heightPercentToDP(30),
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: percentToDP(3),
+              borderRadius: percentToDP(7),
+            }}
+          />
+        </ThemedView>
+        <ThemedTextField
+          label="Title"
+          value={title}
+          textStyleOptions={{ size: "big", weight: "semibold" }}
+          onChangeText={(newText) => setTitle(newText)}
+          withValidation
+          validate={["required", (value) => (value?.length ?? 0) > 5]}
+          validationMessage={["Title is required", "Title is too short."]}
+          multiline={true}
+          maxLength={60}
+        />
+        <HorizontalView style={{ marginBottom: percentToDP(6) }}>
+          <ThemedText
+            textStyleOptions={{ size: "medium", weight: "semibold" }}
+            textColorName="primary"
           >
-            <AppLogo
-              size={40}
-              showMotto={false}
-            />
+            {datetime.toLocaleDateString(undefined, {
+              dateStyle: "medium",
+            })}
+            ,{" "}
+            {datetime.toLocaleTimeString(undefined, {
+              timeStyle: "short",
+            })}
+          </ThemedText>
+        </HorizontalView>
+        <ThemedTextField
+          label="Description"
+          value={description}
+          onChangeText={(newText) => setDescription(newText)}
+          withValidation
+          validate={["required", (value) => (value?.length ?? 0) > 5]}
+          validationMessage={["Title is required", "Title is too short."]}
+          multiline={true}
+          maxLength={500}
+        />
 
-            {validationMessage && (
-              <ThemedText
-                textStyleOptions={{ size: "small" }}
-                textColorName="alarm"
-                style={{
-                  marginBottom: percentToDP(3),
-                  marginLeft: percentToDP(1),
-                  flexWrap: "wrap",
-                  flexShrink: 1,
-                }}
-              >
-                {validationMessage}
-              </ThemedText>
-            )}
-            <ThemedTextField
-              ref={nameRef}
-              label="Title"
-              autoComplete="name"
-              onChangeText={(newText: string) => setName(newText)}
-              autoFocus
-              withValidation
-              validate={[
-                "required",
-                (value) => (value ? value.length : 0) >= 3,
-              ]}
-              validationMessage={[
-                "Name is required",
-                "Name is too short (min. 3 characters)",
-              ]}
-              maxLength={250}
-            />
-            <ThemedTextField
-              ref={emailRef}
-              label="Description"
-              autoComplete="email"
-              onChangeText={(newText: string) => setEmail(newText)}
-              withValidation
-              validate={["required", "email"]}
-              validationMessage={["Email is required", "Email is invalid"]}
-              maxLength={250}
-            />
-            <ThemedTextField
-              ref={repeatPasswordRef}
-              label="Tags password"
-              autoComplete="password-new"
-              onChangeText={(newText: string) => setRepeatPassword(newText)}
-              isSecret
-              withValidation
-              validate={["required", (value) => value === password]}
-              validationMessage={[
-                "Repeat password is required",
-                "Passwords don't match",
-              ]}
-            />
-            <ThemedTextField
-              ref={passwordRef}
-              label="Datetime"
-              autoComplete="password-new"
-              onChangeText={(newText: string) => setPassword(newText)}
-              isSecret
-              withValidation
-              validate={[
-                "required",
-                (value) => (value ? value.length : 0) >= 8,
-                (value) => (value?.match("passwordRegex")?.length ?? 0) > 0,
-              ]}
-              validationMessage={[
-                "Password is required",
-                "Password is too short (min. 8 characters)",
-                "Password must have at least one each of: small letter, big letter, number, special character",
-              ]}
-            />
-            <ThemedTextField
-              ref={passwordRef}
-              label="Location"
-              autoComplete="password-new"
-              onChangeText={(newText: string) => setPassword(newText)}
-              isSecret
-              withValidation
-              validate={[
-                "required",
-                (value) => (value ? value.length : 0) >= 8,
-                (value) => (value?.match("passwordRegex")?.length ?? 0) > 0,
-              ]}
-              validationMessage={[
-                "Password is required",
-                "Password is too short (min. 8 characters)",
-                "Password must have at least one each of: small letter, big letter, number, special character",
-              ]}
-            />
-            <HorizontalView
-              justifyOption="flex-start"
-              style={{
-                marginLeft: percentToDP(0.4),
-                marginBottom: percentToDP(8),
-                marginTop: percentToDP(9),
-              }}
-            >
-              <Checkbox
-                label="I have read and accept "
-                value={termsAgreedTo}
-                onValueChange={(value) => setTermsAgreedTo(value)}
-                color={accentColor}
-                labelStyle={[{ color: textColor }, textStyle]}
-              />
-              <ThemedText
-                textColorName="link"
-                textStyleOptions={{ size: "small", weight: "bold" }}
-                onPress={() => setDialogVisible(true)}
-              >
-                Terms of Use.
-              </ThemedText>
-            </HorizontalView>
+        <TagListInput
+          tags={tags}
+          onAddTag={(tag) => setTags([...tags, tag])}
+          onDeleteTag={(tag) => setTags(tags.filter((t) => t !== tag))}
+        />
 
-            {isProcessing && !dialogVisible && (
-              <ThemedLoadingIndicator
-                size="large"
-                style={{ marginBottom: percentToDP(14) }}
+        <ThemedView
+          style={{ marginTop: percentToDP(12), marginBottom: percentToDP(80) }}
+        >
+          <ThemedButton
+            shape="long"
+            label={props.create ? "Create" : "Save"}
+            backgroundColorName="primary"
+            iconSource={() => (
+              <ThemedIcon
+                name="checkmark"
+                size={20}
+                colorName="textOnPrimary"
+                style={{ marginLeft: percentToDP(2) }}
               />
             )}
-            {(!isProcessing || dialogVisible) && (
-              <ThemedButton
-                style={{
-                  marginBottom: percentToDP(6),
-                }}
-                backgroundColorName="primary"
-                textColorName="textOnPrimary"
-                label="Save"
-                onPress={submit}
-              />
-            )}
-          </ThemedView>
-        )}
+            iconOnRight
+            onPress={submit}
+          />
+        </ThemedView>
       </ThemedScrollView>
     </SafeAreaView>
   );

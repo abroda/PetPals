@@ -29,11 +29,11 @@ export default function FindGroupWalkScreen() {
   >();
   const [dialogVisible, setDialogVisible] = useState(false);
   const [filter, setFilter] = useState([] as GroupWalkTag[]);
-  const { isProcessing, getGroupWalkList } = useWalks();
+  const { isProcessing, getGroupWalkList, shouldRefresh } = useWalks();
 
   const timelineColor = useThemeColor("text");
   const percentToDP = useWindowDimension("shorter");
-  const heightPercentToPD = useWindowDimension("height");
+  const heightPercentToDP = useWindowDimension("height");
 
   const asyncAbortController = useRef<AbortController | undefined>();
 
@@ -43,7 +43,7 @@ export default function FindGroupWalkScreen() {
     return () => {
       asyncAbortController.current?.abort();
     };
-  }, []);
+  }, [shouldRefresh]);
 
   const getData = useCallback(async () => {
     console.log("Start loading");
@@ -90,14 +90,17 @@ export default function FindGroupWalkScreen() {
 
   return (
     <SafeAreaView>
-      <FilterTagsDialog
-        onDismiss={() => setDialogVisible(false)}
-        onSubmit={(tags) => setFilter(tags)}
-      />
+      {dialogVisible && (
+        <FilterTagsDialog
+          onDismiss={() => setDialogVisible(false)}
+          onSubmit={(tags) => setFilter(tags)}
+          filter={filter}
+        />
+      )}
       <ThemedScrollView
         colorName="background"
         style={{
-          height: heightPercentToPD(100),
+          height: heightPercentToDP(100),
           paddingHorizontal: percentToDP(4),
           paddingTop: percentToDP(15),
         }}

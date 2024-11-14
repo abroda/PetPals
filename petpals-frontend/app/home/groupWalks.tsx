@@ -25,10 +25,10 @@ import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoad
 
 export default function GroupWalksScheduleScreen() {
   const [groupWalksData, setGroupWalksData] = useState();
-  const { isProcessing, getGroupWalkList } = useWalks();
+  const { isProcessing, getGroupWalkList, shouldRefresh } = useWalks();
   const timelineColor = useThemeColor("text");
   const percentToDP = useWindowDimension("shorter");
-  const heightPercentToPD = useWindowDimension("height");
+  const heightPercentToDP = useWindowDimension("height");
 
   const asyncAbortController = useRef<AbortController | undefined>(
     new AbortController()
@@ -41,7 +41,7 @@ export default function GroupWalksScheduleScreen() {
     return () => {
       asyncAbortController.current?.abort();
     };
-  }, []);
+  }, [shouldRefresh]);
 
   const getData = async () => {
     let result = await getGroupWalkList(
@@ -98,7 +98,7 @@ export default function GroupWalksScheduleScreen() {
       <ThemedView
         colorName="background"
         style={{
-          height: heightPercentToPD(100),
+          height: heightPercentToDP(100),
           paddingTop: percentToDP(5),
         }}
       >
@@ -136,6 +136,7 @@ export default function GroupWalksScheduleScreen() {
               <ThemedButton
                 textStyleOptions={{ size: "small" }}
                 backgroundColorName="transparent"
+                textColorName="link"
                 border
                 shape="short"
                 label="Join a walk"

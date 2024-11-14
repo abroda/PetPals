@@ -19,8 +19,8 @@ export default function GroupWalksTimelineItem({
   groupWalks: GroupWalk[];
   today?: Date;
 }) {
-  const percentToPD = useWindowDimension("shorter");
-  const heightpercentToPD = useWindowDimension("height");
+  const percentToDP = useWindowDimension("shorter");
+  const heightpercentToDP = useWindowDimension("height");
 
   const getDateHeader = () => {
     let header = "";
@@ -40,9 +40,9 @@ export default function GroupWalksTimelineItem({
     <ThemedView colorName="transparent">
       <ThemedText
         style={{
-          marginTop: percentToPD(-4),
-          marginLeft: percentToPD(1),
-          marginBottom: percentToPD(3),
+          marginTop: percentToDP(-4),
+          marginLeft: percentToDP(1),
+          marginBottom: percentToDP(3),
         }}
       >
         {getDateHeader()}
@@ -50,7 +50,7 @@ export default function GroupWalksTimelineItem({
       {groupWalks.length == 0 && (
         <ThemedText
           style={{
-            marginBottom: heightpercentToPD(8),
+            marginBottom: heightpercentToDP(8),
           }}
         >
           No plans yet.

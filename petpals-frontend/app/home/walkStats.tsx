@@ -8,16 +8,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function WalkStatsScreen() {
   const containerColor = useThemeColor("tertiary");
-  const percentToPD = useWindowDimension("height");
+  const percentToDP = useWindowDimension("height");
   const heighPercentToDP = useWindowDimension("height");
 
   return (
     <SafeAreaView>
       <ThemedScrollView
         scrollEnabled={false}
-        style={{ height: percentToPD(100) }}
+        style={{ height: percentToDP(100) }}
       >
-        <ThemedText style={{ marginTop: percentToPD(10) }}>
+        <ThemedText style={{ marginTop: percentToDP(10) }}>
           TODO: Walk stats
         </ThemedText>
 
@@ -25,8 +25,8 @@ export default function WalkStatsScreen() {
         <FlatList
           style={{
             backgroundColor: containerColor,
-            height: percentToPD(30),
-            padding: percentToPD(1),
+            height: percentToDP(30),
+            padding: percentToDP(1),
           }}
           scrollEnabled={true}
           keyExtractor={(key) => key}
