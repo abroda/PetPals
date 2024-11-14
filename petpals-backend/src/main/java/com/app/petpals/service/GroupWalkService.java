@@ -122,6 +122,12 @@ public class GroupWalkService {
         return groupWalkRepository.save(groupWalk);
     }
 
+
+    public List<String> getSuggestedTags(String tagQuery){
+        return groupWalkRepository.findSuggestedTags(tagQuery);
+    }
+
+
     public LocalDateTime checkDatetime(String datetime) {
         try {
             return LocalDateTime.parse(datetime);

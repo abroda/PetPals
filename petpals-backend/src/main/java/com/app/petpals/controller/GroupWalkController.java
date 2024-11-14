@@ -3,7 +3,6 @@ package com.app.petpals.controller;
 import com.app.petpals.entity.GroupWalk;
 import com.app.petpals.entity.User;
 import com.app.petpals.payload.*;
-import com.app.petpals.service.AWSImageService;
 import com.app.petpals.service.GroupWalkService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -24,8 +23,8 @@ import java.util.stream.Collectors;
 public class GroupWalkController {
     private final GroupWalkService groupWalkService;
 
-    @GetMapping()
-    @Operation(summary = "Get all group walks.", security = @SecurityRequirement(name = "bearerAuth"))
+    @GetMapping("/test")
+    @Operation(summary = "Get all group walks. - TEST ONLY", security = @SecurityRequirement(name = "bearerAuth"))
     private ResponseEntity<List<GroupWalkResponse>> getAllGroupWalks() {
         List<GroupWalk> groupWalkList = groupWalkService.getAllGroupWalks();
         return ResponseEntity.ok(groupWalkList.stream().map(groupWalkService::createGroupWalkResponse).collect(Collectors.toList()));
@@ -36,6 +35,12 @@ public class GroupWalkController {
     private ResponseEntity<GroupWalkResponse> getGroupWalkById(@PathVariable String groupWalkId) {
         GroupWalk groupWalkList = groupWalkService.getGroupWalkById(groupWalkId);
         return ResponseEntity.ok(groupWalkService.createGroupWalkResponse(groupWalkList));
+    }
+
+    @GetMapping("/tags/suggest")
+    @Operation(summary = "Get suggested tags by tag query.", security = @SecurityRequirement(name = "bearerAuth"))
+    private ResponseEntity<GroupWalkTagsResponse> getSuggestedGroupWalkTags(@RequestParam("query") String query) {
+        return ResponseEntity.ok(GroupWalkTagsResponse.builder().tags(groupWalkService.getSuggestedTags(query)).build());
     }
 
     @PostMapping()

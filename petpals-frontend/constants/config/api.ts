@@ -24,7 +24,7 @@ export const apiPaths = {
     walk: (walkId: string) => databaseURL + `api/groupWalks/${walkId}`, // GET=get, PUT=update, DELETE=delete
     join: (walkId: string) => databaseURL + `api/groupWalks/${walkId}/join`,
     leave: (walkId: string) => databaseURL + `api/groupWalks/${walkId}/leave`,
-    walkTags: databaseURL + "api/groupWalks/tags", // GET
+    walkTags: databaseURL + "api/groupWalks/tags", // GET - get tags related to give string - suggestions
     list: (tags: string[]) =>
       databaseURL +
       `api/groupWalks${
@@ -34,7 +34,7 @@ export const apiPaths = {
               (prev, s, i) => prev + s + (i < tags.length - 1 ? "," : ""),
               "tags?="
             )
-      }`, // GET
+      }`, // GET - filtering walks by tags - pageable
     listJoined: (userId: string) =>
       databaseURL + `api/users/${userId}/groupWalks/joined`, // GET
     listCreated: (userId: string) =>
