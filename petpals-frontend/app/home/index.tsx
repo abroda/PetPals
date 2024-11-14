@@ -42,6 +42,29 @@ export default function HomeScreen() {
               version="horizontal"
             />
 
+            <ThemedView>
+              <ThemedButton
+                shape="short"
+                center
+                label="Add post"
+                onPress={() =>
+                  router.push("/user/Username/post/new" as Href<string>)
+                }
+                iconSource={() => (
+                  <ThemedIcon
+                    name="add"
+                    size={20}
+                    style={{
+                      paddingRight: percentToDP(0.7),
+                      paddingBottom: percentToDP(0.7),
+                    }}
+                    colorName="textOnPrimary"
+                  />
+                )}
+                style={{ marginRight: percentToDP(5), width: percentToDP(30) }}
+              />
+            </ThemedView>
+
             {/* NOTIFICATIONS ICON */}
             <Pressable
               onPress={() => {
@@ -61,22 +84,12 @@ export default function HomeScreen() {
                 size={10}
                 doLink={true}
                 userId={(userId?.length ?? 0) > 0 ? userId ?? "me" : "me"}
-                imageUrl={userProfile?.imageUrl || null}
+                imageUrl={userProfile?.imageUrl}
               />
             </ThemedView>
           </HorizontalView>
         </ThemedView>
 
-        <ThemedView>
-          <ThemedButton
-            center
-            onPress={() =>
-              router.push("/user/Username/post/new" as Href<string>)
-            }
-          >
-            <ThemedText>Add post</ThemedText>
-          </ThemedButton>
-        </ThemedView>
         {/* POST FEED */}
         <PostFeed></PostFeed>
       </ThemedView>

@@ -67,7 +67,7 @@ export default function Post({ postFromFeed }: { postFromFeed: PostType }) {
           size={10}
           doLink={true}
           userId={post.author.id}
-          imgUrl={post.author.imageUrl}
+          imageUrl={post.author.imageUrl}
         />
         <ThemedText
           style={{ backgroundColor: "transparent", marginLeft: 16 }}

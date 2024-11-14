@@ -8,28 +8,26 @@ import DogPlaceholderImage from "@/assets/images/dog_placeholder_theme-color-fai
 
 export default function PetAvatar(props: {
   size: number;
-  source: string | null; // Make source nullable to handle missing images
-  username: string;
-  pet: string;
+  source?: string; // Make source nullable to handle missing images
+  userId: string;
   petId: string;
   doLink: boolean;
 }) {
-  const { userEmail } = useAuth();
   const percentToDP = useWindowDimension("shorter");
 
   return (
-      <Pressable
-          onPress={() =>
-              props.doLink
-                  ? router.push(`/user/${props.username}/pet/${props.petId}`)
-                  : {}
-          }
-      >
-        <Avatar
-            size={percentToDP(props.size)}
-            source={props.source ? { uri: props.source } : DogPlaceholderImage}
-            // Use DogPlaceholderImage directly if props.source is null
-        />
-      </Pressable>
+    <Pressable
+      onPress={() =>
+        props.doLink
+          ? router.push(`/user/${props.userId}/pet/${props.petId}`)
+          : {}
+      }
+    >
+      <Avatar
+        size={percentToDP(props.size)}
+        source={props.source ? { uri: props.source } : DogPlaceholderImage}
+        // Use DogPlaceholderImage directly if props.source is null
+      />
+    </Pressable>
   );
 }

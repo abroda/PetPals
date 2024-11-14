@@ -51,8 +51,8 @@ export default function RecordWalkScreen() {
         <ThemedText>My pets (choose which)</ThemedText>
         <PetAvatar
           size={11}
-          username={"me"}
-          pet="Cutie"
+          userId={"me"}
+          petId="Cutie"
           doLink={true}
         />
       </ThemedScrollView>

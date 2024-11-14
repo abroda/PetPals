@@ -8,7 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ChatScreen() {
   const path = usePathname();
-  const username = path.slice(path.lastIndexOf("/") + 1);
+  const userId = path.slice(path.lastIndexOf("/") + 1);
   const percentToDP = useWindowDimension("shorter");
   const heighPercentToDP = useWindowDimension("height");
 
@@ -18,9 +18,9 @@ export default function ChatScreen() {
         style={{ height: heighPercentToDP(100), paddingTop: percentToDP(10) }}
       >
         <HorizontalView justifyOption="flex-end">
-          <ThemedText>{username}</ThemedText>
+          <ThemedText>{userId}</ThemedText>
           <UserAvatar
-            username={username}
+            userId={userId}
             size={15}
             doLink={true}
           ></UserAvatar>

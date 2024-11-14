@@ -18,13 +18,14 @@ import { useWindowDimension } from "@/hooks/useWindowDimension";
 import { UserContext } from "@/context/UserContext";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigation, usePathname, router } from "expo-router";
+import { useNavigation, usePathname, router, Href } from "expo-router";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 import PostFeed from "@/components/lists/PostFeed";
 import { Dog, useDog } from "@/context/DogContext";
 // @ts-ignore
 import DogPlaceholderImage from "@/assets/images/dog_placeholder_theme-color-fair.png";
 import { useUser } from "@/hooks/useUser";
+import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
 
 export default function UserProfileScreen() {
   const path = usePathname();
@@ -90,7 +91,7 @@ export default function UserProfileScreen() {
           )}
           <UserAvatar
             userId={userProfile?.id ?? ""}
-            imageUrl={userProfile?.imageUrl || null}
+            imageUrl={userProfile?.imageUrl}
             size={10}
             doLink={false}
           />
@@ -111,7 +112,7 @@ export default function UserProfileScreen() {
     if (option === "Edit") {
       router.push("/user/me/editProfile");
     } else if (option === "App Settings") {
-      router.push("/settings");
+      router.push("/settings" as Href<string>);
     }
   };
 
@@ -136,8 +137,7 @@ export default function UserProfileScreen() {
         <PetAvatar
           size={35}
           source={item.imageUrl}
-          username={userProfile?.username ?? ""}
-          pet={item.name}
+          userId={userProfile?.username ?? ""}
           petId={item.id}
           doLink={true}
         />
@@ -195,7 +195,7 @@ export default function UserProfileScreen() {
           <UserAvatar
             size={50}
             userId={userProfile?.id ?? ""}
-            imageUrl={userProfile?.imageUrl || null}
+            imageUrl={userProfile?.imageUrl}
             doLink={false}
             style={{
               marginTop: heightPercentToPD(-15),
@@ -338,7 +338,7 @@ export default function UserProfileScreen() {
         backgroundColor: lightGreen,
       }}
     >
-      <FlatList
+      <FlatList // question: why not scrollview? or flatlist (unscrollable) with header dogs and posts as children?
         style={{
           width: widthPercentageToDP(100),
         }}
@@ -347,8 +347,8 @@ export default function UserProfileScreen() {
         ListFooterComponent={() => (
           <>
             <ThemedText
+              textStyleOptions={{ size: 30 }}
               style={{
-                fontSize: 30,
                 color: cream,
                 marginLeft: widthPercentageToDP(5),
                 marginTop: heightPercentToPD(4),
@@ -359,14 +359,14 @@ export default function UserProfileScreen() {
             <PostFeed />
           </>
         )}
-        renderItem={(item) => <View />} // TODO ???
+        renderItem={(item) => <></>} // required argument!
       />
       {menuVisible && (
         <View
           style={{
             position: "absolute",
             zIndex: 100,
-            top: heightPercentToPD(0),
+            top: heightPercentToPD(10),
             right: widthPercentageToDP(5),
             width: widthPercentageToDP(50),
             backgroundColor: darkGreen,

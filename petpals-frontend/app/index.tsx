@@ -73,8 +73,8 @@ export default function WelcomeScreen() {
             </HorizontalView>
             <ThemedButton
               style={{ marginBottom: percentToDP(5) }}
-              backgroundColorName="primary"
-              textColorName="textOnPrimary"
+              backgroundColorName="secondary"
+              textColorName="textOnSecondary"
               label="Register"
               onPress={() => router.push("/register")}
             />

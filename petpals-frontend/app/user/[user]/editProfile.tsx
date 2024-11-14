@@ -180,7 +180,7 @@ export default function EditUserProfileScreen() {
             <UserAvatar
               size={heightPercentToPD(7)}
               userId={userProfile?.id ?? ""}
-              imageUrl={userProfile?.imageUrl || null}
+              imageUrl={userProfile?.imageUrl}
               doLink={false}
             />
           </View>
@@ -197,11 +197,13 @@ export default function EditUserProfileScreen() {
           >
             {/* Username */}
             <ThemedText
+              textStyleOptions={{
+                weight: "regular",
+                size: "small",
+              }}
               style={{
                 backgroundColor: "none",
                 color: accentGreen,
-                fontSize: 16,
-                fontWeight: "light",
                 marginBottom: heightPercentToPD(-1),
                 marginLeft: heightPercentToPD(3),
                 zIndex: 2,
@@ -227,11 +229,13 @@ export default function EditUserProfileScreen() {
 
             {/* Description */}
             <ThemedText
+              textStyleOptions={{
+                weight: "regular",
+                size: "small",
+              }}
               style={{
                 backgroundColor: "none",
                 color: accentGreen,
-                fontSize: 16,
-                fontWeight: "light",
                 marginBottom: heightPercentToPD(-1),
                 marginLeft: heightPercentToPD(3),
                 zIndex: 2,
@@ -262,17 +266,19 @@ export default function EditUserProfileScreen() {
 
             {/* E-mail address */}
             <ThemedText
+              textStyleOptions={{
+                weight: "regular",
+                size: "small",
+              }}
               style={{
                 backgroundColor: "none",
                 color: accentGreen,
-                fontSize: 16,
-                fontWeight: "light",
                 marginBottom: heightPercentToPD(-1),
                 marginLeft: heightPercentToPD(3),
                 zIndex: 2,
               }}
             >
-              E-mail Address
+              E-mail address
             </ThemedText>
             <TextInput
               maxLength={32}
@@ -321,7 +327,22 @@ export default function EditUserProfileScreen() {
                 borderColor: accentTeal,
               }}
             />
+            {/* same styling but using the existing options */}
             <ThemedButton
+              label="Change password"
+              border
+              textColorName="accentGreen"
+              backgroundColorName="transparent"
+              onPress={handleChangePassword}
+              color={accentGreen}
+              style={{
+                width: widthPercentageToDP(80), // default is percentToDP(90)
+                marginTop: heightPercentToPD(2),
+                borderRadius: percentToDP(6), // default is percentToDP(10)
+                borderWidth: 1, // default is 2 pixel width
+              }}
+            />
+            {/* <ThemedButton
               label="Change password"
               onPress={() => handleChangePassword()}
               color={accentGreen}
@@ -335,7 +356,7 @@ export default function EditUserProfileScreen() {
                 borderWidth: 1,
                 borderColor: accentGreen,
               }}
-            />
+            /> */}
           </View>
         </HorizontalView>
       </ThemedView>
