@@ -2,6 +2,8 @@ package com.app.petpals.repository;
 
 import com.app.petpals.entity.GroupWalk;
 import com.app.petpals.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,5 +24,14 @@ public interface GroupWalkRepository extends JpaRepository<GroupWalk, String> {
             LIMIT 5
             """, nativeQuery = true)
     List<String> findSuggestedTags(@Param("tag") String tag);
+
+    @Query(value = """
+            SELECT gw.* FROM group_walk gw
+            JOIN group_walk_tags gwt ON gw.id = gwt.group_walk_id
+            WHERE gwt.tags IN (:tags)
+            GROUP BY gw.id
+            HAVING COUNT(DISTINCT gwt.tags) = :tagCount
+            """, nativeQuery = true)
+    Page<GroupWalk> findByTags(@Param("tags") List<String> tags, @Param("tagCount") long tagCount, Pageable pageable);
 
 }

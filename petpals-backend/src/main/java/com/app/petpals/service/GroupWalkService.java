@@ -9,6 +9,8 @@ import com.app.petpals.payload.*;
 import com.app.petpals.repository.GroupWalkRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -123,8 +125,16 @@ public class GroupWalkService {
     }
 
 
-    public List<String> getSuggestedTags(String tagQuery){
+    public List<String> getSuggestedTags(String tagQuery) {
         return groupWalkRepository.findSuggestedTags(tagQuery);
+    }
+
+    public Page<GroupWalk> getGroupWalksByTags(List<String> tags, Pageable pageable) {
+        if (tags == null || tags.isEmpty()) {
+            return groupWalkRepository.findAll(pageable);
+        } else {
+            return groupWalkRepository.findByTags(tags, tags.size(), pageable);
+        }
     }
 
 

@@ -45,10 +45,7 @@ public class PostController {
     @GetMapping()
     @Operation(summary = "Get posts page.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Page<PostResponse>> getPosts(Pageable pageable) {
-        System.out.println("GETTING PAGES: START");
-        System.out.println("Pageable size: " + pageable.getPageSize());
         Page<Post> postPage = postService.getPosts(pageable);
-        System.out.println("GETTING PAGES: " + postPage);
         return ResponseEntity.ok(postPage.map(this::getPostResponse));
     }
 

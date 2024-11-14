@@ -8,11 +8,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,6 +45,19 @@ public class GroupWalkController {
     @Operation(summary = "Get suggested tags by tag query.", security = @SecurityRequirement(name = "bearerAuth"))
     private ResponseEntity<GroupWalkTagsResponse> getSuggestedGroupWalkTags(@RequestParam("query") String query) {
         return ResponseEntity.ok(GroupWalkTagsResponse.builder().tags(groupWalkService.getSuggestedTags(query)).build());
+    }
+
+    @GetMapping("/tags")
+    @Operation(summary = "Get paginated group walks filtered by tags. - Tags have to be full", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<Page<GroupWalkResponse>> getGroupWalks(
+            @RequestParam(value = "tags", required = false) String tags,
+            Pageable pageable) {
+        List<String> tagList = (tags == null || tags.isEmpty())
+                ? Collections.emptyList()
+                : Arrays.asList(tags.split("\\s*,\\s*"));
+        Page<GroupWalk> groupWalkPage = groupWalkService.getGroupWalksByTags(tagList, pageable);
+        Page<GroupWalkResponse> responsePage = groupWalkPage.map(groupWalkService::createGroupWalkResponse);
+        return ResponseEntity.ok(responsePage);
     }
 
     @PostMapping()
