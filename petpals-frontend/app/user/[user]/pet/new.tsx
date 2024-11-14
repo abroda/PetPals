@@ -1,6 +1,6 @@
 import { ThemedText } from "@/components/basic/ThemedText";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
-import { SafeAreaView, TextInput, Alert, Image } from "react-native";
+import {SafeAreaView, TextInput, Alert, Image, ScrollView, View} from "react-native";
 import { useDog } from "@/context/DogContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
@@ -8,7 +8,10 @@ import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 import {useWindowDimension} from "@/hooks/useWindowDimension";
-import {widthPercentageToDP} from "react-native-responsive-screen";
+import {heightPercentageToDP, widthPercentageToDP} from "react-native-responsive-screen";
+import DogPlaceholderImage from "@/assets/images/dog_placeholder_theme-color-fair.png";
+
+
 import HorizontalView from "@/components/basic/containers/HorizontalView";
 
 export default function NewPetScreen() {
@@ -99,122 +102,179 @@ export default function NewPetScreen() {
 
     return (
         <SafeAreaView style={{flex: 1}}>
-            <ThemedView
-                style={{
-                    flex: 1,
-                    paddingVertical: heightPercentToPD(10),
-                    paddingHorizontal: widthPercentToPD(10),
-                }}
-            >
-                <ThemedText style={{
-                    color: accentGreen,
-                    fontSize: 15,
-                    marginTop: heightPercentToPD(5),
-                    marginBottom: heightPercentToPD(-2),
-                    zIndex: 3,
-                    elevation: 3,
-                    marginLeft: widthPercentToPD(1),
-                }}>
-                    Dog Name
-                </ThemedText>
-                <TextInput
-                    placeholder="Enter dog's name"
-                    placeholderTextColor={'#CAC8BE'}
-                    value={dogName}
-                    onChangeText={setDogName}
-                    maxLength={12}
-                    style={{
-                        paddingHorizontal: widthPercentToPD(6),
-                        paddingVertical: widthPercentToPD(3),
-                        marginVertical: heightPercentToPD(1),
-                        borderRadius: 10,
-                        borderColor: darkGreen,
-                        borderWidth: 1,
-                        fontSize: 18,
-                        color: cream,
-                    }}
-                />
 
-                <ThemedText style={{
-                    color: accentGreen,
-                    fontSize: 15,
-                    marginTop: heightPercentToPD(5),
-                    marginBottom: heightPercentToPD(-2),
-                    zIndex: 3,
-                    elevation: 3,
-                    marginLeft: widthPercentToPD(1),
-                }}>
-                    Description
-                </ThemedText>
-                <TextInput
-                    placeholder="Enter description"
-                    placeholderTextColor={'#CAC8BE'}
-                    value={dogDescription}
-                    onChangeText={setDogDescription}
-                    multiline
-                    numberOfLines={4}
-                    maxLength={48}
+                <ThemedView
                     style={{
-                        paddingHorizontal: widthPercentToPD(6),
-                        paddingVertical: widthPercentToPD(3),
-                        marginVertical: heightPercentToPD(1),
-                        borderRadius: 10,
-                        borderColor: darkGreen,
-                        borderWidth: 1,
-                        fontSize: 18,
-                        textAlignVertical: 'top',
-                        color: cream,
+                        flex: 1,
                     }}
-                />
+                >
+                    <ScrollView style={{
+                        flex:1,
+                        backgroundColor: 'transparent',
+                    }}>
 
-                <ThemedText style={{
-                    color: accentGreen,
-                    fontSize: 15,
-                    marginTop: heightPercentToPD(5),
-                    marginBottom: heightPercentToPD(-2),
-                    zIndex: 3,
-                    elevation: 3,
-                    marginLeft: widthPercentToPD(1),
-                }}>
-                    Tags
-                </ThemedText>
-                <TextInput
-                    placeholder="Enter tags separated by commas"
-                    placeholderTextColor={'#CAC8BE'}
-                    value={dogTags}
-                    onChangeText={setDogTags}
-                    style={{
-                        paddingHorizontal: widthPercentToPD(6),
-                        paddingVertical: widthPercentToPD(3),
-                        marginVertical: heightPercentToPD(1),
-                        borderRadius: 10,
-                        borderColor: darkGreen,
-                        borderWidth: 1,
-                        fontSize: 18,
-                        color: cream,
-                    }}
-                />
-                <ThemedText style={{
-                    color: accentGreen,
-                    fontSize: 15,
-                    marginTop: heightPercentToPD(5),
-                    marginBottom: heightPercentToPD(-2),
-                    zIndex: 3,
-                    elevation: 3,
-                    marginLeft: widthPercentToPD(1),
-                }}>
-                    Dog Photo
-                </ThemedText>
-                {image && <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
-                <ThemedButton label="Pick an Image" onPress={pickImage} style={{
-                    width: widthPercentToPD(80),
-                    marginTop: heightPercentToPD(5),
-                }}/>
-                <ThemedButton label="Add Dog" onPress={handleAddDog} style={{
-                    width: widthPercentToPD(80),
-                    marginTop: heightPercentToPD(5),
-                }}/>
-            </ThemedView>
+                        <View style={{
+                            backgroundColor: lightGreen,
+                            height: heightPercentToPD(30),
+                        }}>
+
+                        </View>
+                    <View style={{
+                        backgroundColor: darkGreen,
+                        flex: 1,
+                    }}>
+                        {/* Conditional Image Display */}
+                        {image ? (
+                            <Image
+                                source={{ uri: image }}
+                                style={{
+                                    width: widthPercentToPD(80),
+                                    height: widthPercentToPD(80),
+                                    marginTop: heightPercentToPD(-30),
+                                    borderRadius: 25,
+                                    borderWidth: 1,
+                                    borderColor: darkGreen,
+                                    justifyContent: "center",
+                                    alignSelf: "center",
+                                }}
+                            />
+                        ) : (
+                            <Image
+                                source={DogPlaceholderImage}
+                                style={{
+                                    width: widthPercentToPD(80),
+                                    height: widthPercentToPD(80),
+                                    marginTop: heightPercentToPD(-30),
+                                    borderRadius: 25,
+                                    borderWidth: 1,
+                                    borderColor: darkGreen,
+                                    justifyContent: "center",
+                                    alignSelf: "center",
+                                }}
+                            />
+                        )}
+
+                        <View style={{
+                            width: widthPercentToPD(80),
+                            alignSelf: 'center',
+                            justifyContent: 'center',
+                            paddingVertical: heightPercentToPD(4),
+                        }}>
+
+                            {/* Dog name */}
+                            <ThemedText style={{
+                                color: accentGreen,
+                                fontSize: 14,
+                                marginBottom: heightPercentToPD(-1),
+                                zIndex: 3,
+                                elevation: 3,
+                                marginLeft: widthPercentToPD(1),
+                            }}>
+                                Dog Name
+                            </ThemedText>
+
+                            <TextInput
+                                placeholder="Enter dog's name"
+                                placeholderTextColor={'#CAC8BE'}
+                                value={dogName}
+                                onChangeText={setDogName}
+                                maxLength={12}
+                                style={{
+                                    paddingHorizontal: widthPercentToPD(6),
+                                    paddingVertical: widthPercentToPD(3),
+                                    borderRadius: 10,
+                                    borderColor: lightGreen,
+                                    borderWidth: 1,
+                                    fontSize: 14,
+                                    color: cream,
+                                    marginBottom: heightPercentToPD(3),
+                                }}
+                            />
+
+                            {/* Description */}
+                            <ThemedText style={{
+                                color: accentGreen,
+                                fontSize: 14,
+                                marginBottom: heightPercentToPD(-1),
+                                zIndex: 3,
+                                elevation: 3,
+                                marginLeft: widthPercentToPD(1),
+                            }}>
+                                Description
+                            </ThemedText>
+                            <TextInput
+                                placeholder="Enter description"
+                                placeholderTextColor={'#CAC8BE'}
+                                value={dogDescription}
+                                onChangeText={setDogDescription}
+                                multiline
+                                numberOfLines={4}
+                                maxLength={48}
+                                style={{
+                                    paddingHorizontal: widthPercentToPD(6),
+                                    paddingVertical: widthPercentToPD(3),
+                                    borderRadius: 10,
+                                    borderColor: lightGreen,
+                                    borderWidth: 1,
+                                    fontSize: 14,
+                                    textAlignVertical: 'top',
+                                    color: cream,
+                                    marginBottom: heightPercentToPD(3),
+                                }}
+                            />
+
+                            <ThemedText style={{
+                                color: accentGreen,
+                                fontSize: 14,
+                                marginBottom: heightPercentToPD(-1),
+                                zIndex: 3,
+                                elevation: 3,
+                                marginLeft: widthPercentToPD(1),
+                            }}>
+                                Tags
+                            </ThemedText>
+                            <TextInput
+                                placeholder="Enter tags separated by commas"
+                                placeholderTextColor={'#CAC8BE'}
+                                value={dogTags}
+                                onChangeText={setDogTags}
+                                style={{
+                                    paddingHorizontal: widthPercentToPD(6),
+                                    paddingVertical: widthPercentToPD(3),
+                                    borderRadius: 10,
+                                    borderColor: lightGreen,
+                                    borderWidth: 1,
+                                    fontSize: 14,
+                                    color: cream,
+                                    marginBottom: heightPercentToPD(3),
+                                }}
+                            />
+                            <ThemedText style={{
+                                color: accentGreen,
+                                fontSize: 14,
+                                zIndex: 3,
+                                elevation: 3,
+                                marginLeft: widthPercentToPD(1),
+                            }}>
+                                Dog Photo
+                            </ThemedText>
+
+                            <ThemedButton label="Pick an Image" onPress={pickImage} style={{
+                                width: widthPercentToPD(80),
+                                marginVertical: heightPercentToPD(3)
+                            }}/>
+                            <ThemedButton label="Add Dog" onPress={handleAddDog} style={{
+                                width: widthPercentToPD(80),
+                                marginBottom: heightPercentToPD(3),
+                            }}/>
+                        </View>
+
+
+                    </View>
+
+                    </ScrollView>
+                </ThemedView>
+
         </SafeAreaView>
     );
 }
