@@ -3,7 +3,6 @@ package com.app.petpals.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
-
 import java.util.Set;
 
 @Data
@@ -17,6 +16,9 @@ public class DogTag {
 
     @Column(name = "tag")
     private String tag;
+
+    @Column(name = "category")
+    private String category;
 
     @JsonBackReference
     @ManyToMany(mappedBy = "tags")

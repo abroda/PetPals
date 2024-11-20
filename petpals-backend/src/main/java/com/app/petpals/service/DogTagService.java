@@ -2,13 +2,19 @@ package com.app.petpals.service;
 
 import com.app.petpals.entity.DogTag;
 import com.app.petpals.exception.dog.DogTagNotFoundException;
+import com.app.petpals.payload.dogTag.DogTagCategoryResponse;
+import com.app.petpals.payload.dogTag.DogTagDetails;
+import com.app.petpals.payload.dogTag.DogTagRequest;
 import com.app.petpals.repository.DogTagRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -16,9 +22,11 @@ public class DogTagService {
 
     private final DogTagRepository dogTagRepository;
 
-    public List<DogTag> findAll() {
-        return dogTagRepository.findAll();
+    public List<DogTagCategoryResponse> findAllGroupedByCategory() {
+        List<DogTag> tags = dogTagRepository.findAll();
+        return getDogTagsGroupedByCategory(tags);
     }
+
 
     public DogTag findById(String tagId) {
         Optional<DogTag> dogTagOptional = dogTagRepository.findById(tagId);
@@ -27,25 +35,23 @@ public class DogTagService {
         } else throw new DogTagNotFoundException("Tag not found.");
     }
 
-    @Transactional
-    public DogTag save(String tagName) {
-        DogTag dogTag = new DogTag();
-        dogTag.setTag(tagName);
-        return dogTagRepository.save(dogTag);
+    public List<DogTagCategoryResponse> getDogTagsGroupedByCategory(Collection<DogTag> tags) {
+        Map<String, List<DogTag>> groupedByCategory = tags.stream()
+                .collect(Collectors.groupingBy(DogTag::getCategory));
+
+        return groupedByCategory.entrySet().stream()
+                .map(entry -> {
+                    String category = entry.getKey();
+                    List<DogTagDetails> tagDetails = entry.getValue().stream()
+                            .map(tag -> new DogTagDetails(tag.getId(), tag.getTag()))
+                            .toList();
+
+                    DogTagCategoryResponse dto = new DogTagCategoryResponse();
+                    dto.setCategory(category);
+                    dto.setTags(tagDetails);
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
-    @Transactional
-    public DogTag updateDogTag(String tagId, String tagName) {
-        Optional<DogTag> dogTagOptional = dogTagRepository.findById(tagId);
-        if (dogTagOptional.isPresent()) {
-            DogTag dogTag = dogTagOptional.get();
-            dogTag.setTag(tagName);
-            return dogTagRepository.save(dogTag);
-        } else throw new DogTagNotFoundException("Tag not found.");
-    }
-
-    @Transactional
-    public void deleteDogTag(String tagId) {
-        dogTagRepository.deleteById(tagId);
-    }
 }

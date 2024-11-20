@@ -1,12 +1,13 @@
 package com.app.petpals.payload.dog;
 
-import com.app.petpals.entity.DogTag;
+import com.app.petpals.payload.dogTag.DogTagCategoryResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Set;
+import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @Builder
@@ -17,5 +18,8 @@ public class DogResponse {
     private String name;
     private String description;
     private String imageUrl;
-    private Set<DogTag> tags;
+    private Integer age;
+    private String breed;
+    private BigDecimal weight;
+    private List<DogTagCategoryResponse> tags;
 }
