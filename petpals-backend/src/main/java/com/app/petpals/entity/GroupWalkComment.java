@@ -10,7 +10,8 @@ import java.util.List;
 
 @Data
 @Entity
-@Table(name = "group_walk_comment")
+@Table(name = "group_walk_comment", indexes = {@Index(name = "group_walk_id_index", columnList = "group_walk_id")}
+)
 public class GroupWalkComment {
 
     @Id

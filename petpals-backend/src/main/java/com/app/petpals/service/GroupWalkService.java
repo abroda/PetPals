@@ -37,10 +37,6 @@ public class GroupWalkService {
         return groupWalkRepository.findById(walkId).orElseThrow(() -> new GroupWalkNotFoundException("GroupWalk not found"));
     }
 
-    public List<GroupWalk> getAllCreatedGroupWalks(User creator) {
-        return groupWalkRepository.findAllByCreator(creator);
-    }
-
     @Transactional
     public GroupWalk saveGroupWalk(GroupWalkAddRequest request) {
         User creator = userService.getById(request.getCreatorId());
