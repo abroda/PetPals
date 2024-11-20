@@ -10,6 +10,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,6 +24,18 @@ public class DogTagService {
 
     public List<DogTagCategoryResponse> findAllGroupedByCategory() {
         List<DogTag> tags = dogTagRepository.findAll();
+        return getDogTagsGroupedByCategory(tags);
+    }
+
+
+    public DogTag findById(String tagId) {
+        Optional<DogTag> dogTagOptional = dogTagRepository.findById(tagId);
+        if (dogTagOptional.isPresent()) {
+            return dogTagOptional.get();
+        } else throw new DogTagNotFoundException("Tag not found.");
+    }
+
+    public List<DogTagCategoryResponse> getDogTagsGroupedByCategory(Collection<DogTag> tags) {
         Map<String, List<DogTag>> groupedByCategory = tags.stream()
                 .collect(Collectors.groupingBy(DogTag::getCategory));
 
@@ -41,11 +54,4 @@ public class DogTagService {
                 .collect(Collectors.toList());
     }
 
-
-    public DogTag findById(String tagId) {
-        Optional<DogTag> dogTagOptional = dogTagRepository.findById(tagId);
-        if (dogTagOptional.isPresent()) {
-            return dogTagOptional.get();
-        } else throw new DogTagNotFoundException("Tag not found.");
-    }
 }

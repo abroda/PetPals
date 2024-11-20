@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
@@ -26,6 +27,15 @@ public class Dog {
 
     @Column(name = "description")
     private String description;
+
+    @Column(name = "age")
+    private Integer age;
+
+    @Column(name = "breed")
+    private String breed;
+
+    @Column(name = "weight", precision = 4, scale = 1)
+    private BigDecimal weight;
 
     @Column(name = "image_id")
     private String imageId;

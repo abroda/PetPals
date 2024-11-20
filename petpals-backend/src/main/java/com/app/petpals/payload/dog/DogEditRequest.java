@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Set;
 
 @Data
@@ -14,5 +15,8 @@ import java.util.Set;
 public class DogEditRequest {
     private String name;
     private String description;
+    private String breed;
+    private Integer age;
+    private BigDecimal weight;
     private Set<String> tagIds;
 }

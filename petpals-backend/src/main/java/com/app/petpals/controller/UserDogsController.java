@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -33,15 +32,7 @@ public class UserDogsController {
         User user = userService.getById(id);
         List<Dog> dogs = dogService.getDogsByUser(user);
         return ResponseEntity.ok(dogs.stream()
-                .map(dog -> DogResponse.builder()
-                        .id(dog.getId())
-                        .name(dog.getName())
-                        .description(dog.getDescription())
-                        .imageUrl(Optional.ofNullable(dog.getImageId())
-                                .map(awsImageService::getPresignedUrl)
-                                .orElse(null))
-                        .tags(dog.getTags())
-                        .build())
+                .map(dogService::createDogResponse)
                 .collect(Collectors.toList()));
     }
 
@@ -49,14 +40,6 @@ public class UserDogsController {
     @Operation(summary = "Add dog to the user.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<DogResponse> addDogToUser(@PathVariable String id, @RequestBody DogAddRequest request) {
         Dog dog = dogService.saveDog(id, request);
-        return ResponseEntity.ok(DogResponse.builder()
-                .id(dog.getId())
-                .name(dog.getName())
-                .description(dog.getDescription())
-                .imageUrl(Optional.ofNullable(dog.getImageId())
-                        .map(awsImageService::getPresignedUrl)
-                        .orElse(null))
-                .tags(dog.getTags())
-                .build());
+        return ResponseEntity.ok(dogService.createDogResponse(dog));
     }
 }

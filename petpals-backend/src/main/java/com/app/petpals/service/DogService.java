@@ -9,6 +9,7 @@ import com.app.petpals.exception.dog.DogTagNotFoundException;
 import com.app.petpals.exception.account.UserNotFoundException;
 import com.app.petpals.payload.dog.DogAddRequest;
 import com.app.petpals.payload.dog.DogEditRequest;
+import com.app.petpals.payload.dog.DogResponse;
 import com.app.petpals.repository.DogRepository;
 import com.app.petpals.repository.DogTagRepository;
 import com.app.petpals.repository.UserRepository;
@@ -26,6 +27,8 @@ public class DogService {
     private final DogRepository dogRepository;
     private final UserRepository userRepository;
     private final DogTagRepository dogTagRepository;
+    private final AWSImageService awsImageService;
+    private final DogTagService dogTagService;
 
     public List<Dog> getDogs() {
         return dogRepository.findAll();
@@ -64,8 +67,16 @@ public class DogService {
             dog.setUser(user);
             dog.setName(request.getName());
             dog.setDescription(request.getDescription());
-            dog.setTags(dogTagRepository.findAllByIdIn(request.getTagIds()));
-
+            dog.setAge(request.getAge());
+            dog.setBreed(request.getBreed());
+            if (request.getWeight() != null && request.getWeight().scale() > 1) {
+                throw new DogDataException("Weight must have at most 1 decimal place.");
+            } else if (request.getWeight() != null && request.getWeight().precision() > 4){
+                throw new DogDataException("Weight can only have up to 4 digits, including decimals.");
+            }
+            if (request.getTagIds() != null) {
+                dog.setTags(dogTagRepository.findAllByIdIn(request.getTagIds()));
+            }
             List<Dog> userDogs = user.getDogs();
             userDogs.add(dog);
             user.setDogs(userDogs);
@@ -81,6 +92,14 @@ public class DogService {
             Dog dog = optionalDog.get();
             dog.setName(request.getName());
             dog.setDescription(request.getDescription());
+            dog.setAge(request.getAge());
+            dog.setBreed(request.getBreed());
+            if (request.getWeight() != null && request.getWeight().scale() > 1) {
+                throw new DogDataException("Weight must have at most 1 decimal place.");
+            } else if (request.getWeight() != null && request.getWeight().precision() > 4){
+                throw new DogDataException("Weight can only have up to 4 digits, including decimals.");
+            }
+            dog.setWeight(request.getWeight());
             if (request.getTagIds() != null) {
                 dog.setTags(dogTagRepository.findAllByIdIn(request.getTagIds()));
             }
@@ -123,5 +142,20 @@ public class DogService {
             dog.getTags().remove(optionalDogTag.get());
             return dogRepository.save(dog);
         } else throw new DogTagNotFoundException("Dog Tag not found.");
+    }
+
+    public DogResponse createDogResponse(Dog dog){
+        return DogResponse.builder()
+                .id(dog.getId())
+                .name(dog.getName())
+                .description(dog.getDescription())
+                .imageUrl(Optional.ofNullable(dog.getImageId())
+                        .map(awsImageService::getPresignedUrl)
+                        .orElse(null))
+                .age(dog.getAge())
+                .breed(dog.getBreed())
+                .weight(dog.getWeight())
+                .tags(dogTagService.getDogTagsGroupedByCategory(dog.getTags()))
+                .build();
     }
 }

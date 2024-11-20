@@ -32,63 +32,30 @@ public class DogController {
     public ResponseEntity<List<DogResponse>> findAll() {
         List<Dog> dogs = dogService.getDogs();
         return ResponseEntity.ok(dogs.stream()
-                .map(dog -> DogResponse.builder()
-                        .id(dog.getId())
-                        .name(dog.getName())
-                        .description(dog.getDescription())
-                        .imageUrl(Optional.ofNullable(dog.getImageId())
-                                .map(awsImageService::getPresignedUrl)
-                                .orElse(null))
-                        .tags(dog.getTags())
-                        .build()
-                ).collect(Collectors.toList()));
+                .map(dogService::createDogResponse)
+                .collect(Collectors.toList()));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get dog by id.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<DogResponse> findByid(@PathVariable String id) {
         Dog dog = dogService.getDogById(id);
-        return ResponseEntity.ok(DogResponse.builder()
-                .id(dog.getId())
-                .name(dog.getName())
-                .description(dog.getDescription())
-                .imageUrl(Optional.ofNullable(dog.getImageId())
-                        .map(awsImageService::getPresignedUrl)
-                        .orElse(null))
-                .tags(dog.getTags())
-                .build());
+        return ResponseEntity.ok(dogService.createDogResponse(dog));
     }
 
     @GetMapping("/tags/{id}")
     @Operation(summary = "Get dogs by tag id.", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<List<DogResponse>> getDogsByTagId(@PathVariable String id){
+    public ResponseEntity<List<DogResponse>> getDogsByTagId(@PathVariable String id) {
         List<Dog> dogs = dogService.getDogsByTagId(id);
         return ResponseEntity.ok(dogs.stream()
-                .map(dog -> DogResponse.builder()
-                        .id(dog.getId())
-                        .name(dog.getName())
-                        .description(dog.getDescription())
-                        .imageUrl(Optional.ofNullable(dog.getImageId())
-                                .map(awsImageService::getPresignedUrl)
-                                .orElse(null))
-                        .tags(dog.getTags())
-                        .build()
-                ).collect(Collectors.toList()));
+                .map(dogService::createDogResponse).collect(Collectors.toList()));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Edit dog data by id.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<DogResponse> editDogData(@PathVariable String id, @RequestBody DogEditRequest request) {
         Dog dog = dogService.updateDog(id, request);
-        return ResponseEntity.ok(DogResponse.builder()
-                .id(dog.getId())
-                .name(dog.getName())
-                .description(dog.getDescription())
-                .imageUrl(Optional.ofNullable(dog.getImageId())
-                        .map(awsImageService::getPresignedUrl)
-                        .orElse(null))
-                .tags(dog.getTags())
-                .build());
+        return ResponseEntity.ok(dogService.createDogResponse(dog));
     }
 
     @PutMapping(value = "/{id}/picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -103,15 +70,7 @@ public class DogController {
             imageId = awsImageService.uploadImage(file.getBytes(), file.getContentType());
         }
         dog = dogService.updateDogPicture(id, imageId);
-        return ResponseEntity.ok(DogResponse.builder()
-                .id(dog.getId())
-                .name(dog.getName())
-                .description(dog.getDescription())
-                .imageUrl(Optional.ofNullable(dog.getImageId())
-                        .map(awsImageService::getPresignedUrl)
-                        .orElse(null))
-                .tags(dog.getTags())
-                .build());
+        return ResponseEntity.ok(dogService.createDogResponse(dog));
     }
 
     @DeleteMapping("/{id}/picture")
@@ -122,15 +81,7 @@ public class DogController {
             awsImageService.deleteImage(dog.getImageId());
             dog = dogService.deleteDogPicture(id);
         }
-        return ResponseEntity.ok(DogResponse.builder()
-                .id(dog.getId())
-                .name(dog.getName())
-                .description(dog.getDescription())
-                .imageUrl(Optional.ofNullable(dog.getImageId())
-                        .map(awsImageService::getPresignedUrl)
-                        .orElse(null))
-                .tags(dog.getTags())
-                .build());
+        return ResponseEntity.ok(dogService.createDogResponse(dog));
     }
 
     @DeleteMapping("/{id}")
