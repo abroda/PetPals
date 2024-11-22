@@ -21,15 +21,14 @@ import {
 } from "react-native-responsive-screen";
 import { useNavigation } from "expo-router";
 
+import {useColorScheme} from "@/hooks/theme/useColorScheme";
+import {ThemeColors} from "@/constants/theme/Colors";
+
 // @ts-ignore
 import DogPlaceholderImage from "@/assets/images/dog_placeholder_theme-color-fair.png";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
 
-// Colors for styling
-const darkGreen = "#0A2421";
-const lightGreen = "#1C302A";
-const accentGreen = "#B4D779";
-const cream = "#FAF7EA";
+
 
 export default function EditDogProfileScreen() {
   const path = usePathname();
@@ -40,6 +39,11 @@ export default function EditDogProfileScreen() {
 
   const title = "Edit Dog";
   const { getDogById, updateDog, updateDogPicture } = useDog();
+
+  // Colours
+  const colorScheme = useColorScheme();
+// @ts-ignore
+  const themeColors = ThemeColors[colorScheme];
 
   // State
   const [dog, setDog] = useState<Dog | null>(null);
@@ -125,6 +129,9 @@ export default function EditDogProfileScreen() {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerTitle: title,
+      headerStyle: {
+        backgroundColor: themeColors.secondary,
+      },
     });
   }, []);
 
@@ -144,7 +151,7 @@ export default function EditDogProfileScreen() {
           <View
             style={{
               height: heightPercentageToDP(30),
-              backgroundColor: lightGreen,
+              backgroundColor: themeColors.secondary,
               alignItems: "center",
             }}
           >
@@ -154,7 +161,7 @@ export default function EditDogProfileScreen() {
           {/* Dog Info Container */}
           <View
             style={{
-              backgroundColor: darkGreen,
+              backgroundColor: themeColors.tertiary,
               height: heightPercentageToDP(70),
             }}
           >
@@ -172,7 +179,7 @@ export default function EditDogProfileScreen() {
                   height: widthPercentageToDP(70),
                   marginTop: heightPercentageToDP(-25),
                   borderWidth: 1,
-                  borderColor: darkGreen,
+                  borderColor: themeColors.tertiary,
                 }}
                 onError={() => setImageUri(null)}
                 borderRadius={percentToDP(8)}
@@ -180,7 +187,7 @@ export default function EditDogProfileScreen() {
               <ThemedText
                 style={{
                   textAlign: "center",
-                  color: accentGreen,
+                  color: themeColors.primary,
                   marginTop: heightPercentageToDP(-35),
                   marginBottom: heightPercentageToDP(33),
                   fontSize: 16,
@@ -202,7 +209,7 @@ export default function EditDogProfileScreen() {
               <ThemedText
                 style={{
                   backgroundColor: "none",
-                  color: accentGreen,
+                  color: themeColors.primary,
                   fontSize: 14,
                   fontWeight: "light",
                   marginBottom: heightPercentageToDP(-1),
@@ -218,8 +225,8 @@ export default function EditDogProfileScreen() {
                   paddingVertical: percentToDP(2),
                   borderRadius: percentToDP(5),
                   borderWidth: 1,
-                  borderColor: lightGreen,
-                  color: cream,
+                  borderColor: themeColors.secondary,
+                  color: themeColors.textOnSecondary,
                   fontSize: 14,
                   letterSpacing: 0.5,
                 }}
@@ -233,7 +240,7 @@ export default function EditDogProfileScreen() {
               <ThemedText
                 style={{
                   backgroundColor: "none",
-                  color: accentGreen,
+                  color: themeColors.primary,
                   fontSize: 14,
                   fontWeight: "light",
                   marginBottom: heightPercentageToDP(-1),
@@ -249,8 +256,8 @@ export default function EditDogProfileScreen() {
                   paddingVertical: percentToDP(2),
                   borderRadius: percentToDP(5),
                   borderWidth: 1,
-                  borderColor: lightGreen,
-                  color: cream,
+                  borderColor: themeColors.secondary,
+                  color: themeColors.textOnSecondary,
                   fontSize: 14,
                   letterSpacing: 0.5,
                 }}
@@ -265,7 +272,7 @@ export default function EditDogProfileScreen() {
               <ThemedText
                 style={{
                   backgroundColor: "none",
-                  color: accentGreen,
+                  color: themeColors.primary,
                   fontSize: 14,
                   fontWeight: "light",
                   marginBottom: heightPercentageToDP(-3),
@@ -283,7 +290,7 @@ export default function EditDogProfileScreen() {
                   <View
                     key={index}
                     style={{
-                      backgroundColor: accentGreen,
+                      backgroundColor: themeColors.primary,
                       paddingHorizontal: 10,
                       paddingVertical: 2,
                       borderRadius: 5,
@@ -303,8 +310,8 @@ export default function EditDogProfileScreen() {
                   paddingVertical: percentToDP(2),
                   borderRadius: percentToDP(6),
                   borderWidth: 1,
-                  borderColor: lightGreen,
-                  color: cream,
+                  borderColor: themeColors.secondary,
+                  color: themeColors.textOnSecondary,
                   fontSize: 16,
                   letterSpacing: 0.5,
                 }}
@@ -317,13 +324,13 @@ export default function EditDogProfileScreen() {
                 onPress={handleAddTag}
                 style={{
                   padding: widthPercentageToDP(2),
-                  backgroundColor: accentGreen,
+                  backgroundColor: themeColors.primary,
                   borderRadius: 100,
                   alignItems: "center",
                   marginVertical: heightPercentageToDP(2),
                 }}
               >
-                <ThemedText style={{ color: darkGreen }}>Add Tag</ThemedText>
+                <ThemedText style={{ color: themeColors.tertiary }}>Add Tag</ThemedText>
               </Pressable>
 
               {/* Save Button */}
@@ -331,13 +338,13 @@ export default function EditDogProfileScreen() {
                 onPress={handleSave}
                 style={{
                   padding: widthPercentageToDP(2),
-                  backgroundColor: accentGreen,
+                  backgroundColor: themeColors.primary,
                   borderRadius: 100,
                   alignItems: "center",
                   marginBottom: heightPercentageToDP(2),
                 }}
               >
-                <ThemedText style={{ color: darkGreen }}>
+                <ThemedText style={{ color: themeColors.tertiary }}>
                   Save Changes
                 </ThemedText>
               </Pressable>

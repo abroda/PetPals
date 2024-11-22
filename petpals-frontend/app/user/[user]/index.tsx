@@ -22,6 +22,8 @@ import { useNavigation, usePathname, router, Href } from "expo-router";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 import PostFeed from "@/components/lists/PostFeed";
 import { Dog, useDog } from "@/context/DogContext";
+import {useColorScheme} from "@/hooks/theme/useColorScheme";
+import {ThemeColors} from "@/constants/theme/Colors";
 // @ts-ignore
 import DogPlaceholderImage from "@/assets/images/dog_placeholder_theme-color-fair.png";
 import { useUser } from "@/hooks/useUser";
@@ -41,11 +43,9 @@ export default function UserProfileScreen() {
   const [dogs, setDogs] = useState<Dog[]>([]);
 
   // Colours
-  const darkGreen = "#0A2421";
-  const lightGreen = "#1C302A";
-  const accentGreen = "#B4D779";
-  const accentTeal = "#52B8A3";
-  const cream = "#FAF7EA";
+  const colorScheme = useColorScheme();
+  // @ts-ignore
+  const themeColors = ThemeColors[colorScheme];
 
   // Context
   const { getUserById, userProfile, isProcessing } = useUser();
@@ -71,7 +71,7 @@ export default function UserProfileScreen() {
         <View
           style={{
             flexDirection: "row",
-            backgroundColor: darkGreen,
+            backgroundColor: themeColors.tertiary,
             padding: percentToDP(2),
             borderRadius: 100,
             alignItems: "center",
@@ -104,6 +104,9 @@ export default function UserProfileScreen() {
         </View>
       ),
       headerTitle: username,
+      headerStyle: {
+        backgroundColor: themeColors.secondary,
+      },
     });
   }, [navigation, username, menuVisible]);
 
@@ -123,13 +126,16 @@ export default function UserProfileScreen() {
   };
 
   const renderDogItem = ({ item }: { item: any }) => (
-    <View style={{ marginRight: 8, paddingVertical: 10 }}>
+    <View style={{
+      marginRight: 8,
+      paddingVertical: 10,
+    }}>
       <View
         style={{
-          width: widthPercentageToDP(40),
-          height: widthPercentageToDP(63),
-          backgroundColor: darkGreen,
-          padding: widthPercentageToDP(3),
+          width: widthPercentageToDP(42),
+          height: widthPercentageToDP(70),
+          backgroundColor: themeColors.tertiary,
+          padding: widthPercentageToDP(4),
           borderRadius: 10,
           alignItems: "center",
         }}
@@ -144,9 +150,10 @@ export default function UserProfileScreen() {
         <ThemedText
           style={{
             fontSize: 22,
-            color: cream,
+            lineHeight: 24,
+            color: themeColors.textOnSecondary,
             fontWeight: "bold",
-            marginTop: heightPercentToPD(1),
+            marginVertical: heightPercentToPD(2),
           }}
         >
           {item.name}
@@ -156,7 +163,8 @@ export default function UserProfileScreen() {
           ellipsizeMode="tail"
           style={{
             fontSize: 14,
-            color: cream,
+            lineHeight: 18,
+            color: themeColors.textOnSecondary,
             fontWeight: "regular",
             marginBottom: heightPercentToPD(2),
           }}
@@ -172,14 +180,15 @@ export default function UserProfileScreen() {
       style={{
         flex: 1,
         width: widthPercentageToDP(100),
+        backgroundColor: themeColors.secondary,
       }}
     >
       {/* User Info Segment */}
       <View
         style={{
-          marginTop: heightPercentToPD(20),
+          marginTop: heightPercentToPD(35),
           marginBottom: heightPercentToPD(3),
-          backgroundColor: darkGreen,
+          backgroundColor: themeColors.tertiary,
           paddingBottom: heightPercentToPD(5),
           width: widthPercentageToDP(100),
         }}
@@ -188,7 +197,7 @@ export default function UserProfileScreen() {
         <View
           style={{
             alignItems: "center",
-            backgroundColor: darkGreen,
+            backgroundColor: themeColors.tertiary,
             width: widthPercentageToDP(100),
           }}
         >
@@ -206,7 +215,8 @@ export default function UserProfileScreen() {
               width: widthPercentageToDP(85),
               textAlign: "center",
               fontSize: 36,
-              color: cream,
+              lineHeight: 40,
+              color: themeColors.textOnSecondary,
               marginVertical: heightPercentToPD(1),
             }}
           >
@@ -216,8 +226,9 @@ export default function UserProfileScreen() {
             style={{
               width: widthPercentageToDP(85),
               fontSize: 15,
+              lineHeight: 17,
               textAlign: "center",
-              color: cream,
+              color: themeColors.textOnSecondary,
               marginBottom: heightPercentToPD(5),
             }}
           >
@@ -230,44 +241,71 @@ export default function UserProfileScreen() {
           justifyOption="space-evenly"
           style={{
             marginBottom: heightPercentToPD(5),
-            backgroundColor: darkGreen,
+            backgroundColor: themeColors.tertiary,
             width: widthPercentageToDP(100),
           }}
         >
           <View style={{ alignItems: "center" }}>
             <ThemedText
-              style={{ fontSize: 24, fontWeight: "bold", color: cream }}
+              style={{
+                fontSize: 24,
+                lineHeight: 26,
+                fontWeight: "bold",
+                color: themeColors.textOnSecondary
+            }}
             >
               21
             </ThemedText>
-            <ThemedText style={{ fontSize: 12, color: cream }}>
+            <ThemedText style={{
+              fontSize: 12,
+              lineHeight: 14,
+              color: themeColors.textOnSecondary
+            }}>
               friends
             </ThemedText>
           </View>
           <View style={{ alignItems: "center" }}>
             <ThemedText
-              style={{ fontSize: 24, fontWeight: "bold", color: cream }}
+              style={{
+                fontSize: 24,
+                lineHeight: 26,
+                fontWeight: "bold",
+                color: themeColors.textOnSecondary
+            }}
             >
               2
             </ThemedText>
-            <ThemedText style={{ fontSize: 12, color: cream }}>
+            <ThemedText style={{
+              fontSize: 12,
+              lineHeight: 14,
+              color: themeColors.textOnSecondary
+            }}>
               km this week
             </ThemedText>
           </View>
           <View style={{ alignItems: "center" }}>
             <ThemedText
-              style={{ fontSize: 24, fontWeight: "bold", color: cream }}
+              style={{
+                fontSize: 24,
+                lineHeight: 26,
+                fontWeight: "bold",
+                color: themeColors.textOnSecondary
+            }}
             >
               21
             </ThemedText>
-            <ThemedText style={{ fontSize: 12, color: cream }}>dogs</ThemedText>
+            <ThemedText style={{
+              fontSize: 12,
+              lineHeight: 14,
+              color: themeColors.textOnSecondary
+            }}>dogs</ThemedText>
           </View>
         </HorizontalView>
 
         <HorizontalView
           justifyOption="center"
           style={{
-            backgroundColor: darkGreen,
+            backgroundColor: themeColors.tertiary,
             width: widthPercentageToDP(100),
             justifyContent: "space-around",
             paddingHorizontal: widthPercentageToDP(5),
@@ -275,19 +313,19 @@ export default function UserProfileScreen() {
         >
           <ThemedButton
             label="Send invitation"
-            color={darkGreen}
+            color={themeColors.tertiary}
             style={{
               width: widthPercentageToDP(40),
-              backgroundColor: accentGreen,
+              backgroundColor: themeColors.primary,
               borderRadius: 100,
             }}
           />
           <ThemedButton
             label="Message"
-            color={darkGreen}
+            color={themeColors.tertiary}
             style={{
               width: widthPercentageToDP(40),
-              backgroundColor: accentGreen,
+              backgroundColor: themeColors.primary,
               borderRadius: 100,
             }}
           />
@@ -302,14 +340,22 @@ export default function UserProfileScreen() {
           paddingHorizontal: widthPercentageToDP(5),
         }}
       >
-        <ThemedText style={{ fontSize: 30, color: cream }}>Dogs</ThemedText>
+        <ThemedText style={{
+          fontSize: 30,
+          lineHeight: 32,
+          backgroundColor: 'transparent',
+          color: themeColors.textOnSecondary
+        }}>
+          Dogs
+        </ThemedText>
+
         <ThemedButton
           label="Add dog"
           onPress={() => router.push(`/user/${username}/pet/new`)}
-          color={darkGreen}
+          color={themeColors.tertiary}
           style={{
             width: widthPercentageToDP(40),
-            backgroundColor: accentGreen,
+            backgroundColor: themeColors.primary,
             borderRadius: 100,
           }}
         />
@@ -335,7 +381,7 @@ export default function UserProfileScreen() {
       style={{
         flex: 1,
         width: widthPercentageToDP(100),
-        backgroundColor: lightGreen,
+        backgroundColor: themeColors.secondary,
       }}
     >
       <FlatList // question: why not scrollview? or flatlist (unscrollable) with header dogs and posts as children?
@@ -349,7 +395,8 @@ export default function UserProfileScreen() {
             <ThemedText
               textStyleOptions={{ size: 30 }}
               style={{
-                color: cream,
+                color: themeColors.textOnSecondary,
+                backgroundColor: 'transparent',
                 marginLeft: widthPercentageToDP(5),
                 marginTop: heightPercentToPD(4),
               }}
@@ -366,22 +413,22 @@ export default function UserProfileScreen() {
           style={{
             position: "absolute",
             zIndex: 100,
-            top: heightPercentToPD(10),
+            top: heightPercentToPD(14),
             right: widthPercentageToDP(5),
             width: widthPercentageToDP(50),
-            backgroundColor: darkGreen,
+            backgroundColor: themeColors.tertiary,
             borderRadius: 5,
             borderWidth: 1,
-            borderColor: accentGreen,
+            borderColor: themeColors.primary,
           }}
         >
           <Pressable onPress={() => handleMenuSelect("Edit")}>
             <Text
               style={{
                 padding: 20,
-                color: cream,
+                color: themeColors.textOnSecondary,
                 borderBottomWidth: 1,
-                borderColor: accentGreen,
+                borderColor: themeColors.primary,
                 fontSize: 18,
               }}
             >
@@ -389,7 +436,7 @@ export default function UserProfileScreen() {
             </Text>
           </Pressable>
           <Pressable onPress={() => handleMenuSelect("App Settings")}>
-            <Text style={{ padding: 20, color: cream, fontSize: 18 }}>
+            <Text style={{ padding: 20, color: themeColors.textOnSecondary, fontSize: 18 }}>
               App Settings
             </Text>
           </Pressable>
