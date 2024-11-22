@@ -41,7 +41,7 @@ export default function PetProfileScreen() {
   const { getUserById, userProfile, isProcessing } = useContext(UserContext);
 
   // States
-  const { getDogById } = useDog();
+  const { getDogById, deleteDog } = useDog();
   const [dog, setDog] = useState<Dog | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [menuVisible, setMenuVisible] = useState(false);
@@ -133,8 +133,36 @@ export default function PetProfileScreen() {
     if (option === "Edit") {
       router.push(`/user/${username}/pet/${petId}/edit`);
     } else if (option === "Delete") {
-      // TODO
+      handleDeleteDog();
     }
+  };
+
+  const handleDeleteDog = async () => {
+    Alert.alert(
+      "Confirm Delete",
+      "Are you sure you want to delete this dog?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteDog(petId); // Call deleteDog from the context
+              Alert.alert("Success", "Successfully deleted dog");
+              router.back(); // Navigate back to the user profile
+            } catch (error) {
+              console.error("Failed to delete dog:", error);
+              Alert.alert("Error", "Failed to delete dog");
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
 
