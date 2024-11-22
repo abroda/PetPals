@@ -6,20 +6,29 @@ import {
   Alert,
   Image,
   ScrollView,
-  View,
+  View, Pressable,
 } from "react-native";
 import { useDog } from "@/context/DogContext";
 import { useAuth } from "@/hooks/useAuth";
-import { useState } from "react";
+import React, {useLayoutEffect, useState} from "react";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
+import {router, useRouter} from "expo-router";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
 import { Assets } from "react-native-ui-lib";
+import {useColorScheme} from "@/hooks/theme/useColorScheme";
+import {ThemeColors} from "@/constants/theme/Colors";
+import {heightPercentageToDP, widthPercentageToDP} from "react-native-responsive-screen";
+// const DogPlaceholderImage = Assets.getAssetByPath(
+//   "@/assets/images/dog_placeholder_theme-color-fair.png"
+// );
+// @ts-ignore
+import DogPlaceholderImage from '@/assets/images/dog_placeholder_theme-color-fair.png';
+import UserAvatar from "@/components/navigation/UserAvatar";
+import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
+import {useNavigation} from "@react-navigation/native";
 
-const DogPlaceholderImage = Assets.getAssetByPath(
-  "@/assets/images/dog_placeholder_theme-color-fair.png"
-);
+
 export default function NewPetScreen() {
   // @ts-ignore
   const { addDog, updateDogPicture } = useDog();
@@ -29,17 +38,28 @@ export default function NewPetScreen() {
   const [dogDescription, setDogDescription] = useState("");
   const [dogTags, setDogTags] = useState("");
   const [image, setImage] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false); // Track saving state
 
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToPD = useWindowDimension("height");
   const widthPercentToPD = useWindowDimension("width");
 
   // Colours
-  const darkGreen = "#0A2421";
-  const lightGreen = "#1C302A";
-  const accentGreen = "#B4D779";
-  const accentTeal = "#52B8A3";
-  const cream = "#FAF7EA";
+  const colorScheme = useColorScheme();
+  // @ts-ignore
+  const themeColors = ThemeColors[colorScheme];
+  const navigation = useNavigation();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+
+      headerTitle: "Create new dog",
+      headerStyle: {
+        backgroundColor: themeColors.secondary,
+      },
+    });
+  }, [navigation]);
+
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -61,6 +81,7 @@ export default function NewPetScreen() {
       return;
     }
 
+    setIsSaving(true)
     try {
       // Prepare dog data with tags as an array
       const dogData = {
@@ -96,6 +117,7 @@ export default function NewPetScreen() {
       }
 
       Alert.alert("Success", "Dog added successfully!");
+      setIsSaving(false);
       router.back(); // Go back to the previous screen
     } catch (error) {
       console.error("Failed to add dog:", error);
@@ -108,74 +130,78 @@ export default function NewPetScreen() {
       <ThemedView
         style={{
           flex: 1,
+          backgroundColor: themeColors.secondary,
         }}
       >
         <ScrollView
           style={{
-            flex: 1,
-            backgroundColor: "transparent",
+
+            backgroundColor: themeColors.secondary,
           }}
         >
           <View
             style={{
-              backgroundColor: lightGreen,
+              backgroundColor: themeColors.secondary,
               height: heightPercentToPD(30),
             }}
           ></View>
           <View
             style={{
-              backgroundColor: darkGreen,
-              flex: 1,
+              backgroundColor: themeColors.tertiary,
+
             }}
           >
-            {/* Conditional Image Display */}
-            {image ? (
+            {/* Change Dog Image */}
+            <Pressable
+              onPress={pickImage}
+              style={{
+                alignItems: "center",
+              }}
+            >
               <Image
-                source={{ uri: image }}
+                source={image ? { uri: image } : DogPlaceholderImage}
                 style={{
-                  width: widthPercentToPD(80),
-                  height: widthPercentToPD(80),
-                  marginTop: heightPercentToPD(-30),
-                  borderRadius: 25,
+                  width: widthPercentageToDP(70),
+                  height: widthPercentageToDP(70),
+                  marginTop: heightPercentageToDP(-15),
                   borderWidth: 1,
-                  borderColor: darkGreen,
-                  justifyContent: "center",
-                  alignSelf: "center",
+                  borderColor: themeColors.tertiary,
                 }}
+                onError={() => setImage(null)}
+                borderRadius={percentToDP(8)}
               />
-            ) : (
-              <Image
-                source={DogPlaceholderImage}
+              <ThemedText
                 style={{
-                  width: widthPercentToPD(80),
-                  height: widthPercentToPD(80),
-                  marginTop: heightPercentToPD(-30),
-                  borderRadius: 25,
-                  borderWidth: 1,
-                  borderColor: darkGreen,
-                  justifyContent: "center",
-                  alignSelf: "center",
+                  textAlign: "center",
+                  color: themeColors.primary,
+                  marginTop: heightPercentageToDP(-6),
+                  marginBottom: heightPercentageToDP(4),
+                  backgroundColor: themeColors.secondary,
+                  opacity: 0.9,
+                  borderRadius: percentToDP(100),
+                  padding: percentToDP(1),
+                  fontSize: 16,
                 }}
-              />
-            )}
+              >
+                Click to change picture
+              </ThemedText>
+            </Pressable>
 
             <View
               style={{
                 width: widthPercentToPD(80),
                 alignSelf: "center",
                 justifyContent: "center",
-                paddingVertical: heightPercentToPD(4),
               }}
             >
               {/* Dog name */}
               <ThemedText
                 style={{
-                  color: accentGreen,
+                  color: themeColors.primary,
                   fontSize: 14,
-                  marginBottom: heightPercentToPD(-1),
                   zIndex: 3,
-                  elevation: 3,
-                  marginLeft: widthPercentToPD(1),
+                  marginLeft: widthPercentToPD(2),
+                  backgroundColor: 'transparent',
                 }}
               >
                 Dog Name
@@ -189,25 +215,23 @@ export default function NewPetScreen() {
                 maxLength={12}
                 style={{
                   paddingHorizontal: widthPercentToPD(6),
-                  paddingVertical: widthPercentToPD(3),
+                  paddingVertical: widthPercentToPD(2),
                   borderRadius: 10,
-                  borderColor: lightGreen,
+                  borderColor: themeColors.secondary,
                   borderWidth: 1,
                   fontSize: 14,
-                  color: cream,
-                  marginBottom: heightPercentToPD(3),
+                  color: themeColors.textOnSecondary,
+                  marginBottom: heightPercentToPD(2),
                 }}
               />
 
               {/* Description */}
               <ThemedText
                 style={{
-                  color: accentGreen,
+                  color: themeColors.primary,
                   fontSize: 14,
-                  marginBottom: heightPercentToPD(-1),
-                  zIndex: 3,
-                  elevation: 3,
-                  marginLeft: widthPercentToPD(1),
+                  marginLeft: widthPercentToPD(2),
+                  backgroundColor: 'transparent',
                 }}
               >
                 Description
@@ -222,25 +246,23 @@ export default function NewPetScreen() {
                 maxLength={48}
                 style={{
                   paddingHorizontal: widthPercentToPD(6),
-                  paddingVertical: widthPercentToPD(3),
-                  borderRadius: 10,
-                  borderColor: lightGreen,
+                  paddingVertical: widthPercentToPD(2),
+                  borderRadius: percentToDP(4),
+                  borderColor: themeColors.secondary,
                   borderWidth: 1,
                   fontSize: 14,
                   textAlignVertical: "top",
-                  color: cream,
-                  marginBottom: heightPercentToPD(3),
+                  color: themeColors.textOnSecondary,
+                  marginBottom: heightPercentToPD(2),
                 }}
               />
 
               <ThemedText
                 style={{
-                  color: accentGreen,
+                  color: themeColors.primary,
                   fontSize: 14,
-                  marginBottom: heightPercentToPD(-1),
-                  zIndex: 3,
-                  elevation: 3,
-                  marginLeft: widthPercentToPD(1),
+                  marginLeft: widthPercentToPD(2),
+                  backgroundColor: 'transparent',
                 }}
               >
                 Tags
@@ -252,41 +274,39 @@ export default function NewPetScreen() {
                 onChangeText={setDogTags}
                 style={{
                   paddingHorizontal: widthPercentToPD(6),
-                  paddingVertical: widthPercentToPD(3),
-                  borderRadius: 10,
-                  borderColor: lightGreen,
+                  paddingVertical: widthPercentToPD(2),
+                  borderRadius: percentToDP(4),
+                  borderColor: themeColors.secondary,
                   borderWidth: 1,
                   fontSize: 14,
-                  color: cream,
-                  marginBottom: heightPercentToPD(3),
+                  color: themeColors.textOnSecondary,
+                  marginBottom: heightPercentToPD(2),
                 }}
               />
-              <ThemedText
-                style={{
-                  color: accentGreen,
-                  fontSize: 14,
-                  zIndex: 3,
-                  elevation: 3,
-                  marginLeft: widthPercentToPD(1),
-                }}
-              >
-                Dog Photo
-              </ThemedText>
+
+              {isSaving ? <ThemedText textColorName={"primary"} style={{
+                width: widthPercentToPD(80),
+                fontSize: percentToDP(4),
+                lineHeight: percentToDP(4),
+                marginVertical: heightPercentToPD(2),
+                textAlign: 'center'
+              }}>
+                Creating new dog...
+              </ThemedText> : null}
 
               <ThemedButton
-                label="Pick an Image"
-                onPress={pickImage}
-                style={{
-                  width: widthPercentToPD(80),
-                  marginVertical: heightPercentToPD(3),
-                }}
-              />
-              <ThemedButton
-                label="Add Dog"
+                label="Save"
+                color={isSaving? themeColors.tertiary : themeColors.primary}
                 onPress={handleAddDog}
+                disabled={isSaving} // Disable button while saving
                 style={{
-                  width: widthPercentToPD(80),
-                  marginBottom: heightPercentToPD(3),
+                  width: widthPercentageToDP(80),
+                  backgroundColor: isSaving ? themeColors.primary : 'transparent',
+                  paddingVertical: percentToDP(2),
+                  borderRadius: percentToDP(4),
+                  borderWidth: 1,
+                  borderColor: themeColors.primary,
+                  marginBottom: heightPercentageToDP(1),
                 }}
               />
             </View>
