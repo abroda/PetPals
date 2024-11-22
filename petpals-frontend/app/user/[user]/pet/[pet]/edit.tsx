@@ -21,12 +21,14 @@ import {
 } from "react-native-responsive-screen";
 import { useNavigation } from "expo-router";
 
-import {useColorScheme} from "@/hooks/theme/useColorScheme";
-import {ThemeColors} from "@/constants/theme/Colors";
 
 // @ts-ignore
 import DogPlaceholderImage from "@/assets/images/dog_placeholder_theme-color-fair.png";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
+
+import {useColorScheme} from "@/hooks/theme/useColorScheme";
+import {ThemeColors} from "@/constants/theme/Colors";
+import {ThemedButton} from "@/components/inputs/ThemedButton";
 
 
 
@@ -177,7 +179,7 @@ export default function EditDogProfileScreen() {
                 style={{
                   width: widthPercentageToDP(70),
                   height: widthPercentageToDP(70),
-                  marginTop: heightPercentageToDP(-25),
+                  marginTop: heightPercentageToDP(-15),
                   borderWidth: 1,
                   borderColor: themeColors.tertiary,
                 }}
@@ -188,8 +190,12 @@ export default function EditDogProfileScreen() {
                 style={{
                   textAlign: "center",
                   color: themeColors.primary,
-                  marginTop: heightPercentageToDP(-35),
-                  marginBottom: heightPercentageToDP(33),
+                  marginTop: heightPercentageToDP(-6),
+                  marginBottom: heightPercentageToDP(4),
+                  backgroundColor: themeColors.secondary,
+                  opacity: 0.9,
+                  borderRadius: percentToDP(100),
+                  padding: percentToDP(1),
                   fontSize: 16,
                 }}
               >
@@ -200,9 +206,11 @@ export default function EditDogProfileScreen() {
             <View
               style={{
                 marginHorizontal: "auto",
-                width: widthPercentageToDP(90),
+                width: widthPercentageToDP(80),
                 justifyContent: "space-evenly",
                 alignContent: "space-evenly",
+                backgroundColor: themeColors.tertiary,
+
               }}
             >
               {/* Dog Name */}
@@ -229,6 +237,7 @@ export default function EditDogProfileScreen() {
                   color: themeColors.textOnSecondary,
                   fontSize: 14,
                   letterSpacing: 0.5,
+                  marginBottom: heightPercentageToDP(1),
                 }}
                 value={name}
                 onChangeText={setName}
@@ -260,6 +269,7 @@ export default function EditDogProfileScreen() {
                   color: themeColors.textOnSecondary,
                   fontSize: 14,
                   letterSpacing: 0.5,
+                  marginBottom: heightPercentageToDP(1),
                 }}
                 value={description}
                 onChangeText={setDescription}
@@ -314,40 +324,33 @@ export default function EditDogProfileScreen() {
                   color: themeColors.textOnSecondary,
                   fontSize: 16,
                   letterSpacing: 0.5,
+                  marginBottom: heightPercentageToDP(1),
                 }}
                 value={newTag}
                 onChangeText={setNewTag}
                 placeholder="Add new tag"
                 placeholderTextColor="#AAA"
               />
-              <Pressable
-                onPress={handleAddTag}
-                style={{
-                  padding: widthPercentageToDP(2),
-                  backgroundColor: themeColors.primary,
-                  borderRadius: 100,
-                  alignItems: "center",
-                  marginVertical: heightPercentageToDP(2),
-                }}
-              >
-                <ThemedText style={{ color: themeColors.tertiary }}>Add Tag</ThemedText>
-              </Pressable>
 
-              {/* Save Button */}
-              <Pressable
-                onPress={handleSave}
-                style={{
-                  padding: widthPercentageToDP(2),
-                  backgroundColor: themeColors.primary,
-                  borderRadius: 100,
-                  alignItems: "center",
-                  marginBottom: heightPercentageToDP(2),
-                }}
-              >
-                <ThemedText style={{ color: themeColors.tertiary }}>
-                  Save Changes
-                </ThemedText>
-              </Pressable>
+              <ThemedButton label="Add Tag" onPress={handleAddTag} color={themeColors.primary} style={{
+                width: widthPercentageToDP(80),
+                backgroundColor: 'transparent',
+                paddingVertical: percentToDP(2),
+                borderRadius: percentToDP(4),
+                borderWidth: 1,
+                borderColor: themeColors.primary,
+                marginBottom: heightPercentageToDP(1),
+              }}/>
+              <ThemedButton label="Save" onPress={handleSave} color={themeColors.primary} style={{
+                width: widthPercentageToDP(80),
+                backgroundColor: 'transparent',
+                paddingVertical: percentToDP(2),
+                borderRadius: percentToDP(4),
+                borderWidth: 1,
+                borderColor: themeColors.primary,
+                marginBottom: heightPercentageToDP(1),
+              }}/>
+
             </View>
           </View>
         </ScrollView>

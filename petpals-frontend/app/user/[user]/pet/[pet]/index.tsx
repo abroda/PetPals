@@ -18,6 +18,8 @@ import { Image } from "react-native-ui-lib";
 import { Dog, useDog } from "@/context/DogContext";
 import { useNavigation } from "@react-navigation/native";
 import { UserContext } from "@/context/UserContext";
+import {useColorScheme} from "@/hooks/theme/useColorScheme";
+import {ThemeColors} from "@/constants/theme/Colors";
 
 // @ts-ignore
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
@@ -46,12 +48,11 @@ export default function PetProfileScreen() {
   const [imageUri, setImageUri] = useState<string | null>(null);
   const navigation = useNavigation();
 
+
   // Colours
-  const darkGreen = "#0A2421";
-  const lightGreen = "#1C302A";
-  const accentGreen = "#B4D779";
-  const accentTeal = "#52B8A3";
-  const cream = "#FAF7EA";
+  const colorScheme = useColorScheme();
+  // @ts-ignore
+  const themeColors = ThemeColors[colorScheme];
 
   const dogTags = [
     "playful",
@@ -62,9 +63,11 @@ export default function PetProfileScreen() {
   ];
   const renderDogTag = ({ item }: { item: string }) => <DogTag tag={item} />;
 
+
   // Functions
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToPD = useWindowDimension("height");
+
 
   // Get dog data
   useEffect(() => {
@@ -82,6 +85,7 @@ export default function PetProfileScreen() {
     fetchDogData();
   }, [petId]);
 
+
   // Customize header layout and options
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -89,15 +93,16 @@ export default function PetProfileScreen() {
         <View
           style={{
             flexDirection: "row",
-            backgroundColor: darkGreen,
-            padding: percentToDP(2),
+            backgroundColor: themeColors.tertiary,
+            padding: percentToDP(1),
             borderRadius: 100,
+            marginVertical: heightPercentToPD(1),
           }}
         >
           {/* User Avatar Link to User Profile */}
           <Pressable
             onPress={() => router.push(`/user/${username}`)}
-            style={{ marginRight: percentToDP(3) }}
+            style={{ marginRight: percentToDP(2) }}
           >
             <UserAvatar
               userId={userId ?? ""}
@@ -108,14 +113,20 @@ export default function PetProfileScreen() {
           </Pressable>
 
           {/* Three-dots Icon for Dropdown Menu */}
-          <Pressable onPress={() => setMenuVisible(!menuVisible)}>
+          <Pressable onPress={() => setMenuVisible(!menuVisible)} style={{
+            padding: percentToDP(2),
+          }}>
             <ThemedIcon name="ellipsis-vertical-outline" />
           </Pressable>
         </View>
       ),
       headerTitle: dog ? dog.name : "Dog Profile",
+      headerStyle: {
+        backgroundColor: themeColors.secondary,
+      },
     });
   }, [navigation, username, dog, menuVisible]);
+
 
   const handleMenuSelect = (option: string) => {
     setMenuVisible(false);
@@ -125,6 +136,7 @@ export default function PetProfileScreen() {
       // TODO
     }
   };
+
 
   if (isLoading) {
     return (
@@ -153,37 +165,38 @@ export default function PetProfileScreen() {
         <ScrollView
           style={{
             flex: 1,
-            backgroundColor: darkGreen,
+            backgroundColor: themeColors.tertiary,
           }}
         >
           {/* Dog Avatar Container */}
           <View
             style={{
               height: heightPercentToPD(30),
-              backgroundColor: lightGreen,
+              backgroundColor: themeColors.secondary,
               alignItems: "center",
             }}
           >
             {/* TODO: Background image in the future? */}
           </View>
 
+
           {/* Dog Info Container */}
           <View
             style={{
-              backgroundColor: darkGreen,
-              height: heightPercentToPD(70),
+              backgroundColor: themeColors.tertiary,
+              width: widthPercentageToDP(100),
             }}
           >
             {/* Dog Image with Placeholder on Error */}
             <Image
               source={imageUri ? { uri: imageUri } : DogPlaceholderImage}
               style={{
-                width: widthPercentageToDP(80),
-                height: widthPercentageToDP(80),
+                width: widthPercentageToDP(70),
+                height: widthPercentageToDP(70),
                 alignSelf: "center",
-                marginTop: heightPercentToPD(-25),
+                marginTop: heightPercentToPD(-15),
                 borderWidth: 1,
-                borderColor: darkGreen,
+                borderColor: themeColors.tertiary,
               }}
               onError={() => setImageUri(null)}
               borderRadius={20}
@@ -192,7 +205,6 @@ export default function PetProfileScreen() {
             <View
               style={{
                 alignItems: "center",
-                marginBottom: heightPercentToPD(2),
                 backgroundColor: "transparent",
               }}
             >
@@ -200,9 +212,10 @@ export default function PetProfileScreen() {
                 style={{
                   textAlign: "center",
                   fontSize: 34,
+                  lineHeight: 36,
                   letterSpacing: 1,
                   fontWeight: "bold",
-                  color: cream,
+                  color: themeColors.textOnSecondary,
                   marginTop: heightPercentToPD(2),
                   marginBottom: heightPercentToPD(1),
                 }}
@@ -241,7 +254,7 @@ export default function PetProfileScreen() {
               {/* Separator */}
               <View
                 style={{
-                  backgroundColor: lightGreen,
+                  backgroundColor: themeColors.secondary,
                   height: heightPercentToPD(0.5),
                   width: widthPercentageToDP(80),
                   marginTop: heightPercentToPD(2),
@@ -255,7 +268,7 @@ export default function PetProfileScreen() {
                   backgroundColor: "transparent",
                   textAlign: "center",
                   fontSize: 15,
-                  color: cream,
+                  color: themeColors.textOnSecondary,
                   paddingHorizontal: widthPercentageToDP(10),
                 }}
               >
@@ -266,7 +279,7 @@ export default function PetProfileScreen() {
               <View
                 style={{
                   alignSelf: "center",
-                  backgroundColor: lightGreen,
+                  backgroundColor: themeColors.secondary,
                   height: heightPercentToPD(0.5),
                   width: widthPercentageToDP(80),
                   marginTop: heightPercentToPD(5),
@@ -290,7 +303,7 @@ export default function PetProfileScreen() {
                   textAlign: "center",
                   fontWeight: "bold",
                   fontSize: 15,
-                  color: cream,
+                  color: themeColors.textOnSecondary,
                 }}
               >
                 Weight
@@ -302,7 +315,7 @@ export default function PetProfileScreen() {
                   textAlign: "center",
                   fontWeight: "bold",
                   fontSize: 15,
-                  color: cream,
+                  color: themeColors.textOnSecondary,
                 }}
               >
                 Age
@@ -323,7 +336,7 @@ export default function PetProfileScreen() {
                   textAlign: "center",
                   fontWeight: "bold",
                   fontSize: 15,
-                  color: cream,
+                  color: themeColors.textOnSecondary,
                 }}
               >
                 Owner:
@@ -350,16 +363,16 @@ export default function PetProfileScreen() {
             position: "absolute",
             zIndex: 100,
             elevation: 100,
-            top: heightPercentToPD(0),
+            top: heightPercentToPD(16),
             right: widthPercentageToDP(5),
-            width: widthPercentageToDP(50),
-            backgroundColor: darkGreen,
+            width: widthPercentageToDP(40),
+            backgroundColor: themeColors.tertiary,
 
-            borderRadius: 5,
+            borderRadius: percentToDP(4),
             shadowOpacity: 0.3,
             shadowRadius: 10,
-            borderWidth: 1,
-            borderColor: accentGreen,
+            borderWidth: 2,
+            borderColor: themeColors.primary,
             alignContent: "space-evenly",
             justifyContent: "space-evenly",
           }}
@@ -367,11 +380,12 @@ export default function PetProfileScreen() {
           <Pressable onPress={() => handleMenuSelect("Edit")}>
             <Text
               style={{
-                padding: 20,
-                color: cream,
+                padding: percentToDP(5),
+                color: themeColors.primary,
                 borderBottomWidth: 1,
-                borderColor: accentGreen,
-                fontSize: 18,
+                borderColor: themeColors.primary,
+                fontSize: percentToDP(4.5),
+                lineHeight: percentToDP(5)
               }}
             >
               Edit
@@ -380,9 +394,10 @@ export default function PetProfileScreen() {
           <Pressable onPress={() => handleMenuSelect("Delete")}>
             <Text
               style={{
-                padding: 20,
-                color: cream,
-                fontSize: 18,
+                padding: percentToDP(5),
+                color: themeColors.primary,
+                fontSize: percentToDP(4.5),
+                lineHeight: percentToDP(5)
               }}
             >
               Delete

@@ -16,12 +16,6 @@ export default function WelcomeScreen() {
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToDP = useWindowDimension("height");
 
-  // Colours
-  const darkGreen = "#0A2421";
-  const lightGreen = "#1C302A";
-  const accentGreen = "#B4D779";
-  const accentTeal = "#52B8A3";
-  const cream = "#FAF7EA";
 
   useEffect(() => {
     if (!isLoading && !isProcessing && userId && authToken) {
@@ -31,7 +25,7 @@ export default function WelcomeScreen() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, margin: 0, padding: 0, backgroundColor: lightGreen }}
+      style={{ flex: 1, margin: 0, padding: 0, backgroundColor: "transparent" }}
       edges={["left", "right", "bottom"]}
     >
       <ThemedScrollView

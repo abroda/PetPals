@@ -63,6 +63,15 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const codeRegex = "^[0-9]{6}$";
   const passwordRegex =
     "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}$";
+
+  // Logging to check when userId is populated
+  useEffect(() => {
+    if (userId) {
+      console.log("[AuthContext] User ID available in AuthContext:", userId);
+    }
+  }, [userId]);
+
+
   // const codeRegex = "^[0-9]{6}$";
 
   // const sendJsonQuery = (path: string, method: string, payload?: any) =>
@@ -181,24 +190,23 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     });
   };
 
-  const login = async (
-    email: string,
-    password: string,
-    asyncAbortController?: AbortController
-  ) => {
+  const login = async (email: string, password: string, asyncAbortController?: AbortController) => {
     return await serverQuery({
       path: apiPaths.auth.login,
       payload: {
         email: email,
         password: password,
       },
-      onOKResponse: (payload: any) => {
+      onOKResponse: async (payload: any) => {
         setUserId(payload.id);
         setUserEmail(email);
         setAuthToken(payload.token);
-        asyncStorage.setItem("userId", JSON.stringify(userId));
-        asyncStorage.setItem("userEmail", JSON.stringify(userEmail));
-        asyncStorage.setItem("authToken", JSON.stringify(authToken));
+
+        // Await AsyncStorage updates to ensure consistency
+        await asyncStorage.setItem("userId", payload.id);
+        await asyncStorage.setItem("userEmail", email);
+        await asyncStorage.setItem("authToken", payload.token);
+
         return;
       },
       onStart: () => setIsProcessing(true),
@@ -206,6 +214,32 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       asyncAbortController: asyncAbortController,
     });
   };
+
+  // const login = async (
+  //   email: string,
+  //   password: string,
+  //   asyncAbortController?: AbortController
+  // ) => {
+  //   return await serverQuery({
+  //     path: apiPaths.auth.login,
+  //     payload: {
+  //       email: email,
+  //       password: password,
+  //     },
+  //     onOKResponse: (payload: any) => {
+  //       setUserId(payload.id);
+  //       setUserEmail(email);
+  //       setAuthToken(payload.token);
+  //       asyncStorage.setItem("userId", JSON.stringify(userId));
+  //       asyncStorage.setItem("userEmail", JSON.stringify(userEmail));
+  //       asyncStorage.setItem("authToken", JSON.stringify(authToken));
+  //       return;
+  //     },
+  //     onStart: () => setIsProcessing(true),
+  //     onEnd: () => setIsProcessing(false),
+  //     asyncAbortController: asyncAbortController,
+  //   });
+  // };
 
   const logout = async () => {
     setIsProcessing(true);

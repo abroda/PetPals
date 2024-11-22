@@ -29,6 +29,8 @@ import DogPlaceholderImage from "@/assets/images/dog_placeholder_theme-color-fai
 import { useUser } from "@/hooks/useUser";
 import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
 
+
+
 export default function UserProfileScreen() {
   const path = usePathname();
   const [username, setUsername] = useState(
@@ -41,6 +43,7 @@ export default function UserProfileScreen() {
   const [menuVisible, setMenuVisible] = useState(false);
   const { addDog, getDogsByUserId } = useDog();
   const [dogs, setDogs] = useState<Dog[]>([]);
+  const dogCount = dogs.length;
 
   // Colours
   const colorScheme = useColorScheme();
@@ -72,20 +75,16 @@ export default function UserProfileScreen() {
           style={{
             flexDirection: "row",
             backgroundColor: themeColors.tertiary,
-            padding: percentToDP(2),
+            padding: percentToDP(1),
             borderRadius: 100,
-            alignItems: "center",
-            justifyContent: "center",
-            alignContent: "center",
-            marginTop: 2,
-            marginBottom: 5,
+            marginVertical: heightPercentToPD(1),
           }}
         >
           {username === "me" && (
             <Pressable onPress={() => Alert.alert("Notifications")}>
               <ThemedIcon
                 name="notifications-outline"
-                style={{ marginHorizontal: widthPercentageToDP(1) }}
+                style={{ marginHorizontal: widthPercentageToDP(1), padding: percentToDP(2), }}
               />
             </Pressable>
           )}
@@ -98,7 +97,7 @@ export default function UserProfileScreen() {
           <Pressable onPress={() => setMenuVisible(!menuVisible)}>
             <ThemedIcon
               name="ellipsis-vertical-outline"
-              style={{ marginHorizontal: widthPercentageToDP(1) }}
+              style={{ marginHorizontal: widthPercentageToDP(1), padding: percentToDP(2), }}
             />
           </Pressable>
         </View>
@@ -292,13 +291,13 @@ export default function UserProfileScreen() {
                 color: themeColors.textOnSecondary
             }}
             >
-              21
+              {dogCount}
             </ThemedText>
             <ThemedText style={{
               fontSize: 12,
               lineHeight: 14,
               color: themeColors.textOnSecondary
-            }}>dogs</ThemedText>
+            }}>{dogCount === 1 ? "dog" : "dogs"}</ThemedText>
           </View>
         </HorizontalView>
 
@@ -413,30 +412,43 @@ export default function UserProfileScreen() {
           style={{
             position: "absolute",
             zIndex: 100,
-            top: heightPercentToPD(14),
+            elevation: 100,
+            top: heightPercentToPD(16),
             right: widthPercentageToDP(5),
-            width: widthPercentageToDP(50),
+            width: widthPercentageToDP(40),
             backgroundColor: themeColors.tertiary,
-            borderRadius: 5,
-            borderWidth: 1,
+
+            borderRadius: percentToDP(4),
+            shadowOpacity: 0.3,
+            shadowRadius: 10,
+            borderWidth: 2,
             borderColor: themeColors.primary,
+            alignContent: "space-evenly",
+            justifyContent: "space-evenly",
           }}
         >
           <Pressable onPress={() => handleMenuSelect("Edit")}>
             <Text
               style={{
-                padding: 20,
-                color: themeColors.textOnSecondary,
+                padding: percentToDP(5),
+                color: themeColors.primary,
                 borderBottomWidth: 1,
                 borderColor: themeColors.primary,
-                fontSize: 18,
+                fontSize: percentToDP(4.5),
+                lineHeight: percentToDP(5)
               }}
             >
               Edit
             </Text>
           </Pressable>
           <Pressable onPress={() => handleMenuSelect("App Settings")}>
-            <Text style={{ padding: 20, color: themeColors.textOnSecondary, fontSize: 18 }}>
+            <Text style={{
+              padding: percentToDP(5),
+              color: themeColors.primary,
+
+              fontSize: percentToDP(4.5),
+              lineHeight: percentToDP(5)
+            }}>
               App Settings
             </Text>
           </Pressable>
