@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useLayoutEffect, useState } from "react";
+import React, {useCallback, useContext, useEffect, useLayoutEffect, useState} from "react";
 import {
   SafeAreaView,
   View,
@@ -18,7 +18,7 @@ import { useWindowDimension } from "@/hooks/useWindowDimension";
 import { UserContext } from "@/context/UserContext";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigation, usePathname, router, Href } from "expo-router";
+import {useNavigation, usePathname, useRouter, router, Href, useFocusEffect} from "expo-router";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 import PostFeed from "@/components/lists/PostFeed";
 import { Dog, useDog } from "@/context/DogContext";
@@ -40,10 +40,12 @@ export default function UserProfileScreen() {
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToPD = useWindowDimension("height");
   const navigation = useNavigation();
+  const router = useRouter();
   const [menuVisible, setMenuVisible] = useState(false);
   const { addDog, getDogsByUserId } = useDog();
   const [dogs, setDogs] = useState<Dog[]>([]);
   const dogCount = dogs.length;
+  const [isRefreshing, setIsRefreshing] = useState(false); // For refresh indicator (if needed)
 
   // Colours
   const colorScheme = useColorScheme();
@@ -57,16 +59,24 @@ export default function UserProfileScreen() {
     getUserById(username);
   }, [username]);
 
-  useEffect(() => {
-    const fetchDogs = async () => {
-      const userDogs = await getDogsByUserId(userId ?? "");
-      const sortedDogs = userDogs
-        .map((dog) => ({ ...dog, name: dog.name || "Unknown Dog" }))
-        .sort((a, b) => a.name.localeCompare(b.name));
-      setDogs(sortedDogs);
-    };
-    fetchDogs();
-  }, [userId]);
+
+  const fetchDogs = async () => {
+    const userDogs = await getDogsByUserId(userId ?? "");
+    const sortedDogs = userDogs
+      .map((dog) => ({ ...dog, name: dog.name || "Unknown Dog" }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+    setDogs(sortedDogs);
+  };
+
+
+// Refresh data whenever the screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      fetchDogs();
+    }, [userId]) // Only re-run if userId changes
+  );
+
+
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -365,6 +375,8 @@ export default function UserProfileScreen() {
         data={dogs}
         keyExtractor={(item) => item.id}
         horizontal
+        refreshing={isRefreshing}
+        onRefresh={fetchDogs} // Pull-to-refresh support
         showsHorizontalScrollIndicator={false}
         renderItem={renderDogItem}
         contentContainerStyle={{
