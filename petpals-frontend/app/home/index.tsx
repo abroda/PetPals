@@ -92,6 +92,7 @@ export default function HomeScreen() {
         colorName="secondary"
         style={{ height: heightPercentToDP(100) }}
       >
+
         <ThemedView
           colorName="secondary"
           style={{ height: heightPercentToDP(10) }}
@@ -155,6 +156,7 @@ export default function HomeScreen() {
         <SearchBar
           onSearch={handleSearch}
           contexts={["posts", "users"]} // Define your search contexts
+          onClear={()=>{setIsSearching(false); setSearchQuery("")}}
         />
 
 
@@ -162,6 +164,7 @@ export default function HomeScreen() {
         {isSearching && searchResults.length > 0 ? (
           <View style={{
             width: widthPercentageToDP(90),
+            height: heightPercentToDP(70),
             alignContent: 'center',
             justifyContent: 'center',
             marginHorizontal: 'auto',
@@ -173,7 +176,7 @@ export default function HomeScreen() {
               minHeight: heightPercentToDP(6),
               maxHeight: heightPercentToDP(7),
               maxWidth: widthPercentageToDP(90),
-              alignSelf: 'center'
+              alignSelf: 'center',
             }}/>
           </View>
 
@@ -184,7 +187,6 @@ export default function HomeScreen() {
               alignItems: "center",
               justifyContent: 'center',
               marginTop: heightPercentToDP(2),
-              flex: 1,
             }}
           >
             <ThemedIcon name="alert-circle-outline" size={40} />
@@ -194,7 +196,7 @@ export default function HomeScreen() {
             }}>
               No users found.
             </ThemedText>
-            <ThemedButton label={"Clear search"} onPress={() => setIsSearching(false)} style={{
+            <ThemedButton label={"Clear search"} onPress={() => {setIsSearching(false);  setSearchQuery("")}} style={{
               padding: 0,
               minHeight: heightPercentToDP(6),
               maxHeight: heightPercentToDP(7),

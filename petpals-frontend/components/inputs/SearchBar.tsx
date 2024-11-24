@@ -18,6 +18,7 @@ import {ThemeColors} from "@/constants/theme/Colors";
 
 export type SearchBarProps = {
   onSearch: (query: string, context: string) => void;
+  onClear: () => void;
   contexts: string[]; // E.g., ["posts", "users"]
   style?: ViewStyle;
   inputStyle?: TextStyle;
@@ -37,6 +38,7 @@ export type SearchBarProps = {
 
 const SearchBar: React.FC<SearchBarProps> = ({
                                                onSearch,
+                                               onClear,
                                                contexts,
                                                style={
                                                  backgroundColor: useThemeColor("transparent"),
@@ -86,6 +88,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const handleClear = () => {
     setSearchQuery("");
     onSearch("", activeContext);
+    onClear();
   };
 
   return (

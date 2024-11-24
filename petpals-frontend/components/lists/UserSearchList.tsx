@@ -38,7 +38,7 @@ const UserSearchList: React.FC<UserSearchListProps> = ({ users}) => {
           imageUrl={item.imageUrl}
         />
       )}
-      style={{height: heightPercentageToDP(100),}}
+      style={{flex: 1}}
     />
   );
 };
