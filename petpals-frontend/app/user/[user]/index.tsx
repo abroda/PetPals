@@ -32,36 +32,46 @@ import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView
 
 
 export default function UserProfileScreen() {
+
+  // Contexts
   const path = usePathname();
+  const { addDog, getDogsByUserId } = useDog();
+  const { logout, userId: loggedInUserId  } = useAuth();
+  const { getUserById, userProfile, isProcessing } = useUser();
+  const navigation = useNavigation();
+  const router = useRouter();
+
+  // Styling
+  const percentToDP = useWindowDimension("shorter");
+  const heightPercentToPD = useWindowDimension("height");
+
+  // Functionality
+  const [isRefreshing, setIsRefreshing] = useState(false); // For refresh indicator (if needed)
+  const [menuVisible, setMenuVisible] = useState(false);
+
+  const [dogs, setDogs] = useState<Dog[]>([]);
+  const dogCount = dogs.length;
   const [username, setUsername] = useState(
     path.slice(path.lastIndexOf("/") + 1)
   );
-  const { logout, userId } = useAuth();
-  const percentToDP = useWindowDimension("shorter");
-  const heightPercentToPD = useWindowDimension("height");
-  const navigation = useNavigation();
-  const router = useRouter();
-  const [menuVisible, setMenuVisible] = useState(false);
-  const { addDog, getDogsByUserId } = useDog();
-  const [dogs, setDogs] = useState<Dog[]>([]);
-  const dogCount = dogs.length;
-  const [isRefreshing, setIsRefreshing] = useState(false); // For refresh indicator (if needed)
 
   // Colours
   const colorScheme = useColorScheme();
   // @ts-ignore
   const themeColors = ThemeColors[colorScheme];
 
-  // Context
-  const { getUserById, userProfile, isProcessing } = useUser();
+  // Check if viewing own profile
+  const isOwnProfile = username === "me" || loggedInUserId === username;
 
+  // Fetch the profile being viewed
   useEffect(() => {
     getUserById(username);
   }, [username]);
 
 
   const fetchDogs = async () => {
-    const userDogs = await getDogsByUserId(userId ?? "");
+    const ownerId = isOwnProfile? loggedInUserId : username;
+    const userDogs = await getDogsByUserId(ownerId ?? "");
     const sortedDogs = userDogs
       .map((dog) => ({ ...dog, name: dog.name || "Unknown Dog" }))
       .sort((a, b) => a.name.localeCompare(b.name));
@@ -69,11 +79,11 @@ export default function UserProfileScreen() {
   };
 
 
-// Refresh data whenever the screen is focused
+  // Refresh data whenever the screen is focused
   useFocusEffect(
     useCallback(() => {
       fetchDogs();
-    }, [userId]) // Only re-run if userId changes
+    }, [loggedInUserId]) // Only re-run if userId changes
   );
 
 
@@ -98,21 +108,25 @@ export default function UserProfileScreen() {
               />
             </Pressable>
           )}
+
+          {/* Avatar of the currently logged-in user */}
           <UserAvatar
-            userId={userProfile?.id ?? ""}
+            userId={loggedInUserId || ""}
             imageUrl={userProfile?.imageUrl}
             size={10}
-            doLink={false}
+            doLink={true}
           />
-          <Pressable onPress={() => setMenuVisible(!menuVisible)}>
+
+          {/* Three-dots Menu Pop-up */}
+          {isOwnProfile && (<Pressable onPress={() => setMenuVisible(!menuVisible)}>
             <ThemedIcon
               name="ellipsis-vertical-outline"
               style={{ marginHorizontal: widthPercentageToDP(1), padding: percentToDP(2), }}
             />
-          </Pressable>
+          </Pressable>)}
         </View>
       ),
-      headerTitle: username,
+      headerTitle: isOwnProfile ? "My Profile" : userProfile?.username || "Profile",
       headerStyle: {
         backgroundColor: themeColors.secondary,
       },
@@ -311,34 +325,71 @@ export default function UserProfileScreen() {
           </View>
         </HorizontalView>
 
-        <HorizontalView
-          justifyOption="center"
-          style={{
-            backgroundColor: themeColors.tertiary,
-            width: widthPercentageToDP(100),
-            justifyContent: "space-around",
-            paddingHorizontal: widthPercentageToDP(5),
-          }}
-        >
-          <ThemedButton
-            label="Send invitation"
-            color={themeColors.tertiary}
+
+        {/* Buttons: Hide "Send Invitation" & "Message" if it's own profile */}
+        {!isOwnProfile && (
+          <HorizontalView
+            justifyOption="center"
             style={{
-              width: widthPercentageToDP(40),
-              backgroundColor: themeColors.primary,
-              borderRadius: 100,
+              backgroundColor: themeColors.tertiary,
+              width: widthPercentageToDP(100),
+              justifyContent: "space-around",
+              paddingHorizontal: widthPercentageToDP(5),
             }}
-          />
-          <ThemedButton
-            label="Message"
-            color={themeColors.tertiary}
-            style={{
-              width: widthPercentageToDP(40),
-              backgroundColor: themeColors.primary,
-              borderRadius: 100,
-            }}
-          />
+          >
+            <ThemedButton
+              label="Send invitation"
+              color={themeColors.tertiary}
+              style={{
+                width: widthPercentageToDP(40),
+                backgroundColor: themeColors.primary,
+                borderRadius: 100,
+              }}
+            />
+            <ThemedButton
+              label="Message"
+              color={themeColors.tertiary}
+              style={{
+                width: widthPercentageToDP(40),
+                backgroundColor: themeColors.primary,
+                borderRadius: 100,
+              }}
+            />
         </HorizontalView>
+        )}
+
+        {isOwnProfile && (
+          <HorizontalView
+            justifyOption="center"
+            style={{
+              backgroundColor: themeColors.tertiary,
+              width: widthPercentageToDP(100),
+              justifyContent: "space-around",
+              paddingHorizontal: widthPercentageToDP(5),
+            }}
+          >
+            <ThemedButton
+              label="My friends"
+              color={themeColors.tertiary}
+              style={{
+                width: widthPercentageToDP(40),
+                backgroundColor: themeColors.primary,
+                borderRadius: 100,
+              }}
+            />
+            <ThemedButton
+              label="Add dog"
+              onPress={() => router.push(`/user/${username}/pet/new`)}
+              color={themeColors.tertiary}
+              style={{
+                width: widthPercentageToDP(40),
+                backgroundColor: themeColors.primary,
+                borderRadius: 100,
+              }}
+            />
+          </HorizontalView>
+        )}
+
       </View>
       <View
         style={{
@@ -358,16 +409,16 @@ export default function UserProfileScreen() {
           Dogs
         </ThemedText>
 
-        <ThemedButton
-          label="Add dog"
-          onPress={() => router.push(`/user/${username}/pet/new`)}
-          color={themeColors.tertiary}
-          style={{
-            width: widthPercentageToDP(40),
-            backgroundColor: themeColors.primary,
-            borderRadius: 100,
-          }}
-        />
+        {/*<ThemedButton*/}
+        {/*  label="Add dog"*/}
+        {/*  onPress={() => router.push(`/user/${username}/pet/new`)}*/}
+        {/*  color={themeColors.tertiary}*/}
+        {/*  style={{*/}
+        {/*    width: widthPercentageToDP(40),*/}
+        {/*    backgroundColor: themeColors.primary,*/}
+        {/*    borderRadius: 100,*/}
+        {/*  }}*/}
+        {/*/>*/}
       </View>
 
       {/* Horizontal FlatList for dogs */}
