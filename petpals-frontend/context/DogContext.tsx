@@ -8,6 +8,9 @@ export interface Dog {
   description: string;
   imageUrl: string | null;
   tags: { id: string; tag: string }[]; // Define tags based on your API response structure
+  age?: number; // Age in months (optional)
+  breed?: string; // Breed (optional)
+  weight?: number; // Weight in kg (optional)
 }
 
 interface DogContextProps {

@@ -76,6 +76,7 @@ export default function PetProfileScreen() {
         const dogData = await getDogById(petId ?? "");
         setDog(dogData ?? null);
         setImageUri(dogData?.imageUrl ?? null);
+        console.log("[Pet/Index] Dog was fetched: ", dogData)
       } catch (error) {
         console.error("Failed to fetch dog data:", error);
       } finally {

@@ -34,10 +34,16 @@ export default function NewPetScreen() {
   const { addDog, updateDogPicture } = useDog();
   const { userId } = useAuth();
   const router = useRouter();
+
+  // Dog Info
   const [dogName, setDogName] = useState("");
   const [dogDescription, setDogDescription] = useState("");
   const [dogTags, setDogTags] = useState("");
   const [image, setImage] = useState<string | null>(null);
+  const [breed, setBreed] = useState("")
+  const [weight, setWeight] = useState("");
+  const [age, setAge] = useState("");
+
   const [isSaving, setIsSaving] = useState(false); // Track saving state
 
   const percentToDP = useWindowDimension("shorter");
@@ -283,6 +289,107 @@ export default function NewPetScreen() {
                   marginBottom: heightPercentToPD(2),
                 }}
               />
+
+              <ThemedText
+                style={{
+                  color: themeColors.primary,
+                  fontSize: 14,
+                  marginLeft: widthPercentToPD(2),
+                  backgroundColor: 'transparent',
+                }}
+              >
+                Breed
+              </ThemedText>
+
+              <TextInput
+                placeholder="Enter dog's breed"
+                placeholderTextColor={"#CAC8BE"}
+                value={breed}
+                onChangeText={setBreed}
+                maxLength={24}
+                style={{
+                  paddingHorizontal: widthPercentToPD(6),
+                  paddingVertical: widthPercentToPD(2),
+                  borderRadius: percentToDP(4),
+                  borderColor: themeColors.secondary,
+                  borderWidth: 1,
+                  fontSize: 14,
+                  color: themeColors.textOnSecondary,
+                  marginBottom: heightPercentToPD(2),
+                }}
+              />
+
+              <View style={{
+                flexDirection: 'row',
+                height: heightPercentToPD(12),
+                marginVertical: heightPercentToPD(2),
+                width: widthPercentToPD(90),
+              }}>
+                <View style={{flexDirection: 'column'}}>
+                  <ThemedText
+                    style={{
+                      color: themeColors.primary,
+                      fontSize: 14,
+                      marginLeft: widthPercentToPD(2),
+                      backgroundColor: 'transparent',
+                    }}
+                  >
+                    Weight
+                  </ThemedText>
+
+                  <TextInput
+                    placeholder="Enter dog's weight"
+                    placeholderTextColor={"#CAC8BE"}
+                    value={weight}
+                    onChangeText={setWeight}
+                    keyboardType={"numeric"}
+                    maxLength={24}
+                    style={{
+                      paddingHorizontal: widthPercentToPD(6),
+                      paddingVertical: widthPercentToPD(2),
+                      borderRadius: percentToDP(4),
+                      borderColor: themeColors.secondary,
+                      borderWidth: 1,
+                      fontSize: 14,
+                      color: themeColors.textOnSecondary,
+                      marginBottom: heightPercentToPD(2),
+                    }}
+                  />
+                </View>
+
+                <View style={{flexDirection: 'column'}}>
+                  <ThemedText
+                    style={{
+                      color: themeColors.primary,
+                      fontSize: 14,
+                      marginLeft: widthPercentToPD(2),
+                      backgroundColor: 'transparent',
+                    }}
+                  >
+                    Age
+                  </ThemedText>
+                  <TextInput
+                    placeholder="Enter dog's age"
+                    placeholderTextColor={"#CAC8BE"}
+                    value={age}
+                    onChangeText={setAge}
+                    keyboardType={"numeric"}
+                    maxLength={24}
+                    style={{
+                      paddingHorizontal: widthPercentToPD(6),
+                      paddingVertical: widthPercentToPD(2),
+                      borderRadius: percentToDP(4),
+                      borderColor: themeColors.secondary,
+                      borderWidth: 1,
+                      fontSize: 14,
+                      color: themeColors.textOnSecondary,
+                      marginBottom: heightPercentToPD(2),
+                    }}
+                  />
+                </View>
+
+              </View>
+
 
               {isSaving ? <ThemedText textColorName={"primary"} style={{
                 width: widthPercentToPD(80),

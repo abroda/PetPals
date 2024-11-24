@@ -1,4 +1,4 @@
-export const databaseURL = "http://localhost:8080/";
+export const databaseURL = "http://192.168.88.42:8080/";
 
 export const apiPaths = {
   auth: {
