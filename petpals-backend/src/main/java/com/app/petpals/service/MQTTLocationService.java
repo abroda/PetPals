@@ -98,7 +98,6 @@ public class MQTTLocationService {
                     .atZone(ZoneId.systemDefault())
                     .toLocalDateTime();
 
-
             // Retrieve the most recent active session from the database
             WalkSession session = walkSessionService.findActiveSessionByUserId(userId);
             if (session == null) {
@@ -108,7 +107,7 @@ public class MQTTLocationService {
 
             String sessionId = session.getId();
 
-            // Retrieve location history from Redis
+            // Retrieve location history from Redis (for distance calculation)
             List<LocationResponse> locations = redisLocationService.getLocationHistory(userId);
 
             // Calculate total distance walked
@@ -117,6 +116,13 @@ public class MQTTLocationService {
             // Finalize the session in the database
             walkSessionService.endWalk(sessionId, endTime, totalDistance);
 
+            // Notify nearby users to remove this user
+            List<LocationResponse> nearbyUsers = redisLocationService.findNearbyUsersForUser(userId);
+            for (LocationResponse nearbyUser : nearbyUsers) {
+                String updatedNearbyUsersJson = redisLocationService.updateNearbyUsersForRemoval(nearbyUser.getUserId(), userId);
+                publishUpdatedNearbyUsers(nearbyUser.getUserId(), updatedNearbyUsersJson);
+            }
+
             // Clear Redis data for the user
             redisLocationService.clearWalkData(userId);
 
@@ -124,6 +130,18 @@ public class MQTTLocationService {
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Error handling walk end: " + e.getMessage());
+        }
+    }
+
+    // Publish the updated nearby users list
+    private void publishUpdatedNearbyUsers(String userId, String updatedNearbyUsersJson) {
+        try {
+            String topic = "location/nearby/" + userId;
+            mqttClient.publish(topic, new MqttMessage(updatedNearbyUsersJson.getBytes()));
+            System.out.println("Updated nearby users for user: " + userId);
+        } catch (MqttException e) {
+            e.printStackTrace();
+            System.err.println("Failed to publish updated nearby users for user: " + userId);
         }
     }
 

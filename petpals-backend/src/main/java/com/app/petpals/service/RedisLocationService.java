@@ -117,6 +117,45 @@ public class RedisLocationService {
         return findNearbyUsers(userPoint.getY(), userPoint.getX(), 5.0); // Reuse the existing method
     }
 
+    // Find nearby users for a specific user (excluding the user itself)
+    public List<LocationResponse> findNearbyUsersForRemoval(String userId) {
+        Point userPoint = redisTemplate.opsForGeo()
+                .position(GEO_KEY, userId)
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+        if (userPoint == null) {
+            return Collections.emptyList();
+        }
+
+        // Reuse the existing method to find nearby users
+        return findNearbyUsers(userPoint.getY(), userPoint.getX(), 5.0)
+                .stream()
+                .filter(user -> !user.getUserId().equals(userId)) // Exclude the user being removed
+                .collect(Collectors.toList());
+    }
+
+    // Update nearby users for a specific user by removing a given user
+    public String updateNearbyUsersForRemoval(String targetUserId, String endedUserId) {
+        try {
+            // Get the current list of nearby users for the target user
+            List<LocationResponse> nearbyUsers = findNearbyUsersForUser(targetUserId);
+
+            // Remove the user who ended their walk
+            List<LocationResponse> updatedNearbyUsers = nearbyUsers.stream()
+                    .filter(user -> !user.getUserId().equals(endedUserId)) // Exclude the user who ended their walk
+                    .collect(Collectors.toList());
+
+            // Convert the updated list to JSON
+            return objectMapper.writeValueAsString(updatedNearbyUsers);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Failed to update nearby users for removal of user: " + endedUserId);
+            return "[]"; // Return an empty list in case of failure
+        }
+    }
+
     // Get location history
     public List<LocationResponse> getLocationHistory(String userId) {
         try {
