@@ -15,20 +15,36 @@ import { ThemedButton } from "@/components/inputs/ThemedButton";
 import { ThemedText } from "@/components/basic/ThemedText";
 import { Href, router } from "expo-router";
 import { useUser } from "@/hooks/useUser";
+import SearchBar from "@/components/inputs/SearchBar";
 
 export default function HomeScreen() {
   const { userId } = useAuth();
   const [notificationsVisible, setNotificationsVisible] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
 
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToDP = useWindowDimension("height");
 
   const { userProfile, isProcessing, getUserById, responseMessage } = useUser();
 
+  const handleSearch = (query: string, context: string) => {
+    console.log(`Searching for "${query}" in ${context}`);
+    // Call the relevant API or filter logic here
+    // For example:
+    if (context === "posts") {
+      // Search posts
+      // setSearchResults(searchPosts(query));
+    } else if (context === "users") {
+      // Search users
+      // setSearchResults(searchUsers(query));
+    }
+  };
+
+
   return (
     <SafeAreaView>
       <ThemedView
-        colorName="primary"
+        colorName="secondary"
         style={{ height: heightPercentToDP(100) }}
       >
         <ThemedView
@@ -89,6 +105,12 @@ export default function HomeScreen() {
             </ThemedView>
           </HorizontalView>
         </ThemedView>
+
+        {/* SEARCH BAR */}
+        <SearchBar
+          onSearch={handleSearch}
+          contexts={["posts", "users"]} // Define your search contexts
+        />
 
         {/* POST FEED */}
         <PostFeed></PostFeed>

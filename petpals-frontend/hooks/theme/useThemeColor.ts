@@ -3,6 +3,7 @@ import { useColorScheme } from "react-native";
 
 export type ColorName = keyof typeof ThemeColors.light &
   keyof typeof ThemeColors.dark;
+
 export type ThemedColor = { light: string; dark: string };
 
 export function useThemeColor(
