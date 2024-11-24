@@ -6,6 +6,7 @@ import { ColorName, ThemedColor, useThemeColor } from "@/hooks/theme/useThemeCol
 import { useWindowDimension } from "@/hooks/useWindowDimension";
 import { widthPercentageToDP, heightPercentageToDP } from "react-native-responsive-screen";
 import {ThemeColors} from "@/constants/theme/Colors";
+import {number} from "prop-types";
 
 type UserSearchListProps = {
   users: UserProfile[];
@@ -37,6 +38,7 @@ const UserSearchList: React.FC<UserSearchListProps> = ({ users}) => {
           imageUrl={item.imageUrl}
         />
       )}
+      style={{height: heightPercentageToDP(100),}}
     />
   );
 };

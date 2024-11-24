@@ -1,22 +1,17 @@
-import {ThemedText} from "@/components/basic/ThemedText";
-import HorizontalView from "@/components/basic/containers/HorizontalView";
-import {ThemedView} from "@/components/basic/containers/ThemedView";
+import { ThemedText } from "@/components/basic/ThemedText";
+import { ThemedView } from "@/components/basic/containers/ThemedView";
 import UserAvatar from "@/components/navigation/UserAvatar";
-import {useNavigation, usePathname} from "expo-router";
-import {useWindowDimension} from "@/hooks/useWindowDimension";
-import React, {useContext, useEffect, useLayoutEffect, useState} from "react";
-import { SafeAreaView, View, TextInput, Alert, Pressable, Button } from "react-native";
+import { useNavigation, usePathname } from "expo-router";
+import { useWindowDimension } from "@/hooks/useWindowDimension";
+import React, { useCallback, useContext, useEffect, useLayoutEffect, useState } from "react";
+import { SafeAreaView, View, TextInput, Alert, Pressable } from "react-native";
 import { UserContext } from "@/context/UserContext";
-import {heightPercentageToDP, widthPercentageToDP} from "react-native-responsive-screen";
-import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
-import {ThemedButton} from "@/components/inputs/ThemedButton";
-import * as ImagePicker from 'expo-image-picker';
-import {tls} from "node-forge";
-import {email} from "@sideway/address";
-import {useColorScheme} from "@/hooks/theme/useColorScheme";
-import {ThemeColors} from "@/constants/theme/Colors";
-
-
+import { heightPercentageToDP, widthPercentageToDP } from "react-native-responsive-screen";
+import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
+import { ThemedButton } from "@/components/inputs/ThemedButton";
+import * as ImagePicker from "expo-image-picker";
+import { useColorScheme } from "@/hooks/theme/useColorScheme";
+import { ThemeColors } from "@/constants/theme/Colors";
 
 export default function EditUserProfileScreen() {
   const path = usePathname();
@@ -26,29 +21,24 @@ export default function EditUserProfileScreen() {
   const navigation = useNavigation();
 
   // Colours
-  const darkGreen = '#0A2421'
-  const lightGreen = '#1C302A'
-  const accentGreen = '#B4D779'
-  const accentTeal = '#52B8A3'
-  const cream = '#FAF7EA'
-
-  // Colours
   const colorScheme = useColorScheme();
   // @ts-ignore
   const themeColors = ThemeColors[colorScheme];
 
-  // @ts-ignore
-  const {getUserById, userProfile, updateUser, changeUserAvatar, isProcessing, responseMessage} = useContext(UserContext);
+  // Context and States
+  const {
+    getUserById,
+    userProfile,
+    updateUser,
+    changeUserAvatar,
+  } = useContext(UserContext);
 
-  // States
   const [usernameText, setUsernameText] = useState("");
   const [descriptionText, setDescriptionText] = useState("");
   const [emailText, setEmailText] = useState("");
-  const [image, setImage] = useState<string | null>(null);
-
 
   useEffect(() => {
-    getUserById(userProfile.id);
+    getUserById(userProfile.id); // Fetch user data
   }, []);
 
   useEffect(() => {
@@ -59,45 +49,19 @@ export default function EditUserProfileScreen() {
     }
   }, [userProfile]);
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <Pressable
-          onPress={saveProfile}
-          style={{
-
-          }}
-        >
-          <ThemedIcon name="checkmark-outline" size={percentToDP(10)} style={{
-            backgroundColor: themeColors.tertiary,
-            borderRadius: percentToDP(100),
-            padding: percentToDP(1.5),
-          }}/>
-        </Pressable>
-      ),
-      headerTitle: username,
-      headerStyle: {
-        backgroundColor: themeColors.secondary,
-      },
-    });
-  }, [navigation]);
-
-
-  const saveProfile = async () => {
-    // Set displayName (username) to "No Username" if empty
+  // Memoized Save Function
+  const saveProfile = useCallback(async () => {
     const displayNameToSave = usernameText.trim() || "No Username";
     const descriptionToSave = descriptionText.trim() || "No Description";
 
-    // Prepare data to update
     const updatedData = {
-      displayName: displayNameToSave,  // Ensure displayName is sent as expected by the backend
+      displayName: displayNameToSave,
       description: descriptionToSave,
-      visibility: userProfile.visibility,  // Include visibility if needed
+      visibility: userProfile.visibility,
     };
 
     console.log("Sending updated user data:", updatedData);
 
-    // Update user data
     const updateSuccessful = await updateUser(userProfile.id, updatedData);
 
     if (updateSuccessful) {
@@ -105,9 +69,37 @@ export default function EditUserProfileScreen() {
     } else {
       Alert.alert("Update Failed", "There was an error updating your profile.");
     }
-  };
+  }, [usernameText, descriptionText, userProfile.id, userProfile.visibility, updateUser]);
 
+  // Update Header Options
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Pressable
+          onPress={saveProfile}
+          style={{
+            marginRight: percentToDP(4),
+          }}
+        >
+          <ThemedIcon
+            name="checkmark-outline"
+            size={percentToDP(10)}
+            style={{
+              backgroundColor: themeColors.tertiary,
+              borderRadius: percentToDP(100),
+              padding: percentToDP(1.5),
+            }}
+          />
+        </Pressable>
+      ),
+      headerTitle: username,
+      headerStyle: {
+        backgroundColor: themeColors.secondary,
+      },
+    });
+  }, [navigation, saveProfile, themeColors, username]);
 
+  // Handle Avatar Change
   const handleAvatarChange = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -126,190 +118,78 @@ export default function EditUserProfileScreen() {
     }
   };
 
-  const handleChangePassword = () => {
-
-  }
-
-  const handleChangeEmail = () => {
-
-  }
-
-
   return (
-    <SafeAreaView style={{flex: 1}}>
-      <ThemedView
-        style={{
-          flex: 1,
-        }}
-      >
-        <View
-          style={{
-            flex: 3,
-            width: widthPercentageToDP(100),
-            backgroundColor: themeColors.secondary,
-          }}>
-        </View>
-
+    <SafeAreaView style={{ flex: 1 }}>
+      <ThemedView style={{ flex: 1 }}>
+        {/* Avatar Section */}
+        <View style={{ flex: 3, width: widthPercentageToDP(100), backgroundColor: themeColors.secondary }} />
         <View
           style={{
             flex: 7,
-            flexDirection: 'column',
+            flexDirection: "column",
             width: widthPercentageToDP(100),
             paddingHorizontal: widthPercentageToDP(10),
             backgroundColor: themeColors.tertiary,
-            marginHorizontal: 'auto',
           }}
         >
-
-          {/* Avatar picture */}
-          <View style={{
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginTop: heightPercentToPD(-15),
-          }}>
+          <View style={{ alignItems: "center", marginTop: heightPercentToPD(-15) }}>
             <UserAvatar
               size={heightPercentToPD(7)}
-              userId={userProfile?.userId}
+              userId={userProfile?.id}
               imageUrl={userProfile?.imageUrl || null}
               doLink={false}
             />
           </View>
 
-          {/* Container for TextInputs and buttons */}
-          <View style={{
-            backgroundColor: 'transparent',
-            flex: 1,
-            width: widthPercentageToDP(80),
-            paddingTop: heightPercentToPD(1),
-            paddingBottom: heightPercentToPD(3),
-            alignContent: 'space-around',
-            justifyContent: 'space-around',
-          }}>
+          {/* Inputs */}
+          <View style={{ width: widthPercentageToDP(80), paddingVertical: heightPercentToPD(1) }}>
             {/* Username */}
-            <ThemedText style={{
-              backgroundColor: 'none',
-              color: themeColors.primary,
-              fontSize: 16,
-              fontWeight: 'light',
-              marginLeft: heightPercentToPD(2),
-              marginBottom: heightPercentToPD(-1),
-              zIndex: 2,
-            }}>
-              Username
-            </ThemedText>
-
+            <ThemedText>Username</ThemedText>
             <TextInput
               maxLength={16}
               style={{
                 paddingHorizontal: percentToDP(6),
-                paddingVertical: percentToDP(1),
-                borderRadius: percentToDP(4),
                 borderWidth: 1,
+                borderRadius: percentToDP(4),
                 borderColor: themeColors.secondary,
-                color: cream,
-                fontSize: 16,
-                letterSpacing: 0.5,
+                color: themeColors.textOnSecondary,
               }}
               onChangeText={setUsernameText}
               value={usernameText}
             />
 
             {/* Description */}
-            <ThemedText style={{
-              backgroundColor: 'none',
-              color: themeColors.primary,
-              fontSize: 16,
-              fontWeight: 'light',
-              marginBottom: heightPercentToPD(-1),
-              marginLeft: heightPercentToPD(3),
-              zIndex: 2,
-            }}>
-              Description
-            </ThemedText>
+            <ThemedText>Description</ThemedText>
             <TextInput
               maxLength={64}
               style={{
-                height: heightPercentToPD(10),
-                justifyContent: 'flex-start',
-                alignContent: 'flex-start',
-                alignItems: 'flex-start',
                 paddingHorizontal: percentToDP(6),
-                paddingVertical: percentToDP(1),
-                textAlignVertical: 'top',
-                borderRadius: percentToDP(4),
                 borderWidth: 1,
+                borderRadius: percentToDP(4),
                 borderColor: themeColors.secondary,
-                color: cream,
-                fontSize: 14,
-                letterSpacing: 0.5,
+                color: themeColors.textOnSecondary,
               }}
               onChangeText={setDescriptionText}
               value={descriptionText}
             />
 
-            {/* E-mail address */}
-            <ThemedText style={{
-              backgroundColor: 'none',
-              color: themeColors.primary,
-              fontSize: 16,
-              fontWeight: 'light',
-              marginBottom: heightPercentToPD(-1),
-              marginLeft: heightPercentToPD(3),
-              zIndex: 2,
-            }}>
-              E-mail Address
-            </ThemedText>
+            {/* Email */}
+            <ThemedText>E-mail Address</ThemedText>
             <TextInput
-              maxLength={32}
               editable={false}
               style={{
                 paddingHorizontal: percentToDP(6),
-                paddingVertical: percentToDP(1),
-                borderRadius: percentToDP(4),
                 borderWidth: 1,
+                borderRadius: percentToDP(4),
                 borderColor: themeColors.secondary,
-                color: cream,
-                fontSize: 16,
-                letterSpacing: 0.5,
+                color: themeColors.textOnSecondary,
               }}
-              onChangeText={setEmailText}
               value={emailText}
             />
 
-            <View style={{
-              flexDirection: 'row',
-              width: widthPercentageToDP(80),
-              marginHorizontal: 'auto',
-              justifyContent: 'space-between'
-            }}>
-              <ThemedButton label="Change e-mail" onPress={() => handleChangeEmail()} color={accentTeal} style={{
-                width: widthPercentageToDP(37),
-                backgroundColor: 'transparent',
-
-                borderRadius: percentToDP(4),
-                borderWidth: 1,
-                borderColor: accentTeal,
-              }}/>
-
-              <ThemedButton label="Change avatar" onPress={handleAvatarChange} color={accentTeal} style={{
-                width: widthPercentageToDP(37),
-                backgroundColor: 'transparent',
-                borderRadius: percentToDP(4),
-                borderWidth: 1,
-                borderColor: accentTeal,
-              }}/>
-            </View>
-
-            <ThemedButton label="Change password" onPress={() => handleChangePassword()} color={themeColors.primary} style={{
-              width: widthPercentageToDP(80),
-              backgroundColor: 'transparent',
-              paddingVertical: percentToDP(2),
-              borderRadius: percentToDP(4),
-              borderWidth: 1,
-              borderColor: themeColors.primary,
-            }}/>
+            {/* Buttons */}
+            <ThemedButton label="Change avatar" onPress={handleAvatarChange} />
           </View>
-
         </View>
       </ThemedView>
     </SafeAreaView>

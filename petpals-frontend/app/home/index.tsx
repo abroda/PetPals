@@ -168,7 +168,7 @@ export default function HomeScreen() {
             backgroundColor: 'transparent',
           }}>
             <UserSearchList users={searchResults}/>
-            <ThemedButton label={"Clear search"} onPress={() => setIsSearching(false)} style={{
+            <ThemedButton label={"Close search"} onPress={() => {setIsSearching(false); setSearchQuery("")} } style={{
               padding: 0,
               minHeight: heightPercentToDP(6),
               maxHeight: heightPercentToDP(7),
@@ -230,7 +230,7 @@ export default function HomeScreen() {
 
 
         {/* POST FEED */}
-        <PostFeed></PostFeed>
+        {/*<PostFeed></PostFeed>*/}
       </ThemedView>
 
       {notificationsVisible && (
