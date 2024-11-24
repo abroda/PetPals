@@ -3,9 +3,9 @@ import { ThemedView } from "@/components/basic/containers/ThemedView";
 import AppLogo from "@/components/decorations/static/AppLogo";
 import { useAuth } from "@/hooks/useAuth";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
-import { useState } from "react";
+import {useContext, useState} from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Pressable } from "react-native";
+import {FlatList, Pressable, StyleSheet, View} from "react-native";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import PostFeed from "@/components/lists/PostFeed";
@@ -16,29 +16,74 @@ import { ThemedText } from "@/components/basic/ThemedText";
 import { Href, router } from "expo-router";
 import { useUser } from "@/hooks/useUser";
 import SearchBar from "@/components/inputs/SearchBar";
+import UserListItem from "@/components/lists/UserListItem";
+import UserSearchList from "@/components/lists/UserSearchList";
+import {widthPercentageToDP} from "react-native-responsive-screen";
+import {ColorName} from "react-native-ui-lib";
 
 export default function HomeScreen() {
-  const { userId } = useAuth();
-  const [notificationsVisible, setNotificationsVisible] = useState(false);
-  const [searchResults, setSearchResults] = useState([]);
 
+
+  const [notificationsVisible, setNotificationsVisible] = useState(false);
+
+  // For User Search
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Styling
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToDP = useWindowDimension("height");
 
-  const { userProfile, isProcessing, getUserById, responseMessage } = useUser();
+  // User Info
+  const { userId } = useAuth();
+  const { userProfile, isProcessing, getUserById, responseMessage, searchUsers } = useUser();
 
-  const handleSearch = (query: string, context: string) => {
-    console.log(`Searching for "${query}" in ${context}`);
-    // Call the relevant API or filter logic here
-    // For example:
-    if (context === "posts") {
-      // Search posts
-      // setSearchResults(searchPosts(query));
-    } else if (context === "users") {
-      // Search users
-      // setSearchResults(searchUsers(query));
+
+  // Fetches all users
+  const fetchUsers = async (query: string) => {
+    setIsSearching(true);
+    try {
+      const response = await fetch(`/api/users`); // Adjust the endpoint as necessary
+      const data = await response.json();
+      const publicUsers = data.filter(
+        (user) =>
+          user.visibility === "PUBLIC" &&
+          user.username.toLowerCase().includes(query.toLowerCase())
+      );
+      setSearchResults(publicUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setIsSearching(false);
     }
   };
+
+
+  // For User search
+  const handleSearch = async (query: string, context: string) => {
+    console.log(`Searching for "${query}" in ${context}`);
+
+    if (context === "users") {
+      setIsSearching(true); // Switch to search results view
+      const results = await searchUsers(query); // Fetch matching users
+      // @ts-ignore
+      setSearchResults(results); // Update the results
+    } else {
+      console.log("Search context is not supported:", context);
+    }
+  };
+
+  // const handleSearch = async (query: string, context: string) => {
+  //   if (context === "users") {
+  //     setIsSearching(true);
+  //     setSearchQuery(query);
+  //     const results = await searchUsers(query);
+  //     setSearchResults(results);
+  //     setIsSearching(false);
+  //   }
+  // };
+
 
 
   return (
@@ -112,6 +157,78 @@ export default function HomeScreen() {
           contexts={["posts", "users"]} // Define your search contexts
         />
 
+
+        {/* Conditional Rendering: User Search Results or Post Feed */}
+        {isSearching && searchResults.length > 0 ? (
+          <View style={{
+            width: widthPercentageToDP(90),
+            alignContent: 'center',
+            justifyContent: 'center',
+            marginHorizontal: 'auto',
+            backgroundColor: 'transparent',
+          }}>
+            <UserSearchList users={searchResults}/>
+            <ThemedButton label={"Clear search"} onPress={() => setIsSearching(false)} style={{
+              padding: 0,
+              minHeight: heightPercentToDP(6),
+              maxHeight: heightPercentToDP(7),
+              maxWidth: widthPercentageToDP(90),
+              alignSelf: 'center'
+            }}/>
+          </View>
+
+        ) : isSearching && searchResults.length === 0 ? (
+          <ThemedView
+            colorName="secondary"
+            style={{
+              alignItems: "center",
+              justifyContent: 'center',
+              marginTop: heightPercentToDP(2),
+              flex: 1,
+            }}
+          >
+            <ThemedIcon name="alert-circle-outline" size={40} />
+
+            <ThemedText textColorName={"primary"} backgroundColorName={'transparent'} style={{
+              marginVertical: heightPercentToDP(2),
+            }}>
+              No users found.
+            </ThemedText>
+            <ThemedButton label={"Clear search"} onPress={() => setIsSearching(false)} style={{
+              padding: 0,
+              minHeight: heightPercentToDP(6),
+              maxHeight: heightPercentToDP(7),
+              maxWidth: widthPercentageToDP(50),
+            }}/>
+
+          </ThemedView>
+        ) : (
+          <PostFeed />
+        )}
+
+        {/*/!* User Results *!/*/}
+        {/*<FlatList*/}
+        {/*  data={searchResults}*/}
+        {/*  keyExtractor={(item) => item.id}*/}
+        {/*  renderItem={({ item }) => (*/}
+        {/*    <UserListItem*/}
+        {/*      id={item.id}*/}
+        {/*      username={item.username}*/}
+        {/*      description={item.description}*/}
+        {/*      imageUrl={item.imageUrl}*/}
+        {/*    />*/}
+        {/*  )}*/}
+        {/*  ListEmptyComponent={*/}
+        {/*    searchQuery.length > 0 && !isSearching ? (*/}
+        {/*      <ThemedText>*/}
+        {/*        No users found*/}
+        {/*      </ThemedText>*/}
+        {/*    ) : null*/}
+        {/*  }*/}
+        {/*  style={styles.resultsContainer}*/}
+        {/*/>*/}
+
+
         {/* POST FEED */}
         <PostFeed></PostFeed>
       </ThemedView>
@@ -162,3 +279,18 @@ export default function HomeScreen() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 10,
+  },
+  resultsContainer: {
+    marginTop: 10,
+  },
+  noResults: {
+    textAlign: "center",
+    marginVertical: 20,
+    fontSize: 16,
+  },
+});

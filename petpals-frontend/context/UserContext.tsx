@@ -17,6 +17,7 @@ export type UserContextType = {
   getUserById: (id: string) => Promise<boolean>;
   updateUser: (id: string, data: Partial<UserProfile>) => Promise<boolean>;
   changeUserAvatar: (id: string, file: File | Blob) => Promise<false | true>;
+  searchUsers: (query: string) => Promise<UserProfile[]>;
 };
 
 export type UserProfile = {
@@ -124,6 +125,7 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
       });
   };
 
+
   // Fetch user data by ID
   const getUserById = async (id: string) => {
     console.log(`Fetching user by ID: ${id}`);
@@ -161,6 +163,7 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
     );
   };
 
+
   // Update user data
   const updateUser = async (id: string, data: Partial<UserProfile>) => {
     console.log(`Updating user data for ID: ${id} with data:`, data);
@@ -187,6 +190,7 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
       }
     );
   };
+
 
   const sendFileQuery = async (
     path: string,
@@ -248,6 +252,7 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
       });
   };
 
+
   const changeUserAvatar = async (id: string, file: File | Blob) => {
     console.log(`Updating user avatar for ID: ${id}`);
 
@@ -273,6 +278,39 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
     );
   };
 
+
+  // Fetch users matching the query and visibility
+  const searchUsers = async (query: string): Promise<UserProfile[]> => {
+    console.log(`Searching users with query: "${query}"`);
+
+    const results: UserProfile[] = [];
+
+    await sendJsonQuery(
+      apiPaths.users.getAllUsers,
+      "GET",
+      {},
+      (payload) => {
+        if (Array.isArray(payload)) {
+          const filteredUsers = payload.filter(
+            (user: UserProfile) =>
+              user.visibility === "PUBLIC" &&
+              user.username.toLowerCase().includes(query.toLowerCase())
+          );
+          console.log("Filtered users:", filteredUsers);
+          results.push(...filteredUsers); // Add filtered users
+        } else {
+          console.error("Unexpected response type:", payload);
+        }
+      },
+      (payload) => {
+        console.error("Failed to fetch users:", payload);
+      }
+    );
+
+    return results; // Return the list of users
+  };
+
+
   return (
     <UserContext.Provider
       value={{
@@ -282,6 +320,7 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
         getUserById,
         updateUser,
         changeUserAvatar, // Add this line
+        searchUsers,
       }}
     >
       {children}
