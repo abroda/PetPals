@@ -27,11 +27,11 @@ export default function RegisterScreen() {
   const { isLoading, isProcessing, passwordRegex, register } = useAuth();
 
   // Colours
-  const darkGreen = '#0A2421'
-  const lightGreen = '#1C302A'
-  const accentGreen = '#B4D779'
-  const accentTeal = '#52B8A3'
-  const cream = '#FAF7EA'
+  const darkGreen = "#0A2421";
+  const lightGreen = "#1C302A";
+  const accentGreen = "#B4D779";
+  const accentTeal = "#52B8A3";
+  const cream = "#FAF7EA";
 
   // to have all fields get validated at once on submit
   const nameRef = useRef<TextFieldRef>(null);
@@ -90,7 +90,10 @@ export default function RegisterScreen() {
   }
 
   return (
-      <SafeAreaView style={{ flex: 1, margin:0, padding: 0, backgroundColor: lightGreen}} edges={['left', 'right', 'bottom']}>
+    <SafeAreaView
+      style={{ flex: 1, margin: 0, padding: 0, backgroundColor: lightGreen }}
+      edges={["left", "right", "bottom"]}
+    >
       <ThemedScrollView
         style={{
           height: heighPercentToDP(100),

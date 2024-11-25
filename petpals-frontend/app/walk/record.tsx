@@ -53,7 +53,7 @@ export default function RecordWalkScreen() {
           size={11}
           userId={"me"}
           petId="Cutie"
-          doLink={true}
+          linkToProfile={true}
         />
       </ThemedScrollView>
     </SafeAreaView>

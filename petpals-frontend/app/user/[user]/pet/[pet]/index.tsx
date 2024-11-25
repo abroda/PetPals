@@ -18,8 +18,8 @@ import { Image } from "react-native-ui-lib";
 import { Dog, useDog } from "@/context/DogContext";
 import { useNavigation } from "@react-navigation/native";
 import { UserContext } from "@/context/UserContext";
-import {useColorScheme} from "@/hooks/theme/useColorScheme";
-import {ThemeColors} from "@/constants/theme/Colors";
+import { useColorScheme } from "@/hooks/theme/useColorScheme";
+import { ThemeColors } from "@/constants/theme/Colors";
 
 // @ts-ignore
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
@@ -48,7 +48,6 @@ export default function PetProfileScreen() {
   const [imageUri, setImageUri] = useState<string | null>(null);
   const navigation = useNavigation();
 
-
   // Colours
   const colorScheme = useColorScheme();
   // @ts-ignore
@@ -63,11 +62,9 @@ export default function PetProfileScreen() {
   ];
   const renderDogTag = ({ item }: { item: string }) => <DogTag tag={item} />;
 
-
   // Functions
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToPD = useWindowDimension("height");
-
 
   // Get dog data
   useEffect(() => {
@@ -76,7 +73,7 @@ export default function PetProfileScreen() {
         const dogData = await getDogById(petId ?? "");
         setDog(dogData ?? null);
         setImageUri(dogData?.imageUrl ?? null);
-        console.log("[Pet/Index] Dog was fetched: ", dogData)
+        console.log("[Pet/Index] Dog was fetched: ", dogData);
       } catch (error) {
         console.error("Failed to fetch dog data:", error);
       } finally {
@@ -85,7 +82,6 @@ export default function PetProfileScreen() {
     };
     fetchDogData();
   }, [petId]);
-
 
   // Customize header layout and options
   useLayoutEffect(() => {
@@ -114,9 +110,12 @@ export default function PetProfileScreen() {
           </Pressable>
 
           {/* Three-dots Icon for Dropdown Menu */}
-          <Pressable onPress={() => setMenuVisible(!menuVisible)} style={{
-            padding: percentToDP(2),
-          }}>
+          <Pressable
+            onPress={() => setMenuVisible(!menuVisible)}
+            style={{
+              padding: percentToDP(2),
+            }}
+          >
             <ThemedIcon name="ellipsis-vertical-outline" />
           </Pressable>
         </View>
@@ -127,7 +126,6 @@ export default function PetProfileScreen() {
       },
     });
   }, [navigation, username, dog, menuVisible]);
-
 
   const handleMenuSelect = (option: string) => {
     setMenuVisible(false);
@@ -152,7 +150,7 @@ export default function PetProfileScreen() {
           style: "destructive",
           onPress: async () => {
             try {
-              await deleteDog(petId); // Call deleteDog from the context
+              await deleteDog(petId ?? ""); // Call deleteDog from the context
               Alert.alert("Success", "Successfully deleted dog");
               router.back(); // Navigate back to the user profile
             } catch (error) {
@@ -165,7 +163,6 @@ export default function PetProfileScreen() {
       { cancelable: true }
     );
   };
-
 
   if (isLoading) {
     return (
@@ -207,7 +204,6 @@ export default function PetProfileScreen() {
           >
             {/* TODO: Background image in the future? */}
           </View>
-
 
           {/* Dog Info Container */}
           <View
@@ -414,7 +410,7 @@ export default function PetProfileScreen() {
                 borderBottomWidth: 1,
                 borderColor: themeColors.primary,
                 fontSize: percentToDP(4.5),
-                lineHeight: percentToDP(5)
+                lineHeight: percentToDP(5),
               }}
             >
               Edit
@@ -426,7 +422,7 @@ export default function PetProfileScreen() {
                 padding: percentToDP(5),
                 color: themeColors.primary,
                 fontSize: percentToDP(4.5),
-                lineHeight: percentToDP(5)
+                lineHeight: percentToDP(5),
               }}
             >
               Delete

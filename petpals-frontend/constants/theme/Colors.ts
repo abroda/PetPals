@@ -46,7 +46,7 @@ export const ThemeColors = {
     alarm: alarmColor,
     icon: secondaryColor,
     active: primaryColor,
-    disabled: darkGreyColor,
+    disabled: greyColor,
     transparent: "#00000000",
   },
 };

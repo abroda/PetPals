@@ -16,9 +16,9 @@ import AppLogo from "@/components/decorations/static/AppLogo";
 import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoadingIndicator";
 import HorizontalView from "@/components/basic/containers/HorizontalView";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
-import TermsOfUseDialog from "@/components/dialogs/TermsOfUseDialog";
 import {
   Checkbox,
+  DateTimePicker,
   KeyboardAwareScrollView,
   TextFieldRef,
 } from "react-native-ui-lib";
@@ -31,10 +31,14 @@ import { isLoaded } from "expo-font";
 import { LocationMap } from "@/components/display/LocationMap";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import TagList from "@/components/lists/TagList";
-import { GroupWalk } from "@/context/WalksContext";
+import { GroupWalk, Participant } from "@/context/WalksContext";
 import TagListInput from "@/components/inputs/TagListInput";
+import PetAvatar from "@/components/navigation/PetAvatar";
+import { ScrollView } from "react-native-gesture-handler";
+import { DogPicker } from "@/components/inputs/DogPicker";
+import { LocationInput } from "@/components/inputs/LocationInput";
 
-export default function EditGroupWalkScreen(props: { create: boolean }) {
+export default function EditGroupWalkScreen(props: { create?: boolean }) {
   const now = new Date();
   const path = usePathname();
 
@@ -54,6 +58,7 @@ export default function EditGroupWalkScreen(props: { create: boolean }) {
   const [errorMessage, setErrorMessage] = useState("");
 
   const { userId } = useAuth();
+  const creatorId = userId;
   const { isProcessing, createGroupWalk, getGroupWalk, updateGroupWalk } =
     useWalks();
 
@@ -121,76 +126,42 @@ export default function EditGroupWalkScreen(props: { create: boolean }) {
     }
   };
 
+  const [dogsParticipating, setDogsParticipating] = useState([] as string[]);
+  let dogs = [
+    {
+      id: "1",
+      name: "Alex",
+      avatarURL:
+        "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
+    } as Participant,
+    {
+      id: "2",
+      name: "Boxer",
+      avatarURL:
+        "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
+    } as Participant,
+    {
+      id: "3",
+      name: "Cutie",
+      avatarURL:
+        "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
+    } as Participant,
+    {
+      id: "4",
+      name: "Anna",
+      avatarURL:
+        "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
+    } as Participant,
+    {
+      id: "5",
+      name: "BIbi",
+      avatarURL:
+        "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
+    } as Participant,
+  ];
+
   return (
     <SafeAreaView>
-      {/* <ThemedScrollView
-        style={{
-          height: heightPercentToDP(100),
-          paddingTop: percentToDP(15),
-          paddingHorizontal: percentToDP(5),
-          alignContent: "center",
-        }}
-      >
-        <ThemedTextField
-          label="Title"
-          withValidation
-          validate={["required", (value) => (value?.length ?? 0) < 5]}
-          validationMessage={["Title is required", "Title is too short."]}
-          maxLength={250}
-        />
-
-        <ThemedTextField
-          label="Description"
-          maxLength={500}
-          multiline
-        />
-
-        <ThemedDatetimePicker />
-        <LocationPicker />
-
-        <ThemedTextField
-          label="Tags"
-          maxLength={250}
-          onChangeText={(newText) => setCurrentTag(newText)}
-          value={currentTag}
-        />
-        <ThemedButton
-          iconSource={() => (
-            <ThemedIcon
-              name="add"
-              colorName="textOnPrimary"
-            />
-          )}
-          shape="round"
-          onPress={() => {
-            setTags([...tags, currentTag]);
-            setCurrentTag("");
-          }}
-        />
-        <HorizontalView
-          justifyOption="flex-start"
-          colorName="disabled"
-          style={{
-            flexWrap: "wrap",
-            marginRight: percentToDP(-1),
-            marginBottom: percentToDP(10),
-          }}
-        >
-          {tags.map((tag) => (
-            <Tag
-              key={tag}
-              label={tag}
-            />
-          ))}
-        </HorizontalView>
-
-        <ThemedButton
-          shape="long"
-          label="Save"
-          style={{ alignSelf: "center" }}
-          onPress={() => router.replace("/walk/event/xyz/" as Href<string>)}
-        ></ThemedButton>
-      </ThemedScrollView> */}
       <ThemedScrollView
         scrollEnabled={true}
         style={{
@@ -198,8 +169,9 @@ export default function EditGroupWalkScreen(props: { create: boolean }) {
           paddingTop: percentToDP(20),
           paddingHorizontal: percentToDP(5),
         }}
+        automaticallyAdjustKeyboardInsets={true}
+        keyboardShouldPersistTaps="handled"
       >
-        <ThemedText textColorName="alarm">{errorMessage}</ThemedText>
         <ThemedView
           colorName="transparent"
           style={{
@@ -207,7 +179,7 @@ export default function EditGroupWalkScreen(props: { create: boolean }) {
             marginBottom: percentToDP(7),
           }}
         >
-          <LocationMap
+          <LocationInput
             initialLocation={{ latitude: 51.1316313, longitude: 17.0417013 }}
             mapProps={{
               pitchEnabled: false,
@@ -233,19 +205,59 @@ export default function EditGroupWalkScreen(props: { create: boolean }) {
           multiline={true}
           maxLength={60}
         />
-        <HorizontalView style={{ marginBottom: percentToDP(6) }}>
-          <ThemedText
-            textStyleOptions={{ size: "medium", weight: "semibold" }}
-            textColorName="primary"
-          >
-            {datetime.toLocaleDateString(undefined, {
-              dateStyle: "medium",
-            })}
-            ,{" "}
-            {datetime.toLocaleTimeString(undefined, {
-              timeStyle: "short",
-            })}
-          </ThemedText>
+        <HorizontalView
+          style={{
+            marginBottom: percentToDP(6),
+            paddingHorizontal: percentToDP(1.5),
+          }}
+        >
+          <DateTimePicker
+            label={"Date"}
+            labelStyle={[
+              useTextStyle({ weight: "semibold" }),
+              { color: useThemeColor("text") },
+            ]}
+            style={[
+              useTextStyle({ size: "medium", weight: "semibold" }),
+              { color: useThemeColor("primary") },
+            ]}
+            themeVariant="dark"
+            value={datetime}
+            mode="date"
+            dateTimeFormatter={(date) =>
+              date.toLocaleDateString(undefined, {
+                dateStyle: "short",
+              })
+            }
+            minimumDate={new Date()}
+            maximumDate={new Date(Date.now() + 3600000 * 24 * 366)}
+          />
+          <DateTimePicker
+            label="Time"
+            labelStyle={[
+              useTextStyle({ weight: "semibold" }),
+              {
+                color: useThemeColor("text"),
+              },
+            ]}
+            style={[
+              useTextStyle({ size: "medium", weight: "semibold" }),
+              {
+                color: useThemeColor("primary"),
+              },
+            ]}
+            themeVariant="light"
+            value={datetime}
+            onChange={(newDate) => setDatetime(newDate)}
+            mode="time"
+            dateTimeFormatter={(date) =>
+              datetime.toLocaleTimeString(undefined, {
+                timeStyle: "short",
+              })
+            }
+            minimumDate={now}
+            maximumDate={new Date(Date.now() + 3600000 * 24 * 366)}
+          />
         </HorizontalView>
         <ThemedTextField
           label="Description"
@@ -264,9 +276,23 @@ export default function EditGroupWalkScreen(props: { create: boolean }) {
           onDeleteTag={(tag) => setTags(tags.filter((t) => t !== tag))}
         />
 
+        <DogPicker
+          header="Dogs attending"
+          dogs={dogs}
+          dogsParticipating={dogsParticipating}
+          onToggle={(dogId: string) => {
+            dogsParticipating.includes(dogId)
+              ? setDogsParticipating(
+                  dogsParticipating.filter((elem) => elem !== dogId)
+                )
+              : setDogsParticipating([dogId, ...dogsParticipating]);
+          }}
+        />
+
         <ThemedView
-          style={{ marginTop: percentToDP(12), marginBottom: percentToDP(80) }}
+          style={{ marginTop: percentToDP(5), marginBottom: percentToDP(30) }}
         >
+          <ThemedText textColorName="alarm">{errorMessage}</ThemedText>
           <ThemedButton
             shape="long"
             label={props.create ? "Create" : "Save"}

@@ -93,8 +93,9 @@ export const ThemedButton = ({
                 name={iconName}
                 colorName={textColorName}
                 style={{
-                  paddingRight: percentToDP(rest.iconOnRight ? 0 : 1),
-                  paddingLeft: percentToDP(rest.iconOnRight ? 1 : 0),
+                  paddingRight: percentToDP(rest.iconOnRight ? 0 : 0.4),
+                  paddingLeft: percentToDP(rest.iconOnRight ? 0.4 : 0),
+                  paddingBottom: percentToDP(0.4),
                 }}
               />
             )

@@ -42,8 +42,10 @@ export const serverQuery = async ({
     retryNumber < retriesCount && !result;
     retryNumber += 1
   ) {
+    console.log("try #" + (retryNumber + 1));
     let timeoutId = timeout
       ? setTimeout(() => {
+          console.log("aborted");
           abortController.abort(); // send abort signout on timeout
         }, timeout)
       : undefined;
@@ -52,7 +54,10 @@ export const serverQuery = async ({
       method: method,
       mode: "cors", // always uses cors
       headers: headers,
-      body: payload ? JSON.stringify(payload) : undefined,
+      body:
+        method == "GET" || method == "HEAD"
+          ? undefined
+          : JSON.stringify(payload),
       signal: abortController.signal, // aborts fetch when signal is received (timeout or send by the component on unmount)
     })
       .then((response: Response) => {
@@ -86,6 +91,9 @@ export const serverQuery = async ({
   }
 
   onEnd();
+  console.log("end query");
 
-  return result ?? { success: false, returnValue: onTimeout() };
+  result = result ?? { success: false, returnValue: onTimeout() };
+  console.log("result: " + JSON.stringify(result));
+  return result;
 };

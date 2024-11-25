@@ -76,7 +76,12 @@ export const ThemedTextField = forwardRef<TextFieldRef, ThemedTextFieldProps>(
     };
 
     return (
-      <ThemedView style={{ marginBottom: percentToDP(2), alignSelf: "center" }}>
+      <ThemedView
+        style={{
+          marginBottom: percentToDP(rest.retainValidationSpace ? 2 : 0),
+          alignSelf: "center",
+        }}
+      >
         <ForwardedRefTextField
           label={label}
           labelColor={textColor}
@@ -94,6 +99,9 @@ export const ThemedTextField = forwardRef<TextFieldRef, ThemedTextFieldProps>(
               borderRadius: percentToDP(10),
               borderColor: textColor,
               paddingHorizontal: percentToDP(4),
+              paddingRight: rest.trailingAccessory
+                ? percentToDP(13)
+                : undefined,
               marginTop: percentToDP(2),
             },
             useTextStyle(textStyleOptions),
@@ -101,7 +109,7 @@ export const ThemedTextField = forwardRef<TextFieldRef, ThemedTextFieldProps>(
           ]}
           placeholder=" "
           secureTextEntry={isSecret}
-          validationMessagePosition="bottom"
+          validationMessagePosition={rest.validationMessagePosition ?? "bottom"}
           enableErrors={withValidation}
           validateOnBlur={withValidation}
           validateOnChange={withValidation}
@@ -116,6 +124,7 @@ export const ThemedTextField = forwardRef<TextFieldRef, ThemedTextFieldProps>(
           validate={validate}
           validationMessage={validationMessage}
           onContentSizeChange={adjustHeightToContent}
+          retainValidationSpace={withValidation}
           {...rest}
           ref={ref}
         />

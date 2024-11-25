@@ -2,7 +2,7 @@ export const testData = [
   {
     id: "1",
     creator: {
-      id: "1",
+      id: "bac3be56-0e5e-443a-945a-4c493fce170c",
       name: "Halloween Spirit",
       avatarURL: "https://wiki.guildwars2.com/images/1/10/Pumpkin_Crown.jpg",
     },
@@ -62,7 +62,7 @@ export const testData = [
   {
     id: "3",
     creator: {
-      id: "1",
+      id: "me",
       name: "Halloween Spirit",
       avatarURL: "https://wiki.guildwars2.com/images/1/10/Pumpkin_Crown.jpg",
     },
@@ -126,7 +126,7 @@ export const testData = [
       name: "Halloween Spirit",
       avatarURL: "https://wiki.guildwars2.com/images/1/10/Pumpkin_Crown.jpg",
     },
-    title: "Example walk title that's needlessly long",
+    title: "Example walk title",
     description:
       "Hello there, fellow Halloween enjoyers! Let's get celebrating and sow mischief in the neighbourhood! COSTUMES MANDATORY! (your dogs too!)",
     datetime: new Date(Date.now() + 5 * 60 * 60 * 1000),
@@ -154,13 +154,103 @@ export const testData = [
       "Hello there, fellow Halloween enjoyers! Let's get celebrating and sow mischief in the neighbourhood! COSTUMES MANDATORY! (your dogs too!)",
     datetime: new Date(Date.now() + 6 * 60 * 60 * 1000),
     location: "Promenady Wrocławskie",
-    tags: [
-      "halloween",
-      "night walk",
-      "all welcome",
-      "long",
-      "trick-or-treating",
+    tags: [],
+    participantsCount: 4,
+    petsCount: 5, // needed?
+    joinedWithPets: [
+      {
+        id: "1",
+        name: "Cutie",
+        avatarURL:
+          "https://wiki-de.guildwars2.com/images/4/47/Mini_Gesetzlosen-Welpe.jpg",
+      },
     ],
+  },
+  {
+    id: "7",
+    creator: {
+      id: "1",
+      name: "Halloween Spirit",
+      avatarURL: "https://wiki.guildwars2.com/images/1/10/Pumpkin_Crown.jpg",
+    },
+    title: "Example walk title that's needlessly long",
+    description:
+      "Hello there, fellow Halloween enjoyers! Let's get celebrating and sow mischief in the neighbourhood! COSTUMES MANDATORY! (your dogs too!)",
+    datetime: new Date(Date.now() + 60 * 60 * 60 * 1000),
+    location: "Promenady Wrocławskie",
+    tags: [],
+    participantsCount: 4,
+    petsCount: 5, // needed?
+    joinedWithPets: [
+      {
+        id: "1",
+        name: "Cutie",
+        avatarURL:
+          "https://wiki-de.guildwars2.com/images/4/47/Mini_Gesetzlosen-Welpe.jpg",
+      },
+    ],
+  },
+  {
+    id: "8",
+    creator: {
+      id: "me",
+      name: "Halloween Spirit",
+      avatarURL: "https://wiki.guildwars2.com/images/1/10/Pumpkin_Crown.jpg",
+    },
+    title: "Example walk title that's needlessly long",
+    description:
+      "Hello there, fellow Halloween enjoyers! Let's get celebrating and sow mischief in the neighbourhood! COSTUMES MANDATORY! (your dogs too!)",
+    datetime: new Date(Date.now() + 61 * 60 * 60 * 1000),
+    location: "Promenady Wrocławskie",
+    tags: [],
+    participantsCount: 4,
+    petsCount: 5, // needed?
+    joinedWithPets: [
+      {
+        id: "1",
+        name: "Cutie",
+        avatarURL:
+          "https://wiki-de.guildwars2.com/images/4/47/Mini_Gesetzlosen-Welpe.jpg",
+      },
+    ],
+  },
+  {
+    id: "9",
+    creator: {
+      id: "1",
+      name: "Halloween Spirit",
+      avatarURL: "https://wiki.guildwars2.com/images/1/10/Pumpkin_Crown.jpg",
+    },
+    title: "Example walk title that's needlessly long",
+    description:
+      "Hello there, fellow Halloween enjoyers! Let's get celebrating and sow mischief in the neighbourhood! COSTUMES MANDATORY! (your dogs too!)",
+    datetime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    location: "Promenady Wrocławskie",
+    tags: [],
+    participantsCount: 4,
+    petsCount: 5, // needed?
+    joinedWithPets: [
+      {
+        id: "1",
+        name: "Cutie",
+        avatarURL:
+          "https://wiki-de.guildwars2.com/images/4/47/Mini_Gesetzlosen-Welpe.jpg",
+      },
+    ],
+  },
+  {
+    id: "10",
+    creator: {
+      id: "1",
+      name: "Halloween Spirit",
+      avatarURL: "https://wiki.guildwars2.com/images/1/10/Pumpkin_Crown.jpg",
+    },
+    title: "Example walk title that's needlessly long",
+    description:
+      "Hello there, fellow Halloween enjoyers! Let's get celebrating and sow mischief in the neighbourhood! COSTUMES MANDATORY! (your dogs too!)",
+    datetime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 + 230000000),
+    location: "Promenady Wrocławskie",
+    tags: [],
     participantsCount: 4,
     petsCount: 5, // needed?
     joinedWithPets: [

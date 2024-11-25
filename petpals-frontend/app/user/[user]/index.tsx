@@ -1,4 +1,10 @@
-import React, {useCallback, useContext, useEffect, useLayoutEffect, useState} from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from "react";
 import {
   SafeAreaView,
   View,
@@ -18,18 +24,23 @@ import { useWindowDimension } from "@/hooks/useWindowDimension";
 import { UserContext } from "@/context/UserContext";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import { useAuth } from "@/hooks/useAuth";
-import {useNavigation, usePathname, useRouter, router, Href, useFocusEffect} from "expo-router";
+import {
+  useNavigation,
+  usePathname,
+  useRouter,
+  router,
+  Href,
+  useFocusEffect,
+} from "expo-router";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 import PostFeed from "@/components/lists/PostFeed";
 import { Dog, useDog } from "@/context/DogContext";
-import {useColorScheme} from "@/hooks/theme/useColorScheme";
-import {ThemeColors} from "@/constants/theme/Colors";
+import { useColorScheme } from "@/hooks/theme/useColorScheme";
+import { ThemeColors } from "@/constants/theme/Colors";
 // @ts-ignore
 import DogPlaceholderImage from "@/assets/images/dog_placeholder_theme-color-fair.png";
 import { useUser } from "@/hooks/useUser";
 import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
-
-
 
 export default function UserProfileScreen() {
   const path = usePathname();
@@ -59,7 +70,6 @@ export default function UserProfileScreen() {
     getUserById(username);
   }, [username]);
 
-
   const fetchDogs = async () => {
     const userDogs = await getDogsByUserId(userId ?? "");
     const sortedDogs = userDogs
@@ -68,15 +78,12 @@ export default function UserProfileScreen() {
     setDogs(sortedDogs);
   };
 
-
-// Refresh data whenever the screen is focused
+  // Refresh data whenever the screen is focused
   useFocusEffect(
     useCallback(() => {
       fetchDogs();
     }, [userId]) // Only re-run if userId changes
   );
-
-
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -94,7 +101,10 @@ export default function UserProfileScreen() {
             <Pressable onPress={() => Alert.alert("Notifications")}>
               <ThemedIcon
                 name="notifications-outline"
-                style={{ marginHorizontal: widthPercentageToDP(1), padding: percentToDP(2), }}
+                style={{
+                  marginHorizontal: widthPercentageToDP(1),
+                  padding: percentToDP(2),
+                }}
               />
             </Pressable>
           )}
@@ -107,7 +117,10 @@ export default function UserProfileScreen() {
           <Pressable onPress={() => setMenuVisible(!menuVisible)}>
             <ThemedIcon
               name="ellipsis-vertical-outline"
-              style={{ marginHorizontal: widthPercentageToDP(1), padding: percentToDP(2), }}
+              style={{
+                marginHorizontal: widthPercentageToDP(1),
+                padding: percentToDP(2),
+              }}
             />
           </Pressable>
         </View>
@@ -135,10 +148,12 @@ export default function UserProfileScreen() {
   };
 
   const renderDogItem = ({ item }: { item: any }) => (
-    <View style={{
-      marginRight: 8,
-      paddingVertical: 10,
-    }}>
+    <View
+      style={{
+        marginRight: 8,
+        paddingVertical: 10,
+      }}
+    >
       <View
         style={{
           width: widthPercentageToDP(42),
@@ -260,16 +275,18 @@ export default function UserProfileScreen() {
                 fontSize: 24,
                 lineHeight: 26,
                 fontWeight: "bold",
-                color: themeColors.textOnSecondary
-            }}
+                color: themeColors.textOnSecondary,
+              }}
             >
               21
             </ThemedText>
-            <ThemedText style={{
-              fontSize: 12,
-              lineHeight: 14,
-              color: themeColors.textOnSecondary
-            }}>
+            <ThemedText
+              style={{
+                fontSize: 12,
+                lineHeight: 14,
+                color: themeColors.textOnSecondary,
+              }}
+            >
               friends
             </ThemedText>
           </View>
@@ -279,16 +296,18 @@ export default function UserProfileScreen() {
                 fontSize: 24,
                 lineHeight: 26,
                 fontWeight: "bold",
-                color: themeColors.textOnSecondary
-            }}
+                color: themeColors.textOnSecondary,
+              }}
             >
               2
             </ThemedText>
-            <ThemedText style={{
-              fontSize: 12,
-              lineHeight: 14,
-              color: themeColors.textOnSecondary
-            }}>
+            <ThemedText
+              style={{
+                fontSize: 12,
+                lineHeight: 14,
+                color: themeColors.textOnSecondary,
+              }}
+            >
               km this week
             </ThemedText>
           </View>
@@ -298,16 +317,20 @@ export default function UserProfileScreen() {
                 fontSize: 24,
                 lineHeight: 26,
                 fontWeight: "bold",
-                color: themeColors.textOnSecondary
-            }}
+                color: themeColors.textOnSecondary,
+              }}
             >
               {dogCount}
             </ThemedText>
-            <ThemedText style={{
-              fontSize: 12,
-              lineHeight: 14,
-              color: themeColors.textOnSecondary
-            }}>{dogCount === 1 ? "dog" : "dogs"}</ThemedText>
+            <ThemedText
+              style={{
+                fontSize: 12,
+                lineHeight: 14,
+                color: themeColors.textOnSecondary,
+              }}
+            >
+              {dogCount === 1 ? "dog" : "dogs"}
+            </ThemedText>
           </View>
         </HorizontalView>
 
@@ -349,12 +372,14 @@ export default function UserProfileScreen() {
           paddingHorizontal: widthPercentageToDP(5),
         }}
       >
-        <ThemedText style={{
-          fontSize: 30,
-          lineHeight: 32,
-          backgroundColor: 'transparent',
-          color: themeColors.textOnSecondary
-        }}>
+        <ThemedText
+          style={{
+            fontSize: 30,
+            lineHeight: 32,
+            backgroundColor: "transparent",
+            color: themeColors.textOnSecondary,
+          }}
+        >
           Dogs
         </ThemedText>
 
@@ -407,7 +432,7 @@ export default function UserProfileScreen() {
               textStyleOptions={{ size: 30 }}
               style={{
                 color: themeColors.textOnSecondary,
-                backgroundColor: 'transparent',
+                backgroundColor: "transparent",
                 marginLeft: widthPercentageToDP(5),
                 marginTop: heightPercentToPD(4),
               }}
@@ -447,20 +472,22 @@ export default function UserProfileScreen() {
                 borderBottomWidth: 1,
                 borderColor: themeColors.primary,
                 fontSize: percentToDP(4.5),
-                lineHeight: percentToDP(5)
+                lineHeight: percentToDP(5),
               }}
             >
               Edit
             </Text>
           </Pressable>
           <Pressable onPress={() => handleMenuSelect("App Settings")}>
-            <Text style={{
-              padding: percentToDP(5),
-              color: themeColors.primary,
+            <Text
+              style={{
+                padding: percentToDP(5),
+                color: themeColors.primary,
 
-              fontSize: percentToDP(4.5),
-              lineHeight: percentToDP(5)
-            }}>
+                fontSize: percentToDP(4.5),
+                lineHeight: percentToDP(5),
+              }}
+            >
               App Settings
             </Text>
           </Pressable>

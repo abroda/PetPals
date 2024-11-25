@@ -3,7 +3,7 @@ import { ThemedText } from "@/components/basic/ThemedText";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
-import { Href, router, useNavigation } from "expo-router";
+import { Href, router, useNavigation, usePathname } from "expo-router";
 import Comment from "@/components/display/Comment";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -23,16 +23,60 @@ import { ThemedView } from "@/components/basic/containers/ThemedView";
 import PetAvatar from "@/components/navigation/PetAvatar";
 import { useWalks } from "@/hooks/useWalks";
 import TagList from "@/components/lists/TagList";
-import { GroupWalkTag } from "@/context/WalksContext";
+import {
+  CommentContent,
+  GroupWalkTag,
+  Participant,
+} from "@/context/WalksContext";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
 import { LocationMap } from "@/components/display/LocationMap";
+import GroupWalkParticipationDialog from "@/components/dialogs/GroupWalkParticipationDialog";
+import { useDog } from "@/context/DogContext";
+import { useUser } from "@/hooks/useUser";
 
 export default function GroupWalkScreen({ walkId }: { walkId: string }) {
-  const [groupWalkInfo, setGroupWalkInfo] = useState(testData[0]);
+  const [groupWalkInfo, setGroupWalkInfo] = useState(testData[4]);
   const [comments, setComments] = useState(testComments);
   const [participants, setParticipants] = useState(testParticipants);
-  const { isProcessing, getGroupWalkList, shouldRefresh } = useWalks();
+  const [dogs, setDogs] = useState([
+    {
+      id: "1",
+      name: "Alex",
+      avatarURL:
+        "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
+    } as Participant,
+    {
+      id: "2",
+      name: "Boxer",
+      avatarURL:
+        "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
+    } as Participant,
+    {
+      id: "3",
+      name: "Cutie",
+      avatarURL:
+        "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
+    } as Participant,
+    {
+      id: "4",
+      name: "Anna",
+      avatarURL:
+        "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
+    } as Participant,
+    {
+      id: "5",
+      name: "BIbi",
+      avatarURL:
+        "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
+    } as Participant,
+  ]);
+  const [dogsParticipating, setDogsParticipating] = useState(["4"]);
+  const [joinDialogVisible, setJoinDialogVisible] = useState(false);
+  const { isProcessing, getGroupWalkList, shouldRefresh, addGroupWalkComment } =
+    useWalks();
   const { userId } = useAuth();
+  const { getDogsByUserId } = useDog();
+  const [joined, setJoined] = useState(groupWalkInfo.joinedWithPets.length > 0);
 
   const buttonColor = useThemeColor("link");
   const iconColor = useThemeColor("text");
@@ -50,7 +94,6 @@ export default function GroupWalkScreen({ walkId }: { walkId: string }) {
   }, [shouldRefresh]);
 
   const getData = useCallback(async () => {
-    console.log("Start loading");
     asyncAbortController.current = new AbortController();
     let result = await getGroupWalkList(
       "all",
@@ -61,7 +104,6 @@ export default function GroupWalkScreen({ walkId }: { walkId: string }) {
     if (result.success) {
       setGroupWalksData(result.returnValue);
     }
-    console.log("Stop loading");
   }, []);
 
   const navigation = useNavigation();
@@ -118,10 +160,16 @@ export default function GroupWalkScreen({ walkId }: { walkId: string }) {
               doLink={true}
             />
             <ThemedView>
-              <ThemedText textStyleOptions={{ size: "small", weight: "bold" }}>
+              <ThemedText
+                textStyleOptions={{ size: "small", weight: "bold" }}
+                style={{ marginLeft: percentToDP(1) }}
+              >
                 {groupWalkInfo.creator.name}
               </ThemedText>
-              <ThemedText textStyleOptions={{ size: "tiny" }}>
+              <ThemedText
+                textStyleOptions={{ size: "tiny" }}
+                style={{ marginLeft: percentToDP(1) }}
+              >
                 # dogs | # friends
               </ThemedText>
             </ThemedView>
@@ -130,12 +178,13 @@ export default function GroupWalkScreen({ walkId }: { walkId: string }) {
             textStyleOptions={{ size: "medium", weight: "semibold" }}
             textColorName="primary"
           >
-            {groupWalkInfo.datetime.toLocaleDateString(undefined, {
-              dateStyle: "medium",
-            })}
-            ,{" "}
             {groupWalkInfo.datetime.toLocaleTimeString(undefined, {
               timeStyle: "short",
+            })}
+
+            {" | "}
+            {groupWalkInfo.datetime.toLocaleDateString(undefined, {
+              dateStyle: "short",
             })}
           </ThemedText>
         </HorizontalView>
@@ -156,38 +205,22 @@ export default function GroupWalkScreen({ walkId }: { walkId: string }) {
 
         <ThemedView style={{ marginBottom: percentToDP(8) }}>
           {groupWalkInfo.creator.id !== userId &&
-            (participants.map((elem) => elem.id).includes(userId ?? "") ? (
+            groupWalkInfo.creator.id !== "me" && (
               <ThemedButton
-                label="Joined"
-                iconSource={() => (
-                  <ThemedIcon
-                    name="checkmark-done-circle"
-                    colorName="textOnPrimary"
-                    style={{ marginLeft: percentToDP(1) }}
-                    onPress={() => router.push("./join/" as Href<string>)}
-                  />
-                )}
+                label={joined ? "Joined" : "Join"}
+                iconName={joined ? "checkmark-done" : "add"}
+                iconSize={22}
                 iconOnRight
+                onPress={() => setJoinDialogVisible(true)}
               />
-            ) : (
-              <ThemedButton
-                label="Join"
-                onPress={() => router.push("./join/" as Href<string>)}
-              />
-            ))}
-          {groupWalkInfo.creator.id === userId && (
+            )}
+          {(groupWalkInfo.creator.id === userId ||
+            groupWalkInfo.creator.id === "me") && (
             <ThemedButton
-              shape="long"
               label="Edit"
-              backgroundColorName="link"
-              iconSource={() => (
-                <ThemedIcon
-                  name="pencil"
-                  colorName="textOnPrimary"
-                  style={{ marginLeft: percentToDP(1) }}
-                  onPress={() => router.push("./join/" as Href<string>)}
-                />
-              )}
+              backgroundColorName="primary"
+              iconName="pencil"
+              iconSize={22}
               iconOnRight
               onPress={() => router.push("./edit/" as Href<string>)}
             />
@@ -207,9 +240,10 @@ export default function GroupWalkScreen({ walkId }: { walkId: string }) {
                   userId={user.id}
                   size={10}
                   doLink={true}
+                  style={{ marginRight: percentToDP(-1) }}
                 />
               ))}
-              <ThemedText style={{ marginLeft: percentToDP(2) }}>
+              <ThemedText style={{ marginLeft: percentToDP(3) }}>
                 {participants.length > 5
                   ? `+${participants.length - 5} more`
                   : ""}
@@ -219,13 +253,49 @@ export default function GroupWalkScreen({ walkId }: { walkId: string }) {
               colorName="text"
               name="chevron-forward-outline"
               onPress={() => {
-                router.push("./participants");
+                router.push("./participants/");
               }}
             />
           </HorizontalView>
         </ThemedView>
-        <CommentSection commentsData={comments} />
+        <CommentSection
+          commentsData={comments}
+          addComment={async (content: string) => {
+            asyncAbortController.current = new AbortController();
+            return addGroupWalkComment(
+              walkId,
+              {} as CommentContent,
+              asyncAbortController.current
+            );
+          }}
+        />
       </ThemedScrollView>
+      {joinDialogVisible && (
+        <GroupWalkParticipationDialog
+          walkId={walkId}
+          joined={joined}
+          dogs={dogs}
+          dogsParticipating={groupWalkInfo.joinedWithPets.map(
+            (elem) => elem.id
+          )}
+          onSave={(dogsParticipating) => {
+            if (!joined) {
+              setParticipants([
+                { id: userId, name: "", avatarURL: "" } as Participant,
+                ...participants,
+              ]);
+              setJoined(true);
+            }
+            setDogsParticipating(dogsParticipating);
+          }}
+          onLeave={() => {
+            setJoined(false);
+            setParticipants(participants.filter((elem) => elem.id !== userId));
+            setDogsParticipating([]);
+          }}
+          onDismiss={() => setJoinDialogVisible(false)}
+        />
+      )}
     </SafeAreaView>
   );
 }

@@ -14,30 +14,45 @@ export default function GroupWalksTimelineItem({
   date,
   groupWalks,
   today,
+  thisWeek,
+  markJoined,
+  markCreated,
 }: {
-  date: Date;
+  date?: Date;
   groupWalks: GroupWalk[];
-  today?: Date;
+  today: Date;
+  thisWeek?: boolean;
+  markJoined?: boolean;
+  markCreated?: boolean;
 }) {
   const percentToDP = useWindowDimension("shorter");
   const heightpercentToDP = useWindowDimension("height");
 
   const getDateHeader = () => {
     let header = "";
-    if (today) {
-      header =
-        format(today, "dd.MM.yyyy") === format(date, "dd.MM.yyyy")
-          ? "Today"
-          : format(date, "EEEE");
 
-      header += " | ";
+    if (date) {
+      if (format(today, "dd.MM.yyyy") === format(date, "dd.MM.yyyy")) {
+        header = "Today | ";
+      } else if (thisWeek) {
+        header = format(date, "EEEE | ");
+      }
+
+      header += date.toLocaleDateString(undefined, {
+        dateStyle: "short",
+      });
+    } else {
+      header = "No plans yet";
     }
 
-    return header + format(date, today ? "dd.MM" : "dd.MM.yyyy");
+    return header;
   };
 
   return (
-    <ThemedView colorName="transparent">
+    <ThemedView
+      colorName="transparent"
+      style={{ marginBottom: heightpercentToDP(2) }}
+    >
       <ThemedText
         style={{
           marginTop: percentToDP(-4),
@@ -47,10 +62,10 @@ export default function GroupWalksTimelineItem({
       >
         {getDateHeader()}
       </ThemedText>
-      {groupWalks.length == 0 && (
+      {groupWalks.length == 0 && date && (
         <ThemedText
           style={{
-            marginBottom: heightpercentToDP(8),
+            marginBottom: heightpercentToDP(3),
           }}
         >
           No plans yet.
@@ -60,6 +75,8 @@ export default function GroupWalksTimelineItem({
         <GroupWalkListItem
           key={walk.id}
           groupWalk={walk}
+          markJoined={markJoined}
+          markCreated={markCreated}
         />
       ))}
     </ThemedView>

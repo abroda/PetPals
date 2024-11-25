@@ -23,6 +23,9 @@ import { RouteProp, useRoute } from "@react-navigation/core";
 import { usePosts } from "@/hooks/usePosts";
 import { PostType } from "@/context/PostContext";
 import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoadingIndicator";
+import CommentSection from "@/components/lists/CommentSection";
+import { testComments, testData } from "@/app/walk/event/testData";
+import { CommentContent } from "@/context/WalksContext";
 
 type PostScreenRouteProp = RouteProp<{ params: { postId: string } }, "params">;
 
@@ -59,6 +62,7 @@ export default function PostScreen() {
   const heightPercentToDP = useWindowDimension("height");
   const tertiaryColor = useThemeColor("tertiary");
   const comments = ["1", "2", "3"];
+  const { addPostComment } = usePosts();
 
   // HIDING DEFAULT NAVIGATION
   const navigation = useNavigation();
@@ -335,6 +339,17 @@ export default function PostScreen() {
                 </ThemedView>
               ))}
           </ThemedView>
+          <CommentSection
+            commentsData={testComments}
+            addComment={(content: string) => {
+              asyncAbortController.current = new AbortController();
+              return addPostComment(
+                postId,
+                content,
+                asyncAbortController.current
+              );
+            }}
+          />
         </ThemedScrollView>
       )}
       {/*<ThemedScrollView colorName="tertiary"*/}

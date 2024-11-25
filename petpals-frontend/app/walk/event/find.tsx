@@ -23,12 +23,20 @@ import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoad
 import { format } from "date-fns";
 import FilterTagsDialog from "@/components/dialogs/FilterTagsDialog";
 
-export default function FindGroupWalkScreen() {
+export default function FindGroupWalkScreen(props: {
+  initialFilter?: GroupWalkTag[];
+}) {
+  const now = new Date();
+  const today = now.valueOf() - (now.valueOf() % (24 * 3600 * 1000));
+  const weekLimit = today + 7 * 24 * 3600 * 1000;
+
   const [groupWalksData, setGroupWalksData] = useState<
     GroupWalk[] | undefined
   >();
   const [dialogVisible, setDialogVisible] = useState(false);
-  const [filter, setFilter] = useState([] as GroupWalkTag[]);
+  const [filter, setFilter] = useState(
+    props.initialFilter ? props.initialFilter : ([] as GroupWalkTag[])
+  );
   const { isProcessing, getGroupWalkList, shouldRefresh } = useWalks();
 
   const timelineColor = useThemeColor("text");
@@ -46,8 +54,8 @@ export default function FindGroupWalkScreen() {
   }, [shouldRefresh]);
 
   const getData = useCallback(async () => {
-    console.log("Start loading");
     asyncAbortController.current = new AbortController();
+
     let result = await getGroupWalkList(
       "all",
       [],
@@ -57,7 +65,6 @@ export default function FindGroupWalkScreen() {
     if (result.success) {
       setGroupWalksData(result.returnValue);
     }
-    console.log("Stop loading");
   }, []);
 
   const navigation = useNavigation();
@@ -65,6 +72,7 @@ export default function FindGroupWalkScreen() {
     navigation.setOptions({
       headerTitle: "Find group walks",
       headerShown: true,
+      animation: "none",
     });
   }, [navigation]);
 
@@ -87,6 +95,8 @@ export default function FindGroupWalkScreen() {
       description: groupWalks,
     }));
   };
+
+  let walks = splitByDay(groupWalksData ?? testData);
 
   return (
     <SafeAreaView>
@@ -114,7 +124,7 @@ export default function FindGroupWalkScreen() {
             textStyleOptions={{ size: "medium" }}
             style={{ marginBottom: percentToDP(4) }}
           >
-            {groupWalksData?.length ?? testData.length} result(s)
+            {`${walks.length} result(s)`}
           </ThemedText>
           <HorizontalView justifyOption="flex-end">
             <ThemedButton
@@ -145,17 +155,29 @@ export default function FindGroupWalkScreen() {
         {isProcessing && (
           <ThemedLoadingIndicator
             size="large"
-            fullScreen={true}
+            fullScreen
             message="Loading..."
           />
         )}
-        {!isProcessing && (
+        {!isProcessing && walks.length == 0 && (
+          <ThemedText
+            style={{
+              alignSelf: "center",
+              textAlign: "center",
+              marginTop: heightPercentToDP(35),
+            }}
+            textColorName="disabled"
+          >
+            No results based on {"\n"}current search parameters.
+          </ThemedText>
+        )}
+        {!isProcessing && walks.length > 0 && (
           <Timeline
             style={{
               flex: 1,
               marginTop: percentToDP(2),
               marginBottom: percentToDP(20),
-              marginLeft: percentToDP(-15),
+              marginLeft: percentToDP(-14),
             }}
             circleColor={timelineColor}
             lineColor={timelineColor}
@@ -163,10 +185,14 @@ export default function FindGroupWalkScreen() {
               <GroupWalksTimelineItem
                 date={rowData.datetime}
                 groupWalks={rowData.description}
+                today={now}
+                thisWeek={rowData.datetime.valueOf() <= weekLimit}
+                markJoined
+                markCreated
               />
             )}
             timeContainerStyle={{ maxWidth: 0 }}
-            data={splitByDay(groupWalksData ?? testData)}
+            data={walks}
             isUsingFlatlist={false}
           />
         )}

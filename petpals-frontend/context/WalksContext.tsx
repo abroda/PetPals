@@ -17,7 +17,7 @@ export type Participant = {
 };
 
 export type GroupWalkTag = string;
-export const tagRegex = '^[^!@#$%^&*(),.?":{}|<>]*$';
+export const tagRegex = '^[^!@#$%^&*(),.?":{}|<>;+]{2,}$';
 
 export type CommentContent = {
   id: string;

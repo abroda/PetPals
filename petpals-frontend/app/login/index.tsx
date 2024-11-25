@@ -32,11 +32,11 @@ export default function LoginScreen() {
   const [dialogVisible, setDialogVisible] = useState(false);
 
   // Colours
-  const darkGreen = '#0A2421'
-  const lightGreen = '#1C302A'
-  const accentGreen = '#B4D779'
-  const accentTeal = '#52B8A3'
-  const cream = '#FAF7EA'
+  const darkGreen = "#0A2421";
+  const lightGreen = "#1C302A";
+  const accentGreen = "#B4D779";
+  const accentTeal = "#52B8A3";
+  const cream = "#FAF7EA";
 
   const { isLoading, isProcessing, login } = useAuth();
 
@@ -77,11 +77,14 @@ export default function LoginScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, margin:0, padding: 0, backgroundColor: lightGreen}} edges={['left', 'right', 'bottom']}>
+    <SafeAreaView
+      style={{ flex: 1, margin: 0, padding: 0, backgroundColor: lightGreen }}
+      edges={["left", "right", "bottom"]}
+    >
       <ThemedScrollView
         style={{
           flex: 1,
-          margin:0,
+          margin: 0,
           padding: 0,
         }}
       >

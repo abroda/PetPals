@@ -52,18 +52,33 @@ export default function ThemedLoadingIndicator({
           color={loaderColor}
           {...rest}
         />
-        <ThemedText textColorName={textColorName}>{message}</ThemedText>
+        <ThemedText
+          textColorName={textColorName}
+          style={{ marginTop: 10 }}
+        >
+          {message}
+        </ThemedText>
       </ThemedView>
     );
   }
 
   return (
-    <ThemedView>
+    <ThemedView
+      style={{
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       <ActivityIndicator
         color={loaderColor}
         {...rest}
       />
-      <ThemedText textColorName={textColorName}>{message}</ThemedText>
+      <ThemedText
+        textColorName={textColorName}
+        style={{ marginTop: 7 }}
+      >
+        {message}
+      </ThemedText>
     </ThemedView>
   );
 }

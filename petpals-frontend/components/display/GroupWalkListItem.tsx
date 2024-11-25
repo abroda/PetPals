@@ -18,16 +18,26 @@ import { useAuth } from "@/hooks/useAuth";
 
 export default function GroupWalkListItem({
   groupWalk,
+  markJoined,
+  markCreated,
 }: {
   groupWalk: GroupWalk;
+  markJoined?: boolean;
+  markCreated?: boolean;
 }) {
   const [selected, setSelected] = useState("");
   const percentToDP = useWindowDimension("shorter");
   const heightpercentToDP = useWindowDimension("height");
   const { userId } = useAuth();
   const backgroundColor = useThemeColor("accent") + "28";
-  const borderColor =
-    groupWalk.creator.id === userId ? useThemeColor("accent") : "transparent";
+  const borderColor = useThemeColor(
+    markCreated &&
+      (groupWalk.creator.id === userId || groupWalk.creator.id === "me")
+      ? "accent"
+      : markJoined && groupWalk.joinedWithPets.length > 0
+      ? "primary"
+      : "transparent"
+  );
 
   // TODO: fix when backend works
   const getWalkId = () => {
@@ -58,7 +68,7 @@ export default function GroupWalkListItem({
       style={{
         paddingHorizontal: percentToDP(4.7),
         paddingVertical: percentToDP(3.7),
-        marginBottom: percentToDP(2.5),
+        marginBottom: percentToDP(3),
         borderColor: borderColor,
 
         borderWidth: 2,
@@ -72,6 +82,7 @@ export default function GroupWalkListItem({
           colorName="transparent"
           style={{
             flex: 1,
+            marginBottom: percentToDP(groupWalk.tags.length == 0 ? 1 : 5),
           }}
         >
           {/* TITLE */}
@@ -96,7 +107,6 @@ export default function GroupWalkListItem({
           <HorizontalView
             justifyOption="space-between"
             colorName="transparent"
-            style={{ marginBottom: percentToDP(5) }}
           >
             {/* LOCATION */}
             <HorizontalView
@@ -114,7 +124,6 @@ export default function GroupWalkListItem({
                 numberOfLines={1}
                 style={{
                   paddingLeft: percentToDP(1),
-                  paddingRight: percentToDP(2),
                 }}
               >
                 {getLocation()}
@@ -125,7 +134,7 @@ export default function GroupWalkListItem({
               justifyOption="flex-end"
               colorName="transparent"
               style={{
-                width: percentToDP(14),
+                width: percentToDP(15.5),
                 flex: 0,
               }}
             >
@@ -150,7 +159,7 @@ export default function GroupWalkListItem({
             justifyContent: "flex-end",
             alignContent: "flex-end",
             alignSelf: "flex-end",
-            marginBottom: percentToDP(11.7),
+            marginBottom: percentToDP(groupWalk.tags.length == 0 ? 7.7 : 11.7),
             paddingLeft: percentToDP(4),
           }}
         >

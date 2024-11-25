@@ -5,6 +5,7 @@ import { useWindowDimension } from "@/hooks/useWindowDimension";
 import { Href, router, useNavigation } from "expo-router";
 import {
   ReactElement,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -22,28 +23,42 @@ import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
 import { format } from "date-fns";
 import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoadingIndicator";
+import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 
 export default function GroupWalksScheduleScreen() {
-  const [groupWalksData, setGroupWalksData] = useState();
-  const { isProcessing, getGroupWalkList, shouldRefresh } = useWalks();
+  const now = new Date();
+  const today = now.valueOf() - (now.valueOf() % (24 * 3600 * 1000));
+  const weekLimit = today + 7 * 24 * 3600 * 1000;
+
+  const [groupWalksData, setGroupWalksData] = useState(null);
+
   const timelineColor = useThemeColor("text");
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToDP = useWindowDimension("height");
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const { getGroupWalkList, shouldRefresh } = useWalks();
 
   const asyncAbortController = useRef<AbortController | undefined>(
     new AbortController()
   );
 
   useEffect(() => {
-    asyncAbortController.current = new AbortController();
-    getData().then((data) => setGroupWalksData(data));
+    if (shouldRefresh || !groupWalksData) {
+      setIsLoading(true);
+      getData();
+    }
 
     return () => {
       asyncAbortController.current?.abort();
     };
   }, [shouldRefresh]);
 
-  const getData = async () => {
+  const getData = useCallback(async () => {
+    asyncAbortController.current = new AbortController();
+
     let result = await getGroupWalkList(
       "joined",
       [],
@@ -51,23 +66,23 @@ export default function GroupWalksScheduleScreen() {
     );
 
     if (result.success) {
-      return result.returnValue;
+      setGroupWalksData(result.returnValue);
     } else {
-      return;
+      setErrorMessage(result.returnValue);
     }
-  };
+
+    setIsLoading(false);
+  }, [groupWalksData]);
 
   const getThisWeekData = (groupWalks: GroupWalk[]) => {
-    const now = new Date();
     return [0, 1, 2, 3, 4, 5, 6].map((i) => {
-      let day = new Date(now.getTime() + i * 24 * 60 * 60 * 1000);
+      let day = new Date(today + i * 24 * 3600 * 1000);
       return {
-        time: day.toString(),
+        time: day.toLocaleDateString(undefined, { dateStyle: "short" }),
         datetime: day,
         description: groupWalks.filter(
           (walk) =>
-            walk.datetime.toString().slice(0, 10) ===
-            day.toString().slice(0, 10)
+            format(walk.datetime, "dd.MM.yyyy") === format(day, "dd.MM.yyyy")
         ),
       };
     });
@@ -76,11 +91,16 @@ export default function GroupWalksScheduleScreen() {
   const getFollowingWeeksData = (groupWalks: GroupWalk[]) => {
     let buckets = groupWalks.reduce(
       (buckets: Record<string, GroupWalk[]>, walk: GroupWalk) => {
-        let date = format(walk.datetime, "dd.MM.yyyy");
-        if (!buckets[date]) {
-          buckets[date] = [];
+        if (walk.datetime.valueOf() > weekLimit) {
+          let date = walk.datetime.toLocaleDateString(undefined, {
+            dateStyle: "medium",
+          });
+          //format(walk.datetime, "dd.MM.yyyy");
+          if (!buckets[date]) {
+            buckets[date] = [];
+          }
+          buckets[date].push(walk);
         }
-        buckets[date].push(walk);
         return buckets;
       },
       {}
@@ -93,6 +113,13 @@ export default function GroupWalksScheduleScreen() {
     }));
   };
 
+  let thisWeek = getThisWeekData(
+    groupWalksData ?? testData.filter((elem) => elem.joinedWithPets.length > 0)
+  );
+  let followingWeeks = getFollowingWeeksData(
+    groupWalksData ?? testData.filter((elem) => elem.joinedWithPets.length > 0)
+  );
+
   return (
     <SafeAreaView>
       <ThemedView
@@ -100,6 +127,7 @@ export default function GroupWalksScheduleScreen() {
         style={{
           height: heightPercentToDP(100),
           paddingTop: percentToDP(5),
+          paddingBottom: percentToDP(12),
         }}
       >
         <ThemedText
@@ -107,22 +135,44 @@ export default function GroupWalksScheduleScreen() {
           backgroundColorName="transparent"
           style={{
             paddingHorizontal: percentToDP(4),
-            marginBottom: percentToDP(5),
           }}
         >
           Group walks schedule
         </ThemedText>
-        {isProcessing && (
+        {isLoading && (
           <ThemedLoadingIndicator
             size="large"
-            fullScreen={true}
+            fullScreen
             message="Loading..."
           />
         )}
-        {!isProcessing && (
+        {!isLoading && groupWalksData !== null && (
+          <ThemedView
+            style={{
+              alignSelf: "center",
+              alignItems: "center",
+              margin: "auto",
+            }}
+          >
+            <ThemedIcon
+              name="close-circle-outline"
+              colorName="disabled"
+              size={percentToDP(12)}
+            />
+            <ThemedText
+              textStyleOptions={{ size: "big" }}
+              textColorName="disabled"
+              style={{ alignSelf: "center", marginTop: percentToDP(3) }}
+            >
+              {errorMessage ?? "Network error"}
+            </ThemedText>
+          </ThemedView>
+        )}
+        {!isLoading && groupWalksData === null && (
           <ThemedScrollView
             style={{
               paddingHorizontal: percentToDP(4),
+              marginTop: percentToDP(5),
             }}
           >
             <HorizontalView>
@@ -153,8 +203,7 @@ export default function GroupWalksScheduleScreen() {
               style={{
                 flex: 1,
                 marginTop: percentToDP(2),
-                marginBottom: percentToDP(5),
-                marginLeft: percentToDP(-15),
+                marginLeft: percentToDP(-14),
               }}
               circleColor={timelineColor}
               lineColor={timelineColor}
@@ -163,10 +212,12 @@ export default function GroupWalksScheduleScreen() {
                   date={rowData.datetime}
                   groupWalks={rowData.description}
                   today={new Date()}
+                  markCreated
+                  thisWeek
                 />
               )}
               timeContainerStyle={{ maxWidth: 0 }}
-              data={getThisWeekData(groupWalksData ?? testData)}
+              data={thisWeek}
               isUsingFlatlist={false}
             />
             <ThemedText
@@ -180,8 +231,8 @@ export default function GroupWalksScheduleScreen() {
               style={{
                 flex: 1,
                 marginTop: percentToDP(2),
-                marginBottom: percentToDP(20),
-                marginLeft: percentToDP(-15),
+                marginBottom: percentToDP(5),
+                marginLeft: percentToDP(-14),
               }}
               circleColor={timelineColor}
               lineColor={timelineColor}
@@ -189,10 +240,21 @@ export default function GroupWalksScheduleScreen() {
                 <GroupWalksTimelineItem
                   date={rowData.datetime}
                   groupWalks={rowData.description}
+                  today={now}
                 />
               )}
               timeContainerStyle={{ maxWidth: 0 }}
-              data={getFollowingWeeksData(groupWalksData ?? testData)}
+              data={
+                followingWeeks.length > 0
+                  ? followingWeeks
+                  : [
+                      {
+                        time: "",
+                        datetime: "",
+                        description: [],
+                      },
+                    ]
+              } //?? testData)}
               isUsingFlatlist={false}
             />
           </ThemedScrollView>

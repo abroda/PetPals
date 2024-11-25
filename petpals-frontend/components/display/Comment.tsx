@@ -85,9 +85,7 @@ export default function Comment({
         textStyleOptions={{ size: "small" }}
         style={{ marginBottom: percentToDP(2) }}
       >
-        Absolutely gorgeous post! The IQ of the poster is over 9000! Can't
-        believe this is finally working. Probably. Maybe. Hopefully. Please
-        don't let it break somehow...
+        {comment?.content}
       </ThemedText>
     </ThemedView>
     // <ThemedView

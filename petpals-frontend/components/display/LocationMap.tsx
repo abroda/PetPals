@@ -46,7 +46,7 @@ export type LocationMapProps = {
 export function LocationMap({
   initialLocation,
   initialDelta = 0.012,
-  minDelta = 0.003,
+  minDelta = 0.001,
   maxDelta = 0.7,
   viewStyle,
   mapProps,

@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { ComponentProps } from "react";
 import { router } from "expo-router";
 import { ThemedText } from "../basic/ThemedText";
+import { GroupWalkTag } from "@/context/WalksContext";
 
 export type TagProps = ButtonProps & {
   backgroundColorName?: ColorName;
@@ -19,11 +20,16 @@ export type TagProps = ButtonProps & {
   textColorName?: ColorName;
   textThemedColor?: ThemedColor;
   textStyleOptions?: TextStyleOptions;
+  doLink?: boolean;
+  doDismissOnLink?: boolean;
 };
 
 export const Tag = ({
   style,
   label,
+  onPress = (tag: GroupWalkTag) => {
+    router.push("/walk/event/find");
+  },
   backgroundColorName = "secondary",
   backgroundThemedColor,
   textColorName = "text",
@@ -41,6 +47,7 @@ export const Tag = ({
 
   return (
     <Card
+      onPress={onPress}
       color={backgroundColor}
       style={[
         {

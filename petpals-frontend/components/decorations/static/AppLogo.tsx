@@ -51,7 +51,7 @@ export default function AppLogo(props: {
           flex: 1,
           alignItems: "center",
           justifyContent: "center",
-          marginBottom: props.showMotto ? percentToDP(19) : percentToDP(8),
+          marginBottom: props.showMotto ? percentToDP(30) : percentToDP(8),
         }}
       >
         <Image

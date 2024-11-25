@@ -10,35 +10,47 @@ import TagList from "../lists/TagList";
 import { ThemedView, ThemedViewProps } from "../basic/containers/ThemedView";
 import { useWalks } from "@/hooks/useWalks";
 import ThemedLoadingIndicator from "../decorations/animated/ThemedLoadingIndicator";
-import { View } from "react-native";
-
+import { TouchableWithoutFeedback, View } from "react-native";
+import { useThemeColor } from "@/hooks/theme/useThemeColor";
 export default function TagListInput({
   onAddTag = (tag: GroupWalkTag) => {},
   onDeleteTag = (tag: GroupWalkTag) => {},
   tags = [] as GroupWalkTag[],
 }) {
   const [tagInput, setTagInput] = useState("");
-  const percentToDP = useWindowDimension("shorter");
-  const [showSuggestions, setShowSuggestions] = useState(true);
-  const [suggsetions, setSuggestions] = useState([
-    "suggestion1",
-    "suggestion2",
-    "suggestion3",
-    "suggestion4",
-    "suggestion5",
-  ]);
+  const [isInputValid, setIsInputValid] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(" ");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggsetions, setSuggestions] = useState([] as string[]);
   const { isProcessing } = useWalks();
-
   const tagInputRef = useRef<TextFieldRef>(null);
 
-  const getSuggestions = async (content: string) => {
-    setSuggestions([
-      content + "_1",
-      content + "_2",
-      content + "_3",
-      content + "_4",
-      content + "_5",
-    ]);
+  const percentToDP = useWindowDimension("shorter");
+
+  const borderColor = useThemeColor("primary");
+
+  const onChangeText = async (newText: string) => {
+    let content = newText.toLocaleLowerCase();
+    setTagInput(content);
+
+    if (content.length < 3) {
+      setIsInputValid(false);
+      setErrorMessage(" ");
+      setShowSuggestions(false);
+    } else if (content.match(tagRegex)) {
+      setIsInputValid(true);
+      setErrorMessage(" ");
+      let newSuggestions =
+        content.length < 13
+          ? [content + "a", content + "b", content + "c"]
+          : [];
+      setSuggestions(newSuggestions);
+      setShowSuggestions(newSuggestions.length > 0);
+    } else {
+      setIsInputValid(false);
+      setErrorMessage("Tag should not use any special characters");
+      setShowSuggestions(false);
+    }
   };
 
   return (
@@ -55,47 +67,23 @@ export default function TagListInput({
         label="Tags"
         placeholder="Add tag"
         autoComplete="off"
+        inputMode="text"
         value={tagInput}
-        onBlur={() => setTimeout(() => setShowSuggestions(false), 700)}
-        onFocus={() => {
-          if (tagInput.length > 0) {
-            setShowSuggestions(true);
-          }
-        }}
-        onChangeText={(newText: string) => {
-          newText = newText.toLocaleLowerCase();
-
-          if (newText.length > 0) {
-            setShowSuggestions(true);
-            getSuggestions(newText);
-          } else {
-            setShowSuggestions(false);
-          }
-
-          setTagInput(newText);
-        }}
-        withValidation
-        validate={[
-          (value) => (value?.length ?? 0) > 0,
-          (value) => (value?.length ?? 3) > 2,
-          (value) => (value?.match(tagRegex)?.length ?? 0) > 0,
-          (value) => !tags.includes(value as GroupWalkTag),
-        ]}
-        validationMessage={[
-          "",
-          "Tag is too short",
-          "Tag should not contain any special characters",
-          "Tag already addded",
-        ]}
-        maxLength={50}
+        onBlur={() => setShowSuggestions(false)}
+        onChangeText={onChangeText}
+        withValidation={!showSuggestions}
+        validate={[(value) => false]}
+        validationMessage={[errorMessage.valueOf()]}
+        maxLength={60}
         trailingAccessory={
           <ThemedIcon
             name="add"
-            colorName="primary"
+            colorName={isInputValid ? "primary" : "disabled"}
             onPress={() => {
-              if (tagInputRef.current?.validate()) {
-                onAddTag(tagInput);
+              if (isInputValid) {
+                onAddTag(tagInput.trimStart().trimEnd());
                 setTagInput("");
+                setShowSuggestions(false);
               }
             }}
             style={{
@@ -105,32 +93,50 @@ export default function TagListInput({
             }}
           />
         }
+        bottomAccessory={
+          showSuggestions && suggsetions.length > 0 ? (
+            <ThemedView
+              colorName="textField"
+              style={{
+                borderBottomEndRadius: percentToDP(4),
+                borderBottomStartRadius: percentToDP(4),
+                marginTop: percentToDP(-2.9),
+                paddingTop: percentToDP(2),
+                paddingHorizontal: percentToDP(2),
+                paddingBottom: percentToDP(2),
+                marginRight: percentToDP(2.0),
+                marginLeft: percentToDP(2.0),
+                borderWidth: 0,
+                borderTopWidth: 1,
+                borderColor: borderColor,
+              }}
+            >
+              {isProcessing && <ThemedLoadingIndicator size={"small"} />}
+              {!isProcessing &&
+                suggsetions.map((elem) => (
+                  <ThemedText
+                    backgroundColorName="transparent"
+                    onPress={() => {
+                      setTagInput(elem);
+                      setShowSuggestions(false);
+                    }}
+                    style={{
+                      marginBottom: percentToDP(2),
+                    }}
+                  >
+                    {elem}
+                  </ThemedText>
+                ))}
+            </ThemedView>
+          ) : undefined
+        }
+        retainValidationSpace
       />
-      {showSuggestions && (
-        <ThemedView
-          style={{
-            borderColor: "white",
-            borderWidth: 1,
-          }}
-        >
-          {isProcessing && <ThemedLoadingIndicator size={"small"} />}
-          {!isProcessing &&
-            suggsetions.map((s) => (
-              <ThemedText
-                onPress={() => {
-                  setTagInput(s);
-                  setShowSuggestions(false);
-                }}
-              >
-                {s}
-              </ThemedText>
-            ))}
-        </ThemedView>
-      )}
 
       <TagList
         tags={tags}
         onPressTag={onDeleteTag}
+        style={{ marginHorizontal: percentToDP(-2.5) }}
       />
     </ThemedView>
   );

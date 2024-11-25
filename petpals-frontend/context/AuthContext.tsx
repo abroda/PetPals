@@ -112,7 +112,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       path: apiPaths.auth.register,
       payload: {
         displayName: displayName,
-        email: email,
+        email: email.trimStart().trimEnd(),
         password: password,
       },
       onOKResponse: (payload: any) => setUserEmail(email),
@@ -130,7 +130,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return serverQuery({
       path: apiPaths.auth.verifyEmail,
       payload: {
-        email: email,
+        email: email.trimStart().trimEnd(),
         verificationCode: verificationCode,
       },
       onStart: () => setIsProcessing(true),
@@ -146,7 +146,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return serverQuery({
       path: apiPaths.auth.resend,
       payload: {
-        email: email,
+        email: email.trimStart().trimEnd(),
       },
       onOKResponse: (payload: any) => "Verifcation code resent.",
       onStart: () => setIsProcessing(true),
@@ -162,7 +162,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return serverQuery({
       path: apiPaths.auth.sendPasswordResetCode,
       payload: {
-        email: email,
+        email: email.trimStart().trimEnd(),
       },
       onOKResponse: (payload: any) => "Password reset code sent.",
       onStart: () => setIsProcessing(true),
@@ -180,9 +180,9 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return serverQuery({
       path: apiPaths.auth.resetPassword,
       payload: {
-        email: email,
+        email: email.trimStart().trimEnd(),
         password: password,
-        code: code,
+        code: code.trimStart().trimEnd(),
       },
       onStart: () => setIsProcessing(true),
       onEnd: () => setIsProcessing(false),
@@ -194,12 +194,12 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return await serverQuery({
       path: apiPaths.auth.login,
       payload: {
-        email: email,
+        email: email.trimStart().trimEnd(),
         password: password,
       },
       onOKResponse: async (payload: any) => {
         setUserId(payload.id);
-        setUserEmail(email);
+        setUserEmail(email.trimStart().trimEnd());
         setAuthToken(payload.token);
 
         // Await AsyncStorage updates to ensure consistency
