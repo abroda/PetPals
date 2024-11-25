@@ -5,10 +5,10 @@ import com.app.petpals.payload.location.LocationResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
-import org.eclipse.paho.client.mqttv3.*;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -23,13 +23,15 @@ public class MQTTLocationService {
     private final RedisLocationService redisLocationService;
     private final WalkSessionService walkSessionService;
     private final ObjectMapper objectMapper;
+    private final FriendshipService friendshipService;
 
-    public MQTTLocationService(MqttClient mqttClient, RedisLocationService redisLocationService, WalkSessionService walkSessionService, ObjectMapper objectMapper) {
+    public MQTTLocationService(MqttClient mqttClient, RedisLocationService redisLocationService, WalkSessionService walkSessionService, ObjectMapper objectMapper, FriendshipService friendshipService) {
         this.mqttClient = mqttClient;
         this.redisLocationService = redisLocationService;
         this.walkSessionService = walkSessionService;
         this.objectMapper = objectMapper;
-        this. objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        this.friendshipService = friendshipService;
+        this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     @PostConstruct
@@ -72,16 +74,18 @@ public class MQTTLocationService {
     private void handleWalkStart(String userId, String payload) {
         try {
             var node = objectMapper.readTree(payload);
-            LocalDateTime startTime = Instant.parse(node.get("timestamp").asText())
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDateTime();
+            LocalDateTime startTime = Instant.parse(node.get("timestamp").asText()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+            String visibility = node.has("visibility") ? node.get("visibility").asText() : "PUBLIC";
+
+            // Fetch friends list if FRIENDS_ONLY
+            List<String> friends = "FRIENDS_ONLY".equals(visibility) ? friendshipService.getAcceptedFriendshipsForUser(userId) : null;
 
 
             // Start a new walk session in the database
             String sessionId = walkSessionService.startWalk(userId, startTime);
 
             // Initialize metadata in Redis
-            redisLocationService.initWalk(userId);
+            redisLocationService.initWalk(userId, visibility, friends);
 
             System.out.println("Walk started for user: " + userId + ", session ID: " + sessionId);
         } catch (Exception e) {
@@ -154,18 +158,14 @@ public class MQTTLocationService {
             // Store the user's location in Redis
             redisLocationService.updateLocation(userId, userLocation.getLatitude(), userLocation.getLongitude(), userLocation.getTimestamp());
 
-            // Find all users nearby this user
-            List<LocationResponse> nearbyUsersForUser = redisLocationService.findNearbyUsers(
-                    userLocation.getLatitude(),
-                    userLocation.getLongitude(),
-                    5.0
-            );
+            // Find nearby users respecting visibility rules
+            List<LocationResponse> nearbyUsers = redisLocationService.findNearbyUsersWithVisibility(userId, userLocation.getLatitude(), userLocation.getLongitude(), 5.0);
 
             // Publish the updated list of nearby users to this user's topic
-            publishNearbyUsers(userId, nearbyUsersForUser);
+            publishNearbyUsers(userId, nearbyUsers);
 
             // Find all users who would consider this user as "nearby"
-            List<String> affectedUsers = redisLocationService.findUsersAffectedBy(userId, userLocation.getLatitude(), userLocation.getLongitude(), 5.0);
+            List<String> affectedUsers = redisLocationService.findUsersAffectedByWithVisibility(userId, userLocation.getLatitude(), userLocation.getLongitude(), 5.0);
 
             // For each affected user, recompute their nearby list and publish updates
             for (String affectedUser : affectedUsers) {

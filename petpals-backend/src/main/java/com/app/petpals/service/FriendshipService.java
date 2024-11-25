@@ -23,6 +23,10 @@ public class FriendshipService {
     private final UserRepository userRepository;
     private final FriendshipRepository friendshipRepository;
 
+    public List<String> getAcceptedFriendshipsForUser(String userId) {
+        return friendshipRepository.findOtherUserIdsByUserIdAndStatus(userId, FriendshipRequestStatus.ACCEPTED);
+    }
+
     @Transactional
     public void sendFriendRequest(String senderId, String receiverId) {
         if (Objects.equals(senderId, receiverId)) {
