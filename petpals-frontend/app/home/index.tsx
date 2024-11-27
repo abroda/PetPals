@@ -56,7 +56,7 @@ export default function HomeScreen() {
       console.error("Error fetching users:", error);
     } finally {
       setIsSearching(false);
-    }
+    }78
   };
 
 

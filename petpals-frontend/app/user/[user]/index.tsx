@@ -36,7 +36,7 @@ export default function UserProfileScreen() {
   // Contexts
   const path = usePathname();
   const { addDog, getDogsByUserId } = useDog();
-  const { logout, userId: loggedInUserId  } = useAuth();
+  const { logout, userId: loggedInUserId, authToken  } = useAuth();
   const { getUserById, userProfile, isProcessing } = useUser();
   const navigation = useNavigation();
   const router = useRouter();
@@ -51,9 +51,8 @@ export default function UserProfileScreen() {
 
   const [dogs, setDogs] = useState<Dog[]>([]);
   const dogCount = dogs.length;
-  const [username, setUsername] = useState(
-    path.slice(path.lastIndexOf("/") + 1)
-  );
+  const usernameFromPath = path.slice(path.lastIndexOf("/") + 1);
+  const [username, setUsername] = useState(usernameFromPath);
 
   // Colours
   const colorScheme = useColorScheme();
@@ -65,17 +64,39 @@ export default function UserProfileScreen() {
 
   // Fetch the profile being viewed
   useEffect(() => {
-    getUserById(username);
-  }, [username]);
+    const resolvedUsername = username === "me" ? loggedInUserId : username;
+
+    if (resolvedUsername) {
+      getUserById(resolvedUsername).catch((error) => {
+        console.error("Failed to fetch user:", error);
+      });
+    }
+  }, [username, loggedInUserId]); // Re-run when username or loggedInUserId changes
+
+
+
+
+// Update username only if it changes
+  useEffect(() => {
+    if (usernameFromPath !== username) {
+      setUsername(usernameFromPath);
+    }
+  }, [path, usernameFromPath, username]);
 
 
   const fetchDogs = async () => {
-    const ownerId = isOwnProfile? loggedInUserId : username;
-    const userDogs = await getDogsByUserId(ownerId ?? "");
-    const sortedDogs = userDogs
-      .map((dog) => ({ ...dog, name: dog.name || "Unknown Dog" }))
-      .sort((a, b) => a.name.localeCompare(b.name));
-    setDogs(sortedDogs);
+    const ownerId = username === "me" ? loggedInUserId : username;
+    if (!ownerId) return;
+
+    try {
+      const userDogs = await getDogsByUserId(ownerId);
+      const sortedDogs = userDogs
+        .map((dog) => ({ ...dog, name: dog.name || "Unknown Dog" }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      setDogs(sortedDogs);
+    } catch (error) {
+      console.error("Failed to fetch dogs:", error);
+    }
   };
 
 
@@ -518,5 +539,26 @@ export default function UserProfileScreen() {
         </View>
       )}
     </SafeAreaView>
-  );
+  )
+  // For not logged in user? I dunno if we need it, we should only allow logged in users.
+  //   : (
+  //   <SafeAreaView style={{
+  //     flex: 1,
+  //     width: widthPercentageToDP(100),
+  //     backgroundColor: themeColors.secondary,
+  //   }}>
+  //     <ThemedText textColorName={"textOnSecondary"} style={{
+  //       width: widthPercentageToDP(70),
+  //       justifyContent: 'center',
+  //       textAlign: 'center',
+  //       alignContent: 'center',
+  //       alignSelf: 'center',
+  //       margin: 'auto',
+  //       backgroundColor: 'transparent'
+  //     }} >
+  //       You are currently not logged in. Log in to view your profile.
+  //     </ThemedText>
+  //
+  //   </SafeAreaView>
+  // );
 }

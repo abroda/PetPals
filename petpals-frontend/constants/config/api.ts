@@ -1,4 +1,4 @@
-export const databaseURL = "http://192.168.88.42:8080/";
+export const databaseURL = "http://192.168.1.4:8080/";
 
 export const apiPaths = {
   auth: {
@@ -16,7 +16,14 @@ export const apiPaths = {
     addPost: databaseURL + "api/posts",
   },
   profiles: {},
-  friends: {},
+  friends: {
+    getRequests: (userId: string) => databaseURL + `api/users/${userId}/friends/requests`,
+    sendRequest: databaseURL + "api/users/friends/request",
+    acceptRequest: (requestId: string) => databaseURL + `api/users/friends/accept/${requestId}`,
+    denyRequest: (requestId: string) => databaseURL + `api/users/friends/deny/${requestId}`,
+    removeFriend: databaseURL + "api/users/remove",
+    getFriends: (userId: string) => databaseURL + `api/users/${userId}/friends`,
+  },
   chats: {},
   walks: {},
   users: {

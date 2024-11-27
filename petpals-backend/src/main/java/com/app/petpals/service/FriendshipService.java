@@ -125,4 +125,17 @@ public class FriendshipService {
             throw new FriendshipRequestNotFoundException("Friend relationship does not exist.");
         }
     }
+
+    @Transactional
+    public List<Friendship> getFriendRequestsForUser(String userId) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+
+        if (optionalUser.isPresent()) {
+            // Fetch all requests where the user is the sender or receiver
+            return friendshipRepository.findAllBySenderIdOrReceiverId(userId, userId);
+        } else {
+            throw new UserNotFoundException("User not found.");
+        }
+    }
+
 }
