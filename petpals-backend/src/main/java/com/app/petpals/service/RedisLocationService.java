@@ -35,6 +35,12 @@ public class RedisLocationService {
             // Store visibility
             redisTemplate.opsForValue().set(VISIBILITY_KEY + userId, visibility);
 
+            // If visibility is FRIENDS_ONLY, store the friends list in Redis
+            if ("FRIENDS_ONLY".equalsIgnoreCase(visibility) && friends != null && !friends.isEmpty()) {
+                String friendsKey = FRIENDS_LIST_KEY + userId; // Define a key for the friends list
+                redisTemplate.opsForList().rightPushAll(friendsKey, friends);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Failed to initialize walk metadata for user: " + userId);
@@ -85,7 +91,7 @@ public class RedisLocationService {
         }
     }
 
-    // Find nearby users with visibility rules applied
+    // Find nearby users with visibility rules applied - users that I can see on the walk
     public List<LocationResponse> findNearbyUsersWithVisibility(String userId, double latitude, double longitude, double radiusKm) {
         List<LocationResponse> nearbyUsers = findNearbyUsers(latitude, longitude, radiusKm);
 
@@ -97,10 +103,15 @@ public class RedisLocationService {
                     if (user.getUserId().equals(userId)) {
                         return true;
                     }
+
                     // Handle visibility rules for other users
-                    if ("PRIVATE".equals(visibility)) {
+                    if ("PRIVATE".equalsIgnoreCase(visibility)) {
                         return false;
+                    } else if ("FRIENDS_ONLY".equalsIgnoreCase(visibility)) {
+                        List<String> theirFriendsList = redisTemplate.opsForList().range(FRIENDS_LIST_KEY + user.getUserId(), 0, -1);
+                        return theirFriendsList != null && theirFriendsList.contains(userId);
                     }
+
                     return true; // Allow PUBLIC users
                 })
                 .collect(Collectors.toList());
@@ -131,11 +142,11 @@ public class RedisLocationService {
         }
     }
 
-    // Find users affected by location update, respecting visibility rules
+    // Find users affected by location update, respecting visibility rules - find users that can see me
     public List<String> findUsersAffectedByWithVisibility(String userId, double latitude, double longitude, double radiusKm) {
         // Apply the visibility settings of the user (the one updating their location)
         String visibility = getVisibility(userId);
-        if ("PRIVATE".equals(visibility)) {
+        if ("PRIVATE".equalsIgnoreCase(visibility)) {
             return Collections.emptyList();
         }
 
@@ -149,6 +160,18 @@ public class RedisLocationService {
                 .filter(affectedUserId -> !affectedUserId.equals(userId)) // Exclude the current user
                 .collect(Collectors.toList());
 
+        // if friends_only then filter out users that are not on my friends list
+        if ("FRIENDS_ONLY".equalsIgnoreCase(visibility)) {
+            List<String> friendsList = redisTemplate.opsForList().range(FRIENDS_LIST_KEY + userId, 0, -1);
+
+            if (friendsList == null || friendsList.isEmpty()) {
+                return Collections.emptyList();
+            }
+
+            return affectedUsers.stream()
+                    .filter(friendsList::contains)
+                    .collect(Collectors.toList());
+        }
 
         // If PUBLIC, all affected users can see the update
         return affectedUsers;

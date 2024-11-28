@@ -165,13 +165,12 @@ public class MQTTLocationService {
             // Store the user's location in Redis
             redisLocationService.updateLocation(userId, userLocation.getLatitude(), userLocation.getLongitude(), userLocation.getTimestamp());
 
-            // Find nearby users respecting visibility rules
+            // Find nearby users that I can see
             List<LocationResponse> nearbyUsers = redisLocationService.findNearbyUsersWithVisibility(userId, userLocation.getLatitude(), userLocation.getLongitude(), 5.0);
-
-            // Publish the updated list of nearby users to this user's topic
+            // Publish the updated list of nearby users to my topic
             publishNearbyUsers(userId, nearbyUsers);
 
-            // Find all users who would consider this user as "nearby"
+            // Find all users who would be able to see me - if private none, if public all, if friends users on my list
             List<String> affectedUsers = redisLocationService.findUsersAffectedByWithVisibility(userId, userLocation.getLatitude(), userLocation.getLongitude(), 5.0);
 
             // For each affected user, recompute their nearby list and publish updates
