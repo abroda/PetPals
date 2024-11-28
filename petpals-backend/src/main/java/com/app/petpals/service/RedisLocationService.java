@@ -12,7 +12,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,7 +23,6 @@ public class RedisLocationService {
 
     private static final String GEO_KEY = "user_locations";
     private static final String USER_METADATA_KEY = "user_metadata"; // for timestamp on location update
-    private static final String LOCATION_HISTORY_KEY_PREFIX = "location_history:";
     private static final String VISIBILITY_KEY = "visibility:";
     private static final String FRIENDS_LIST_KEY = "friends_list:";
 
@@ -31,9 +32,6 @@ public class RedisLocationService {
     // Initialize walk metadata in Redis
     public void initWalk(String userId, String visibility, List<String> friends) {
         try {
-            // Clear old location history
-            redisTemplate.delete(LOCATION_HISTORY_KEY_PREFIX + userId);
-
             // Store visibility
             redisTemplate.opsForValue().set(VISIBILITY_KEY + userId, visibility);
 
@@ -68,6 +66,25 @@ public class RedisLocationService {
 //        redisTemplate.opsForSet().remove(FRIENDS_LIST_KEY + userId, friendId);
 //    }
 
+    // Add or update a user's location
+    public void updateLocation(String userId, double latitude, double longitude, LocalDateTime timestamp) {
+        try {
+            // Validate coordinates
+            if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+                throw new IllegalArgumentException("Invalid latitude/longitude values");
+            }
+
+            // Update geospatial data
+            redisTemplate.opsForGeo().add(GEO_KEY, new RedisGeoCommands.GeoLocation<>(userId, new Point(longitude, latitude)));
+
+            // Update metadata
+            redisTemplate.opsForHash().put(USER_METADATA_KEY, userId, timestamp.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Failed to update location for user: " + userId);
+        }
+    }
+
     // Find nearby users with visibility rules applied
     public List<LocationResponse> findNearbyUsersWithVisibility(String userId, double latitude, double longitude, double radiusKm) {
         List<LocationResponse> nearbyUsers = findNearbyUsers(latitude, longitude, radiusKm);
@@ -87,33 +104,6 @@ public class RedisLocationService {
                     return true; // Allow PUBLIC users
                 })
                 .collect(Collectors.toList());
-    }
-
-    // Add or update a user's location
-    public void updateLocation(String userId, double latitude, double longitude, LocalDateTime timestamp) {
-        try {
-            // Validate coordinates
-            if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
-                throw new IllegalArgumentException("Invalid latitude/longitude values");
-            }
-
-            // Update geospatial data
-            redisTemplate.opsForGeo().add(GEO_KEY, new RedisGeoCommands.GeoLocation<>(userId, new Point(longitude, latitude)));
-
-            // Update metadata
-            redisTemplate.opsForHash().put(USER_METADATA_KEY, userId, timestamp.toString());
-
-            // Append to location history
-            Map<String, Object> location = Map.of(
-                    "latitude", latitude,
-                    "longitude", longitude,
-                    "timestamp", timestamp.toString()
-            );
-            redisTemplate.opsForList().rightPush(LOCATION_HISTORY_KEY_PREFIX + userId, objectMapper.writeValueAsString(location));
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Failed to update location for user: " + userId);
-        }
     }
 
     // Find nearby users within a radius (in km)
@@ -197,43 +187,11 @@ public class RedisLocationService {
         }
     }
 
-    // Get location history
-    public List<LocationResponse> getLocationHistory(String userId) {
-        try {
-            List<String> locationJsons = redisTemplate.opsForList().range(LOCATION_HISTORY_KEY_PREFIX + userId, 0, -1);
-            if (locationJsons == null || locationJsons.isEmpty()) {
-                return Collections.emptyList();
-            }
-            return locationJsons.stream()
-                    .map(json -> {
-                        try {
-                            Map<String, Object> location = objectMapper.readValue(json, Map.class);
-                            return new LocationResponse(
-                                    userId,
-                                    (double) location.get("latitude"),
-                                    (double) location.get("longitude"),
-                                    LocalDateTime.parse((String) location.get("timestamp"))
-                            );
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            return null;
-                        }
-                    })
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Failed to retrieve location history for user: " + userId);
-            return Collections.emptyList();
-        }
-    }
-
     // Clear all data for a user's walk
     public void clearWalkData(String userId) {
         try {
             redisTemplate.opsForGeo().remove(GEO_KEY, userId);
             redisTemplate.opsForHash().delete(USER_METADATA_KEY, userId);
-            redisTemplate.delete(LOCATION_HISTORY_KEY_PREFIX + userId);
             redisTemplate.delete(VISIBILITY_KEY + userId);
             redisTemplate.delete(FRIENDS_LIST_KEY + userId);
         } catch (Exception e) {

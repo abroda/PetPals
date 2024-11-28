@@ -3,6 +3,7 @@ package com.app.petpals.service;
 import com.app.petpals.entity.WalkSession;
 import com.app.petpals.payload.location.LocationResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import jakarta.annotation.PostConstruct;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -80,7 +82,6 @@ public class MQTTLocationService {
             // Fetch friends list if FRIENDS_ONLY
             List<String> friends = "FRIENDS_ONLY".equals(visibility) ? friendshipService.getAcceptedFriendshipsForUser(userId) : null;
 
-
             // Start a new walk session in the database
             String sessionId = walkSessionService.startWalk(userId, startTime);
 
@@ -102,6 +103,15 @@ public class MQTTLocationService {
                     .atZone(ZoneId.systemDefault())
                     .toLocalDateTime();
 
+            JsonNode locationsNode = node.get("locations");
+            List<LocationResponse> locations = new ArrayList<>();
+            if (locationsNode.isArray()) {
+                for (JsonNode locationNode : locationsNode) {
+                    LocationResponse location = parseLocation(userId, locationNode.asText());
+                    locations.add(location);
+                }
+            }
+
             // Retrieve the most recent active session from the database
             WalkSession session = walkSessionService.findActiveSessionByUserId(userId);
             if (session == null) {
@@ -110,9 +120,6 @@ public class MQTTLocationService {
             }
 
             String sessionId = session.getId();
-
-            // Retrieve location history from Redis (for distance calculation)
-            List<LocationResponse> locations = redisLocationService.getLocationHistory(userId);
 
             // Calculate total distance walked
             double totalDistance = redisLocationService.calculateTotalDistance(locations);
