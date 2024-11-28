@@ -61,4 +61,8 @@ public class Dog {
             inverseJoinColumns = @JoinColumn(name = "group_walk_id")
     )
     private List<GroupWalk> joinedWalks;
+
+    @JsonIgnore
+    @ManyToMany(mappedBy = "dogs")
+    private List<WalkSession> walkSessions;
 }

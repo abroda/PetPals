@@ -1,5 +1,6 @@
 package com.app.petpals.service;
 
+import com.app.petpals.entity.Dog;
 import com.app.petpals.entity.WalkSession;
 import com.app.petpals.payload.location.LocationResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MQTTLocationService {
@@ -26,13 +28,15 @@ public class MQTTLocationService {
     private final WalkSessionService walkSessionService;
     private final ObjectMapper objectMapper;
     private final FriendshipService friendshipService;
+    private final DogService dogService;
 
-    public MQTTLocationService(MqttClient mqttClient, RedisLocationService redisLocationService, WalkSessionService walkSessionService, ObjectMapper objectMapper, FriendshipService friendshipService) {
+    public MQTTLocationService(MqttClient mqttClient, RedisLocationService redisLocationService, WalkSessionService walkSessionService, ObjectMapper objectMapper, FriendshipService friendshipService, DogService dogService) {
         this.mqttClient = mqttClient;
         this.redisLocationService = redisLocationService;
         this.walkSessionService = walkSessionService;
         this.objectMapper = objectMapper;
         this.friendshipService = friendshipService;
+        this.dogService = dogService;
         this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
@@ -82,8 +86,26 @@ public class MQTTLocationService {
             // Fetch friends list if FRIENDS_ONLY
             List<String> friends = "FRIENDS_ONLY".equals(visibility) ? friendshipService.getAcceptedFriendshipsForUser(userId) : null;
 
+            // Fetch dog IDs from the payload
+            List<String> dogIds = new ArrayList<>();
+            if (node.has("dogIds") && node.get("dogIds").isArray()) {
+                for (JsonNode dogIdNode : node.get("dogIds")) {
+                    dogIds.add(dogIdNode.asText());
+                }
+            }
+
+            // Validate and fetch Dog entities
+            List<Dog> dogs = dogService.getDogsByUserId(userId).stream()
+                    .filter(dog -> dogIds.contains(dog.getId()))
+                    .toList();
+
+            // Check if all requested dog IDs were found
+            if (dogs.size() != dogIds.size()) {
+                throw new IllegalArgumentException("One or more dog IDs are invalid or do not belong to the user");
+            }
+
             // Start a new walk session in the database
-            String sessionId = walkSessionService.startWalk(userId, startTime);
+            String sessionId = walkSessionService.startWalk(userId, startTime, dogs);
 
             // Initialize metadata in Redis
             redisLocationService.initWalk(userId, visibility, friends);

@@ -1,13 +1,17 @@
 package com.app.petpals.service;
 
+import com.app.petpals.entity.Dog;
 import com.app.petpals.entity.User;
 import com.app.petpals.entity.WalkSession;
+import com.app.petpals.repository.DogRepository;
 import com.app.petpals.repository.WalkSessionRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -15,14 +19,16 @@ public class WalkSessionService {
     private final UserService userService;
     private final WalkSessionRepository walkSessionRepository;
 
-    public String startWalk(String userId, LocalDateTime startTime) {
+    @Transactional
+    public String startWalk(String userId, LocalDateTime startTime, List<Dog> dogs) {
         User user = userService.getById(userId);
         WalkSession session = new WalkSession();
         session.setUser(user);
         session.setStartTime(startTime);
         session.setDistance(BigDecimal.valueOf(0.0));
-        walkSessionRepository.save(session);
-        return session.getId();
+        session.setDogs(dogs);
+        WalkSession savedSession = walkSessionRepository.save(session);
+        return savedSession.getId();
     }
 
     public void endWalk(String sessionId, LocalDateTime endTime, double totalDistance) {
