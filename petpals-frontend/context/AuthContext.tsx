@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { apiPaths } from "@/constants/config/api";
 import asyncStorage from "@react-native-async-storage/async-storage/src/AsyncStorage";
-import { serverQuery } from "@/hooks/serverQuery";
+import { serverQuery } from "@/helpers/serverQuery";
 
 export type AuthContextType = {
   isLoading: boolean;
@@ -70,7 +70,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       console.log("[AuthContext] User ID available in AuthContext:", userId);
     }
   }, [userId]);
-
 
   // const codeRegex = "^[0-9]{6}$";
 
@@ -190,7 +189,11 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     });
   };
 
-  const login = async (email: string, password: string, asyncAbortController?: AbortController) => {
+  const login = async (
+    email: string,
+    password: string,
+    asyncAbortController?: AbortController
+  ) => {
     return await serverQuery({
       path: apiPaths.auth.login,
       payload: {

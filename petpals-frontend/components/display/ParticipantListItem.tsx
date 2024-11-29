@@ -1,8 +1,8 @@
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { ThemedScrollView } from "../basic/containers/ThemedScrollView";
 import { ThemedView, ThemedViewProps } from "../basic/containers/ThemedView";
 import { ThemedText } from "../basic/ThemedText";
-import { Participant } from "@/context/WalksContext";
+import { Entity } from "@/context/WalksContext";
 import PetAvatar from "../navigation/PetAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { ViewProps } from "react-native-ui-lib";
@@ -11,8 +11,8 @@ import HorizontalView from "../basic/containers/HorizontalView";
 import UserAvatar from "../navigation/UserAvatar";
 
 export const ParticipantListItem = (props: {
-  user?: Participant;
-  dogsParticipating?: Participant[];
+  user?: Entity;
+  dogsParticipating?: Entity[];
 }) => {
   const user = props.user ?? { id: "d1", name: "Example", avatarURL: "" };
   const dogsParticipating = props.dogsParticipating ?? [

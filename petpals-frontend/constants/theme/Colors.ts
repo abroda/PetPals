@@ -2,7 +2,7 @@ const primaryColor = "#b4d779"; //accentGreen;
 const secondaryColor = "#1c302a"; //lightGreen;
 const tertiaryColor = "#162521";
 const accentColor = "#52b8a3"; //accentTeal;
-const alarmColor = "#c54835";
+const alarmColor = "#ef503e"; //"#c54835";
 
 const lightColor = "#FAF7EA";
 const lightGreyColor = "#d3dedc";

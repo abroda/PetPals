@@ -8,7 +8,7 @@ import { ThemedButton } from "@/components/inputs/ThemedButton";
 import { Href, router } from "expo-router";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import { Pressable } from "react-native";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { PostType } from "@/context/PostContext";
 import { usePosts } from "@/hooks/usePosts";
 import { useAuth } from "@/hooks/useAuth";

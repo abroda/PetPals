@@ -1,8 +1,8 @@
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { ThemedScrollView } from "../basic/containers/ThemedScrollView";
 import { ThemedView, ThemedViewProps } from "../basic/containers/ThemedView";
 import { ThemedText } from "../basic/ThemedText";
-import { Participant } from "@/context/WalksContext";
+import { Entity } from "@/context/WalksContext";
 import PetAvatar from "../navigation/PetAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { ViewProps } from "react-native-ui-lib";
@@ -10,7 +10,7 @@ import { ViewProps } from "react-native-ui-lib";
 export const DogPicker = (
   props: ThemedViewProps & {
     header: string;
-    dogs: Participant[];
+    dogs: Entity[];
     dogsParticipating: string[];
     onToggle: (dogId: string) => void;
   }

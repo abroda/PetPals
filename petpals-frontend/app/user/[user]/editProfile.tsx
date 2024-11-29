@@ -2,11 +2,20 @@ import { ThemedText } from "@/components/basic/ThemedText";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import { useNavigation, usePathname } from "expo-router";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
-import React, { useCallback, useContext, useEffect, useLayoutEffect, useState } from "react";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from "react";
 import { SafeAreaView, View, TextInput, Alert, Pressable } from "react-native";
 import { UserContext } from "@/context/UserContext";
-import { heightPercentageToDP, widthPercentageToDP } from "react-native-responsive-screen";
+import {
+  heightPercentageToDP,
+  widthPercentageToDP,
+} from "react-native-responsive-screen";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import * as ImagePicker from "expo-image-picker";
@@ -26,12 +35,8 @@ export default function EditUserProfileScreen() {
   const themeColors = ThemeColors[colorScheme];
 
   // Context and States
-  const {
-    getUserById,
-    userProfile,
-    updateUser,
-    changeUserAvatar,
-  } = useContext(UserContext);
+  const { getUserById, userProfile, updateUser, changeUserAvatar } =
+    useContext(UserContext);
 
   const [usernameText, setUsernameText] = useState("");
   const [descriptionText, setDescriptionText] = useState("");
@@ -65,11 +70,20 @@ export default function EditUserProfileScreen() {
     const updateSuccessful = await updateUser(userProfile.id, updatedData);
 
     if (updateSuccessful) {
-      Alert.alert("Profile Updated", "Your profile has been successfully updated.");
+      Alert.alert(
+        "Profile Updated",
+        "Your profile has been successfully updated."
+      );
     } else {
       Alert.alert("Update Failed", "There was an error updating your profile.");
     }
-  }, [usernameText, descriptionText, userProfile.id, userProfile.visibility, updateUser]);
+  }, [
+    usernameText,
+    descriptionText,
+    userProfile.id,
+    userProfile.visibility,
+    updateUser,
+  ]);
 
   // Update Header Options
   useLayoutEffect(() => {
@@ -122,7 +136,13 @@ export default function EditUserProfileScreen() {
     <SafeAreaView style={{ flex: 1 }}>
       <ThemedView style={{ flex: 1 }}>
         {/* Avatar Section */}
-        <View style={{ flex: 3, width: widthPercentageToDP(100), backgroundColor: themeColors.secondary }} />
+        <View
+          style={{
+            flex: 3,
+            width: widthPercentageToDP(100),
+            backgroundColor: themeColors.secondary,
+          }}
+        />
         <View
           style={{
             flex: 7,
@@ -132,7 +152,9 @@ export default function EditUserProfileScreen() {
             backgroundColor: themeColors.tertiary,
           }}
         >
-          <View style={{ alignItems: "center", marginTop: heightPercentToPD(-15) }}>
+          <View
+            style={{ alignItems: "center", marginTop: heightPercentToPD(-15) }}
+          >
             <UserAvatar
               size={heightPercentToPD(7)}
               userId={userProfile?.id}
@@ -142,7 +164,12 @@ export default function EditUserProfileScreen() {
           </View>
 
           {/* Inputs */}
-          <View style={{ width: widthPercentageToDP(80), paddingVertical: heightPercentToPD(1) }}>
+          <View
+            style={{
+              width: widthPercentageToDP(80),
+              paddingVertical: heightPercentToPD(1),
+            }}
+          >
             {/* Username */}
             <ThemedText>Username</ThemedText>
             <TextInput
@@ -188,7 +215,10 @@ export default function EditUserProfileScreen() {
             />
 
             {/* Buttons */}
-            <ThemedButton label="Change avatar" onPress={handleAvatarChange} />
+            <ThemedButton
+              label="Change avatar"
+              onPress={handleAvatarChange}
+            />
           </View>
         </View>
       </ThemedView>

@@ -3,7 +3,7 @@ import { Image } from "react-native-ui-lib";
 import { ThemedText } from "@/components/basic/ThemedText";
 import { AnimatedTextSwap } from "../animated/AnimatedTextSwap";
 import HorizontalView from "@/components/basic/containers/HorizontalView";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 
 export default function AppLogo(props: {
   size: number;

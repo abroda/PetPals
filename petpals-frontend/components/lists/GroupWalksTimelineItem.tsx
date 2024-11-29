@@ -2,7 +2,7 @@ import { ThemedView } from "@/components/basic/containers/ThemedView";
 
 import { useState } from "react";
 import { ThemedText } from "../basic/ThemedText";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { GroupWalk } from "@/context/WalksContext";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import { FlatList } from "react-native-gesture-handler";
@@ -38,9 +38,7 @@ export default function GroupWalksTimelineItem({
         header = format(date, "EEEE | ");
       }
 
-      header += date.toLocaleDateString(undefined, {
-        dateStyle: "short",
-      });
+      header += date.toLocaleDateString(undefined, { dateStyle: "short" });
     } else {
       header = "No plans yet";
     }

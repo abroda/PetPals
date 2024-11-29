@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useLayoutEffect, useContext } from "react";
+import React, {
+  useEffect,
+  useState,
+  useLayoutEffect,
+  useContext,
+  useCallback,
+} from "react";
 import {
   SafeAreaView,
   Pressable,
@@ -12,7 +18,7 @@ import { ThemedText } from "@/components/basic/ThemedText";
 import HorizontalView from "@/components/basic/containers/HorizontalView";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 import UserAvatar from "@/components/navigation/UserAvatar";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { usePathname, router } from "expo-router";
 import { Image } from "react-native-ui-lib";
 import { Dog, useDog } from "@/context/DogContext";
@@ -66,20 +72,21 @@ export default function PetProfileScreen() {
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToPD = useWindowDimension("height");
 
+  const fetchDogData = useCallback(async () => {
+    try {
+      const dogData = await getDogById(petId ?? "");
+      setDog(dogData ?? null);
+      setImageUri(dogData?.imageUrl ?? null);
+      console.log("[Pet/Index] Dog was fetched: ", dogData);
+    } catch (error) {
+      console.error("Failed to fetch dog data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   // Get dog data
   useEffect(() => {
-    const fetchDogData = async () => {
-      try {
-        const dogData = await getDogById(petId ?? "");
-        setDog(dogData ?? null);
-        setImageUri(dogData?.imageUrl ?? null);
-        console.log("[Pet/Index] Dog was fetched: ", dogData);
-      } catch (error) {
-        console.error("Failed to fetch dog data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchDogData();
   }, [petId]);
 

@@ -4,8 +4,7 @@ import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import { Href, router, useNavigation, usePathname } from "expo-router";
-import Comment from "@/components/display/Comment";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CommentSection from "@/components/lists/CommentSection";
 import {
@@ -15,68 +14,28 @@ import {
   useRef,
   useState,
 } from "react";
-import { testComments, testData, testParticipants } from "../testData";
 import HorizontalView from "@/components/basic/containers/HorizontalView";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
-import PetAvatar from "@/components/navigation/PetAvatar";
 import { useWalks } from "@/hooks/useWalks";
 import TagList from "@/components/lists/TagList";
-import {
-  CommentContent,
-  GroupWalkTag,
-  Participant,
-} from "@/context/WalksContext";
-import { useTextStyle } from "@/hooks/theme/useTextStyle";
+import { CommentContent, GroupWalk, Participant } from "@/context/WalksContext";
 import { LocationMap } from "@/components/display/LocationMap";
 import GroupWalkParticipationDialog from "@/components/dialogs/GroupWalkParticipationDialog";
 import { useDog } from "@/context/DogContext";
-import { useUser } from "@/hooks/useUser";
 
 export default function GroupWalkScreen({ walkId }: { walkId: string }) {
-  const [groupWalkInfo, setGroupWalkInfo] = useState(testData[4]);
-  const [comments, setComments] = useState(testComments);
-  const [participants, setParticipants] = useState(testParticipants);
-  const [dogs, setDogs] = useState([
-    {
-      id: "1",
-      name: "Alex",
-      avatarURL:
-        "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
-    } as Participant,
-    {
-      id: "2",
-      name: "Boxer",
-      avatarURL:
-        "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
-    } as Participant,
-    {
-      id: "3",
-      name: "Cutie",
-      avatarURL:
-        "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
-    } as Participant,
-    {
-      id: "4",
-      name: "Anna",
-      avatarURL:
-        "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
-    } as Participant,
-    {
-      id: "5",
-      name: "BIbi",
-      avatarURL:
-        "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
-    } as Participant,
-  ]);
-  const [dogsParticipating, setDogsParticipating] = useState(["4"]);
-  const [joinDialogVisible, setJoinDialogVisible] = useState(false);
-  const { isProcessing, getGroupWalkList, shouldRefresh, addGroupWalkComment } =
-    useWalks();
+  const [groupWalk, setGroupWalk] = useState<GroupWalk | null>(null);
+  const [comments, setComments] = useState([] as CommentContent[]);
+
+  const [dialogVisible, setDialogVisible] = useState(false);
+  const { getGroupWalk, addGroupWalkComment } = useWalks();
   const { userId } = useAuth();
   const { getDogsByUserId } = useDog();
-  const [joined, setJoined] = useState(groupWalkInfo.joinedWithPets.length > 0);
+  const [joined, setJoined] = useState(
+    groupWalk?.participants.some((elem) => elem.userId === userId)
+  );
 
   const buttonColor = useThemeColor("link");
   const iconColor = useThemeColor("text");
@@ -91,15 +50,11 @@ export default function GroupWalkScreen({ walkId }: { walkId: string }) {
     return () => {
       asyncAbortController.current?.abort();
     };
-  }, [shouldRefresh]);
+  }, []);
 
   const getData = useCallback(async () => {
     asyncAbortController.current = new AbortController();
-    let result = await getGroupWalkList(
-      "all",
-      [],
-      asyncAbortController.current
-    );
+    let result = await getGroupWalk(walkId, asyncAbortController.current);
 
     if (result.success) {
       setGroupWalksData(result.returnValue);
@@ -150,12 +105,12 @@ export default function GroupWalkScreen({ walkId }: { walkId: string }) {
           textStyleOptions={{ size: "veryBig", weight: "semibold" }}
           style={{ marginBottom: percentToDP(4) }}
         >
-          {groupWalkInfo.title}
+          {groupWalk?.title ?? ""}
         </ThemedText>
         <HorizontalView style={{ marginBottom: percentToDP(6) }}>
           <HorizontalView justifyOption="flex-start">
             <UserAvatar
-              userId={groupWalkInfo.creator.id}
+              userId={groupWalk?.creator.userId ?? ""}
               size={12}
               doLink={true}
             />
@@ -164,7 +119,7 @@ export default function GroupWalkScreen({ walkId }: { walkId: string }) {
                 textStyleOptions={{ size: "small", weight: "bold" }}
                 style={{ marginLeft: percentToDP(1) }}
               >
-                {groupWalkInfo.creator.name}
+                {groupWalk?.creator.username ?? ""}
               </ThemedText>
               <ThemedText
                 textStyleOptions={{ size: "tiny" }}
@@ -178,12 +133,12 @@ export default function GroupWalkScreen({ walkId }: { walkId: string }) {
             textStyleOptions={{ size: "medium", weight: "semibold" }}
             textColorName="primary"
           >
-            {groupWalkInfo.datetime.toLocaleTimeString(undefined, {
+            {groupWalk?.datetime.toLocaleTimeString(undefined, {
               timeStyle: "short",
             })}
 
             {" | "}
-            {groupWalkInfo.datetime.toLocaleDateString(undefined, {
+            {groupWalk?.datetime.toLocaleDateString(undefined, {
               dateStyle: "short",
             })}
           </ThemedText>
@@ -195,27 +150,27 @@ export default function GroupWalkScreen({ walkId }: { walkId: string }) {
           Description
         </ThemedText>
         <ThemedText style={{ marginBottom: percentToDP(7) }}>
-          {groupWalkInfo.description}
+          {groupWalk?.description}
         </ThemedText>
 
         <TagList
-          tags={groupWalkInfo.tags}
+          tags={groupWalk?.tags ?? []}
           style={{ marginBottom: percentToDP(12) }}
         />
 
         <ThemedView style={{ marginBottom: percentToDP(8) }}>
-          {groupWalkInfo.creator.id !== userId &&
-            groupWalkInfo.creator.id !== "me" && (
+          {groupWalk?.creator.userId !== userId &&
+            groupWalk?.creator.userId !== "me" && (
               <ThemedButton
                 label={joined ? "Joined" : "Join"}
                 iconName={joined ? "checkmark-done" : "add"}
                 iconSize={22}
                 iconOnRight
-                onPress={() => setJoinDialogVisible(true)}
+                onPress={() => setDialogVisible(true)}
               />
             )}
-          {(groupWalkInfo.creator.id === userId ||
-            groupWalkInfo.creator.id === "me") && (
+          {(groupWalk?.creator.userId === userId ||
+            groupWalk?.creator.userId === "me") && (
             <ThemedButton
               label="Edit"
               backgroundColorName="primary"
@@ -235,17 +190,20 @@ export default function GroupWalkScreen({ walkId }: { walkId: string }) {
           </ThemedText>
           <HorizontalView>
             <HorizontalView justifyOption="flex-start">
-              {participants.slice(0, 5).map((user) => (
-                <UserAvatar
-                  userId={user.id}
-                  size={10}
-                  doLink={true}
-                  style={{ marginRight: percentToDP(-1) }}
-                />
-              ))}
+              {(groupWalk?.participants ?? [])
+                .slice(0, 5)
+                .map((user: Participant) => (
+                  <UserAvatar
+                    userId={user.userId}
+                    imageUrl={user.imageURL}
+                    size={10}
+                    doLink={true}
+                    style={{ marginRight: percentToDP(-1) }}
+                  />
+                ))}
               <ThemedText style={{ marginLeft: percentToDP(3) }}>
-                {participants.length > 5
-                  ? `+${participants.length - 5} more`
+                {(groupWalk?.participants ?? []).length > 5
+                  ? `+${(groupWalk?.participants ?? []).length - 5} more`
                   : ""}
               </ThemedText>
             </HorizontalView>
@@ -270,30 +228,30 @@ export default function GroupWalkScreen({ walkId }: { walkId: string }) {
           }}
         />
       </ThemedScrollView>
-      {joinDialogVisible && (
+      {dialogVisible && (
         <GroupWalkParticipationDialog
           walkId={walkId}
-          joined={joined}
-          dogs={dogs}
-          dogsParticipating={groupWalkInfo.joinedWithPets.map(
-            (elem) => elem.id
-          )}
+          joined={joined ?? false}
+          dogs={
+            [] //get user's dogs
+          }
+          dogsParticipating={[]}
           onSave={(dogsParticipating) => {
             if (!joined) {
-              setParticipants([
-                { id: userId, name: "", avatarURL: "" } as Participant,
-                ...participants,
-              ]);
+              //   setParticipants([
+              //     { id: userId, name: "", imageURL: "" } as Entity,
+              //     ...participants,
+              //   ]);
               setJoined(true);
             }
-            setDogsParticipating(dogsParticipating);
+            // setDogsParticipating(dogsParticipating);
           }}
           onLeave={() => {
             setJoined(false);
-            setParticipants(participants.filter((elem) => elem.id !== userId));
-            setDogsParticipating([]);
+            // setParticipants(participants.filter((elem) => elem.id !== userId));
+            // setDogsParticipating([]);
           }}
-          onDismiss={() => setJoinDialogVisible(false)}
+          onDismiss={() => setDialogVisible(false)}
         />
       )}
     </SafeAreaView>

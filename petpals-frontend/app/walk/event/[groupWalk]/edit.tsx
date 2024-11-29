@@ -23,7 +23,7 @@ import {
   TextFieldRef,
 } from "react-native-ui-lib";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useWalks } from "@/hooks/useWalks";
 import { testData } from "../testData";
@@ -37,6 +37,7 @@ import PetAvatar from "@/components/navigation/PetAvatar";
 import { ScrollView } from "react-native-gesture-handler";
 import { DogPicker } from "@/components/inputs/DogPicker";
 import { LocationInput } from "@/components/inputs/LocationInput";
+import DeleteDialog from "@/components/dialogs/DeleteDialog";
 
 export default function EditGroupWalkScreen(props: { create?: boolean }) {
   const now = new Date();
@@ -56,10 +57,11 @@ export default function EditGroupWalkScreen(props: { create?: boolean }) {
   const [currentTag, setCurrentTag] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [dialogVisible, setDialogVisible] = useState(false);
 
   const { userId } = useAuth();
   const creatorId = userId;
-  const { isProcessing, createGroupWalk, getGroupWalk, updateGroupWalk } =
+  const { createGroupWalk, getGroupWalk, updateGroupWalk, deleteGroupWalk } =
     useWalks();
 
   const buttonColor = useThemeColor("link");
@@ -97,10 +99,11 @@ export default function EditGroupWalkScreen(props: { create?: boolean }) {
     let data = {
       id: walkId,
       creator: {
-        id: userId,
-        name: "",
-        avatarURL: "",
-      },
+        userId: userId,
+        username: "",
+        imageURL: "",
+        dogs: [],
+      } as Participant,
       title: title,
       description: description,
       datetime: datetime,
@@ -108,7 +111,7 @@ export default function EditGroupWalkScreen(props: { create?: boolean }) {
       tags: tags,
       participantsCount: 0,
       petsCount: 0,
-      joinedWithPets: [],
+      participants: [],
     } as GroupWalk;
 
     if (props.create) {
@@ -126,39 +129,18 @@ export default function EditGroupWalkScreen(props: { create?: boolean }) {
     }
   };
 
+  const deleteWalk = async () => {
+    let result = await deleteGroupWalk(walkId, asyncAbortController.current);
+    if (result.success) {
+      router.dismiss();
+      router.dismiss();
+    } else {
+      setErrorMessage(result.returnValue);
+    }
+  };
+
   const [dogsParticipating, setDogsParticipating] = useState([] as string[]);
-  let dogs = [
-    {
-      id: "1",
-      name: "Alex",
-      avatarURL:
-        "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
-    } as Participant,
-    {
-      id: "2",
-      name: "Boxer",
-      avatarURL:
-        "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
-    } as Participant,
-    {
-      id: "3",
-      name: "Cutie",
-      avatarURL:
-        "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
-    } as Participant,
-    {
-      id: "4",
-      name: "Anna",
-      avatarURL:
-        "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
-    } as Participant,
-    {
-      id: "5",
-      name: "BIbi",
-      avatarURL:
-        "http://images2.fanpop.com/image/photos/13800000/Cute-Dogs-dogs-13883179-2560-1931.jpg",
-    } as Participant,
-  ];
+  let dogs = [] as Participant[];
 
   return (
     <SafeAreaView>
@@ -307,9 +289,35 @@ export default function EditGroupWalkScreen(props: { create?: boolean }) {
             )}
             iconOnRight
             onPress={submit}
+            style={{ marginBottom: percentToDP(3) }}
           />
+          {!props.create && (
+            <ThemedButton
+              shape="long"
+              label="Delete"
+              textColorName="text"
+              backgroundColorName="alarm"
+              iconSource={() => (
+                <ThemedIcon
+                  name="trash-outline"
+                  size={20}
+                  colorName="text"
+                  style={{ marginLeft: percentToDP(2) }}
+                />
+              )}
+              iconOnRight
+              onPress={() => setDialogVisible(true)}
+            />
+          )}
         </ThemedView>
       </ThemedScrollView>
+      {dialogVisible && (
+        <DeleteDialog
+          message={"Delete walk?"}
+          onDismiss={() => setDialogVisible(false)}
+          onSubmit={() => deleteGroupWalk(walkId, asyncAbortController.current)}
+        />
+      )}
     </SafeAreaView>
   );
 }

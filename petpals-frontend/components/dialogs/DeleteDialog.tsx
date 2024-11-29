@@ -11,7 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import ThemedLoadingIndicator from "../decorations/animated/ThemedLoadingIndicator";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { KeyboardAwareScrollView, TextFieldRef } from "react-native-ui-lib";
 import { GroupWalkTag, tagRegex } from "@/context/WalksContext";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
@@ -75,8 +75,21 @@ export default function DeleteDialog({
             marginTop: percentToDP(3),
             marginBottom: percentToDP(2),
             alignSelf: "center",
+            width: percentToDP(75),
           }}
           onPress={submit}
+        />
+        <ThemedButton
+          label="Cancel"
+          textColorName="textOnSecondary"
+          backgroundColorName="secondary"
+          style={{
+            marginTop: percentToDP(3),
+            marginBottom: percentToDP(2),
+            alignSelf: "center",
+            width: percentToDP(75),
+          }}
+          onPress={onDismiss}
         />
       </KeyboardAwareScrollView>
     </ThemedDialog>

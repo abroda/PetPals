@@ -1,21 +1,13 @@
 import { ThemedText } from "@/components/basic/ThemedText";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
-import { Href, router, useNavigation } from "expo-router";
-import {
-  ReactElement,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
+import { Href, router } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import Timeline from "react-native-timeline-flatlist";
 import { GroupWalk } from "@/context/WalksContext";
-import { testData } from "../walk/event/testData";
 import { useWalks } from "@/hooks/useWalks";
 import GroupWalksTimelineItem from "@/components/lists/GroupWalksTimelineItem";
 import HorizontalView from "@/components/basic/containers/HorizontalView";
@@ -24,56 +16,78 @@ import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView
 import { format } from "date-fns";
 import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoadingIndicator";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
+import { RefreshControl } from "react-native-gesture-handler";
+import Toast from "react-native-ui-lib/src/incubator/toast";
+import ThemedToast from "@/components/popups/ThemedToast";
 
 export default function GroupWalksScheduleScreen() {
   const now = new Date();
   const today = now.valueOf() - (now.valueOf() % (24 * 3600 * 1000));
   const weekLimit = today + 7 * 24 * 3600 * 1000;
 
-  const [groupWalksData, setGroupWalksData] = useState(null);
+  const { getGroupWalks, shouldRefreshSchedule } = useWalks();
+
+  const [groupWalks, setGroupWalks] = useState<GroupWalk[] | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+  const asyncAbortController = useRef<AbortController | undefined>(
+    new AbortController()
+  );
 
   const timelineColor = useThemeColor("text");
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToDP = useWindowDimension("height");
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState("");
-
-  const { getGroupWalkList, shouldRefresh } = useWalks();
-
-  const asyncAbortController = useRef<AbortController | undefined>(
-    new AbortController()
-  );
-
   useEffect(() => {
-    if (shouldRefresh || !groupWalksData) {
-      setIsLoading(true);
+    if (shouldRefreshSchedule || !groupWalks) {
       getData();
     }
 
     return () => {
       asyncAbortController.current?.abort();
     };
-  }, [shouldRefresh]);
+  }, [shouldRefreshSchedule]);
 
   const getData = useCallback(async () => {
+    setIsLoading(true);
+    setErrorMessage("");
     asyncAbortController.current = new AbortController();
 
-    let result = await getGroupWalkList(
-      "joined",
-      [],
+    let result = await getGroupWalks(
+      // get walks created by user
+      "created",
       asyncAbortController.current
     );
 
     if (result.success) {
-      setGroupWalksData(result.returnValue);
+      let walks = result.returnValue as GroupWalk[];
+
+      result = await getGroupWalks(
+        // get walks joined by user
+        "joined",
+        asyncAbortController.current
+      );
+
+      if (result.success) {
+        let newWalks = walks.concat(result.returnValue as GroupWalk[]);
+
+        newWalks.sort(
+          (a, b) =>
+            new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
+        );
+
+        setGroupWalks(newWalks);
+      } else {
+        setErrorMessage(result.returnValue);
+      }
     } else {
       setErrorMessage(result.returnValue);
     }
 
     setIsLoading(false);
-  }, [groupWalksData]);
+  }, [groupWalks]);
 
+  // separate walk for current week into buckets, one for each day (even if empty)
   const getThisWeekData = (groupWalks: GroupWalk[]) => {
     return [0, 1, 2, 3, 4, 5, 6].map((i) => {
       let day = new Date(today + i * 24 * 3600 * 1000);
@@ -88,14 +102,14 @@ export default function GroupWalksScheduleScreen() {
     });
   };
 
+  // separate walks into buckets by day (only for exisiting)
   const getFollowingWeeksData = (groupWalks: GroupWalk[]) => {
     let buckets = groupWalks.reduce(
       (buckets: Record<string, GroupWalk[]>, walk: GroupWalk) => {
         if (walk.datetime.valueOf() > weekLimit) {
           let date = walk.datetime.toLocaleDateString(undefined, {
-            dateStyle: "medium",
+            dateStyle: "short",
           });
-          //format(walk.datetime, "dd.MM.yyyy");
           if (!buckets[date]) {
             buckets[date] = [];
           }
@@ -114,14 +128,20 @@ export default function GroupWalksScheduleScreen() {
   };
 
   let thisWeek = getThisWeekData(
-    groupWalksData ?? testData.filter((elem) => elem.joinedWithPets.length > 0)
+    groupWalks ?? [] // testData.filter((elem) => elem.joinedWithPets.length > 0)
   );
   let followingWeeks = getFollowingWeeksData(
-    groupWalksData ?? testData.filter((elem) => elem.joinedWithPets.length > 0)
+    groupWalks ?? [] //testData.filter((elem) => elem.joinedWithPets.length > 0)
   );
 
   return (
     <SafeAreaView>
+      <ThemedToast
+        visible={!isLoading && errorMessage.length > 0}
+        message={errorMessage} // {"Check your internet connection."}
+        preset="offline"
+        aboveTabBar
+      />
       <ThemedView
         colorName="background"
         style={{
@@ -139,126 +159,132 @@ export default function GroupWalksScheduleScreen() {
         >
           Group walks schedule
         </ThemedText>
-        {isLoading && (
-          <ThemedLoadingIndicator
-            size="large"
-            fullScreen
-            message="Loading..."
-          />
-        )}
-        {!isLoading && groupWalksData !== null && (
-          <ThemedView
-            style={{
-              alignSelf: "center",
-              alignItems: "center",
-              margin: "auto",
-            }}
-          >
-            <ThemedIcon
-              name="close-circle-outline"
-              colorName="disabled"
-              size={percentToDP(12)}
+
+        <ThemedScrollView
+          style={{
+            paddingHorizontal: percentToDP(4),
+            marginTop: percentToDP(5),
+          }}
+          refreshControl={
+            <RefreshControl
+              refreshing={isLoading}
+              onRefresh={getData}
+              colors={[useThemeColor("accent"), useThemeColor("text")]}
             />
-            <ThemedText
-              textStyleOptions={{ size: "big" }}
-              textColorName="disabled"
-              style={{ alignSelf: "center", marginTop: percentToDP(3) }}
-            >
-              {errorMessage ?? "Network error"}
-            </ThemedText>
-          </ThemedView>
-        )}
-        {!isLoading && groupWalksData === null && (
-          <ThemedScrollView
-            style={{
-              paddingHorizontal: percentToDP(4),
-              marginTop: percentToDP(5),
-            }}
-          >
-            <HorizontalView>
-              <ThemedText
-                textStyleOptions={{ size: "big" }}
-                backgroundColorName="transparent"
-                style={{ marginBottom: percentToDP(5) }}
-              >
-                This week
-              </ThemedText>
-              <ThemedButton
-                textStyleOptions={{ size: "small" }}
-                backgroundColorName="transparent"
-                textColorName="link"
-                border
-                shape="short"
-                label="Join a walk"
-                iconName={"arrow-forward"}
-                iconOnRight={true}
-                onPress={() => router.push("/walk/event/find" as Href<string>)}
-                style={{
-                  marginBottom: percentToDP(2),
-                  width: percentToDP(30),
-                }}
-              ></ThemedButton>
-            </HorizontalView>
-            <Timeline
-              style={{
-                flex: 1,
-                marginTop: percentToDP(2),
-                marginLeft: percentToDP(-14),
-              }}
-              circleColor={timelineColor}
-              lineColor={timelineColor}
-              renderDetail={(rowData, sectionID, rowID) => (
-                <GroupWalksTimelineItem
-                  date={rowData.datetime}
-                  groupWalks={rowData.description}
-                  today={new Date()}
-                  markCreated
-                  thisWeek
-                />
-              )}
-              timeContainerStyle={{ maxWidth: 0 }}
-              data={thisWeek}
-              isUsingFlatlist={false}
-            />
+          }
+        >
+          <HorizontalView>
             <ThemedText
               textStyleOptions={{ size: "big" }}
               backgroundColorName="transparent"
               style={{ marginBottom: percentToDP(5) }}
             >
-              Following weeks
+              This week
             </ThemedText>
-            <Timeline
+            <ThemedButton
+              textStyleOptions={{ size: "small" }}
+              backgroundColorName="transparent"
+              textColorName="link"
+              border
+              shape="short"
+              label="Join a walk"
+              iconName={"arrow-forward"}
+              iconOnRight={true}
+              onPress={() => router.push("/walk/event/find" as Href<string>)}
               style={{
-                flex: 1,
-                marginTop: percentToDP(2),
-                marginBottom: percentToDP(5),
-                marginLeft: percentToDP(-14),
+                marginBottom: percentToDP(2),
+                width: percentToDP(30),
               }}
-              circleColor={timelineColor}
-              lineColor={timelineColor}
-              renderDetail={(rowData, sectionID, rowID) => (
-                <GroupWalksTimelineItem
-                  date={rowData.datetime}
-                  groupWalks={rowData.description}
-                  today={now}
-                />
-              )}
-              timeContainerStyle={{ maxWidth: 0 }}
-              data={
-                followingWeeks.length > 0
-                  ? followingWeeks
-                  : [
-                      {
-                        time: "",
-                        datetime: "",
-                        description: [],
-                      },
-                    ]
-              } //?? testData)}
-              isUsingFlatlist={false}
-            />
-          </ThemedScrollView>
-        )}
+            ></ThemedButton>
+          </HorizontalView>
+          {groupWalks === null && !isLoading && (
+            <ThemedView
+              style={{
+                alignSelf: "center",
+                alignItems: "center",
+                alignContent: "center",
+                marginTop: heightPercentToDP(35),
+                margin: "auto",
+              }}
+            >
+              <ThemedIcon
+                name="alert-circle-outline"
+                colorName="disabled"
+                size={percentToDP(12)}
+              />
+
+              <ThemedText
+                textStyleOptions={{ size: "big" }}
+                textColorName="disabled"
+                style={{ alignSelf: "center", marginTop: percentToDP(3) }}
+              >
+                Unable to load schedule
+              </ThemedText>
+            </ThemedView>
+          )}
+          {groupWalks !== null && (
+            <>
+              <Timeline
+                style={{
+                  flex: 1,
+                  marginTop: percentToDP(2),
+                  marginLeft: percentToDP(-14),
+                }}
+                circleColor={timelineColor}
+                lineColor={timelineColor}
+                renderDetail={(rowData, sectionID, rowID) => (
+                  <GroupWalksTimelineItem
+                    date={rowData.datetime}
+                    groupWalks={rowData.description}
+                    today={new Date()}
+                    markCreated
+                    thisWeek
+                  />
+                )}
+                timeContainerStyle={{ maxWidth: 0 }}
+                data={thisWeek}
+                isUsingFlatlist={false}
+              />
+              <ThemedText
+                textStyleOptions={{ size: "big" }}
+                backgroundColorName="transparent"
+                style={{ marginBottom: percentToDP(5) }}
+              >
+                Following weeks
+              </ThemedText>
+              <Timeline
+                style={{
+                  flex: 1,
+                  marginTop: percentToDP(2),
+                  marginBottom: percentToDP(5),
+                  marginLeft: percentToDP(-14),
+                }}
+                circleColor={timelineColor}
+                lineColor={timelineColor}
+                renderDetail={(rowData, sectionID, rowID) => (
+                  <GroupWalksTimelineItem
+                    date={rowData.datetime}
+                    groupWalks={rowData.description}
+                    today={now}
+                  />
+                )}
+                timeContainerStyle={{ maxWidth: 0 }}
+                data={
+                  followingWeeks.length > 0
+                    ? followingWeeks
+                    : [
+                        {
+                          time: "",
+                          datetime: "",
+                          description: [],
+                        },
+                      ]
+                }
+                isUsingFlatlist={false}
+              />
+            </>
+          )}
+        </ThemedScrollView>
       </ThemedView>
     </SafeAreaView>
   );

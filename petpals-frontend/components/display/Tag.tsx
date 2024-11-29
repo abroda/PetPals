@@ -7,7 +7,7 @@ import {
 import { Button, ButtonProps, ButtonSize, Card } from "react-native-ui-lib";
 import { TextStyleOptions, useTextStyle } from "@/hooks/theme/useTextStyle";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { Ionicons } from "@expo/vector-icons";
 import { ComponentProps } from "react";
 import { router } from "expo-router";

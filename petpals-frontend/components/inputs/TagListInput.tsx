@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ThemedText } from "../basic/ThemedText";
 import { ThemedTextField } from "../inputs/ThemedTextField";
 
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { TextFieldRef } from "react-native-ui-lib";
 import { GroupWalkTag, tagRegex } from "@/context/WalksContext";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";

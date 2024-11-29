@@ -2,7 +2,7 @@ import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView
 import { ThemedText } from "@/components/basic/ThemedText";
 import FriendActivityListItem from "@/components/display/FriendActivityListItem";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 

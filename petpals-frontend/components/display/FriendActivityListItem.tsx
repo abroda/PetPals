@@ -7,7 +7,7 @@ import { router } from "expo-router";
 import { ThemedText } from "../basic/ThemedText";
 import HorizontalView from "../basic/containers/HorizontalView";
 import UserAvatar from "../navigation/UserAvatar";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 
 export default function FriendActivityListItem(props: { username: string }) {
   const [selected, setSelected] = useState("");

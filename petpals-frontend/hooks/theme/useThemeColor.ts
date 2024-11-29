@@ -10,11 +10,11 @@ export function useThemeColor(
   colorName?: ColorName,
   themedColor?: ThemedColor
 ) {
-  const theme = useColorScheme() ?? "light";
+  //const theme = useColorScheme() ?? "light";
 
   if (themedColor) {
-    return themedColor[theme];
+    return themedColor["dark"]; //theme];
   } else {
-    return ThemeColors[theme][colorName ?? "text"];
+    return ThemeColors["dark"][colorName ?? "text"]; //theme][colorName ?? "text"];
   }
 }

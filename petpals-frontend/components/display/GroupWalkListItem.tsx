@@ -7,7 +7,7 @@ import { Href, router } from "expo-router";
 import { ThemedText } from "../basic/ThemedText";
 import HorizontalView from "../basic/containers/HorizontalView";
 import UserAvatar from "../navigation/UserAvatar";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { GroupWalk } from "@/context/WalksContext";
 import { Card, View } from "react-native-ui-lib";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
@@ -31,15 +31,14 @@ export default function GroupWalkListItem({
   const { userId } = useAuth();
   const backgroundColor = useThemeColor("accent") + "28";
   const borderColor = useThemeColor(
-    markCreated &&
-      (groupWalk.creator.id === userId || groupWalk.creator.id === "me")
+    markCreated && groupWalk.creator.userId === userId
       ? "accent"
-      : markJoined && groupWalk.joinedWithPets.length > 0
+      : markJoined &&
+        groupWalk.participants.some((elem) => elem.userId === (userId ?? ""))
       ? "primary"
       : "transparent"
   );
 
-  // TODO: fix when backend works
   const getWalkId = () => {
     return groupWalk.id;
   };
@@ -57,7 +56,7 @@ export default function GroupWalkListItem({
   };
 
   const getParticipantsCount = () => {
-    return groupWalk.participantsCount;
+    return groupWalk.participants.length;
   };
 
   return (

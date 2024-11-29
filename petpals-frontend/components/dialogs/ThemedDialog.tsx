@@ -1,4 +1,4 @@
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { ThemedView } from "../basic/containers/ThemedView";
 import { Dimensions, Modal, ModalProps } from "react-native";
 

@@ -23,14 +23,14 @@ import {
   TextFieldRef,
 } from "react-native-ui-lib";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useWalks } from "@/hooks/useWalks";
 import { isLoaded } from "expo-font";
 import { LocationMap } from "@/components/display/LocationMap";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import TagList from "@/components/lists/TagList";
-import { GroupWalk, Participant } from "@/context/WalksContext";
+import { GroupWalk, Entity } from "@/context/WalksContext";
 import TagListInput from "@/components/inputs/TagListInput";
 import ThemedDialog from "./ThemedDialog";
 import PetAvatar from "../navigation/PetAvatar";
@@ -39,7 +39,7 @@ import { DogPicker } from "../inputs/DogPicker";
 export default function GroupWalkParticipationDialog(props: {
   walkId: string;
   joined: boolean;
-  dogs: Participant[];
+  dogs: Entity[];
   dogsParticipating: string[];
   onSave: (dogsParticipating: string[]) => void;
   onLeave: () => void;

@@ -8,7 +8,7 @@ import React from "react";
 import { Text, View, Linking } from "react-native";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 
 export default function TermsOfUseDialog({ onDismiss = () => {} }) {
   const percentToDP = useWindowDimension("shorter");

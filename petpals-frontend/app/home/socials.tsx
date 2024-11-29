@@ -9,7 +9,7 @@ import ChatListItem from "@/components/display/ChatListItem";
 import FriendRequestListItem from "@/components/display/FriendRequestListItem";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 
 export default function FriendsScreen() {

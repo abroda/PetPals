@@ -1,4 +1,4 @@
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
 import {
   ThemedView,
@@ -16,28 +16,9 @@ import { useLayoutEffect } from "react";
 import { useNavigation } from "expo-router";
 
 export default function GroupWalkParticipantsScreen(props: {
-  participantsWithDogs?: (any & { dogsParticipating: Participant[] })[];
+  participantsWithDogs?: Participant[];
 }) {
-  const participantsWithDogs = props.participantsWithDogs ?? [
-    {
-      id: "1",
-      name: "Example1",
-      avatarURL: "",
-      dogs: [{ id: "d1", name: "Cutie", avatarURL: "" } as Participant],
-    },
-    {
-      id: "1",
-      name: "Example1",
-      avatarURL: "",
-      dogs: [{ id: "d1", name: "Cutie", avatarURL: "" } as Participant],
-    },
-    {
-      id: "1",
-      name: "Example1",
-      avatarURL: "",
-      dogs: [{ id: "d1", name: "Cutie", avatarURL: "" } as Participant],
-    },
-  ];
+  const participantsWithDogs = props.participantsWithDogs ?? [];
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToDP = useWindowDimension("height");
 
@@ -62,7 +43,7 @@ export default function GroupWalkParticipantsScreen(props: {
           renderItem={(row) => (
             <ParticipantListItem
               user={row.item as Participant}
-              dogsParticipating={row.item.dogsParticipating}
+              dogsParticipating={row.item.dogs}
             />
           )}
           style={{

@@ -5,7 +5,7 @@ import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoad
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import { router } from "expo-router";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { SafeAreaView } from "react-native-safe-area-context";
 import HorizontalView from "@/components/basic/containers/HorizontalView";
 import { useEffect } from "react";
@@ -15,7 +15,6 @@ export default function WelcomeScreen() {
   const { isLoading, isProcessing, userId, authToken } = useAuth();
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToDP = useWindowDimension("height");
-
 
   useEffect(() => {
     if (!isLoading && !isProcessing && userId && authToken) {

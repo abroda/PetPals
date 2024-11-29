@@ -1,37 +1,28 @@
 import { useEffect, useRef, useState } from "react";
 import { ThemedText } from "../basic/ThemedText";
-import { ThemedScrollView } from "../basic/containers/ThemedScrollView";
 import { ThemedButton } from "../inputs/ThemedButton";
 import { ThemedTextField } from "../inputs/ThemedTextField";
-import HorizontalView from "../basic/containers/HorizontalView";
-import { router } from "expo-router";
 import ThemedDialog from "./ThemedDialog";
-import validators from "react-native-ui-lib/src/components/textField/validators";
-import { useAuth } from "@/hooks/useAuth";
-import { useTextStyle } from "@/hooks/theme/useTextStyle";
-import { useThemeColor } from "@/hooks/theme/useThemeColor";
-import ThemedLoadingIndicator from "../decorations/animated/ThemedLoadingIndicator";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { KeyboardAwareScrollView, TextFieldRef } from "react-native-ui-lib";
 import { GroupWalkTag, tagRegex } from "@/context/WalksContext";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
-import { Tag } from "../display/Tag";
 import TagList from "../lists/TagList";
 
 export default function FilterTagsDialog({
   onDismiss = () => {},
   onSubmit = (tags: GroupWalkTag[]) => {},
-  emailFilled = "",
   filter = [] as GroupWalkTag[],
 }) {
   const [tags, setTags] = useState(filter);
   const [tagInput, setTagInput] = useState("");
   const [validationMessage, setValidationMessage] = useState("");
-  const percentToDP = useWindowDimension("shorter");
 
   const tagInputRef = useRef<TextFieldRef>(null);
-
   const asyncAbortController = useRef<AbortController | undefined>(undefined);
+
+  const percentToDP = useWindowDimension("shorter");
+
   useEffect(() => {
     asyncAbortController.current = new AbortController();
     return () => {
@@ -39,22 +30,23 @@ export default function FilterTagsDialog({
     };
   }, []);
 
-  function validate() {
+  const validate = () => {
     return tagInputRef.current?.validate();
-  }
+  };
 
-  async function addTag() {
+  const addTag = () => {
     if (validate()) {
-      setTags([...tags, tagInput]);
+      let newTags = [...tags, tagInput];
+      setTags(newTags);
       setTagInput("");
     }
-  }
+  };
 
-  async function submit() {
+  const submit = () => {
     setValidationMessage("");
     onSubmit(tags);
     onDismiss();
-  }
+  };
 
   return (
     <ThemedDialog onDismiss={onDismiss}>
@@ -127,7 +119,7 @@ export default function FilterTagsDialog({
           }}
         />
         <ThemedButton
-          label="Save"
+          label="Apply"
           shape="half"
           textColorName="textOnPrimary"
           style={{

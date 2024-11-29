@@ -1,4 +1,4 @@
-export const databaseURL = "http://192.168.88.42:8080/";
+export const databaseURL = "http://192.168.0.104:8080/";
 
 export const apiPaths = {
   auth: {
@@ -48,15 +48,17 @@ export const apiPaths = {
     walk: (walkId: string) => databaseURL + `api/groupWalks/${walkId}`, // GET=get, PUT=update, DELETE=delete
     join: (walkId: string) => databaseURL + `api/groupWalks/${walkId}/join`,
     leave: (walkId: string) => databaseURL + `api/groupWalks/${walkId}/leave`,
-    walkTags: databaseURL + "api/groupWalks/tags", // GET
-    list: (tags: string[]) =>
-      databaseURL +
-      `api/groupWalks${
-        tags.length == 0
+    tagSuggestions: (input: string) =>
+      databaseURL + `api/groupWalks/tags/suggest/${input}`, // GET
+    //(tags: string[]) =>
+    list: (page: number, size: number, tags?: string[]) =>
+      databaseURL + //"api/groupWalks/list?tags=a, ś",
+      `api/groupWalks/list?page=${page}&size=${size}&sort=datetime,asc${
+        !tags || tags.length == 0
           ? ""
           : tags.reduce(
               (prev, s, i) => prev + s + (i < tags.length - 1 ? "," : ""),
-              "tags?="
+              "&tags="
             )
       }`, // GET - filtering walks by tags - pageable
     listJoined: (userId: string) =>

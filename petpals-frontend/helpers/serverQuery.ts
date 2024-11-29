@@ -55,7 +55,7 @@ export const serverQuery = async ({
       mode: "cors", // always uses cors
       headers: headers,
       body:
-        method == "GET" || method == "HEAD"
+        payload && (method == "GET" || method == "HEAD")
           ? undefined
           : JSON.stringify(payload),
       signal: abortController.signal, // aborts fetch when signal is received (timeout or send by the component on unmount)

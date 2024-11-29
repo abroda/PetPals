@@ -13,10 +13,9 @@ import Geocoder from "react-native-geocoding";
 import { Href, router } from "expo-router";
 import HorizontalView from "../basic/containers/HorizontalView";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import axios from "axios";
-import { reverseGeocodeAsync } from "expo-location";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { ThemedTextField } from "./ThemedTextField";
 

@@ -13,7 +13,7 @@ import { ThemedButton } from "@/components/inputs/ThemedButton";
 import TermsOfUseDialog from "@/components/dialogs/TermsOfUseDialog";
 import { Checkbox, TextFieldRef } from "react-native-ui-lib";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RegisterScreen() {
@@ -97,7 +97,7 @@ export default function RegisterScreen() {
       <ThemedScrollView
         style={{
           height: heighPercentToDP(100),
-          paddingTop: percentToDP(10),
+          paddingTop: percentToDP(15),
         }}
       >
         {dialogVisible && (

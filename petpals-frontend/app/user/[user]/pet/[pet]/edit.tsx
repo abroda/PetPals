@@ -1,4 +1,9 @@
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from "react";
 import {
   SafeAreaView,
   TextInput,
@@ -21,16 +26,13 @@ import {
 } from "react-native-responsive-screen";
 import { useNavigation } from "expo-router";
 
-
 // @ts-ignore
 import DogPlaceholderImage from "@/assets/images/dog_placeholder_theme-color-fair.png";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 
-import {useColorScheme} from "@/hooks/theme/useColorScheme";
-import {ThemeColors} from "@/constants/theme/Colors";
-import {ThemedButton} from "@/components/inputs/ThemedButton";
-
-
+import { useColorScheme } from "@/hooks/theme/useColorScheme";
+import { ThemeColors } from "@/constants/theme/Colors";
+import { ThemedButton } from "@/components/inputs/ThemedButton";
 
 export default function EditDogProfileScreen() {
   const path = usePathname();
@@ -44,7 +46,7 @@ export default function EditDogProfileScreen() {
 
   // Colours
   const colorScheme = useColorScheme();
-// @ts-ignore
+  // @ts-ignore
   const themeColors = ThemeColors[colorScheme];
 
   // State
@@ -55,24 +57,25 @@ export default function EditDogProfileScreen() {
   const [newTag, setNewTag] = useState("");
   const [imageUri, setImageUri] = useState<string | null>(null);
 
+  const fetchDogData = useCallback(async () => {
+    try {
+      console.log("[Pet/Edit] Dog owner username: ", username);
+      console.log("[Pet/Edit] Fetching data for dog with id: ", petId);
+      const dogData = await getDogById(petId);
+      setDog(dogData);
+      setName(dogData?.name ?? "");
+      setDescription(dogData?.description ?? "");
+      setTags(dogData?.tags.map((tag) => tag.tag) ?? []);
+      setImageUri(dogData?.imageUrl ?? null);
+      console.log("[Pet/Edit] Dog data fetched: ", dogData);
+    } catch (error) {
+      console.error("[Pet/Edit] Failed to fetch dog data:", error);
+    }
+  }, []);
+
   // Fetch the dog's data
   // @ts-ignore
   useEffect(() => {
-    const fetchDogData = async () => {
-      try {
-        console.log("[Pet/Edit] Dog owner username: ", username);
-        console.log("[Pet/Edit] Fetching data for dog with id: ", petId);
-        const dogData = await getDogById(petId);
-        setDog(dogData);
-        setName(dogData?.name ?? "");
-        setDescription(dogData?.description ?? "");
-        setTags(dogData?.tags.map((tag) => tag.tag) ?? []);
-        setImageUri(dogData?.imageUrl ?? null);
-        console.log("[Pet/Edit] Dog data fetched: ", dogData);
-      } catch (error) {
-        console.error("[Pet/Edit] Failed to fetch dog data:", error);
-      }
-    };
     fetchDogData();
   }, [petId]);
 
@@ -210,7 +213,6 @@ export default function EditDogProfileScreen() {
                 justifyContent: "space-evenly",
                 alignContent: "space-evenly",
                 backgroundColor: themeColors.tertiary,
-
               }}
             >
               {/* Dog Name */}
@@ -332,25 +334,34 @@ export default function EditDogProfileScreen() {
                 placeholderTextColor="#AAA"
               />
 
-              <ThemedButton label="Add Tag" onPress={handleAddTag} color={themeColors.primary} style={{
-                width: widthPercentageToDP(80),
-                backgroundColor: 'transparent',
-                paddingVertical: percentToDP(2),
-                borderRadius: percentToDP(4),
-                borderWidth: 1,
-                borderColor: themeColors.primary,
-                marginBottom: heightPercentageToDP(1),
-              }}/>
-              <ThemedButton label="Save" onPress={handleSave} color={themeColors.primary} style={{
-                width: widthPercentageToDP(80),
-                backgroundColor: 'transparent',
-                paddingVertical: percentToDP(2),
-                borderRadius: percentToDP(4),
-                borderWidth: 1,
-                borderColor: themeColors.primary,
-                marginBottom: heightPercentageToDP(1),
-              }}/>
-
+              <ThemedButton
+                label="Add Tag"
+                onPress={handleAddTag}
+                color={themeColors.primary}
+                style={{
+                  width: widthPercentageToDP(80),
+                  backgroundColor: "transparent",
+                  paddingVertical: percentToDP(2),
+                  borderRadius: percentToDP(4),
+                  borderWidth: 1,
+                  borderColor: themeColors.primary,
+                  marginBottom: heightPercentageToDP(1),
+                }}
+              />
+              <ThemedButton
+                label="Save"
+                onPress={handleSave}
+                color={themeColors.primary}
+                style={{
+                  width: widthPercentageToDP(80),
+                  backgroundColor: "transparent",
+                  paddingVertical: percentToDP(2),
+                  borderRadius: percentToDP(4),
+                  borderWidth: 1,
+                  borderColor: themeColors.primary,
+                  marginBottom: heightPercentageToDP(1),
+                }}
+              />
             </View>
           </View>
         </ScrollView>

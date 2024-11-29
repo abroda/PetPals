@@ -6,7 +6,7 @@ import NotificationItem from "../display/NotificationItem";
 import { Href } from "expo-router";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
 import { Pressable } from "react-native";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 export default function NotificationsPopup({ onDismiss = () => {} }) {
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToDP = useWindowDimension("height");

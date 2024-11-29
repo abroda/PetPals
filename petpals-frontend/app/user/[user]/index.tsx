@@ -20,7 +20,7 @@ import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import PetAvatar from "@/components/navigation/PetAvatar";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { UserContext } from "@/context/UserContext";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import { useAuth } from "@/hooks/useAuth";
@@ -70,19 +70,22 @@ export default function UserProfileScreen() {
     getUserById(username);
   }, [username]);
 
-  const fetchDogs = async () => {
+  const fetchDogs = useCallback(async () => {
     const userDogs = await getDogsByUserId(userId ?? "");
     const sortedDogs = userDogs
       .map((dog) => ({ ...dog, name: dog.name || "Unknown Dog" }))
       .sort((a, b) => a.name.localeCompare(b.name));
     setDogs(sortedDogs);
-  };
+  }, [userId]); // Only re-run if userId changes
 
   // Refresh data whenever the screen is focused
   useFocusEffect(
-    useCallback(() => {
+    // useCallback(() => { // -- using a hook within a hook is not recommended
+    //   fetchDogs();
+    // }, [userId]) // Only re-run if userId changes
+    () => {
       fetchDogs();
-    }, [userId]) // Only re-run if userId changes
+    }
   );
 
   useLayoutEffect(() => {

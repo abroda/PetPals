@@ -8,7 +8,7 @@ import AppLogo from "@/components/decorations/static/AppLogo";
 import { useAuth } from "@/hooks/useAuth";
 import { Href, router, useLocalSearchParams } from "expo-router";
 import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoadingIndicator";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TextFieldRef } from "react-native-ui-lib";
 

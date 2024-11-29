@@ -23,8 +23,14 @@ public class GroupWalk {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "location")
+    @Column(name = "locationName")
     private String location;
+
+    @Column(name = "latitude")
+    private float latitude;
+
+    @Column(name = "longitude")
+    private float longitude;
 
     @Column(name = "datetime")
     private LocalDateTime datetime;

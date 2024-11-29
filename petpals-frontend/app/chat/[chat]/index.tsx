@@ -2,7 +2,7 @@ import HorizontalView from "@/components/basic/containers/HorizontalView";
 import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
 import { ThemedText } from "@/components/basic/ThemedText";
 import UserAvatar from "@/components/navigation/UserAvatar";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { usePathname } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 

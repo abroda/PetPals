@@ -12,7 +12,7 @@ import { ThemedScrollView } from "../basic/containers/ThemedScrollView";
 import { Href, router } from "expo-router";
 import HorizontalView from "../basic/containers/HorizontalView";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 

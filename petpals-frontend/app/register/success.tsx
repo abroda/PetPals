@@ -9,7 +9,7 @@ import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import { router } from "expo-router";
 import validators from "react-native-ui-lib/src/components/textField/validators";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoadingIndicator";
 
 export default function RegisterSuccessScreen() {

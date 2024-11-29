@@ -1,7 +1,7 @@
 import React, { createContext, FC, ReactNode, useState } from "react";
 import { apiPaths } from "@/constants/config/api";
 import { useAuth } from "@/hooks/useAuth";
-import { serverQuery } from "@/hooks/serverQuery";
+import { serverQuery } from "@/helpers/serverQuery";
 
 export type PostContextType = {
   isProcessing: boolean;

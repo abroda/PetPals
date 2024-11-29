@@ -11,7 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import ThemedLoadingIndicator from "../decorations/animated/ThemedLoadingIndicator";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { TextFieldRef } from "react-native-ui-lib";
 
 export default function ResetPasswordDialog({

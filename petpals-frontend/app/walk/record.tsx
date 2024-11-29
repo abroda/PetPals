@@ -5,7 +5,7 @@ import { ThemedButton } from "@/components/inputs/ThemedButton";
 import PetAvatar from "@/components/navigation/PetAvatar";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { Href, router } from "expo-router";
 import { Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";

@@ -6,7 +6,7 @@ import { Avatar, View, Text } from "react-native-ui-lib";
 import { useState } from "react";
 import { Link, router } from "expo-router";
 import { ThemedText } from "../basic/ThemedText";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 
 export default function FriendListItem(props: { username: string }) {
   const [selected, setSelected] = useState("");

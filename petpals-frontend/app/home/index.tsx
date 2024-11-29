@@ -2,10 +2,10 @@ import HorizontalView from "@/components/basic/containers/HorizontalView";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 import AppLogo from "@/components/decorations/static/AppLogo";
 import { useAuth } from "@/hooks/useAuth";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
-import {useContext, useState} from "react";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
+import { useContext, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {FlatList, Pressable, StyleSheet, View} from "react-native";
+import { FlatList, Pressable, StyleSheet, View } from "react-native";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import PostFeed from "@/components/lists/PostFeed";
@@ -18,12 +18,10 @@ import { useUser } from "@/hooks/useUser";
 import SearchBar from "@/components/inputs/SearchBar";
 import UserListItem from "@/components/lists/UserListItem";
 import UserSearchList from "@/components/lists/UserSearchList";
-import {widthPercentageToDP} from "react-native-responsive-screen";
-import {ColorName} from "react-native-ui-lib";
+import { widthPercentageToDP } from "react-native-responsive-screen";
+import { ColorName } from "react-native-ui-lib";
 
 export default function HomeScreen() {
-
-
   const [notificationsVisible, setNotificationsVisible] = useState(false);
 
   // For User Search
@@ -37,8 +35,13 @@ export default function HomeScreen() {
 
   // User Info
   const { userId } = useAuth();
-  const { userProfile, isProcessing, getUserById, responseMessage, searchUsers } = useUser();
-
+  const {
+    userProfile,
+    isProcessing,
+    getUserById,
+    responseMessage,
+    searchUsers,
+  } = useUser();
 
   // Fetches all users
   const fetchUsers = async (query: string) => {
@@ -58,7 +61,6 @@ export default function HomeScreen() {
       setIsSearching(false);
     }
   };
-
 
   // For User search
   const handleSearch = async (query: string, context: string) => {
@@ -84,15 +86,12 @@ export default function HomeScreen() {
   //   }
   // };
 
-
-
   return (
     <SafeAreaView>
       <ThemedView
         colorName="secondary"
         style={{ height: heightPercentToDP(100) }}
       >
-
         <ThemedView
           colorName="secondary"
           style={{ height: heightPercentToDP(10) }}
@@ -156,53 +155,76 @@ export default function HomeScreen() {
         <SearchBar
           onSearch={handleSearch}
           contexts={["posts", "users"]} // Define your search contexts
-          onClear={()=>{setIsSearching(false); setSearchQuery("")}}
+          onClear={() => {
+            setIsSearching(false);
+            setSearchQuery("");
+          }}
         />
-
 
         {/* Conditional Rendering: User Search Results or Post Feed */}
         {isSearching && searchResults.length > 0 ? (
-          <View style={{
-            width: widthPercentageToDP(90),
-            height: heightPercentToDP(70),
-            alignContent: 'center',
-            justifyContent: 'center',
-            marginHorizontal: 'auto',
-            backgroundColor: 'transparent',
-          }}>
-            <UserSearchList users={searchResults}/>
-            <ThemedButton label={"Close search"} onPress={() => {setIsSearching(false); setSearchQuery("")} } style={{
-              padding: 0,
-              minHeight: heightPercentToDP(6),
-              maxHeight: heightPercentToDP(7),
-              maxWidth: widthPercentageToDP(90),
-              alignSelf: 'center',
-            }}/>
+          <View
+            style={{
+              width: widthPercentageToDP(90),
+              height: heightPercentToDP(70),
+              alignContent: "center",
+              justifyContent: "center",
+              marginHorizontal: "auto",
+              backgroundColor: "transparent",
+            }}
+          >
+            <UserSearchList users={searchResults} />
+            <ThemedButton
+              label={"Close search"}
+              onPress={() => {
+                setIsSearching(false);
+                setSearchQuery("");
+              }}
+              style={{
+                padding: 0,
+                minHeight: heightPercentToDP(6),
+                maxHeight: heightPercentToDP(7),
+                maxWidth: widthPercentageToDP(90),
+                alignSelf: "center",
+              }}
+            />
           </View>
-
         ) : isSearching && searchResults.length === 0 ? (
           <ThemedView
             colorName="secondary"
             style={{
               alignItems: "center",
-              justifyContent: 'center',
+              justifyContent: "center",
               marginTop: heightPercentToDP(2),
             }}
           >
-            <ThemedIcon name="alert-circle-outline" size={40} />
+            <ThemedIcon
+              name="alert-circle-outline"
+              size={40}
+            />
 
-            <ThemedText textColorName={"primary"} backgroundColorName={'transparent'} style={{
-              marginVertical: heightPercentToDP(2),
-            }}>
+            <ThemedText
+              textColorName={"primary"}
+              backgroundColorName={"transparent"}
+              style={{
+                marginVertical: heightPercentToDP(2),
+              }}
+            >
               No users found.
             </ThemedText>
-            <ThemedButton label={"Clear search"} onPress={() => {setIsSearching(false);  setSearchQuery("")}} style={{
-              padding: 0,
-              minHeight: heightPercentToDP(6),
-              maxHeight: heightPercentToDP(7),
-              maxWidth: widthPercentageToDP(50),
-            }}/>
-
+            <ThemedButton
+              label={"Clear search"}
+              onPress={() => {
+                setIsSearching(false);
+                setSearchQuery("");
+              }}
+              style={{
+                padding: 0,
+                minHeight: heightPercentToDP(6),
+                maxHeight: heightPercentToDP(7),
+                maxWidth: widthPercentageToDP(50),
+              }}
+            />
           </ThemedView>
         ) : (
           <PostFeed />
@@ -229,7 +251,6 @@ export default function HomeScreen() {
         {/*  }*/}
         {/*  style={styles.resultsContainer}*/}
         {/*/>*/}
-
 
         {/* POST FEED */}
         {/*<PostFeed></PostFeed>*/}

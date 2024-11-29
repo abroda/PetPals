@@ -9,12 +9,17 @@ import {
 } from "react-native";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import { ThemedText } from "@/components/basic/ThemedText";
-import { ColorName, ThemedColor, useThemeColor } from "@/hooks/theme/useThemeColor";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
-import { widthPercentageToDP, heightPercentageToDP } from "react-native-responsive-screen";
-import {ThemeColors} from "@/constants/theme/Colors";
-
-
+import {
+  ColorName,
+  ThemedColor,
+  useThemeColor,
+} from "@/hooks/theme/useThemeColor";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
+import {
+  widthPercentageToDP,
+  heightPercentageToDP,
+} from "react-native-responsive-screen";
+import { ThemeColors } from "@/constants/theme/Colors";
 
 export type SearchBarProps = {
   onSearch: (query: string, context: string) => void;
@@ -37,50 +42,59 @@ export type SearchBarProps = {
 };
 
 const SearchBar: React.FC<SearchBarProps> = ({
-                                               onSearch,
-                                               onClear,
-                                               contexts,
-                                               style={
-                                                 backgroundColor: useThemeColor("transparent"),
-                                               },
-                                               inputStyle={
-                                                 backgroundColor: useThemeColor("tertiary"),
-                                                 marginHorizontal: widthPercentageToDP(1),
-                                               },
-                                               tabStyle={
-                                                 backgroundColor: 'transparent',
-                                                 borderBottomWidth: 2,
-                                                 borderBottomColor: useThemeColor("tertiary")
-                                               },
-                                               tabTextStyle={
-                                                 backgroundColor: 'transparent',
-                                                 fontSize: 14,
-                                                 fontWeight: 'light',
-                                               },
-                                               activeTabStyle={
-                                                 backgroundColor: 'transparent',
-                                                 borderBottomWidth: 2,
-                                                 borderBottomColor: useThemeColor("primary")
-                                               },
-                                               activeTabTextStyle,
-                                               backgroundColorName = 'secondary',
-                                               backgroundThemedColor = 'secondary',
-                                               inputBackgroundColorName = 'tertiary',
-                                               inputBackgroundThemedColor =  'secondary',
-                                               inputTextColorName = 'textOnSecondary',
-                                               inputTextThemedColor,
-                                               iconColorName = 'primary',
-                                               iconThemedColor,
-                                             }) => {
+  onSearch,
+  onClear,
+  contexts,
+  style = {
+    backgroundColor: useThemeColor("transparent"),
+  },
+  inputStyle = {
+    backgroundColor: useThemeColor("tertiary"),
+    marginHorizontal: widthPercentageToDP(1),
+  },
+  tabStyle = {
+    backgroundColor: "transparent",
+    borderBottomWidth: 2,
+    borderBottomColor: useThemeColor("tertiary"),
+  },
+  tabTextStyle = {
+    backgroundColor: "transparent",
+    fontSize: 14,
+    fontWeight: "light",
+  },
+  activeTabStyle = {
+    backgroundColor: "transparent",
+    borderBottomWidth: 2,
+    borderBottomColor: useThemeColor("primary"),
+  },
+  activeTabTextStyle,
+  backgroundColorName = "secondary",
+  backgroundThemedColor = "secondary",
+  inputBackgroundColorName = "tertiary",
+  inputBackgroundThemedColor = "secondary",
+  inputTextColorName = "textOnSecondary",
+  inputTextThemedColor,
+  iconColorName = "primary",
+  iconThemedColor,
+}) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeContext, setActiveContext] = useState(contexts[0]); // Default to the first context
 
   // Colors from theme
   // @ts-ignore
-  const backgroundColor = useThemeColor(backgroundColorName, backgroundThemedColor);
+  const backgroundColor = useThemeColor(
+    backgroundColorName,
+    backgroundThemedColor
+  );
   // @ts-ignore
-  const inputBackgroundColor = useThemeColor(inputBackgroundColorName, inputBackgroundThemedColor);
-  const inputTextColor = useThemeColor(inputTextColorName, inputTextThemedColor);
+  const inputBackgroundColor = useThemeColor(
+    inputBackgroundColorName,
+    inputBackgroundThemedColor
+  );
+  const inputTextColor = useThemeColor(
+    inputTextColorName,
+    inputTextThemedColor
+  );
   const iconColor = useThemeColor(iconColorName, iconThemedColor);
 
   const percentToDP = useWindowDimension("shorter");
@@ -92,21 +106,26 @@ const SearchBar: React.FC<SearchBarProps> = ({
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: backgroundColor }, style]}>
-
+    <View
+      style={[styles.container, { backgroundColor: backgroundColor }, style]}
+    >
       {/* Context Tabs */}
-      <View style={[styles.tabsContainer,{backgroundColor: backgroundColor}]}>
+      <View
+        style={[styles.tabsContainer, { backgroundColor: backgroundColor }]}
+      >
         {contexts.map((context) => (
           <Pressable
             key={context}
             style={[
               styles.tab,
-              {backgroundColor: useThemeColor("primary", {light: "primary", dark: "primary"})},
+              {
+                backgroundColor: useThemeColor("primary", {
+                  light: "primary",
+                  dark: "primary",
+                }),
+              },
               tabStyle,
-              context === activeContext && [
-                styles.activeTab,
-                activeTabStyle,
-              ],
+              context === activeContext && [styles.activeTab, activeTabStyle],
             ]}
             onPress={() => setActiveContext(context)}
           >
@@ -130,25 +149,30 @@ const SearchBar: React.FC<SearchBarProps> = ({
       <View
         style={[
           styles.searchContainer,
-          { backgroundColor: useThemeColor("tertiary")},
+          { backgroundColor: useThemeColor("tertiary") },
         ]}
       >
-        <ThemedIcon name="search-outline" size={20} color={iconColor} style={styles.icon} />
+        <ThemedIcon
+          name="search-outline"
+          size={20}
+          color={iconColor}
+          style={styles.icon}
+        />
         <TextInput
           value={searchQuery}
           onChangeText={(text) => setSearchQuery(text)}
           onSubmitEditing={() => onSearch(searchQuery, activeContext)}
           placeholder={`Search ${activeContext}`}
-          style={[
-            styles.input,
-            { color: inputTextColor },
-            inputStyle,
-          ]}
+          style={[styles.input, { color: inputTextColor }, inputStyle]}
           placeholderTextColor={iconColor}
         />
         {searchQuery.length > 0 && (
           <Pressable onPress={handleClear}>
-            <ThemedIcon name="close-circle-outline" size={20} color={iconColor} />
+            <ThemedIcon
+              name="close-circle-outline"
+              size={20}
+              color={iconColor}
+            />
           </Pressable>
         )}
       </View>
@@ -162,7 +186,7 @@ export default SearchBar;
 const styles = StyleSheet.create({
   container: {
     width: widthPercentageToDP(90),
-    marginHorizontal: 'auto',
+    marginHorizontal: "auto",
     marginVertical: heightPercentageToDP(1),
     borderRadius: 10,
   },
@@ -178,11 +202,10 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     marginHorizontal: 5,
 
-    backgroundColor: 'red',
+    backgroundColor: "red",
   },
   activeTab: {
-
-    backgroundColor: 'red',
+    backgroundColor: "red",
   },
   tabText: {
     fontWeight: "bold",

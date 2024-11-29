@@ -22,7 +22,7 @@ import { ThemedButton } from "@/components/inputs/ThemedButton";
 import ResetPasswordDialog from "@/components/dialogs/ResetPasswordDialog";
 import { TextField, TextFieldRef } from "react-native-ui-lib";
 import { heightPercentageToDP } from "react-native-responsive-screen";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
@@ -85,7 +85,9 @@ export default function LoginScreen() {
         style={{
           flex: 1,
           margin: 0,
+
           padding: 0,
+          paddingTop: percentToDP(15),
         }}
       >
         {dialogVisible && (

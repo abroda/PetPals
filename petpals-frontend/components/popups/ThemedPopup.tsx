@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { ThemedView } from "../basic/containers/ThemedView";
 import { Dimensions, Modal, ModalProps } from "react-native";
 import { heightPercentageToDP } from "react-native-responsive-screen";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 
 export type PopupProps = ModalProps & {
   visible?: boolean;

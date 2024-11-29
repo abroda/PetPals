@@ -1,19 +1,13 @@
-import React, {
-  createContext,
-  FC,
-  ReactNode,
-  useEffect,
-  useState,
-} from "react";
+import React, { createContext, FC, ReactNode, useState } from "react";
 import { apiPaths } from "@/constants/config/api";
-import asyncStorage from "@react-native-async-storage/async-storage/src/AsyncStorage";
-import { serverQuery } from "@/hooks/serverQuery";
+import { serverQuery } from "@/helpers/serverQuery";
 import { useAuth } from "@/hooks/useAuth";
 
 export type Participant = {
-  id: string;
-  name: string;
-  avatarURL: string;
+  userId: string;
+  username: string;
+  imageURL?: string;
+  dogs?: { dogId: string; name: string; imageUrl?: string }[];
 };
 
 export type GroupWalkTag = string;
@@ -33,19 +27,27 @@ export type GroupWalk = {
   description: string;
   datetime: Date;
   location: string;
+  latitude: number;
+  longitude: number;
   tags: GroupWalkTag[];
-  participantsCount: number;
-  petsCount: number; // needed?
-  joinedWithPets: Participant[]; // empty = not joined
+  participants: Participant[];
 };
-// - will pull comments separately to speed up page load
-//comments: Comment[];
-// participants: Participant[]; // needed?
-// petsParticipating: Participant[]; // needed?
+
+export type PageInfo = {
+  size: number;
+  number: number;
+  totalElements: number;
+  totalPages: number;
+};
+
+export type PagedGroupWalks = {
+  content: GroupWalk[];
+  page: PageInfo;
+};
 
 export type WalksContextType = {
-  isProcessing: boolean;
-  shouldRefresh: boolean;
+  shouldRefreshSchedule: boolean;
+  shouldRefreshFound: boolean;
   getGroupWalk: (
     walkId: string,
     asyncAbortController?: AbortController
@@ -72,12 +74,18 @@ export type WalksContextType = {
     walkId: string,
     asyncAbortController?: AbortController
   ) => Promise<{ success: boolean; returnValue: any }>;
-  getGroupWalkTags: (
+  getTagSuggestions: (
+    input: string,
     asyncAbortController?: AbortController
   ) => Promise<{ success: boolean; returnValue: any }>;
-  getGroupWalkList: (
-    from: "all" | "joined" | "created",
+  getGroupWalks: (
+    from: "joined" | "created",
+    asyncAbortController?: AbortController
+  ) => Promise<{ success: boolean; returnValue: any }>;
+  findGroupWalks: (
     tags: GroupWalkTag[],
+    page: number,
+    elementsOnPage: number,
     asyncAbortController?: AbortController
   ) => Promise<{ success: boolean; returnValue: any }>;
   addGroupWalkComment: (
@@ -100,9 +108,9 @@ export type WalksContextType = {
 export const WalksContext = createContext<WalksContextType | null>(null);
 
 export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [shouldRefresh, setShouldRefresh] = useState(true);
-  const { userId } = useAuth();
+  const [shouldRefreshSchedule, setShouldRefreshSchedule] = useState(false);
+  const [shouldRefreshFound, setShouldRefreshFound] = useState(false);
+  const { userId, authToken } = useAuth();
 
   const getGroupWalk = async (
     walkId: string,
@@ -111,8 +119,6 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return serverQuery({
       path: apiPaths.groupWalks.walk(walkId),
       method: "GET",
-      onStart: () => setIsProcessing(true),
-      onEnd: () => setIsProcessing(false),
       asyncAbortController: asyncAbortController,
     });
   };
@@ -125,11 +131,10 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
       path: apiPaths.groupWalks.create,
       payload: data,
       onOKResponse: (payload) => {
-        setShouldRefresh(true);
+        setShouldRefreshSchedule(true);
+        setShouldRefreshFound(true);
         return payload;
       },
-      onStart: () => setIsProcessing(true),
-      onEnd: () => setIsProcessing(false),
       asyncAbortController: asyncAbortController,
     });
   };
@@ -144,11 +149,10 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
       method: "PUT",
       payload: data,
       onOKResponse: (payload) => {
-        setShouldRefresh(true);
+        setShouldRefreshSchedule(true);
+        setShouldRefreshFound(true);
         return payload;
       },
-      onStart: () => setIsProcessing(true),
-      onEnd: () => setIsProcessing(false),
       asyncAbortController: asyncAbortController,
     });
   };
@@ -161,11 +165,10 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
       path: apiPaths.groupWalks.walk(walkId),
       method: "DELETE",
       onOKResponse: (payload) => {
-        setShouldRefresh(true);
+        setShouldRefreshSchedule(true);
+        setShouldRefreshFound(true);
         return payload;
       },
-      onStart: () => setIsProcessing(true),
-      onEnd: () => setIsProcessing(false),
       asyncAbortController: asyncAbortController,
     });
   };
@@ -179,11 +182,10 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
       path: apiPaths.groupWalks.join(walkId),
       payload: joinedWithPets,
       onOKResponse: (payload) => {
-        setShouldRefresh(true);
+        setShouldRefreshSchedule(true);
+        setShouldRefreshFound(true);
         return payload;
       },
-      onStart: () => setIsProcessing(true),
-      onEnd: () => setIsProcessing(false),
       asyncAbortController: asyncAbortController,
     });
   };
@@ -195,40 +197,56 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return serverQuery({
       path: apiPaths.groupWalks.leave(walkId),
       onOKResponse: (payload) => {
-        setShouldRefresh(true);
+        setShouldRefreshSchedule(true);
+        setShouldRefreshFound(true);
         return payload;
       },
-      onStart: () => setIsProcessing(true),
-      onEnd: () => setIsProcessing(false),
       asyncAbortController: asyncAbortController,
     });
   };
 
-  const getGroupWalkTags = async (asyncAbortController?: AbortController) => {
+  const getTagSuggestions = async (
+    input: string,
+    asyncAbortController?: AbortController
+  ) => {
     return serverQuery({
-      path: apiPaths.groupWalks.walkTags,
+      path: apiPaths.groupWalks.tagSuggestions(input),
       method: "GET",
-      onStart: () => setIsProcessing(true),
-      onEnd: () => setIsProcessing(false),
       asyncAbortController: asyncAbortController,
     });
   };
 
-  const getGroupWalkList = async (
-    from: "all" | "joined" | "created",
-    tags: GroupWalkTag[],
+  const getGroupWalks = async (
+    from: "created" | "joined",
     asyncAbortController?: AbortController
   ) => {
     return serverQuery({
       path:
-        from === "all"
-          ? apiPaths.groupWalks.list(tags)
-          : from === "created"
+        from === "created"
           ? apiPaths.groupWalks.listCreated(userId ?? "")
           : apiPaths.groupWalks.listJoined(userId ?? ""),
       method: "GET",
-      onStart: () => setIsProcessing(true),
-      onEnd: () => setIsProcessing(false),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken ?? ""}`,
+      },
+      asyncAbortController: asyncAbortController,
+    });
+  };
+
+  const findGroupWalks = async (
+    tags: GroupWalkTag[],
+    page: number,
+    elementsOnPage: number,
+    asyncAbortController?: AbortController
+  ) => {
+    return serverQuery({
+      path: apiPaths.groupWalks.list(page, elementsOnPage, tags),
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken ?? ""}`,
+      },
       asyncAbortController: asyncAbortController,
     });
   };
@@ -241,15 +259,10 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return serverQuery({
       path: apiPaths.groupWalks.addComment(walkId),
       payload: data,
-      onOKResponse: (payload) => {
-        setShouldRefresh(true);
-        return payload;
-      },
-      onStart: () => setIsProcessing(true),
-      onEnd: () => setIsProcessing(false),
       asyncAbortController: asyncAbortController,
     });
   };
+
   const deleteGroupWalkComment = async (
     walkId: string,
     commentId: string,
@@ -258,12 +271,6 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return serverQuery({
       path: apiPaths.groupWalks.comment(walkId, commentId),
       method: "DELETE",
-      onOKResponse: (payload) => {
-        setShouldRefresh(true);
-        return payload;
-      },
-      onStart: () => setIsProcessing(true),
-      onEnd: () => setIsProcessing(false),
       asyncAbortController: asyncAbortController,
     });
   };
@@ -275,12 +282,6 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
   ) => {
     return serverQuery({
       path: apiPaths.groupWalks.commentToggleLike(walkId, commentId),
-      onOKResponse: (payload) => {
-        setShouldRefresh(true);
-        return payload;
-      },
-      onStart: () => setIsProcessing(true),
-      onEnd: () => setIsProcessing(false),
       asyncAbortController: asyncAbortController,
     });
   };
@@ -288,16 +289,17 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <WalksContext.Provider
       value={{
-        isProcessing,
-        shouldRefresh,
+        shouldRefreshSchedule,
+        shouldRefreshFound,
         getGroupWalk,
         createGroupWalk,
         updateGroupWalk,
         deleteGroupWalk,
         joinGroupWalk,
         leaveGroupWalk,
-        getGroupWalkTags,
-        getGroupWalkList,
+        getTagSuggestions,
+        getGroupWalks,
+        findGroupWalks,
         addGroupWalkComment,
         deleteGroupWalkComment,
         toggleLikeOnGroupWalkComment,

@@ -1,17 +1,13 @@
 import { ThemedText } from "@/components/basic/ThemedText";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
-import {
-  FlatList,
-  TouchableWithoutFeedback,
-} from "react-native-gesture-handler";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { FlatList } from "react-native-gesture-handler";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import Comment from "../display/Comment";
 import { CommentContent } from "@/context/WalksContext";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
 import { useCallback, useRef, useState } from "react";
-import { TextFieldRef, TouchableOpacity } from "react-native-ui-lib";
+import { TextFieldRef } from "react-native-ui-lib";
 import { ThemedTextField } from "../inputs/ThemedTextField";
-import { sub } from "date-fns";
 import ThemedLoadingIndicator from "../decorations/animated/ThemedLoadingIndicator";
 
 export default function CommentSection({

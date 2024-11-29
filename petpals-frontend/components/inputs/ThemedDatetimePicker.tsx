@@ -16,7 +16,7 @@ import { ThemedView } from "../basic/containers/ThemedView";
 import { Validator } from "react-native-ui-lib/src/components/textField/types";
 import { Dimensions } from "react-native";
 import { heightPercentageToDP } from "react-native-responsive-screen";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import HorizontalView from "../basic/containers/HorizontalView";
 import { useTheme } from "@react-navigation/native";
 import { ThemedText } from "../basic/ThemedText";

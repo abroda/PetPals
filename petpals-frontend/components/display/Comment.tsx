@@ -10,7 +10,7 @@ import { ThemedButton } from "../inputs/ThemedButton";
 import { useState } from "react";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
 import { Pressable } from "react-native";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { CommentContent } from "@/context/WalksContext";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import { ViewProps } from "react-native-ui-lib";

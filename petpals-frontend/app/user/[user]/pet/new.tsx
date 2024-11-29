@@ -6,28 +6,31 @@ import {
   Alert,
   Image,
   ScrollView,
-  View, Pressable,
+  View,
+  Pressable,
 } from "react-native";
 import { useDog } from "@/context/DogContext";
 import { useAuth } from "@/hooks/useAuth";
-import React, {useLayoutEffect, useState} from "react";
+import React, { useLayoutEffect, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
-import {router, useRouter} from "expo-router";
+import { router, useRouter } from "expo-router";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { Assets } from "react-native-ui-lib";
-import {useColorScheme} from "@/hooks/theme/useColorScheme";
-import {ThemeColors} from "@/constants/theme/Colors";
-import {heightPercentageToDP, widthPercentageToDP} from "react-native-responsive-screen";
+import { useColorScheme } from "@/hooks/theme/useColorScheme";
+import { ThemeColors } from "@/constants/theme/Colors";
+import {
+  heightPercentageToDP,
+  widthPercentageToDP,
+} from "react-native-responsive-screen";
 // const DogPlaceholderImage = Assets.getAssetByPath(
 //   "@/assets/images/dog_placeholder_theme-color-fair.png"
 // );
 // @ts-ignore
-import DogPlaceholderImage from '@/assets/images/dog_placeholder_theme-color-fair.png';
+import DogPlaceholderImage from "@/assets/images/dog_placeholder_theme-color-fair.png";
 import UserAvatar from "@/components/navigation/UserAvatar";
-import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
-import {useNavigation} from "@react-navigation/native";
-
+import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
+import { useNavigation } from "@react-navigation/native";
 
 export default function NewPetScreen() {
   // @ts-ignore
@@ -40,7 +43,7 @@ export default function NewPetScreen() {
   const [dogDescription, setDogDescription] = useState("");
   const [dogTags, setDogTags] = useState("");
   const [image, setImage] = useState<string | null>(null);
-  const [breed, setBreed] = useState("")
+  const [breed, setBreed] = useState("");
   const [weight, setWeight] = useState("");
   const [age, setAge] = useState("");
 
@@ -58,14 +61,12 @@ export default function NewPetScreen() {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-
       headerTitle: "Create new dog",
       headerStyle: {
         backgroundColor: themeColors.secondary,
       },
     });
   }, [navigation]);
-
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -87,7 +88,7 @@ export default function NewPetScreen() {
       return;
     }
 
-    setIsSaving(true)
+    setIsSaving(true);
     try {
       // Prepare dog data with tags as an array
       const dogData = {
@@ -141,7 +142,6 @@ export default function NewPetScreen() {
       >
         <ScrollView
           style={{
-
             backgroundColor: themeColors.secondary,
           }}
         >
@@ -154,7 +154,6 @@ export default function NewPetScreen() {
           <View
             style={{
               backgroundColor: themeColors.tertiary,
-
             }}
           >
             {/* Change Dog Image */}
@@ -207,7 +206,7 @@ export default function NewPetScreen() {
                   fontSize: 14,
                   zIndex: 3,
                   marginLeft: widthPercentToPD(2),
-                  backgroundColor: 'transparent',
+                  backgroundColor: "transparent",
                 }}
               >
                 Dog Name
@@ -237,7 +236,7 @@ export default function NewPetScreen() {
                   color: themeColors.primary,
                   fontSize: 14,
                   marginLeft: widthPercentToPD(2),
-                  backgroundColor: 'transparent',
+                  backgroundColor: "transparent",
                 }}
               >
                 Description
@@ -268,7 +267,7 @@ export default function NewPetScreen() {
                   color: themeColors.primary,
                   fontSize: 14,
                   marginLeft: widthPercentToPD(2),
-                  backgroundColor: 'transparent',
+                  backgroundColor: "transparent",
                 }}
               >
                 Tags
@@ -295,7 +294,7 @@ export default function NewPetScreen() {
                   color: themeColors.primary,
                   fontSize: 14,
                   marginLeft: widthPercentToPD(2),
-                  backgroundColor: 'transparent',
+                  backgroundColor: "transparent",
                 }}
               >
                 Breed
@@ -319,19 +318,21 @@ export default function NewPetScreen() {
                 }}
               />
 
-              <View style={{
-                flexDirection: 'row',
-                height: heightPercentToPD(12),
-                marginVertical: heightPercentToPD(2),
-                width: widthPercentToPD(90),
-              }}>
-                <View style={{flexDirection: 'column'}}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  height: heightPercentToPD(12),
+                  marginVertical: heightPercentToPD(2),
+                  width: widthPercentToPD(90),
+                }}
+              >
+                <View style={{ flexDirection: "column" }}>
                   <ThemedText
                     style={{
                       color: themeColors.primary,
                       fontSize: 14,
                       marginLeft: widthPercentToPD(2),
-                      backgroundColor: 'transparent',
+                      backgroundColor: "transparent",
                     }}
                   >
                     Weight
@@ -357,13 +358,13 @@ export default function NewPetScreen() {
                   />
                 </View>
 
-                <View style={{flexDirection: 'column'}}>
+                <View style={{ flexDirection: "column" }}>
                   <ThemedText
                     style={{
                       color: themeColors.primary,
                       fontSize: 14,
                       marginLeft: widthPercentToPD(2),
-                      backgroundColor: 'transparent',
+                      backgroundColor: "transparent",
                     }}
                   >
                     Age
@@ -387,28 +388,33 @@ export default function NewPetScreen() {
                     }}
                   />
                 </View>
-
               </View>
 
-
-              {isSaving ? <ThemedText textColorName={"primary"} style={{
-                width: widthPercentToPD(80),
-                fontSize: percentToDP(4),
-                lineHeight: percentToDP(4),
-                marginVertical: heightPercentToPD(2),
-                textAlign: 'center'
-              }}>
-                Creating new dog...
-              </ThemedText> : null}
+              {isSaving ? (
+                <ThemedText
+                  textColorName={"primary"}
+                  style={{
+                    width: widthPercentToPD(80),
+                    fontSize: percentToDP(4),
+                    lineHeight: percentToDP(4),
+                    marginVertical: heightPercentToPD(2),
+                    textAlign: "center",
+                  }}
+                >
+                  Creating new dog...
+                </ThemedText>
+              ) : null}
 
               <ThemedButton
                 label="Save"
-                color={isSaving? themeColors.tertiary : themeColors.primary}
+                color={isSaving ? themeColors.tertiary : themeColors.primary}
                 onPress={handleAddDog}
                 disabled={isSaving} // Disable button while saving
                 style={{
                   width: widthPercentageToDP(80),
-                  backgroundColor: isSaving ? themeColors.primary : 'transparent',
+                  backgroundColor: isSaving
+                    ? themeColors.primary
+                    : "transparent",
                   paddingVertical: percentToDP(2),
                   borderRadius: percentToDP(4),
                   borderWidth: 1,

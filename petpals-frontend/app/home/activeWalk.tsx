@@ -1,7 +1,7 @@
 import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { router } from "expo-router";
 import { Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";

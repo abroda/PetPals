@@ -10,7 +10,7 @@ import { useState } from "react";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
 import { Pressable } from "react-native";
 import { Href, router } from "expo-router";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 
 export default function NotificationItem(
   props: {

@@ -2,7 +2,7 @@ import { Pressable, ViewProps } from "react-native";
 import { Avatar, Overlay, View } from "react-native-ui-lib";
 import { router } from "expo-router";
 import { useAuth } from "@/hooks/useAuth";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 // @ts-ignore
 import DogPlaceholderImage from "@/assets/images/dog_placeholder_theme-color-fair.png";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";

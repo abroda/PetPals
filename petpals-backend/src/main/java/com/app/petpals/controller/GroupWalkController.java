@@ -48,7 +48,7 @@ public class GroupWalkController {
         return ResponseEntity.ok(GroupWalkTagsResponse.builder().tags(groupWalkService.getSuggestedTags(query)).build());
     }
 
-    @GetMapping("/tags")
+    @GetMapping("/list")
     @Operation(summary = "Get paginated group walks filtered by tags. - Tags have to be full", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Page<GroupWalkResponse>> getGroupWalks(
             @RequestParam(value = "tags", required = false) String tags,
