@@ -131,6 +131,10 @@ public class User implements UserDetails {
     )
     private List<GroupWalkComment> likedGroupWalkComments;
 
+    @JsonManagedReference
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WalkSession> walks;
+
     public User() {
     }
 
