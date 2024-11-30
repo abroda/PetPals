@@ -16,7 +16,9 @@ public class GroupWalkAddRequest {
     private String description;
     private String creatorId;
     private String datetime;
-    private String location;
+    private String locationName;
+    private double latitude;
+    private double longitude;
     private List<String> tags;
     private List<String> participatingDogsIds;
 }

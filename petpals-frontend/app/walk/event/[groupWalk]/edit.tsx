@@ -6,38 +6,26 @@ import React, {
   useState,
 } from "react";
 import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
-import { Href, router, useNavigation, usePathname } from "expo-router";
+import { router, useNavigation, usePathname } from "expo-router";
 import { useAuth } from "@/hooks/useAuth";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import { ThemedTextField } from "@/components/inputs/ThemedTextField";
 import { ThemedText } from "@/components/basic/ThemedText";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
-import AppLogo from "@/components/decorations/static/AppLogo";
-import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoadingIndicator";
 import HorizontalView from "@/components/basic/containers/HorizontalView";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
-import {
-  Checkbox,
-  DateTimePicker,
-  KeyboardAwareScrollView,
-  TextFieldRef,
-} from "react-native-ui-lib";
+import { DateTimePicker } from "react-native-ui-lib";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useWalks } from "@/hooks/useWalks";
-import { testData } from "../testData";
-import { isLoaded } from "expo-font";
-import { LocationMap } from "@/components/display/LocationMap";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
-import TagList from "@/components/lists/TagList";
 import { GroupWalk, Participant } from "@/context/WalksContext";
 import TagListInput from "@/components/inputs/TagListInput";
-import PetAvatar from "@/components/navigation/PetAvatar";
-import { ScrollView } from "react-native-gesture-handler";
 import { DogPicker } from "@/components/inputs/DogPicker";
 import { LocationInput } from "@/components/inputs/LocationInput";
 import DeleteDialog from "@/components/dialogs/DeleteDialog";
+import ThemedToast from "@/components/popups/ThemedToast";
 
 export default function EditGroupWalkScreen(props: { create?: boolean }) {
   const now = new Date();
@@ -56,6 +44,7 @@ export default function EditGroupWalkScreen(props: { create?: boolean }) {
   const [location, setLocation] = useState("");
   const [currentTag, setCurrentTag] = useState("");
   const [tags, setTags] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [dialogVisible, setDialogVisible] = useState(false);
 
@@ -107,7 +96,7 @@ export default function EditGroupWalkScreen(props: { create?: boolean }) {
       title: title,
       description: description,
       datetime: datetime,
-      location: location,
+      locationName: location,
       latitude: 0,
       longitude: 0,
       tags: tags,
@@ -146,6 +135,11 @@ export default function EditGroupWalkScreen(props: { create?: boolean }) {
 
   return (
     <SafeAreaView>
+      <ThemedToast
+        visible={!isLoading && errorMessage.length > 0}
+        message={errorMessage} // {"Check your internet connection."}
+        preset="offline"
+      />
       <ThemedScrollView
         scrollEnabled={true}
         style={{

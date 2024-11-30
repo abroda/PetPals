@@ -15,6 +15,7 @@ import { ThemedIcon } from "../decorations/static/ThemedIcon";
 import { Tag } from "./Tag";
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
+import { useWalks } from "@/hooks/useWalks";
 
 export default function GroupWalkListItem({
   groupWalk,
@@ -25,10 +26,11 @@ export default function GroupWalkListItem({
   markJoined?: boolean;
   markCreated?: boolean;
 }) {
-  const [selected, setSelected] = useState("");
+  const { userId } = useAuth();
+
   const percentToDP = useWindowDimension("shorter");
   const heightpercentToDP = useWindowDimension("height");
-  const { userId } = useAuth();
+
   const backgroundColor = useThemeColor("accent") + "28";
   const borderColor = useThemeColor(
     markCreated && groupWalk.creator.userId === userId
@@ -52,7 +54,7 @@ export default function GroupWalkListItem({
   };
 
   const getLocation = () => {
-    return groupWalk.location;
+    return groupWalk.locationName;
   };
 
   const getParticipantsCount = () => {

@@ -31,7 +31,8 @@ export type MarkerData = {
 };
 
 export type LocationMapProps = {
-  initialLocation: { latitude: number; longitude: number; name?: string };
+  locationName: string;
+  initialLocation: { latitude: number; longitude: number };
   initialDelta?: number;
   minDelta?: number;
   maxDelta?: number;
@@ -44,6 +45,7 @@ export type LocationMapProps = {
 };
 
 export function LocationMap({
+  locationName,
   initialLocation,
   initialDelta = 0.012,
   minDelta = 0.001,
@@ -62,50 +64,48 @@ export function LocationMap({
     latitudeDelta: initialDelta,
     longitudeDelta: initialDelta,
   };
-  const [name, setName] = useState<string | null>(initialLocation.name ?? null);
-
+  //const [name, setName] = useState<string | null>(initialLocation.name ?? null);
   const mapRef = useRef<MapView | null>(null);
 
   const percentToDP = useWindowDimension("shorter");
 
-  const accuracies = [
-    "country",
-    "administrative_level_1",
-    "administrative_level_2",
-    "locality",
-    "sublocality",
-    "neighborhood",
-    "colloquial_area",
-    "natural_feature",
-    "tourtist_attraction",
-    "establishment",
-    "point_of_interest",
-    "public_park",
-    "park",
-    "garden",
-  ];
+  // const accuracies = [
+  //   "country",
+  //   "administrative_level_1",
+  //   "administrative_level_2",
+  //   "locality",
+  //   "sublocality",
+  //   "neighborhood",
+  //   "colloquial_area",
+  //   "natural_feature",
+  //   "tourtist_attraction",
+  //   "establishment",
+  //   "point_of_interest",
+  //   "public_park",
+  //   "park",
+  //   "garden",
+  // ];
 
-  const getLocationName = async (location: {
-    latitude: number;
-    longitude: number;
-  }) =>
-    await Geocoder.from({
-      latitude: location.latitude,
-      longitude: location.longitude,
-    })
-      .then((response) => {
-        if (response.results.length > 0) {
-          setName(response.results[0].formatted_address);
-        }
-      })
-      .catch((error) => {
-        setName(location.latitude + ", " + location.longitude);
-        console.error("Error in Geocoding:", error);
-      });
-
-  useEffect(() => {
-    getLocationName(initialLocation);
-  }, []);
+  // const getLocationName = async (location: {
+  //   latitude: number;
+  //   longitude: number;
+  // }) =>
+  //   await Geocoder.from({
+  //     latitude: location.latitude,
+  //     longitude: location.longitude,
+  //   })
+  //     .then((response) => {
+  //       if (response.results.length > 0) {
+  //         setName(response.results[0].formatted_address);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       setName(location.latitude + ", " + location.longitude);
+  //       console.log("Error in Geocoding:", error);
+  //     });
+  // useEffect(() => {
+  //   getLocationName(initialLocation);
+  // }, []);
 
   const recenter = (newRegion: Region) =>
     mapRef.current?.animateToRegion(
@@ -194,7 +194,7 @@ export function LocationMap({
             paddingRight: percentToDP(2),
           }}
         >
-          {name}
+          {locationName}
         </ThemedText>
       </HorizontalView>
     </View>

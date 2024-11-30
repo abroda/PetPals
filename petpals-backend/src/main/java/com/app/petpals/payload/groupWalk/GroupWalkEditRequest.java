@@ -15,6 +15,8 @@ public class GroupWalkEditRequest {
     private String title;
     private String description;
     private String datetime;
-    private String location;
+    private String locationName;
+    private double latitude;
+    private double longitude;
     private List<String> tags;
 }

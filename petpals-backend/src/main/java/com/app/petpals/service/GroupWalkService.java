@@ -41,14 +41,16 @@ public class GroupWalkService {
     public GroupWalk saveGroupWalk(GroupWalkAddRequest request) {
         User creator = userService.getById(request.getCreatorId());
         if (request.getTitle() == null) throw new GroupWalkDataException("Title is required.");
-        if (request.getLocation() == null) throw new GroupWalkDataException("Location is required");
+        if (request.getLocationName() == null) throw new GroupWalkDataException("Location name is required");
         if (request.getDatetime() == null) throw new GroupWalkDataException("Datetime is required");
 
         GroupWalk groupWalk = new GroupWalk();
         groupWalk.setTitle(request.getTitle());
         groupWalk.setDescription(request.getDescription());
         groupWalk.setDatetime(checkDatetime(request.getDatetime()));
-        groupWalk.setLocation(request.getLocation());
+        groupWalk.setLocationName(request.getLocationName());
+        groupWalk.setLatitude(request.getLatitude());
+        groupWalk.setLongitude(request.getLongitude());
         groupWalk.setCreator(creator);
 
         if (request.getTags() != null && !request.getTags().isEmpty()) {
@@ -69,13 +71,15 @@ public class GroupWalkService {
     public GroupWalk editGroupWalk(String walkId, GroupWalkEditRequest request) {
         GroupWalk groupWalk = getGroupWalkById(walkId);
         if (request.getTitle() == null) throw new GroupWalkDataException("Title is required.");
-        if (request.getLocation() == null) throw new GroupWalkDataException("Location is required");
+        if (request.getLocationName() == null) throw new GroupWalkDataException("Location name is required");
         if (request.getDatetime() == null) throw new GroupWalkDataException("Datetime is required");
 
         groupWalk.setTitle(request.getTitle());
         groupWalk.setDescription(request.getDescription());
         groupWalk.setDatetime(checkDatetime(request.getDatetime()));
-        groupWalk.setLocation(request.getLocation());
+        groupWalk.setLocationName(request.getLocationName());
+        groupWalk.setLatitude(request.getLatitude());
+        groupWalk.setLongitude(request.getLongitude());
         groupWalk.setTags(request.getTags());
 
         return groupWalkRepository.save(groupWalk);
@@ -149,7 +153,9 @@ public class GroupWalkService {
                 .id(groupWalk.getId())
                 .title(groupWalk.getTitle())
                 .description(groupWalk.getDescription())
-                .location(groupWalk.getLocation())
+                .locationName(groupWalk.getLocationName())
+                .latitude(groupWalk.getLatitude())
+                .longitude(groupWalk.getLongitude())
                 .datetime(groupWalk.getDatetime().toString())
                 .creator(
                         GroupWalkCreatorResponse.builder()

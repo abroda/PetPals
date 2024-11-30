@@ -1,45 +1,22 @@
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
-import { Href, router, useNavigation, usePathname } from "expo-router";
 import { useAuth } from "@/hooks/useAuth";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
-import { ThemedTextField } from "@/components/inputs/ThemedTextField";
 import { ThemedText } from "@/components/basic/ThemedText";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
-import AppLogo from "@/components/decorations/static/AppLogo";
 import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoadingIndicator";
-import HorizontalView from "@/components/basic/containers/HorizontalView";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
-import {
-  Checkbox,
-  DateTimePicker,
-  KeyboardAwareScrollView,
-  TextFieldRef,
-} from "react-native-ui-lib";
-import { useTextStyle } from "@/hooks/theme/useTextStyle";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useWalks } from "@/hooks/useWalks";
-import { isLoaded } from "expo-font";
-import { LocationMap } from "@/components/display/LocationMap";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
-import TagList from "@/components/lists/TagList";
-import { GroupWalk, Entity } from "@/context/WalksContext";
-import TagListInput from "@/components/inputs/TagListInput";
+import { Participant } from "@/context/WalksContext";
 import ThemedDialog from "./ThemedDialog";
-import PetAvatar from "../navigation/PetAvatar";
 import { DogPicker } from "../inputs/DogPicker";
 
 export default function GroupWalkParticipationDialog(props: {
   walkId: string;
   joined: boolean;
-  dogs: Entity[];
+  dogs: Participant[];
   dogsParticipating: string[];
   onSave: (dogsParticipating: string[]) => void;
   onLeave: () => void;
@@ -51,7 +28,8 @@ export default function GroupWalkParticipationDialog(props: {
   const [errorMessage, setErrorMessage] = useState(" ");
 
   const { userId } = useAuth();
-  const { isProcessing, joinGroupWalk, leaveGroupWalk } = useWalks();
+  const { joinGroupWalk, leaveGroupWalk } = useWalks();
+  const [isLoading, setIsLoading] = useState(false);
 
   const buttonColor = useThemeColor("link");
   const iconColor = useThemeColor("text");
@@ -129,13 +107,13 @@ export default function GroupWalkParticipationDialog(props: {
           style={{ padding: percentToDP(0) }}
         />
 
-        {isProcessing && (
+        {isLoading && (
           <ThemedLoadingIndicator
             size={"large"}
             style={{ marginVertical: percentToDP(props.joined ? 15.5 : 6.5) }}
           />
         )}
-        {!isProcessing && (
+        {!isLoading && (
           <ThemedView
             style={{
               marginTop: percentToDP(0),

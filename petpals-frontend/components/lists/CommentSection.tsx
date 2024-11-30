@@ -103,6 +103,14 @@ export default function CommentSection({
           }
         />
       )}
+      {commentsData.length == 0 && (
+        <ThemedText
+          textColorName={"disabled"}
+          style={{ paddingLeft: percentToDP(1.5) }}
+        >
+          No comments yet
+        </ThemedText>
+      )}
       <FlatList
         style={{ marginTop: percentToDP(2) }}
         scrollEnabled={false}

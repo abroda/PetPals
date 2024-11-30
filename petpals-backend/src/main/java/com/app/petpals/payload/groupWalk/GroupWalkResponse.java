@@ -13,7 +13,9 @@ public class GroupWalkResponse {
     private String id;
     private String title;
     private String description;
-    private String location;
+    private String locationName;
+    private  double latitude;
+    private  double longitude;
     private String datetime;
     private GroupWalkCreatorResponse creator;
     private List<String> tags;

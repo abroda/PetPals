@@ -26,7 +26,7 @@ export type GroupWalk = {
   title: string;
   description: string;
   datetime: Date;
-  location: string;
+  locationName: string;
   latitude: number;
   longitude: number;
   tags: GroupWalkTag[];
@@ -119,6 +119,10 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return serverQuery({
       path: apiPaths.groupWalks.walk(walkId),
       method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken ?? ""}`,
+      },
       asyncAbortController: asyncAbortController,
     });
   };
@@ -134,6 +138,10 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setShouldRefreshSchedule(true);
         setShouldRefreshFound(true);
         return payload;
+      },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken ?? ""}`,
       },
       asyncAbortController: asyncAbortController,
     });
@@ -153,6 +161,10 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setShouldRefreshFound(true);
         return payload;
       },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken ?? ""}`,
+      },
       asyncAbortController: asyncAbortController,
     });
   };
@@ -168,6 +180,10 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setShouldRefreshSchedule(true);
         setShouldRefreshFound(true);
         return payload;
+      },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken ?? ""}`,
       },
       asyncAbortController: asyncAbortController,
     });
@@ -186,6 +202,10 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setShouldRefreshFound(true);
         return payload;
       },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken ?? ""}`,
+      },
       asyncAbortController: asyncAbortController,
     });
   };
@@ -200,6 +220,10 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setShouldRefreshSchedule(true);
         setShouldRefreshFound(true);
         return payload;
+      },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken ?? ""}`,
       },
       asyncAbortController: asyncAbortController,
     });
@@ -263,6 +287,10 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return serverQuery({
       path: apiPaths.groupWalks.addComment(walkId),
       payload: data,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken ?? ""}`,
+      },
       asyncAbortController: asyncAbortController,
     });
   };
@@ -275,6 +303,10 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return serverQuery({
       path: apiPaths.groupWalks.comment(walkId, commentId),
       method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken ?? ""}`,
+      },
       asyncAbortController: asyncAbortController,
     });
   };
@@ -286,6 +318,10 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
   ) => {
     return serverQuery({
       path: apiPaths.groupWalks.commentToggleLike(walkId, commentId),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken ?? ""}`,
+      },
       asyncAbortController: asyncAbortController,
     });
   };
