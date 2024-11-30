@@ -1,18 +1,16 @@
-import { Pressable, StyleSheet } from "react-native";
 import {
   ColorName,
   ThemedColor,
   useThemeColor,
 } from "@/hooks/theme/useThemeColor";
-import { Button, ButtonProps, ButtonSize, Card } from "react-native-ui-lib";
+import { ButtonProps, Card, View } from "react-native-ui-lib";
 import { TextStyleOptions, useTextStyle } from "@/hooks/theme/useTextStyle";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
-import { Ionicons } from "@expo/vector-icons";
-import { ComponentProps } from "react";
 import { router } from "expo-router";
 import { ThemedText } from "../basic/ThemedText";
 import { GroupWalkTag } from "@/context/WalksContext";
+import HorizontalView from "../basic/containers/HorizontalView";
 
 export type TagProps = ButtonProps & {
   backgroundColorName?: ColorName;
@@ -20,8 +18,7 @@ export type TagProps = ButtonProps & {
   textColorName?: ColorName;
   textThemedColor?: ThemedColor;
   textStyleOptions?: TextStyleOptions;
-  doLink?: boolean;
-  doDismissOnLink?: boolean;
+  showDeleteIcon?: boolean;
 };
 
 export const Tag = ({
@@ -35,6 +32,7 @@ export const Tag = ({
   textColorName = "text",
   textThemedColor,
   textStyleOptions = { size: "tiny", weight: "semibold" },
+  showDeleteIcon,
   ...rest
 }: TagProps) => {
   const backgroundColor = useThemeColor(
@@ -64,14 +62,24 @@ export const Tag = ({
       enableShadow={false}
       {...rest}
     >
-      <ThemedText
-        textStyleOptions={{ size: "small" }}
-        backgroundColorName="transparent"
-        textColorName={textColorName}
-        numberOfLines={1}
-      >
-        #{label?.toLocaleLowerCase()}
-      </ThemedText>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <ThemedText
+          textStyleOptions={{ size: "small" }}
+          backgroundColorName="transparent"
+          textColorName={textColorName}
+          numberOfLines={1}
+        >
+          #{label?.toLocaleLowerCase()}
+        </ThemedText>
+        {showDeleteIcon && (
+          <ThemedIcon
+            size={textStyle.fontSize!}
+            name="close"
+            colorName="border"
+            style={{ marginLeft: percentToDP(1) }}
+          />
+        )}
+      </View>
     </Card>
   );
 };

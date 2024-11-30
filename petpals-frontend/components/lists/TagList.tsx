@@ -14,10 +14,12 @@ export default function TagList({
   tags,
   onPressTag,
   style,
+  showDeleteIcons,
   ...rest
 }: {
   tags: GroupWalkTag[];
   onPressTag?: (tag: GroupWalkTag) => void;
+  showDeleteIcons?: boolean;
 } & HorizontalViewProps) {
   const percentToDP = useWindowDimension("shorter");
   return (
@@ -40,11 +42,12 @@ export default function TagList({
           key={tag}
           label={tag}
           onPress={onPressTag ? () => onPressTag(tag) : undefined}
+          showDeleteIcon={showDeleteIcons}
         />
       ))}
       {tags.length == 0 && (
         <ThemedText
-          textColorName="text"
+          textColorName="placeholderText"
           backgroundColorName="transparent"
           style={{ paddingVertical: percentToDP(1.5) }}
         >

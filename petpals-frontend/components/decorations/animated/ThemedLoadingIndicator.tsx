@@ -36,11 +36,11 @@ export default function ThemedLoadingIndicator({
 }: ThemedLoadingIndicatorProps) {
   const loaderColor = useThemeColor(colorName, themedColor);
   const textColor = useThemeColor(textColorName, textThemedColor);
-  const backgroundColor = useThemeColor("background");
 
   if (fullScreen) {
     return (
       <ThemedView
+        colorName="transparent"
         style={{
           alignItems: "center",
           justifyContent: "center",
@@ -54,6 +54,7 @@ export default function ThemedLoadingIndicator({
         />
         <ThemedText
           textColorName={textColorName}
+          backgroundColorName="transparent"
           style={{ marginTop: 10 }}
         >
           {message}
@@ -64,6 +65,7 @@ export default function ThemedLoadingIndicator({
 
   return (
     <ThemedView
+      colorName="transparent"
       style={{
         alignItems: "center",
         justifyContent: "center",
@@ -74,6 +76,7 @@ export default function ThemedLoadingIndicator({
         {...rest}
       />
       <ThemedText
+        backgroundColorName="transparent"
         textColorName={textColorName}
         style={{ marginTop: 7 }}
       >

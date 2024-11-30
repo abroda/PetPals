@@ -49,10 +49,9 @@ export const apiPaths = {
     join: (walkId: string) => databaseURL + `api/groupWalks/${walkId}/join`,
     leave: (walkId: string) => databaseURL + `api/groupWalks/${walkId}/leave`,
     tagSuggestions: (input: string) =>
-      databaseURL + `api/groupWalks/tags/suggest/${input}`, // GET
-    //(tags: string[]) =>
+      databaseURL + `api/groupWalks/tags/suggest?query=${input}`, // GET
     list: (page: number, size: number, tags?: string[]) =>
-      databaseURL + //"api/groupWalks/list?tags=a, ś",
+      databaseURL +
       `api/groupWalks/list?page=${page}&size=${size}&sort=datetime,asc${
         !tags || tags.length == 0
           ? ""

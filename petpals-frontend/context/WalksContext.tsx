@@ -212,6 +212,10 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return serverQuery({
       path: apiPaths.groupWalks.tagSuggestions(input),
       method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken ?? ""}`,
+      },
       asyncAbortController: asyncAbortController,
     });
   };

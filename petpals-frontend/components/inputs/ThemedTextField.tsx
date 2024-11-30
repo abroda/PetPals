@@ -56,6 +56,7 @@ export const ThemedTextField = forwardRef<TextFieldRef, ThemedTextFieldProps>(
     ref
   ) => {
     const textColor = useThemeColor(textColorName, textThemedColor);
+    const placeholderColor = useThemeColor("placeholderText");
     const backgroundColor = useThemeColor(
       backgroundColorName,
       backgroundThemedColor
@@ -89,7 +90,7 @@ export const ThemedTextField = forwardRef<TextFieldRef, ThemedTextFieldProps>(
             useTextStyle({ weight: "semibold" }),
             { paddingLeft: percentToDP(1) },
           ]}
-          placeholderTextColor={textColor + "70"}
+          placeholderTextColor={placeholderColor}
           style={[
             {
               color: textColor,

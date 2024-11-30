@@ -28,7 +28,7 @@ export default function ThemedDialog({
           justifyContent: "center",
           alignContent: "center",
           padding: "auto",
-          backgroundColor: "#00000088",
+          backgroundColor: "#000000aa",
           backfaceVisibility: "hidden",
         }}
       >

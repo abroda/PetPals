@@ -108,6 +108,8 @@ export default function EditGroupWalkScreen(props: { create?: boolean }) {
       description: description,
       datetime: datetime,
       location: location,
+      latitude: 0,
+      longitude: 0,
       tags: tags,
       participantsCount: 0,
       petsCount: 0,

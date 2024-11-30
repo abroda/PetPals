@@ -23,7 +23,7 @@ import HorizontalView from "@/components/basic/containers/HorizontalView";
 import GroupWalksTimelineItem from "@/components/lists/GroupWalksTimelineItem";
 import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoadingIndicator";
 import { format } from "date-fns";
-import FilterTagsDialog from "@/components/dialogs/FilterTagsDialog";
+import FilterResultsDialog from "@/components/dialogs/FilterResultsDialog";
 import { RefreshControl } from "react-native-gesture-handler";
 import { Toast } from "react-native-ui-lib/src/incubator";
 import ThemedToast from "@/components/popups/ThemedToast";
@@ -32,7 +32,7 @@ import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import { View } from "react-native-ui-lib";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 
-const elementsOnPage = 15;
+const elementsOnPage = 3;
 
 export default function FindGroupWalkScreen(props: {
   initialFilter?: GroupWalkTag[];
@@ -135,7 +135,7 @@ export default function FindGroupWalkScreen(props: {
   return (
     <SafeAreaView>
       {dialogVisible && (
-        <FilterTagsDialog
+        <FilterResultsDialog
           onDismiss={() => setDialogVisible(false)}
           onSubmit={(tags) => {
             setTagFilter(tags);

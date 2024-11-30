@@ -7,47 +7,74 @@ import { TextFieldRef } from "react-native-ui-lib";
 import { GroupWalkTag, tagRegex } from "@/context/WalksContext";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
 import TagList from "../lists/TagList";
-import { ThemedView, ThemedViewProps } from "../basic/containers/ThemedView";
-import { useWalks } from "@/hooks/useWalks";
+import { ThemedView } from "../basic/containers/ThemedView";
 import ThemedLoadingIndicator from "../decorations/animated/ThemedLoadingIndicator";
-import { TouchableWithoutFeedback, View } from "react-native";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
+import { useWalks } from "@/hooks/useWalks";
+
 export default function TagListInput({
   onAddTag = (tag: GroupWalkTag) => {},
   onDeleteTag = (tag: GroupWalkTag) => {},
   tags = [] as GroupWalkTag[],
+  width,
+}: {
+  onAddTag: (tag: GroupWalkTag) => void;
+  onDeleteTag: (tag: GroupWalkTag) => void;
+  tags?: GroupWalkTag[];
+  width?: number;
 }) {
   const [tagInput, setTagInput] = useState("");
-  const [isInputValid, setIsInputValid] = useState(false);
+  const [addTagEnabled, setAddTagEnabled] = useState(false);
   const [errorMessage, setErrorMessage] = useState(" ");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggsetions, setSuggestions] = useState([] as string[]);
-  const { isProcessing } = useWalks();
+  const [isLoading, setIsLoading] = useState(false);
   const tagInputRef = useRef<TextFieldRef>(null);
 
-  const percentToDP = useWindowDimension("shorter");
+  const { getTagSuggestions } = useWalks();
 
+  const percentToDP = useWindowDimension("shorter");
   const borderColor = useThemeColor("primary");
 
   const onChangeText = async (newText: string) => {
-    let content = newText.toLocaleLowerCase();
-    setTagInput(content);
+    let input = newText.toLocaleLowerCase();
 
-    if (content.length < 3) {
-      setIsInputValid(false);
+    setTagInput(input);
+
+    if (input.length < 3) {
+      // tag too short - adding is disabled
+      setAddTagEnabled(false);
       setErrorMessage(" ");
       setShowSuggestions(false);
-    } else if (content.match(tagRegex)) {
-      setIsInputValid(true);
-      setErrorMessage(" ");
-      let newSuggestions =
-        content.length < 13
-          ? [content + "a", content + "b", content + "c"]
-          : [];
-      setSuggestions(newSuggestions);
-      setShowSuggestions(newSuggestions.length > 0);
+    } else if (input.match(tagRegex)) {
+      if (tags.includes(input)) {
+        // don't allow repeat tags
+        setAddTagEnabled(false);
+        setErrorMessage("Tag already added");
+        setShowSuggestions(false);
+      } else {
+        // tag is ok - show suggestions
+        setAddTagEnabled(true);
+        setErrorMessage(" ");
+        setIsLoading(true);
+        setShowSuggestions(true);
+
+        let result = await getTagSuggestions(input);
+
+        if (result.success) {
+          // show new suggestions (if there are any)
+          setSuggestions(result.returnValue.tags);
+        } else {
+          // couldn't get suggestion -> hide the suggestion box
+          setSuggestions([]);
+          setErrorMessage(result.returnValue);
+        }
+
+        setTimeout(() => setIsLoading(false), 500);
+      }
     } else {
-      setIsInputValid(false);
+      // tag has special characters - adding is disabled + error messsage
+      setAddTagEnabled(false);
       setErrorMessage("Tag should not use any special characters");
       setShowSuggestions(false);
     }
@@ -65,22 +92,22 @@ export default function TagListInput({
       <ThemedTextField
         ref={tagInputRef}
         label="Tags"
-        placeholder="Add tag"
+        placeholder="Enter tag"
         autoComplete="off"
-        inputMode="text"
         value={tagInput}
-        onBlur={() => setShowSuggestions(false)}
+        //onBlur={() => setShowSuggestions(false)}
         onChangeText={onChangeText}
         withValidation={!showSuggestions}
-        validate={[(value) => false]}
+        validate={[(value) => false]} // alway show error message (otherwise space left for validation does jumps)
         validationMessage={[errorMessage.valueOf()]}
         maxLength={60}
         trailingAccessory={
+          // add tag icon
           <ThemedIcon
             name="add"
-            colorName={isInputValid ? "primary" : "disabled"}
+            colorName={addTagEnabled ? "primary" : "disabled"}
             onPress={() => {
-              if (isInputValid) {
+              if (addTagEnabled) {
                 onAddTag(tagInput.trimStart().trimEnd());
                 setTagInput("");
                 setShowSuggestions(false);
@@ -94,7 +121,8 @@ export default function TagListInput({
           />
         }
         bottomAccessory={
-          showSuggestions && suggsetions.length > 0 ? (
+          // suggestion box
+          showSuggestions ? (
             <ThemedView
               colorName="textField"
               style={{
@@ -111,8 +139,25 @@ export default function TagListInput({
                 borderColor: borderColor,
               }}
             >
-              {isProcessing && <ThemedLoadingIndicator size={"small"} />}
-              {!isProcessing &&
+              {isLoading && (
+                <ThemedLoadingIndicator
+                  size={"small"}
+                  style={{ marginTop: percentToDP(6) }}
+                />
+              )}
+              {!isLoading && (suggsetions.length === 0 || !suggsetions) && (
+                <ThemedText
+                  textColorName="disabled"
+                  backgroundColorName="transparent"
+                  style={{
+                    marginBottom: percentToDP(2),
+                  }}
+                >
+                  No matching tags
+                </ThemedText>
+              )}
+              {!isLoading &&
+                suggsetions.length > 0 &&
                 suggsetions.map((elem) => (
                   <ThemedText
                     backgroundColorName="transparent"
@@ -131,12 +176,16 @@ export default function TagListInput({
           ) : undefined
         }
         retainValidationSpace
+        width={width}
       />
-
       <TagList
         tags={tags}
         onPressTag={onDeleteTag}
-        style={{ marginHorizontal: percentToDP(-2.5) }}
+        style={{
+          marginLeft: percentToDP(-3),
+          width: width ? percentToDP(width) : undefined,
+        }}
+        showDeleteIcons
       />
     </ThemedView>
   );
