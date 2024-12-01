@@ -11,6 +11,7 @@ import { useRouter } from "expo-router";
 import { useColorScheme } from "@/hooks/theme/useColorScheme";
 import { ThemeColors } from "@/constants/theme/Colors";
 import UserAvatar from "@/components/navigation/UserAvatar";
+import {heightPercentageToDP, widthPercentageToDP} from "react-native-responsive-screen";
 
 export default function FriendRequestListItem(props: {
   requestId: string;
@@ -19,7 +20,6 @@ export default function FriendRequestListItem(props: {
   senderId: string;
   receiverId: string;
   avatar?: string;
-  onActionComplete?: () => void;
 }) {
 
 
@@ -36,7 +36,6 @@ export default function FriendRequestListItem(props: {
     const success = await acceptFriendRequest(props.requestId);
     if (success) {
       Alert.alert("Friend Request", `${props.username} is now your friend!`);
-      props.onActionComplete(); // Refresh the list
     } else {
       Alert.alert("Error", "Failed to accept the friend request.");
     }
@@ -49,7 +48,6 @@ export default function FriendRequestListItem(props: {
         "Friend Request",
         `You denied the request from ${props.username}.`
       );
-      props.onActionComplete(); // Refresh the list
     } else {
       Alert.alert("Error", "Failed to deny the friend request.");
     }
@@ -59,7 +57,6 @@ export default function FriendRequestListItem(props: {
     const success = await removePendingFriendRequest(props.requestId);
     if (success) {
       Alert.alert("Friend Request", "Your request has been canceled.");
-      props.onActionComplete(); // Refresh the list
     } else {
       Alert.alert("Error", "Failed to cancel the friend request.");
     }
@@ -70,44 +67,42 @@ export default function FriendRequestListItem(props: {
       style={{
         flexDirection: "row",
         flex: 1,
-        marginVertical: percentToDP(1),
-        padding: percentToDP(4),
-        alignItems: "center",
-        justifyContent: "space-between",
+        marginVertical: heightPercentageToDP(1),
+        marginHorizontal: widthPercentageToDP(5),
         backgroundColor: themeColors.tertiary,
         borderRadius: percentToDP(4),
+
       }}
     >
-      {/* Avatar and username */}
+      {/* Whole card */}
       <View
         style={{
           flex: 1,
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
+          flexDirection: "row",
+          padding: widthPercentageToDP(5),
+          // backgroundColor: 'blue',
         }}
       >
+        {/* Avatar and username */}
         <View
           style={{
-            flex: 1,
-            flexDirection: "row",
-            marginHorizontal: "auto",
+            flexDirection: "column",
             alignItems: "center",
-            alignContent: "space-between",
-            justifyContent: "space-between",
+            justifyContent: 'center',
+            width: percentToDP(30),
           }}
         >
           <Pressable onPress={() => router.push(`/user/${props.senderId}`)}>
-            <UserAvatar size={percentToDP(5)} userId={props.avatar} doLink={true} />
+            <UserAvatar size={percentToDP(6)} userId={props.avatar} doLink={true} />
           </Pressable>
+
           {props.username ? (
             <ThemedText
               textColorName={"textOnSecondary"}
               style={{
-                flex: 1,
-                fontSize: percentToDP(5),
-                marginLeft: percentToDP(4),
+                fontSize: percentToDP(4),
                 lineHeight: percentToDP(5),
+                marginTop: percentToDP(3),
               }}
               textStyleOptions={{
                 size: "big",
@@ -117,62 +112,67 @@ export default function FriendRequestListItem(props: {
               {props.username}
             </ThemedText>
           ) : (
-            <ThemedText>Unknown User</ThemedText>
+            <ThemedText style={{
+              fontSize: percentToDP(4),
+              lineHeight: percentToDP(5),
+              marginTop: percentToDP(3),
+            }}>
+              Unknown User
+            </ThemedText>
           )}
         </View>
+
 
         {/* Accept and Deny Buttons OR Awaiting Answer */}
         {props.isReceiver ? (
           <View
             style={{
-              flexDirection: "row",
-              alignContent: "space-around",
-              justifyContent: "space-around",
-              marginTop: percentToDP(2),
+              flex: 2,
+              flexDirection: "column",
+              alignContent: "center",
+              justifyContent: "center",
+              alignItems: 'center',
+              margin: 'auto',
+
             }}
           >
             <ThemedButton
               label="Accept"
               onPress={handleAccept}
               textColorName={"primary"}
+              shape={"half"}
+              border={true}
+              backgroundColorName={"transparent"}
               style={{
-                backgroundColor: themeColors.transparent,
-                flex: 1,
-                padding: percentToDP(0),
-                marginRight: percentToDP(4),
-                borderWidth: 2,
-                borderRadius: percentToDP(4),
-                borderColor: themeColors.primary,
+                marginBottom: widthPercentageToDP(2),
               }}
             />
             <ThemedButton
               label="Deny"
               textColorName={"accent"}
               onPress={handleDeny}
-              style={{
-                backgroundColor: themeColors.transparent,
-                flex: 1,
-                padding: percentToDP(0),
-                borderWidth: 2,
-                borderRadius: percentToDP(4),
-                borderColor: themeColors.accent,
-              }}
+              shape={"half"}
+              border={true}
+              backgroundColorName={"transparent"}
             />
           </View>
         ) : (
 
           <View style={{
-            flexDirection: "row",
-            alignContent: "space-around",
-            justifyContent: "space-around",
-            marginTop: percentToDP(2),
+            flex: 2,
+            flexDirection: "column",
+            alignContent: "center",
+            justifyContent: "center",
+            alignItems: 'center',
+            margin: 'auto',
+
           }}>
             <ThemedText
               textColorName={"textOnSecondary"}
               style={{
-                marginTop: percentToDP(2),
-                fontSize: percentToDP(4),
                 textAlign: "center",
+                textAlignVertical: 'center',
+                flex: 1,
               }}
             >
               Awaiting answer
@@ -182,15 +182,9 @@ export default function FriendRequestListItem(props: {
               label="Cancel request"
               textColorName={"accent"}
               onPress={handleCancelRequest}
-              style={{
-                backgroundColor: themeColors.transparent,
-                flex: 1,
-                padding: percentToDP(0),
-                borderWidth: 2,
-                borderRadius: percentToDP(4),
-                borderColor: themeColors.accent,
-                margin: 'auto'
-              }}
+              shape={"half"}
+              border={true}
+              backgroundColorName={"transparent"}
             />
           </View>
 

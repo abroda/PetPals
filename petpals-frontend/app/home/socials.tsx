@@ -34,40 +34,50 @@ export default function FriendsScreen() {
   // @ts-ignore
   const themeColors = ThemeColors[colorScheme];
 
-  useEffect(() => {
-    refreshRequests(); // Load requests when the screen is mounted
-  }, []);
+  // useEffect(() => {
+  //   refreshRequests(); // Load requests when the screen is mounted
+  // }, []);
 
   return (
-    <SafeAreaView>
-      <ThemedText>Received Requests</ThemedText>
-      <FlatList
-        data={receivedRequests}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <FriendRequestListItem
-            requestId={item.id}
-            username={item.senderUsername}
-            senderId={item.senderId}
-            receiverId={item.receiverId}
-            avatar={item.senderId}
-          />
-        )}
-      />
-      <ThemedText>Sent Requests</ThemedText>
-      <FlatList
-        data={sentRequests}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <FriendRequestListItem
-            requestId={item.id}
-            username={item.receiverUsername}
-            senderId={item.senderId}
-            receiverId={item.receiverId}
-            avatar={item.receiverId}
-          />
-        )}
-      />
+    <SafeAreaView style={{
+      backgroundColor: themeColors.secondary,
+      flex: 1,
+    }}>
+      <ThemedView backgroundColor={themeColors.secondary} style={{
+        flex: 1,
+      }}>
+        <ThemedText backgroundColorName={"secondary"}>Received Requests</ThemedText>
+        <FlatList
+          data={receivedRequests}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <FriendRequestListItem
+              requestId={item.id}
+              username={item.senderUsername}
+              senderId={item.senderId}
+              receiverId={item.receiverId}
+              avatar={item.senderId}
+              isReceiver={true}
+            />
+          )}
+        />
+        <ThemedText backgroundColorName={"secondary"}>Sent Requests</ThemedText>
+        <FlatList
+          data={sentRequests}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <FriendRequestListItem
+              requestId={item.id}
+              username={item.receiverUsername}
+              senderId={item.senderId}
+              receiverId={item.receiverId}
+              avatar={item.receiverId}
+              isReceiver={false}
+            />
+          )}
+        />
+      </ThemedView>
+
     </SafeAreaView>
   );
 }
