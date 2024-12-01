@@ -1,6 +1,7 @@
 import React, { createContext, FC, ReactNode, useContext, useState } from "react";
 import { apiPaths } from "@/constants/config/api";
 import { useAuth } from "@/hooks/useAuth";
+import {AuthContext} from "@/context/AuthContext";
 
 
 export type FriendshipRequest = {
@@ -25,16 +26,25 @@ type FriendshipContextType = {
   sendFriendRequest: (senderId: string, receiverId: string) => Promise<boolean>;
   acceptFriendRequest: (requestId: string) => Promise<boolean>;
   denyFriendRequest: (requestId: string) => Promise<boolean>;
+  removePendingFriendRequest: (requestId: string) => Promise<boolean>;
   removeFriend: (userId: string, friendId: string) => Promise<boolean>;
   getFriends: (userId: string) => Promise<Friend[]>;
+  refreshRequests: () => Promise<void>;
+  sentRequests: FriendshipRequest[];
+  receivedRequests: FriendshipRequest[];
 };
 
 export const FriendshipContext = createContext<FriendshipContextType | null>(null);
 
 export const FriendshipProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  const { authToken } = useAuth();
+
+  const { authToken, userId } = useAuth();
+  const [sentRequests, setSentRequests] = useState<FriendshipRequest[]>([]);
+  const [receivedRequests, setReceivedRequests] = useState<FriendshipRequest[]>([]);
 
   const [isProcessing, setIsProcessing] = useState(false);
+
+
 
   // JSON request function with error handling
   const sendJsonQuery = async (
@@ -65,9 +75,19 @@ export const FriendshipProvider: FC<{ children: ReactNode }> = ({ children }) =>
   };
 
 
-  const getFriendRequests = async (userId: string): Promise<FriendshipRequest[]> => {
-    const response = await sendJsonQuery(apiPaths.friends.getRequests(userId), "GET");
-    return response || [];
+  // Function to refresh al requests (sent & received) for currently logged in user - USE GLOBALLY!
+  const refreshRequests = async () => {
+    if (userId) {
+      await getFriendRequests(userId);
+    }
+  };
+
+  const getFriendRequests = async (userId: string) => {
+    const requests: FriendshipRequest[] = await sendJsonQuery(apiPaths.friends.getRequests(userId), "GET");
+    const received = requests.filter((request) => request.receiverId === userId);
+    const sent = requests.filter((request) => request.senderId === userId);
+    setReceivedRequests(received);
+    setSentRequests(sent);
   };
 
   const sendFriendRequest = async (senderId: string, receiverId: string): Promise<boolean> => {
@@ -75,17 +95,31 @@ export const FriendshipProvider: FC<{ children: ReactNode }> = ({ children }) =>
       senderId,
       receiverId,
     });
+    await refreshRequests();
     return !!response;
   };
 
   const acceptFriendRequest = async (requestId: string): Promise<boolean> => {
     const response = await sendJsonQuery(apiPaths.friends.acceptRequest(requestId), "POST");
+    await refreshRequests();
     return !!response;
   };
 
   const denyFriendRequest = async (requestId: string): Promise<boolean> => {
     const response = await sendJsonQuery(apiPaths.friends.denyRequest(requestId), "POST");
+    await refreshRequests();
     return !!response;
+  };
+
+  const removePendingFriendRequest = async (requestId: string): Promise<boolean> => {
+    try {
+      await sendJsonQuery(apiPaths.friends.removePendingRequest(requestId), "DELETE");
+      await refreshRequests();
+      return true;
+    } catch (error) {
+      console.error("Failed to remove pending friend request:", error);
+      return false;
+    }
   };
 
   const removeFriend = async (userId: string, friendId: string): Promise<boolean> => {
@@ -93,6 +127,7 @@ export const FriendshipProvider: FC<{ children: ReactNode }> = ({ children }) =>
       userId,
       friendId,
     });
+    await refreshRequests();
     return !!response;
   };
 
@@ -108,8 +143,12 @@ export const FriendshipProvider: FC<{ children: ReactNode }> = ({ children }) =>
         sendFriendRequest,
         acceptFriendRequest,
         denyFriendRequest,
+        removePendingFriendRequest,
         removeFriend,
         getFriends,
+        refreshRequests,
+        sentRequests,
+        receivedRequests,
       }}
     >
       {children}

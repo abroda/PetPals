@@ -25,9 +25,7 @@ export default function FriendsScreen() {
   const { userId } = useAuth(); // Assuming logged-in user's ID
 
   // States
-  const [friendRequests, setFriendRequests] = useState([]);
-  const [receivedRequests, setReceivedRequests] = useState([]);
-  const [sentRequests, setSentRequests] = useState([]);
+  const { receivedRequests, sentRequests, refreshRequests } = useFriendship();
 
   const backgroundColor = useThemeColor("background");
   const percentToDP = useWindowDimension("shorter");
@@ -37,116 +35,39 @@ export default function FriendsScreen() {
   const themeColors = ThemeColors[colorScheme];
 
   useEffect(() => {
-    const fetchRequests = async () => {
-      try {
-        const requests = await getFriendRequests(userId);
-        setFriendRequests(requests);
-
-        // Split into received and sent requests
-        const received = requests.filter(
-          (request) => request.receiverId === userId
-        );
-        const sent = requests.filter((request) => request.senderId === userId);
-
-        setReceivedRequests(received);
-        setSentRequests(sent);
-      } catch (error) {
-        Alert.alert("Error", "Failed to fetch friend requests.");
-      }
-    };
-
-    fetchRequests();
-  }, [userId]);
+    refreshRequests(); // Load requests when the screen is mounted
+  }, []);
 
   return (
-    <SafeAreaView style={{ backgroundColor: themeColors.secondary }}>
-      <ThemedView
-        style={{
-          alignContent: "center",
-          height: heighPercentToDP(100),
-          width: widthPercentageToDP(100),
-          backgroundColor: themeColors.secondary,
-        }}
-      >
-        <ThemedText
-          textStyleOptions={{ size: "big", weight: "bold" }}
-          style={{
-            marginBottom: 20,
-            backgroundColor: themeColors.secondary,
-          }}
-        >
-          Friendship Requests
-        </ThemedText>
-
-        {/* Received Requests */}
-        <ThemedText
-          textStyleOptions={{ size: "medium", weight: "bold" }}
-          style={{
-            marginVertical: percentToDP(2),
-            marginLeft: percentToDP(2),
-            color: themeColors.textOnSecondary,
-          }}
-        >
-          Received Requests
-        </ThemedText>
-        <View
-          style={{
-            width: widthPercentageToDP(90),
-            flex: 1,
-            paddingVertical: percentToDP(2),
-            margin: "auto",
-          }}
-        >
-          <FlatList
-            data={receivedRequests}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <FriendRequestListItem
-                requestId={item.id}
-                username={item.senderUsername}
-                senderId={item.senderId}
-                receiverId={item.receiverId}
-                avatar={item.senderId}
-              />
-            )}
+    <SafeAreaView>
+      <ThemedText>Received Requests</ThemedText>
+      <FlatList
+        data={receivedRequests}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <FriendRequestListItem
+            requestId={item.id}
+            username={item.senderUsername}
+            senderId={item.senderId}
+            receiverId={item.receiverId}
+            avatar={item.senderId}
           />
-        </View>
-
-        {/* Sent Requests */}
-        <ThemedText
-          textStyleOptions={{ size: "medium", weight: "bold" }}
-          style={{
-            marginVertical: percentToDP(2),
-            marginLeft: percentToDP(2),
-            color: themeColors.textOnSecondary,
-          }}
-        >
-          Sent Requests
-        </ThemedText>
-        <View
-          style={{
-            width: widthPercentageToDP(90),
-            flex: 1,
-            paddingVertical: percentToDP(2),
-            margin: "auto",
-          }}
-        >
-          <FlatList
-            data={sentRequests}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <FriendRequestListItem
-                requestId={item.id}
-                username={item.receiverUsername}
-                senderId={item.senderId}
-                receiverId={item.receiverId}
-                avatar={item.receiverId}
-              />
-            )}
+        )}
+      />
+      <ThemedText>Sent Requests</ThemedText>
+      <FlatList
+        data={sentRequests}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <FriendRequestListItem
+            requestId={item.id}
+            username={item.receiverUsername}
+            senderId={item.senderId}
+            receiverId={item.receiverId}
+            avatar={item.receiverId}
           />
-        </View>
-      </ThemedView>
+        )}
+      />
     </SafeAreaView>
   );
 }
-

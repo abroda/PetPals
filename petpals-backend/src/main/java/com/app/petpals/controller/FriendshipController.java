@@ -73,6 +73,22 @@ public class FriendshipController {
         return ResponseEntity.ok(new TextResponse("Friend request denied."));
     }
 
+    @DeleteMapping("/friends/request/{requestId}")
+    @Operation(
+            summary = "Remove a pending friend request.",
+            description = "Deletes a friend request if it is still pending.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Friend request successfully removed."),
+            @ApiResponse(responseCode = "404", description = "Friend request not found or not pending."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized.")
+    })
+    public ResponseEntity<TextResponse> removePendingFriendRequest(@PathVariable String requestId) {
+        friendshipService.removePendingFriendRequest(requestId);
+        return ResponseEntity.ok(new TextResponse("Friend request removed."));
+    }
+
     @DeleteMapping("/remove")
     @Operation(summary = "Remove friend.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<TextResponse> removeFriend(@RequestBody FriendshipDeleteRequest request) {

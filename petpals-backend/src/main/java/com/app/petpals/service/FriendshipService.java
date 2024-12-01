@@ -98,6 +98,21 @@ public class FriendshipService {
     }
 
     @Transactional
+    public void removePendingFriendRequest(String requestId) {
+        Optional<Friendship> requestOptional = friendshipRepository.findById(requestId);
+
+        if (requestOptional.isPresent()) {
+            Friendship request = requestOptional.get();
+            if (request.getStatus() != FriendshipRequestStatus.PENDING) {
+                throw new FriendshipRequestDataException("Only pending requests can be removed.");
+            }
+            friendshipRepository.delete(request);
+        } else {
+            throw new FriendshipRequestNotFoundException("Friend request not found.");
+        }
+    }
+
+    @Transactional
     public void removeFriend(String userId, String friendId) {
         if (Objects.equals(userId, friendId)) {
             throw new UserDataException("You can't unfriend yourself.");

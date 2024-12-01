@@ -1,3 +1,4 @@
+
 import React, { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import {
   SafeAreaView,
@@ -25,14 +26,18 @@ import { ThemeColors } from "@/constants/theme/Colors";
 import { useUser } from "@/hooks/useUser";
 import {UserProfile} from "@/context/UserContext";
 import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
+import {useFriendship} from "@/context/FriendshipContext";
 
 export default function UserProfileScreen() {
+
   // Contexts
   const path = usePathname();
   const { addDog, getDogsByUserId } = useDog();
   const { logout, userId: loggedInUserId } = useAuth();
   const { fetchUserById, userProfile } = useUser();
   const navigation = useNavigation();
+  const { sendFriendRequest, removePendingFriendRequest, sentRequests, receivedRequests } =
+    useFriendship(); // Use friendship context
 
   // Styling
   const percentToDP = useWindowDimension("shorter");
@@ -41,7 +46,6 @@ export default function UserProfileScreen() {
   // Functionality
   const [isRefreshing, setIsRefreshing] = useState(false); // For refresh indicator (if needed)
   const [menuVisible, setMenuVisible] = useState(false);
-
   const [dogs, setDogs] = useState<Dog[]>([]);
   const dogCount = dogs.length;
 
@@ -49,6 +53,7 @@ export default function UserProfileScreen() {
   const [username, setUsername] = useState(usernameFromPath);
 
   const [visitedUser, setVisitedUser] = useState<UserProfile | null>(null);
+  const [hasPendingRequest, setHasPendingRequest] = useState(false); // Track friendship request state
 
   // Colours
   const colorScheme = useColorScheme();
@@ -66,13 +71,22 @@ export default function UserProfileScreen() {
       fetchUserById(resolvedUsername)
         .then((user) => {
           setVisitedUser(user);
-          console.log("[User/Index] Visited user fetched:", user);
         })
         .catch((error) => {
           console.error("Failed to fetch visited user:", error);
         });
+
+
+      const pendingRequest = sentRequests.find(
+        (request) =>
+          request.receiverId === resolvedUsername &&
+          request.status === "PENDING"
+      );
+      setHasPendingRequest(!!pendingRequest);
+
     }
   }, [username, loggedInUserId]);
+
 
   // Update username only if it changes
   useEffect(() => {
@@ -80,6 +94,7 @@ export default function UserProfileScreen() {
       setUsername(usernameFromPath);
     }
   }, [path, usernameFromPath, username]);
+
 
   const fetchDogs = async () => {
     const ownerId = username === "me" ? loggedInUserId : username;
@@ -102,6 +117,46 @@ export default function UserProfileScreen() {
       fetchDogs();
     }, [loggedInUserId]) // Only re-run if userId changes
   );
+
+
+  // Send Friendship Request
+  const handleSendRequest = async () => {
+    if (!visitedUser) return;
+    const success = await sendFriendRequest(loggedInUserId, visitedUser.id);
+    if (success) {
+      Alert.alert("Friend Request", "Invitation sent!");
+      setHasPendingRequest(true);
+    } else {
+      Alert.alert("Error", "Failed to send invitation.");
+    }
+  };
+
+  // Cancel Pending Friendship Requests
+  const handleCancelRequest = async () => {
+    if (!visitedUser) return;
+
+    const resolvedUsername = username === "me" ? loggedInUserId : username;
+
+    const pendingRequest = sentRequests.find(
+      (request) =>
+        request.receiverId === resolvedUsername &&
+        request.status === "PENDING"
+    );
+    if (pendingRequest) {
+      const success = await removePendingFriendRequest(pendingRequest.id);
+      if (success) {
+        Alert.alert("Friend Request", "Invitation canceled.");
+        setHasPendingRequest(false);
+      } else {
+        Alert.alert("Error", "Failed to cancel invitation.");
+      }
+    } else {
+      console.log("[User/Index] Tried to cancel a friend request, that was not found")
+      return
+    }
+
+  };
+
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -283,6 +338,152 @@ export default function UserProfileScreen() {
             {visitedUser?.description || "No description"}
           </ThemedText>
         </View>
+
+        {/* User Info: Friends, KM, Dogs */}
+        <HorizontalView
+          justifyOption="space-evenly"
+          style={{
+            marginBottom: heightPercentToPD(5),
+            backgroundColor: themeColors.tertiary,
+            width: widthPercentageToDP(100),
+          }}
+        >
+          <View style={{ alignItems: "center" }}>
+            <ThemedText
+              style={{
+                fontSize: 24,
+                lineHeight: 26,
+                fontWeight: "bold",
+                color: themeColors.textOnSecondary
+              }}
+            >
+              21
+            </ThemedText>
+            <ThemedText style={{
+              fontSize: 12,
+              lineHeight: 14,
+              color: themeColors.textOnSecondary
+            }}>
+              friends
+            </ThemedText>
+          </View>
+          <View style={{ alignItems: "center" }}>
+            <ThemedText
+              style={{
+                fontSize: 24,
+                lineHeight: 26,
+                fontWeight: "bold",
+                color: themeColors.textOnSecondary
+              }}
+            >
+              2
+            </ThemedText>
+            <ThemedText style={{
+              fontSize: 12,
+              lineHeight: 14,
+              color: themeColors.textOnSecondary
+            }}>
+              km this week
+            </ThemedText>
+          </View>
+          <View style={{ alignItems: "center" }}>
+            <ThemedText
+              style={{
+                fontSize: 24,
+                lineHeight: 26,
+                fontWeight: "bold",
+                color: themeColors.textOnSecondary
+              }}
+            >
+              {dogCount}
+            </ThemedText>
+            <ThemedText style={{
+              fontSize: 12,
+              lineHeight: 14,
+              color: themeColors.textOnSecondary
+            }}>{dogCount === 1 ? "dog" : "dogs"}</ThemedText>
+          </View>
+        </HorizontalView>
+
+
+        {/* Buttons */}
+        {!isOwnProfile && (
+          <HorizontalView
+            justifyOption="center"
+            style={{
+              backgroundColor: themeColors.tertiary,
+              width: widthPercentageToDP(100),
+              justifyContent: "space-around",
+              paddingHorizontal: widthPercentageToDP(5),
+            }}
+          >
+            {hasPendingRequest ? (
+                <ThemedButton
+                  label="Cancel invitation"
+                  onPress={handleCancelRequest}
+                  color={themeColors.tertiary}
+                  style={{
+                    width: widthPercentageToDP(40),
+                    backgroundColor: themeColors.primary,
+                    borderRadius: 100,
+                  }}
+                />
+              ) : (
+              <ThemedButton
+                label="Send invitation"
+                onPress={handleSendRequest}
+                color={themeColors.tertiary}
+                style={{
+                  width: widthPercentageToDP(40),
+                  backgroundColor: themeColors.primary,
+                  borderRadius: 100,
+                }}
+              />
+            )}
+            <ThemedButton
+              label="Message"
+              color={themeColors.tertiary}
+              style={{
+                width: widthPercentageToDP(40),
+                backgroundColor: themeColors.primary,
+                borderRadius: 100,
+              }}
+            />
+          </HorizontalView>
+        )}
+
+        {isOwnProfile && (
+          <HorizontalView
+            justifyOption="center"
+            style={{
+              backgroundColor: themeColors.tertiary,
+              width: widthPercentageToDP(100),
+              justifyContent: "space-around",
+              paddingHorizontal: widthPercentageToDP(5),
+            }}
+          >
+            <ThemedButton
+              label="My friends"
+              color={themeColors.tertiary}
+              style={{
+                width: widthPercentageToDP(40),
+                backgroundColor: themeColors.primary,
+                borderRadius: 100,
+              }}
+            />
+            <ThemedButton
+              label="Add dog"
+              onPress={() => router.push(`/user/${username}/pet/new`)}
+              color={themeColors.tertiary}
+              style={{
+                width: widthPercentageToDP(40),
+                backgroundColor: themeColors.primary,
+                borderRadius: 100,
+              }}
+            />
+          </HorizontalView>
+        )}
+
       </View>
       <View
         style={{
