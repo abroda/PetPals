@@ -68,7 +68,7 @@ export default function FriendRequestListItem(props: {
         flexDirection: "row",
         flex: 1,
         marginVertical: heightPercentageToDP(1),
-        marginHorizontal: widthPercentageToDP(5),
+        // marginHorizontal: widthPercentageToDP(5),
         backgroundColor: themeColors.tertiary,
         borderRadius: percentToDP(4),
 
@@ -79,7 +79,8 @@ export default function FriendRequestListItem(props: {
         style={{
           flex: 1,
           flexDirection: "row",
-          padding: widthPercentageToDP(5),
+          paddingHorizontal: widthPercentageToDP(4),
+          paddingVertical: widthPercentageToDP(4),
           // backgroundColor: 'blue',
         }}
       >

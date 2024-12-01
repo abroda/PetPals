@@ -45,37 +45,60 @@ export default function FriendsScreen() {
     }}>
       <ThemedView backgroundColor={themeColors.secondary} style={{
         flex: 1,
+        paddingVertical: widthPercentageToDP(6),
+        paddingHorizontal: widthPercentageToDP(4),
       }}>
-        <ThemedText backgroundColorName={"secondary"}>Received Requests</ThemedText>
-        <FlatList
-          data={receivedRequests}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <FriendRequestListItem
-              requestId={item.id}
-              username={item.senderUsername}
-              senderId={item.senderId}
-              receiverId={item.receiverId}
-              avatar={item.senderId}
-              isReceiver={true}
-            />
-          )}
-        />
-        <ThemedText backgroundColorName={"secondary"}>Sent Requests</ThemedText>
-        <FlatList
-          data={sentRequests}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <FriendRequestListItem
-              requestId={item.id}
-              username={item.receiverUsername}
-              senderId={item.senderId}
-              receiverId={item.receiverId}
-              avatar={item.receiverId}
-              isReceiver={false}
-            />
-          )}
-        />
+        <View style={{
+          flex:1,
+        }}>
+          <ThemedText textStyleOptions={{size: "veryBig", weight: 'bold'}} backgroundColorName={"secondary"}>
+            Received Requests
+          </ThemedText>
+
+          <FlatList
+            data={receivedRequests}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <FriendRequestListItem
+                requestId={item.id}
+                username={item.senderUsername}
+                senderId={item.senderId}
+                receiverId={item.receiverId}
+                avatar={item.senderId}
+                isReceiver={true}
+              />
+            )}
+            contentContainerStyle={{
+              paddingVertical: widthPercentageToDP(5),
+
+            }}
+          />
+        </View>
+        <View style={{
+          flex:1,
+          marginTop: heighPercentToDP(2),
+        }}>
+          <ThemedText textStyleOptions={{size: "veryBig", weight: 'bold'}} backgroundColorName={"secondary"}>Sent Requests</ThemedText>
+          <FlatList
+            data={sentRequests}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <FriendRequestListItem
+                requestId={item.id}
+                username={item.receiverUsername}
+                senderId={item.senderId}
+                receiverId={item.receiverId}
+                avatar={item.receiverId}
+                isReceiver={false}
+              />
+            )}
+            contentContainerStyle={{
+              paddingVertical: widthPercentageToDP(5),
+
+            }}
+          />
+        </View>
+
       </ThemedView>
 
     </SafeAreaView>
