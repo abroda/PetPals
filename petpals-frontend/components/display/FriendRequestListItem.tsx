@@ -10,13 +10,14 @@ import { useRouter } from "expo-router";
 
 import {useColorScheme} from "@/hooks/theme/useColorScheme";
 import {ThemeColors} from "@/constants/theme/Colors";
+import UserAvatar from "@/components/navigation/UserAvatar";
 
 export default function FriendRequestListItem(props: {
   requestId: string;
   username: string;
   senderId: string;
   receiverId: string;
-  avatarUrl?: string;
+  avatar?: string;
 }) {
   const { acceptFriendRequest, denyFriendRequest } = useFriendship();
   const router = useRouter();
@@ -24,6 +25,7 @@ export default function FriendRequestListItem(props: {
 
   // Colours
   const colorScheme = useColorScheme();
+  // @ts-ignore
   const themeColors = ThemeColors[colorScheme];
 
   const handleAccept = async () => {
@@ -75,13 +77,10 @@ export default function FriendRequestListItem(props: {
           justifyContent: 'space-between'
         }}>
           <Pressable onPress={() => router.push(`/user/${props.senderId}`)}>
-            <Avatar
-              size={percentToDP(17)}
-              source={{
-                uri:
-                  props.avatarUrl ||
-                  "https://external-preview.redd.it/PzM9Myb5uugh3qrxvb1F0nVTsdXJKRl0NB88MuAPwZA.jpg?auto=webp&s=6627165dbd61ab8a8d7fc026b5ce9199c593fe93",
-              }}
+            <UserAvatar
+              size={percentToDP(5)}
+              userId={props.avatar}
+              doLink={true}
             />
           </Pressable>
           {props.username? <ThemedText

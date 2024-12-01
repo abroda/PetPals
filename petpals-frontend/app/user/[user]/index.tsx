@@ -1,11 +1,11 @@
-import React, {useCallback, useContext, useEffect, useLayoutEffect, useState} from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import {
   SafeAreaView,
   View,
   Pressable,
-  Text,
-  FlatList,
   Alert,
+  FlatList,
+  Text,
   TouchableWithoutFeedback,
 } from "react-native";
 import { ThemedText } from "@/components/basic/ThemedText";
@@ -15,31 +15,24 @@ import { ThemedButton } from "@/components/inputs/ThemedButton";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import PetAvatar from "@/components/navigation/PetAvatar";
 import { useWindowDimension } from "@/hooks/useWindowDimension";
-import { UserContext } from "@/context/UserContext";
-import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import { useAuth } from "@/hooks/useAuth";
-import {useNavigation, usePathname, useRouter, router, Href, useFocusEffect} from "expo-router";
+import { useNavigation, usePathname, router, Href, useFocusEffect } from "expo-router";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 import PostFeed from "@/components/lists/PostFeed";
 import { Dog, useDog } from "@/context/DogContext";
-import {useColorScheme} from "@/hooks/theme/useColorScheme";
-import {ThemeColors} from "@/constants/theme/Colors";
-// @ts-ignore
-import DogPlaceholderImage from "@/assets/images/dog_placeholder_theme-color-fair.png";
+import { useColorScheme } from "@/hooks/theme/useColorScheme";
+import { ThemeColors } from "@/constants/theme/Colors";
 import { useUser } from "@/hooks/useUser";
-import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
-
-
+import {UserProfile} from "@/context/UserContext";
+import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
 
 export default function UserProfileScreen() {
-
   // Contexts
   const path = usePathname();
   const { addDog, getDogsByUserId } = useDog();
-  const { logout, userId: loggedInUserId, authToken  } = useAuth();
-  const { getUserById, userProfile, isProcessing } = useUser();
+  const { logout, userId: loggedInUserId } = useAuth();
+  const { fetchUserById, userProfile } = useUser();
   const navigation = useNavigation();
-  const router = useRouter();
 
   // Styling
   const percentToDP = useWindowDimension("shorter");
@@ -51,8 +44,11 @@ export default function UserProfileScreen() {
 
   const [dogs, setDogs] = useState<Dog[]>([]);
   const dogCount = dogs.length;
+
   const usernameFromPath = path.slice(path.lastIndexOf("/") + 1);
   const [username, setUsername] = useState(usernameFromPath);
+
+  const [visitedUser, setVisitedUser] = useState<UserProfile | null>(null);
 
   // Colours
   const colorScheme = useColorScheme();
@@ -67,22 +63,23 @@ export default function UserProfileScreen() {
     const resolvedUsername = username === "me" ? loggedInUserId : username;
 
     if (resolvedUsername) {
-      getUserById(resolvedUsername).catch((error) => {
-        console.error("Failed to fetch user:", error);
-      });
+      fetchUserById(resolvedUsername)
+        .then((user) => {
+          setVisitedUser(user);
+          console.log("[User/Index] Visited user fetched:", user);
+        })
+        .catch((error) => {
+          console.error("Failed to fetch visited user:", error);
+        });
     }
-  }, [username, loggedInUserId]); // Re-run when username or loggedInUserId changes
+  }, [username, loggedInUserId]);
 
-
-
-
-// Update username only if it changes
+  // Update username only if it changes
   useEffect(() => {
     if (usernameFromPath !== username) {
       setUsername(usernameFromPath);
     }
   }, [path, usernameFromPath, username]);
-
 
   const fetchDogs = async () => {
     const ownerId = username === "me" ? loggedInUserId : username;
@@ -99,15 +96,12 @@ export default function UserProfileScreen() {
     }
   };
 
-
   // Refresh data whenever the screen is focused
   useFocusEffect(
     useCallback(() => {
       fetchDogs();
     }, [loggedInUserId]) // Only re-run if userId changes
   );
-
-
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -125,7 +119,10 @@ export default function UserProfileScreen() {
             <Pressable onPress={() => Alert.alert("Notifications")}>
               <ThemedIcon
                 name="notifications-outline"
-                style={{ marginHorizontal: widthPercentageToDP(1), padding: percentToDP(2), }}
+                style={{
+                  marginHorizontal: widthPercentageToDP(1),
+                  padding: percentToDP(2),
+                }}
               />
             </Pressable>
           )}
@@ -139,20 +136,27 @@ export default function UserProfileScreen() {
           />
 
           {/* Three-dots Menu Pop-up */}
-          {isOwnProfile && (<Pressable onPress={() => setMenuVisible(!menuVisible)}>
-            <ThemedIcon
-              name="ellipsis-vertical-outline"
-              style={{ marginHorizontal: widthPercentageToDP(1), padding: percentToDP(2), }}
-            />
-          </Pressable>)}
+          {isOwnProfile && (
+            <Pressable onPress={() => setMenuVisible(!menuVisible)}>
+              <ThemedIcon
+                name="ellipsis-vertical-outline"
+                style={{
+                  marginHorizontal: widthPercentageToDP(1),
+                  padding: percentToDP(2),
+                }}
+              />
+            </Pressable>
+          )}
         </View>
       ),
-      headerTitle: isOwnProfile ? "My Profile" : userProfile?.username || "Profile",
+      headerTitle: isOwnProfile
+        ? "My Profile"
+        : visitedUser?.username || "Profile",
       headerStyle: {
         backgroundColor: themeColors.secondary,
       },
     });
-  }, [navigation, username, menuVisible]);
+  }, [navigation, username, menuVisible, visitedUser]);
 
   const handleMenuSelect = (option: string) => {
     setMenuVisible(false);
@@ -170,10 +174,12 @@ export default function UserProfileScreen() {
   };
 
   const renderDogItem = ({ item }: { item: any }) => (
-    <View style={{
-      marginRight: 8,
-      paddingVertical: 10,
-    }}>
+    <View
+      style={{
+        marginRight: 8,
+        paddingVertical: 10,
+      }}
+    >
       <View
         style={{
           width: widthPercentageToDP(42),
@@ -227,7 +233,6 @@ export default function UserProfileScreen() {
         backgroundColor: themeColors.secondary,
       }}
     >
-      {/* User Info Segment */}
       <View
         style={{
           marginTop: heightPercentToPD(35),
@@ -237,7 +242,6 @@ export default function UserProfileScreen() {
           width: widthPercentageToDP(100),
         }}
       >
-        {/* User Avatar & Username */}
         <View
           style={{
             alignItems: "center",
@@ -247,8 +251,8 @@ export default function UserProfileScreen() {
         >
           <UserAvatar
             size={50}
-            userId={userProfile?.id ?? ""}
-            imageUrl={userProfile?.imageUrl}
+            userId={visitedUser?.id ?? ""}
+            imageUrl={visitedUser?.imageUrl}
             doLink={false}
             style={{
               marginTop: heightPercentToPD(-15),
@@ -264,7 +268,7 @@ export default function UserProfileScreen() {
               marginVertical: heightPercentToPD(1),
             }}
           >
-            {userProfile?.username || "Unknown User"}
+            {visitedUser?.username || "Unknown User"}
           </ThemedText>
           <ThemedText
             style={{
@@ -276,141 +280,9 @@ export default function UserProfileScreen() {
               marginBottom: heightPercentToPD(5),
             }}
           >
-            {userProfile?.description || "No description"}
+            {visitedUser?.description || "No description"}
           </ThemedText>
         </View>
-
-        {/* User Info: Friends, KM, Dogs */}
-        <HorizontalView
-          justifyOption="space-evenly"
-          style={{
-            marginBottom: heightPercentToPD(5),
-            backgroundColor: themeColors.tertiary,
-            width: widthPercentageToDP(100),
-          }}
-        >
-          <View style={{ alignItems: "center" }}>
-            <ThemedText
-              style={{
-                fontSize: 24,
-                lineHeight: 26,
-                fontWeight: "bold",
-                color: themeColors.textOnSecondary
-            }}
-            >
-              21
-            </ThemedText>
-            <ThemedText style={{
-              fontSize: 12,
-              lineHeight: 14,
-              color: themeColors.textOnSecondary
-            }}>
-              friends
-            </ThemedText>
-          </View>
-          <View style={{ alignItems: "center" }}>
-            <ThemedText
-              style={{
-                fontSize: 24,
-                lineHeight: 26,
-                fontWeight: "bold",
-                color: themeColors.textOnSecondary
-            }}
-            >
-              2
-            </ThemedText>
-            <ThemedText style={{
-              fontSize: 12,
-              lineHeight: 14,
-              color: themeColors.textOnSecondary
-            }}>
-              km this week
-            </ThemedText>
-          </View>
-          <View style={{ alignItems: "center" }}>
-            <ThemedText
-              style={{
-                fontSize: 24,
-                lineHeight: 26,
-                fontWeight: "bold",
-                color: themeColors.textOnSecondary
-            }}
-            >
-              {dogCount}
-            </ThemedText>
-            <ThemedText style={{
-              fontSize: 12,
-              lineHeight: 14,
-              color: themeColors.textOnSecondary
-            }}>{dogCount === 1 ? "dog" : "dogs"}</ThemedText>
-          </View>
-        </HorizontalView>
-
-
-        {/* Buttons: Hide "Send Invitation" & "Message" if it's own profile */}
-        {!isOwnProfile && (
-          <HorizontalView
-            justifyOption="center"
-            style={{
-              backgroundColor: themeColors.tertiary,
-              width: widthPercentageToDP(100),
-              justifyContent: "space-around",
-              paddingHorizontal: widthPercentageToDP(5),
-            }}
-          >
-            <ThemedButton
-              label="Send invitation"
-              color={themeColors.tertiary}
-              style={{
-                width: widthPercentageToDP(40),
-                backgroundColor: themeColors.primary,
-                borderRadius: 100,
-              }}
-            />
-            <ThemedButton
-              label="Message"
-              color={themeColors.tertiary}
-              style={{
-                width: widthPercentageToDP(40),
-                backgroundColor: themeColors.primary,
-                borderRadius: 100,
-              }}
-            />
-        </HorizontalView>
-        )}
-
-        {isOwnProfile && (
-          <HorizontalView
-            justifyOption="center"
-            style={{
-              backgroundColor: themeColors.tertiary,
-              width: widthPercentageToDP(100),
-              justifyContent: "space-around",
-              paddingHorizontal: widthPercentageToDP(5),
-            }}
-          >
-            <ThemedButton
-              label="My friends"
-              color={themeColors.tertiary}
-              style={{
-                width: widthPercentageToDP(40),
-                backgroundColor: themeColors.primary,
-                borderRadius: 100,
-              }}
-            />
-            <ThemedButton
-              label="Add dog"
-              onPress={() => router.push(`/user/${username}/pet/new`)}
-              color={themeColors.tertiary}
-              style={{
-                width: widthPercentageToDP(40),
-                backgroundColor: themeColors.primary,
-                borderRadius: 100,
-              }}
-            />
-          </HorizontalView>
-        )}
-
       </View>
       <View
         style={{
@@ -421,34 +293,23 @@ export default function UserProfileScreen() {
           paddingHorizontal: widthPercentageToDP(5),
         }}
       >
-        <ThemedText style={{
-          fontSize: 30,
-          lineHeight: 32,
-          backgroundColor: 'transparent',
-          color: themeColors.textOnSecondary
-        }}>
+        <ThemedText
+          style={{
+            fontSize: 30,
+            lineHeight: 32,
+            backgroundColor: "transparent",
+            color: themeColors.textOnSecondary,
+          }}
+        >
           Dogs
         </ThemedText>
-
-        {/*<ThemedButton*/}
-        {/*  label="Add dog"*/}
-        {/*  onPress={() => router.push(`/user/${username}/pet/new`)}*/}
-        {/*  color={themeColors.tertiary}*/}
-        {/*  style={{*/}
-        {/*    width: widthPercentageToDP(40),*/}
-        {/*    backgroundColor: themeColors.primary,*/}
-        {/*    borderRadius: 100,*/}
-        {/*  }}*/}
-        {/*/>*/}
       </View>
-
-      {/* Horizontal FlatList for dogs */}
       <FlatList
         data={dogs}
         keyExtractor={(item) => item.id}
         horizontal
         refreshing={isRefreshing}
-        onRefresh={fetchDogs} // Pull-to-refresh support
+        onRefresh={fetchDogs}
         showsHorizontalScrollIndicator={false}
         renderItem={renderDogItem}
         contentContainerStyle={{
@@ -467,7 +328,7 @@ export default function UserProfileScreen() {
         backgroundColor: themeColors.secondary,
       }}
     >
-      <FlatList // question: why not scrollview? or flatlist (unscrollable) with header dogs and posts as children?
+      <FlatList
         style={{
           width: widthPercentageToDP(100),
         }}
@@ -479,7 +340,7 @@ export default function UserProfileScreen() {
               textStyleOptions={{ size: 30 }}
               style={{
                 color: themeColors.textOnSecondary,
-                backgroundColor: 'transparent',
+                backgroundColor: "transparent",
                 marginLeft: widthPercentageToDP(5),
                 marginTop: heightPercentToPD(4),
               }}
@@ -489,7 +350,7 @@ export default function UserProfileScreen() {
             <PostFeed />
           </>
         )}
-        renderItem={(item) => <></>} // required argument!
+        renderItem={(item) => <></>}
       />
       {menuVisible && (
         <View
@@ -501,7 +362,6 @@ export default function UserProfileScreen() {
             right: widthPercentageToDP(5),
             width: widthPercentageToDP(40),
             backgroundColor: themeColors.tertiary,
-
             borderRadius: percentToDP(4),
             shadowOpacity: 0.3,
             shadowRadius: 10,
@@ -519,46 +379,26 @@ export default function UserProfileScreen() {
                 borderBottomWidth: 1,
                 borderColor: themeColors.primary,
                 fontSize: percentToDP(4.5),
-                lineHeight: percentToDP(5)
+                lineHeight: percentToDP(5),
               }}
             >
               Edit
             </Text>
           </Pressable>
           <Pressable onPress={() => handleMenuSelect("App Settings")}>
-            <Text style={{
-              padding: percentToDP(5),
-              color: themeColors.primary,
-
-              fontSize: percentToDP(4.5),
-              lineHeight: percentToDP(5)
-            }}>
+            <Text
+              style={{
+                padding: percentToDP(5),
+                color: themeColors.primary,
+                fontSize: percentToDP(4.5),
+                lineHeight: percentToDP(5),
+              }}
+            >
               App Settings
             </Text>
           </Pressable>
         </View>
       )}
     </SafeAreaView>
-  )
-  // For not logged in user? I dunno if we need it, we should only allow logged in users.
-  //   : (
-  //   <SafeAreaView style={{
-  //     flex: 1,
-  //     width: widthPercentageToDP(100),
-  //     backgroundColor: themeColors.secondary,
-  //   }}>
-  //     <ThemedText textColorName={"textOnSecondary"} style={{
-  //       width: widthPercentageToDP(70),
-  //       justifyContent: 'center',
-  //       textAlign: 'center',
-  //       alignContent: 'center',
-  //       alignSelf: 'center',
-  //       margin: 'auto',
-  //       backgroundColor: 'transparent'
-  //     }} >
-  //       You are currently not logged in. Log in to view your profile.
-  //     </ThemedText>
-  //
-  //   </SafeAreaView>
-  // );
+  );
 }
