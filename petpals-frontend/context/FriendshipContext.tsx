@@ -2,6 +2,7 @@ import React, { createContext, FC, ReactNode, useContext, useState } from "react
 import { apiPaths } from "@/constants/config/api";
 import { useAuth } from "@/hooks/useAuth";
 import {AuthContext} from "@/context/AuthContext";
+import {Alert} from "react-native";
 
 
 export type FriendshipRequest = {
@@ -32,6 +33,7 @@ type FriendshipContextType = {
   refreshRequests: () => Promise<void>;
   sentRequests: FriendshipRequest[];
   receivedRequests: FriendshipRequest[];
+  friends: Friend[];
 };
 
 export const FriendshipContext = createContext<FriendshipContextType | null>(null);
@@ -39,8 +41,11 @@ export const FriendshipContext = createContext<FriendshipContextType | null>(nul
 export const FriendshipProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const { authToken, userId } = useAuth();
+
+
   const [sentRequests, setSentRequests] = useState<FriendshipRequest[]>([]);
   const [receivedRequests, setReceivedRequests] = useState<FriendshipRequest[]>([]);
+  const [friends, setFriends] = useState<Friend[]>([]);
 
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -79,25 +84,67 @@ export const FriendshipProvider: FC<{ children: ReactNode }> = ({ children }) =>
   const refreshRequests = async () => {
     if (userId) {
       await getFriendRequests(userId);
+      const userFriends = await getFriends(userId);
+      setFriends(userFriends);
     }
   };
 
   const getFriendRequests = async (userId: string) => {
     const requests: FriendshipRequest[] = await sendJsonQuery(apiPaths.friends.getRequests(userId), "GET");
-    const received = requests.filter((request) => request.receiverId === userId);
-    const sent = requests.filter((request) => request.senderId === userId);
+    const received = requests.filter((request) => request.receiverId === userId).filter((request) => request.status == 'PENDING');
+    const sent = requests.filter((request) => request.senderId === userId).filter((request) => request.status == 'PENDING');
     setReceivedRequests(received);
     setSentRequests(sent);
   };
 
   const sendFriendRequest = async (senderId: string, receiverId: string): Promise<boolean> => {
-    const response = await sendJsonQuery(apiPaths.friends.sendRequest, "POST", {
-      senderId,
-      receiverId,
-    });
-    await refreshRequests();
-    return !!response;
+    try {
+      // Refresh the requests to ensure you are working with the latest data
+      await refreshRequests();
+
+      // Check if there is an existing request from the receiver to the sender
+      const existingRequest = receivedRequests.find(
+        (request) => request.senderId === receiverId && request.receiverId === senderId
+      );
+
+      if (existingRequest) {
+        // If an existing request is found, accept it
+        const accepted = await acceptFriendRequest(existingRequest.id);
+        if (accepted) {
+          Alert.alert("Friendship", "You have successfully added a new friend!");
+          await refreshRequests();
+          return true;
+        } else {
+          Alert.alert("Error", "Failed to accept the existing friend request.");
+          return false;
+        }
+      }
+
+      // If no existing request, proceed to send a new one
+      const response = await sendJsonQuery(apiPaths.friends.sendRequest, "POST", {
+        senderId,
+        receiverId,
+      });
+      if (response) {
+        Alert.alert("Friendship", "Friend request sent!");
+      }
+      await refreshRequests();
+      return !!response;
+    } catch (error) {
+      console.error("Error sending friend request:", error);
+      Alert.alert("Error", "Failed to send a friend request.");
+      return false;
+    }
   };
+
+  // const sendFriendRequest = async (senderId: string, receiverId: string): Promise<boolean> => {
+  //   const response = await sendJsonQuery(apiPaths.friends.sendRequest, "POST", {
+  //     senderId,
+  //     receiverId,
+  //   });
+  //   await refreshRequests();
+  //   return !!response;
+  // };
 
   const acceptFriendRequest = async (requestId: string): Promise<boolean> => {
     const response = await sendJsonQuery(apiPaths.friends.acceptRequest(requestId), "POST");
@@ -132,8 +179,13 @@ export const FriendshipProvider: FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const getFriends = async (userId: string): Promise<Friend[]> => {
-    const response = await sendJsonQuery(apiPaths.friends.getFriends(userId), "GET");
-    return response || [];
+    try {
+      const response = await sendJsonQuery(apiPaths.friends.getFriends(userId), "GET");
+      return response || [];
+    } catch (error) {
+      console.error("Failed to fetch friends:", error);
+      return [];
+    }
   };
 
   return (
@@ -149,6 +201,7 @@ export const FriendshipProvider: FC<{ children: ReactNode }> = ({ children }) =>
         refreshRequests,
         sentRequests,
         receivedRequests,
+        friends
       }}
     >
       {children}
