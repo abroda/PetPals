@@ -15,7 +15,7 @@ import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import PetAvatar from "@/components/navigation/PetAvatar";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigation, usePathname, router, Href, useFocusEffect } from "expo-router";
 import { widthPercentageToDP } from "react-native-responsive-screen";
@@ -113,10 +113,7 @@ export default function UserProfileScreen() {
 
   // Refresh data whenever the screen is focused
   useFocusEffect(
-    // useCallback(() => { // -- using a hook within a hook is not recommended
-    //   fetchDogs();
-    // }, [userId]) // Only re-run if userId changes
-    () => {
+    useCallback(() => {
       fetchDogs();
     }, [loggedInUserId]) // Only re-run if userId changes
   );
@@ -362,13 +359,11 @@ export default function UserProfileScreen() {
             >
               21
             </ThemedText>
-            <ThemedText
-              style={{
-                fontSize: 12,
-                lineHeight: 14,
-                color: themeColors.textOnSecondary,
-              }}
-            >
+            <ThemedText style={{
+              fontSize: 12,
+              lineHeight: 14,
+              color: themeColors.textOnSecondary
+            }}>
               friends
             </ThemedText>
           </View>
@@ -383,13 +378,11 @@ export default function UserProfileScreen() {
             >
               2
             </ThemedText>
-            <ThemedText
-              style={{
-                fontSize: 12,
-                lineHeight: 14,
-                color: themeColors.textOnSecondary,
-              }}
-            >
+            <ThemedText style={{
+              fontSize: 12,
+              lineHeight: 14,
+              color: themeColors.textOnSecondary
+            }}>
               km this week
             </ThemedText>
           </View>
@@ -404,15 +397,11 @@ export default function UserProfileScreen() {
             >
               {dogCount}
             </ThemedText>
-            <ThemedText
-              style={{
-                fontSize: 12,
-                lineHeight: 14,
-                color: themeColors.textOnSecondary,
-              }}
-            >
-              {dogCount === 1 ? "dog" : "dogs"}
-            </ThemedText>
+            <ThemedText style={{
+              fontSize: 12,
+              lineHeight: 14,
+              color: themeColors.textOnSecondary
+            }}>{dogCount === 1 ? "dog" : "dogs"}</ThemedText>
           </View>
         </HorizontalView>
 
@@ -429,17 +418,17 @@ export default function UserProfileScreen() {
             }}
           >
             {hasPendingRequest ? (
-                <ThemedButton
-                  label="Cancel invitation"
-                  onPress={handleCancelRequest}
-                  color={themeColors.tertiary}
-                  style={{
-                    width: widthPercentageToDP(40),
-                    backgroundColor: themeColors.primary,
-                    borderRadius: 100,
-                  }}
-                />
-              ) : (
+              <ThemedButton
+                label="Cancel invitation"
+                onPress={handleCancelRequest}
+                color={themeColors.tertiary}
+                style={{
+                  width: widthPercentageToDP(40),
+                  backgroundColor: themeColors.primary,
+                  borderRadius: 100,
+                }}
+              />
+            ) : (
               <ThemedButton
                 label="Send invitation"
                 onPress={handleSendRequest}

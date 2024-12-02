@@ -4,7 +4,7 @@ import { Avatar } from "react-native-ui-lib";
 import { router } from "expo-router";
 import { useAuth } from "@/hooks/useAuth";
 import { useUser } from "@/hooks/useUser"; // Assuming this is where getUserById is located
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import {useWindowDimension} from "@/hooks/theme/useWindowDimension";
 
 export default function UserAvatar(props: {
   size: number;

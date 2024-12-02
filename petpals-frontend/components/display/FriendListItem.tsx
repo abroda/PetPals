@@ -6,11 +6,11 @@ import { Avatar, View, Text } from "react-native-ui-lib";
 import { useState } from "react";
 import { Link, router } from "expo-router";
 import { ThemedText } from "../basic/ThemedText";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
 import {widthPercentageToDP} from "react-native-responsive-screen";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import {useColorScheme} from "@/hooks/theme/useColorScheme";
 import {ThemeColors} from "@/constants/theme/Colors";
+import {useWindowDimension} from "@/hooks/theme/useWindowDimension";
 
 export default function FriendListItem (props:{
   username: any,

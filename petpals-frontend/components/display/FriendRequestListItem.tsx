@@ -4,7 +4,7 @@ import { Avatar, View, Text } from "react-native-ui-lib";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { ThemedText } from "../basic/ThemedText";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
-import { useWindowDimension } from "@/hooks/useWindowDimension";
+import {useWindowDimension} from "@/hooks/theme/useWindowDimension";
 import { useFriendship } from "@/context/FriendshipContext";
 import { useRouter } from "expo-router";
 
