@@ -1,14 +1,18 @@
 package com.app.petpals.controller;
 
+import com.app.petpals.entity.Friendship;
 import com.app.petpals.entity.User;
 import com.app.petpals.payload.account.AccountResponse;
 import com.app.petpals.payload.account.FriendshipDeleteRequest;
 import com.app.petpals.payload.account.FriendshipRequest;
+import com.app.petpals.payload.account.FriendshipRequestResponse;
 import com.app.petpals.payload.TextResponse;
 import com.app.petpals.service.AWSImageService;
 import com.app.petpals.service.FriendshipService;
 import com.app.petpals.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -69,10 +73,56 @@ public class FriendshipController {
         return ResponseEntity.ok(new TextResponse("Friend request denied."));
     }
 
+    @DeleteMapping("/friends/request/{requestId}")
+    @Operation(
+            summary = "Remove a pending friend request.",
+            description = "Deletes a friend request if it is still pending.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Friend request successfully removed."),
+            @ApiResponse(responseCode = "404", description = "Friend request not found or not pending."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized.")
+    })
+    public ResponseEntity<TextResponse> removePendingFriendRequest(@PathVariable String requestId) {
+        friendshipService.removePendingFriendRequest(requestId);
+        return ResponseEntity.ok(new TextResponse("Friend request removed."));
+    }
+
     @DeleteMapping("/remove")
     @Operation(summary = "Remove friend.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<TextResponse> removeFriend(@RequestBody FriendshipDeleteRequest request) {
         friendshipService.removeFriend(request.getUserId(), request.getFriendId());
         return ResponseEntity.ok(new TextResponse("Friend removed."));
+    }
+
+
+    @GetMapping("/{id}/friends/requests")
+    @Operation(
+            summary = "Get friendship requests for a user",
+            description = "Retrieves all friendship requests where the user is either the sender or the receiver.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved friendship requests."),
+            @ApiResponse(responseCode = "404", description = "User not found."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized.")
+    })
+    public ResponseEntity<List<FriendshipRequestResponse>> getFriendRequestsForUser(@PathVariable String id) {
+        List<Friendship> requests = friendshipService.getFriendRequestsForUser(id);
+
+        // Map Friendship entities to FriendshipRequestResponse DTOs
+        List<FriendshipRequestResponse> response = requests.stream()
+                .map(request -> FriendshipRequestResponse.builder()
+                        .id(request.getId())
+                        .status(request.getStatus().name())
+                        .senderId(request.getSender().getId())
+                        .senderUsername(request.getSender().getDisplayName())
+                        .receiverId(request.getReceiver().getId())
+                        .receiverUsername(request.getReceiver().getDisplayName())
+                        .build())
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
     }
 }

@@ -44,23 +44,23 @@ export default function HomeScreen() {
   } = useUser();
 
   // Fetches all users
-  const fetchUsers = async (query: string) => {
-    setIsSearching(true);
-    try {
-      const response = await fetch(`/api/users`); // Adjust the endpoint as necessary
-      const data = await response.json();
-      const publicUsers = data.filter(
-        (user) =>
-          user.visibility === "PUBLIC" &&
-          user.username.toLowerCase().includes(query.toLowerCase())
-      );
-      setSearchResults(publicUsers);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    } finally {
-      setIsSearching(false);
-    }
-  };
+  // const fetchUsers = async (query: string) => {
+  //   setIsSearching(true);
+  //   try {
+  //     const response = await fetch(`/api/users`); // Adjust the endpoint as necessary
+  //     const data = await response.json();
+  //     const publicUsers = data.filter(
+  //       (user) =>
+  //         user.visibility === "PUBLIC" &&
+  //         user.username.toLowerCase().includes(query.toLowerCase())
+  //     );
+  //     setSearchResults(publicUsers);
+  //   } catch (error) {
+  //     console.error("Error fetching users:", error);
+  //   } finally {
+  //     setIsSearching(false);
+  //   }
+  // };
 
   // For User search
   const handleSearch = async (query: string, context: string) => {
@@ -144,7 +144,7 @@ export default function HomeScreen() {
               <UserAvatar
                 size={10}
                 doLink={true}
-                userId={(userId?.length ?? 0) > 0 ? userId ?? "me" : "me"}
+                userId={"me"}
                 imageUrl={userProfile?.imageUrl}
               />
             </ThemedView>
