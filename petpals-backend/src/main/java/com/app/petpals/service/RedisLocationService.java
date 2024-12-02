@@ -25,12 +25,13 @@ public class RedisLocationService {
     private static final String USER_METADATA_KEY = "user_metadata"; // for timestamp on location update
     private static final String VISIBILITY_KEY = "visibility:";
     private static final String FRIENDS_LIST_KEY = "friends_list:";
+    private static final String GROUP_WALK_LIST_KEY = "group_walk_list:";
 
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
 
     // Initialize walk metadata in Redis
-    public void initWalk(String userId, String visibility, List<String> friends) {
+    public void initWalk(String userId, String visibility, List<String> friends, String groupWalkId) {
         try {
             // Store visibility
             redisTemplate.opsForValue().set(VISIBILITY_KEY + userId, visibility);
@@ -39,6 +40,11 @@ public class RedisLocationService {
             if ("FRIENDS_ONLY".equalsIgnoreCase(visibility) && friends != null && !friends.isEmpty()) {
                 String friendsKey = FRIENDS_LIST_KEY + userId; // Define a key for the friends list
                 redisTemplate.opsForList().rightPushAll(friendsKey, friends);
+            }
+
+            if (groupWalkId != null && !groupWalkId.isEmpty()) {
+                String groupWalkKey = GROUP_WALK_LIST_KEY + groupWalkId;
+                redisTemplate.opsForList().rightPush(groupWalkKey, userId);
             }
 
         } catch (Exception e) {
@@ -142,6 +148,45 @@ public class RedisLocationService {
         }
     }
 
+    public List<LocationResponse> findGroupWalkParticipantsLocations(String groupWalkId) {
+        try {
+            // Define the Redis key for the group walk
+            String groupWalkKey = GROUP_WALK_LIST_KEY + groupWalkId;
+
+            // Get all user IDs in the group walk
+            List<String> userIds = redisTemplate.opsForList().range(groupWalkKey, 0, -1);
+
+            if (userIds == null || userIds.isEmpty()) {
+                System.out.println("No participants found for group walk: " + groupWalkId);
+                return Collections.emptyList();
+            }
+
+            // Fetch the latest locations for all users in the group walk
+            return userIds.stream()
+                    .map(userId -> {
+                        try {
+                            // Retrieve the user's location from Redis
+                            Point point = Objects.requireNonNull(redisTemplate.opsForGeo().position(GEO_KEY, userId)).get(0);
+                            String timestampStr = (String) redisTemplate.opsForHash().get(USER_METADATA_KEY, userId);
+                            LocalDateTime timestamp = timestampStr != null ? LocalDateTime.parse(timestampStr) : null;
+
+                            // Create and return the LocationResponse
+                            return new LocationResponse(userId, point.getY(), point.getX(), timestamp);
+                        } catch (Exception e) {
+                            System.err.println("Failed to retrieve location for user: " + userId);
+                            return null;
+                        }
+                    })
+                    .filter(Objects::nonNull) // Filter out any null results
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Failed to retrieve group walk participants for groupWalkId: " + groupWalkId);
+            return Collections.emptyList();
+        }
+    }
+
+
     // Find users affected by location update, respecting visibility rules - find users that can see me
     public List<String> findUsersAffectedByWithVisibility(String userId, double latitude, double longitude, double radiusKm) {
         // Apply the visibility settings of the user (the one updating their location)
@@ -211,12 +256,17 @@ public class RedisLocationService {
     }
 
     // Clear all data for a user's walk
-    public void clearWalkData(String userId) {
+    public void clearWalkData(String userId, String groupWalkId) {
         try {
             redisTemplate.opsForGeo().remove(GEO_KEY, userId);
             redisTemplate.opsForHash().delete(USER_METADATA_KEY, userId);
             redisTemplate.delete(VISIBILITY_KEY + userId);
             redisTemplate.delete(FRIENDS_LIST_KEY + userId);
+            if (groupWalkId != null && !groupWalkId.isEmpty()) {
+                String groupWalkKey = GROUP_WALK_LIST_KEY + groupWalkId;
+                redisTemplate.opsForList().remove(groupWalkKey, 0, userId);
+                System.out.println("Removed user " + userId + " from group walk " + groupWalkId);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Failed to clear walk data for user: " + userId);
