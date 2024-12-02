@@ -274,9 +274,9 @@ public class RedisLocationService {
     }
 
     // Calculate total distance
-    public double calculateTotalDistance(List<LocationResponse> locations) {
+    public int calculateTotalDistance(List<LocationResponse> locations) {
         if (locations.size() < 2) {
-            return 0.0;
+            return 0;
         }
         double totalDistance = 0.0;
         for (int i = 1; i < locations.size(); i++) {
@@ -285,7 +285,7 @@ public class RedisLocationService {
                     locations.get(i).getLatitude(), locations.get(i).getLongitude()
             );
         }
-        return totalDistance;
+        return (int) (totalDistance * 1000);
     }
 
     private double calculateHaversineDistance(double lat1, double lon1, double lat2, double lon2) {

@@ -148,7 +148,7 @@ public class MQTTLocationService {
             String sessionId = session.getId();
 
             // Calculate total distance walked
-            double totalDistance = redisLocationService.calculateTotalDistance(locations);
+            int totalDistance = redisLocationService.calculateTotalDistance(locations);
 
             // Finalize the session in the database
             walkSessionService.endWalk(sessionId, endTime, totalDistance);
