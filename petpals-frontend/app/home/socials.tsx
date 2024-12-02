@@ -34,9 +34,9 @@ export default function FriendsScreen() {
   // @ts-ignore
   const themeColors = ThemeColors[colorScheme];
 
-  // useEffect(() => {
-  //   refreshRequests(); // Load requests when the screen is mounted
-  // }, []);
+  useEffect(() => {
+    refreshRequests(); // Load requests when the screen is mounted
+  }, []);
 
   return (
     <SafeAreaView style={{
