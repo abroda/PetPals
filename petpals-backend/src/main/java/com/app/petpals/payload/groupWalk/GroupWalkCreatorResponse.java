@@ -11,4 +11,6 @@ public class GroupWalkCreatorResponse {
     private String userId;
     private String username;
     private String imageUrl;
+    private int dogsCount;
+    private  int friendsCount;
 }

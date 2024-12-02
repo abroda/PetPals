@@ -64,6 +64,7 @@ export const apiPaths = {
       databaseURL + `api/users/${userId}/groupWalks/joined`, // GET
     listCreated: (userId: string) =>
       databaseURL + `api/users/${userId}/groupWalks/created`, // GET
+    listUsersDogs: (userId: string) => databaseURL + `api/users/${userId}/dogs`, // GET
     listComments: (walkId: string) =>
       databaseURL + `api/groupWalks/${walkId}/comments`, // GET
     addComment: (walkId: string) =>

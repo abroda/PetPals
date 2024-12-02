@@ -1,27 +1,20 @@
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
-import { ThemedScrollView } from "../basic/containers/ThemedScrollView";
-import { ThemedView, ThemedViewProps } from "../basic/containers/ThemedView";
 import { ThemedText } from "../basic/ThemedText";
-import { Entity } from "@/context/WalksContext";
+import { Participant } from "@/context/WalksContext";
 import PetAvatar from "../navigation/PetAvatar";
 import { useAuth } from "@/hooks/useAuth";
-import { ViewProps } from "react-native-ui-lib";
-import { FlatList } from "react-native-gesture-handler";
 import HorizontalView from "../basic/containers/HorizontalView";
 import UserAvatar from "../navigation/UserAvatar";
+import { useThemeColor } from "@/hooks/theme/useThemeColor";
 
 export const ParticipantListItem = (props: {
-  user?: Entity;
-  dogsParticipating?: Entity[];
+  user: Participant;
+  isCreator: boolean;
 }) => {
   const user = props.user ?? { id: "d1", name: "Example", avatarURL: "" };
-  const dogsParticipating = props.dogsParticipating ?? [
-    { id: "d1", name: "Cutie1", avatarURL: "" },
-    { id: "d2", name: "Cutie2", avatarURL: "" },
-    { id: "d3", name: "Cutie3", avatarURL: "" },
-    { id: "d4", name: "Cutie4", avatarURL: "" },
-    { id: "d5", name: "Cutie5", avatarURL: "" },
-  ];
+  const dogsParticipating = props.user.dogs ?? [];
+
+  const borderColor = useThemeColor("primary");
   const percentToDP = useWindowDimension("shorter");
   const { userId } = useAuth();
 
@@ -33,26 +26,28 @@ export const ParticipantListItem = (props: {
       <HorizontalView justifyOption="flex-start">
         <UserAvatar
           size={12}
-          userId={user.id}
+          userId={user.userId}
           doLink={true}
-          imageUrl={user.avatarURL}
+          imageUrl={user.imageURL}
+          marked={props.isCreator}
         />
         <ThemedText
           textStyleOptions={{ weight: "semibold" }}
           style={{ marginLeft: percentToDP(2) }}
         >
-          {user.name}
+          {user.username}
         </ThemedText>
       </HorizontalView>
 
       <HorizontalView justifyOption="flex-end">
         {dogsParticipating.map((dog) => (
           <PetAvatar
+            key={dog.dogId}
             size={12}
-            userId={user.id}
-            petId={dog.id}
+            userId={user.userId}
+            petId={dog.dogId}
             doLink={true}
-            source={dog.avatarURL}
+            source={dog.imageUrl}
             viewProps={{ style: { marginLeft: percentToDP(-3.5) } }}
           />
         ))}

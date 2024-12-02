@@ -12,11 +12,12 @@ import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import { Participant } from "@/context/WalksContext";
 import ThemedDialog from "./ThemedDialog";
 import { DogPicker } from "../inputs/DogPicker";
+import { Dog } from "@/context/DogContext";
 
-export default function GroupWalkParticipationDialog(props: {
+export default function JoinDialog(props: {
   walkId: string;
   joined: boolean;
-  dogs: Participant[];
+  dogs: Dog[];
   dogsParticipating: string[];
   onSave: (dogsParticipating: string[]) => void;
   onLeave: () => void;
@@ -53,11 +54,18 @@ export default function GroupWalkParticipationDialog(props: {
     }
   }, []);
 
-  const save = useCallback(async () => {
+  const save = async () => {
+    if (dogsParticipating.length === 0) {
+      setErrorMessage("At least one dog needs to participate.");
+      return;
+    }
     asyncAbortController.current = new AbortController();
+    let data = {
+      dogIds: dogsParticipating,
+    };
     let result = await joinGroupWalk(
       props.walkId,
-      dogsParticipating,
+      data,
       asyncAbortController.current
     );
 
@@ -67,7 +75,7 @@ export default function GroupWalkParticipationDialog(props: {
     } else {
       setErrorMessage(result.returnValue);
     }
-  }, []);
+  };
 
   return (
     <ThemedDialog
@@ -130,41 +138,54 @@ export default function GroupWalkParticipationDialog(props: {
               {errorMessage}
             </ThemedText>
             <ThemedButton
-              label={props.joined ? "Save" : "Join"}
-              backgroundColorName="primary"
+              label={
+                props.joined
+                  ? dogsParticipating.length === 0
+                    ? "Leave"
+                    : "Save"
+                  : "Join"
+              }
+              textColorName={
+                props.joined && dogsParticipating.length === 0
+                  ? "text"
+                  : "textOnPrimary"
+              }
+              backgroundColorName={
+                props.joined && dogsParticipating.length === 0
+                  ? "alarm"
+                  : "primary"
+              }
               iconSource={() => (
                 <ThemedIcon
-                  name="checkmark"
+                  name={
+                    props.joined && dogsParticipating.length === 0
+                      ? "log-out-outline"
+                      : "checkmark"
+                  }
                   size={20}
-                  colorName="textOnPrimary"
+                  colorName={
+                    props.joined && dogsParticipating.length === 0
+                      ? "text"
+                      : "textOnPrimary"
+                  }
                   style={{ marginLeft: percentToDP(2) }}
                 />
               )}
               iconOnRight
-              onPress={save}
+              onPress={() =>
+                props.joined && dogsParticipating.length === 0
+                  ? leave()
+                  : save()
+              }
               style={{ marginBottom: percentToDP(3), width: percentToDP(75.8) }}
             />
-            {props.joined && (
-              <ThemedButton
-                label="Leave"
-                textColorName={"text"}
-                backgroundColorName="alarm"
-                iconSource={() => (
-                  <ThemedIcon
-                    name="log-out-outline"
-                    size={20}
-                    colorName="text"
-                    style={{ marginLeft: percentToDP(2) }}
-                  />
-                )}
-                iconOnRight
-                onPress={leave}
-                style={{
-                  marginBottom: percentToDP(3),
-                  width: percentToDP(75.8),
-                }}
-              />
-            )}
+            <ThemedButton
+              label={"Cancel"}
+              textColorName="textOnSecondary"
+              backgroundColorName="secondary"
+              onPress={props.onDismiss}
+              style={{ marginBottom: percentToDP(3), width: percentToDP(75.8) }}
+            />
           </ThemedView>
         )}
       </ThemedScrollView>

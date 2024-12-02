@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Data
@@ -33,7 +33,7 @@ public class GroupWalk {
     private double longitude;
 
     @Column(name = "datetime")
-    private LocalDateTime datetime;
+    private ZonedDateTime datetime;
 
     @JsonManagedReference
     @ManyToOne()

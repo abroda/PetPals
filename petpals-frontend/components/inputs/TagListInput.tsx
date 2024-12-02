@@ -36,47 +36,51 @@ export default function TagListInput({
   const percentToDP = useWindowDimension("shorter");
   const borderColor = useThemeColor("primary");
 
-  const onChangeText = async (newText: string) => {
-    let input = newText.toLocaleLowerCase();
+  const validate = (newText: string) => {
+    let tagText = newText.trimStart().trimEnd();
+    let message = "";
 
-    setTagInput(input);
-
-    if (input.length < 3) {
-      // tag too short - adding is disabled
-      setAddTagEnabled(false);
-      setErrorMessage(" ");
-      setShowSuggestions(false);
-    } else if (input.match(tagRegex)) {
-      if (tags.includes(input)) {
-        // don't allow repeat tags
-        setAddTagEnabled(false);
-        setErrorMessage("Tag already added");
-        setShowSuggestions(false);
-      } else {
-        // tag is ok - show suggestions
-        setAddTagEnabled(true);
-        setErrorMessage(" ");
-        setIsLoading(true);
-        setShowSuggestions(true);
-
-        let result = await getTagSuggestions(input);
-
-        if (result.success) {
-          // show new suggestions (if there are any)
-          setSuggestions(result.returnValue.tags);
-        } else {
-          // couldn't get suggestion -> hide the suggestion box
-          setSuggestions([]);
-          setErrorMessage(result.returnValue);
-        }
-
-        setTimeout(() => setIsLoading(false), 500);
+    if (tagText.length < 3) {
+      message = " ";
+    } else if (tagText.match(tagRegex)) {
+      if (tags.includes(tagText)) {
+        message = "Tag already added";
       }
     } else {
-      // tag has special characters - adding is disabled + error messsage
+      message = "Tag should not include any special characters";
+    }
+
+    return message;
+  };
+
+  const onChangeText = async (newText: string) => {
+    let input = newText.toLocaleLowerCase();
+    setTagInput(input);
+
+    let message = validate(input);
+    setErrorMessage(message);
+
+    if (message.length > 0) {
       setAddTagEnabled(false);
-      setErrorMessage("Tag should not use any special characters");
       setShowSuggestions(false);
+      setSuggestions([]);
+    } else {
+      setAddTagEnabled(true);
+
+      setIsLoading(true);
+      setShowSuggestions(true);
+
+      let result = await getTagSuggestions(input);
+
+      if (result.success) {
+        // show new suggestions (if there are any)
+        setSuggestions(result.returnValue.tags);
+      } else {
+        // couldn't get suggestion -> hide the suggestion box
+        setSuggestions([]);
+        setErrorMessage(result.returnValue);
+      }
+      setTimeout(() => setIsLoading(false), 500);
     }
   };
 
@@ -95,7 +99,6 @@ export default function TagListInput({
         placeholder="Enter tag"
         autoComplete="off"
         value={tagInput}
-        //onBlur={() => setShowSuggestions(false)}
         onChangeText={onChangeText}
         withValidation={!showSuggestions}
         validate={[(value) => false]} // alway show error message (otherwise space left for validation does jumps)
@@ -160,9 +163,10 @@ export default function TagListInput({
                 suggsetions.length > 0 &&
                 suggsetions.map((elem) => (
                   <ThemedText
+                    key={elem}
                     backgroundColorName="transparent"
                     onPress={() => {
-                      setTagInput(elem);
+                      onChangeText(elem);
                       setShowSuggestions(false);
                     }}
                     style={{

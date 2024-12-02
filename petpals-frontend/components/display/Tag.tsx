@@ -10,7 +10,6 @@ import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { router } from "expo-router";
 import { ThemedText } from "../basic/ThemedText";
 import { GroupWalkTag } from "@/context/WalksContext";
-import HorizontalView from "../basic/containers/HorizontalView";
 
 export type TagProps = ButtonProps & {
   backgroundColorName?: ColorName;
@@ -26,6 +25,7 @@ export const Tag = ({
   label,
   onPress = (tag: GroupWalkTag) => {
     router.push("/walk/event/find");
+    router.setParams({ initialFilter: label });
   },
   backgroundColorName = "secondary",
   backgroundThemedColor,

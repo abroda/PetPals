@@ -2,15 +2,15 @@ import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { ThemedScrollView } from "../basic/containers/ThemedScrollView";
 import { ThemedView, ThemedViewProps } from "../basic/containers/ThemedView";
 import { ThemedText } from "../basic/ThemedText";
-import { Entity } from "@/context/WalksContext";
 import PetAvatar from "../navigation/PetAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { ViewProps } from "react-native-ui-lib";
+import { Dog } from "@/context/DogContext";
 
 export const DogPicker = (
   props: ThemedViewProps & {
     header: string;
-    dogs: Entity[];
+    dogs: Dog[];
     dogsParticipating: string[];
     onToggle: (dogId: string) => void;
   }
@@ -43,7 +43,7 @@ export const DogPicker = (
             petId={dog.id}
             petName={dog.name}
             userId={userId ?? ""}
-            source={dog.avatarURL}
+            source={dog.imageUrl ?? undefined}
             size={15}
             toggleEnabled={true}
             marked={props.dogsParticipating.includes(dog.id)}

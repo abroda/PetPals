@@ -64,48 +64,9 @@ export function LocationMap({
     latitudeDelta: initialDelta,
     longitudeDelta: initialDelta,
   };
-  //const [name, setName] = useState<string | null>(initialLocation.name ?? null);
   const mapRef = useRef<MapView | null>(null);
 
   const percentToDP = useWindowDimension("shorter");
-
-  // const accuracies = [
-  //   "country",
-  //   "administrative_level_1",
-  //   "administrative_level_2",
-  //   "locality",
-  //   "sublocality",
-  //   "neighborhood",
-  //   "colloquial_area",
-  //   "natural_feature",
-  //   "tourtist_attraction",
-  //   "establishment",
-  //   "point_of_interest",
-  //   "public_park",
-  //   "park",
-  //   "garden",
-  // ];
-
-  // const getLocationName = async (location: {
-  //   latitude: number;
-  //   longitude: number;
-  // }) =>
-  //   await Geocoder.from({
-  //     latitude: location.latitude,
-  //     longitude: location.longitude,
-  //   })
-  //     .then((response) => {
-  //       if (response.results.length > 0) {
-  //         setName(response.results[0].formatted_address);
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       setName(location.latitude + ", " + location.longitude);
-  //       console.log("Error in Geocoding:", error);
-  //     });
-  // useEffect(() => {
-  //   getLocationName(initialLocation);
-  // }, []);
 
   const recenter = (newRegion: Region) =>
     mapRef.current?.animateToRegion(
@@ -143,7 +104,7 @@ export function LocationMap({
             },
             mapProps?.style,
           ]}
-          //customMapStyle={} //customize map style, editable in browser
+          //customMapStyle={} //customize map style, editable in Google Maps Platform console
           provider={PROVIDER_GOOGLE}
           initialRegion={initialRegion}
           onRegionChangeComplete={recenter}
@@ -199,91 +160,4 @@ export function LocationMap({
       </HorizontalView>
     </View>
   );
-  //   const [region, setRegion] = useState<Region | null>(null);
-  //   const [error, setError] = useState<string | null>(null);
-
-  //   // Replace "YOUR_GOOGLE_MAPS_API_KEY" with your actual API key
-  //   const GOOGLE_MAPS_API_KEY =
-  //     Constants.expoConfig?.extra?.googleMapsApiKey ?? "YOUR_GOOGLE_MAPS_API_KEY";
-
-  //   // Replace "locationName" with the location you want
-  //   const locationName = "Park Skowroni, Wrocław";
-
-  //   const fetchCoordinates = async (location: string) => {
-  //     try {
-  //       const response = await axios.get(
-  //         `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-  //           location
-  //         )}&key=${GOOGLE_MAPS_API_KEY}`
-  //       );
-  //       if (response.data.results.length > 0) {
-  //         const { lat, lng } = response.data.results[0].geometry.location;
-  //         setRegion({
-  //           latitude: lat,
-  //           longitude: lng,
-  //           latitudeDelta: 0.0001,
-  //           longitudeDelta: 0.0001,
-  //         });
-  //       } else {
-  //         setError("Location not found.");
-  //       }
-  //     } catch (err) {
-  //       setError("Failed to fetch coordinates.");
-  //     }
-  //   };
-
-  //   useEffect(() => {
-  //     fetchCoordinates(locationName);
-  //   }, []);
-
-  //   if (!region) {
-  //     return (
-  //       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-  //         <Text>{error || "Loading map..."}</Text>
-  //       </View>
-  //     );
-  //   }
-
-  //   return (
-  //     <View
-  //       style={[
-  //         {
-  //           height: heightPercentageToDP(60),
-  //           borderRadius: 50,
-  //           borderColor: "red",
-  //           borderWidth: 10,
-  //           overflow: "hidden",
-  //           padding: 30,
-  //         },
-  //         viewProps?.style,
-  //       ]}
-  //       {...viewProps}
-  //     >
-  //       <MapView
-  //         provider={PROVIDER_GOOGLE}
-  //         style={[
-  //           {
-  //             width: "100%",
-  //             height: "100%",
-  //             borderColor: "purple",
-  //             borderWidth: 2,
-  //           },
-  //           mapProps?.style,
-  //         ]}
-  //         region={region}
-  //         cacheEnabled={true}
-  //         onRegionChangeComplete={setRegion}
-  //         {...mapProps}
-  //       >
-  //         <Marker
-  //           coordinate={{
-  //             latitude: region.latitude,
-  //             longitude: region.longitude,
-  //           }}
-  //           title={locationName}
-  //           description="This is the location you searched for."
-  //         />
-  //       </MapView>
-  //     </View>
-  //   );
 }

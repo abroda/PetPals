@@ -12,6 +12,7 @@ import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { PostType } from "@/context/PostContext";
 import { usePosts } from "@/hooks/usePosts";
 import { useAuth } from "@/hooks/useAuth";
+import { countToString } from "@/helpers/countToString";
 
 export default function Post({ postFromFeed }: { postFromFeed: PostType }) {
   const { userId } = useAuth();
@@ -122,7 +123,9 @@ export default function Post({ postFromFeed }: { postFromFeed: PostType }) {
           textStyleOptions={{ size: "small" }}
           textColorName="primary"
           style={{ width: percentToDP(40) }}
-          label="21 comments"
+          label={`${countToString(post.comments.length)} comment${
+            post.comments.length > 1 ? "s" : ""
+          }`}
           iconSource={() => (
             <ThemedIcon
               name="chatbox"
@@ -142,7 +145,9 @@ export default function Post({ postFromFeed }: { postFromFeed: PostType }) {
               name={liked ? "heart" : "heart-outline"}
             />
           </Pressable>
-          <ThemedText style={{ fontSize: 24 }}>{post.likes.length}</ThemedText>
+          <ThemedText style={{ fontSize: 24 }}>
+            {countToString(post.likes.length)}
+          </ThemedText>
         </HorizontalView>
       </HorizontalView>
     </ThemedView>

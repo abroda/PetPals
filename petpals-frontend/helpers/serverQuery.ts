@@ -56,7 +56,7 @@ export const serverQuery = async ({
       headers: headers,
       body:
         payload && (method == "GET" || method == "HEAD")
-          ? undefined
+          ? null
           : JSON.stringify(payload),
       signal: abortController.signal, // aborts fetch when signal is received (timeout or send by the component on unmount)
     })

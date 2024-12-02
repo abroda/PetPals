@@ -7,6 +7,8 @@ export type Participant = {
   userId: string;
   username: string;
   imageURL?: string;
+  dogsCount?: number;
+  friendsCount?: number;
   dogs?: { dogId: string; name: string; imageUrl?: string }[];
 };
 
@@ -18,6 +20,7 @@ export type CommentContent = {
   creator: Participant;
   content: string;
   liked: boolean;
+  likes: number;
 };
 
 export type GroupWalk = {
@@ -46,19 +49,17 @@ export type PagedGroupWalks = {
 };
 
 export type WalksContextType = {
-  shouldRefreshSchedule: boolean;
-  shouldRefreshFound: boolean;
   getGroupWalk: (
     walkId: string,
     asyncAbortController?: AbortController
   ) => Promise<{ success: boolean; returnValue: any }>;
   createGroupWalk: (
-    data: GroupWalk,
+    data: GroupWalk | any,
     asyncAbortController?: AbortController
   ) => Promise<{ success: boolean; returnValue: any }>;
   updateGroupWalk: (
     walkId: string,
-    data: GroupWalk,
+    data: GroupWalk | any,
     asyncAbortController?: AbortController
   ) => Promise<{ success: boolean; returnValue: any }>;
   deleteGroupWalk: (
@@ -67,11 +68,14 @@ export type WalksContextType = {
   ) => Promise<{ success: boolean; returnValue: any }>;
   joinGroupWalk: (
     walkId: string,
-    joinedWithPets: string[],
+    data: any,
     asyncAbortController?: AbortController
   ) => Promise<{ success: boolean; returnValue: any }>;
   leaveGroupWalk: (
     walkId: string,
+    asyncAbortController?: AbortController
+  ) => Promise<{ success: boolean; returnValue: any }>;
+  getUsersDogs: (
     asyncAbortController?: AbortController
   ) => Promise<{ success: boolean; returnValue: any }>;
   getTagSuggestions: (
@@ -108,8 +112,6 @@ export type WalksContextType = {
 export const WalksContext = createContext<WalksContextType | null>(null);
 
 export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  const [shouldRefreshSchedule, setShouldRefreshSchedule] = useState(false);
-  const [shouldRefreshFound, setShouldRefreshFound] = useState(false);
   const { userId, authToken } = useAuth();
 
   const getGroupWalk = async (
@@ -128,17 +130,12 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
   };
 
   const createGroupWalk = async (
-    data: GroupWalk,
+    data: any,
     asyncAbortController?: AbortController
   ) => {
     return serverQuery({
       path: apiPaths.groupWalks.create,
       payload: data,
-      onOKResponse: (payload) => {
-        setShouldRefreshSchedule(true);
-        setShouldRefreshFound(true);
-        return payload;
-      },
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${authToken ?? ""}`,
@@ -149,18 +146,13 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const updateGroupWalk = async (
     walkId: string,
-    data: GroupWalk,
+    data: any,
     asyncAbortController?: AbortController
   ) => {
     return serverQuery({
       path: apiPaths.groupWalks.walk(walkId),
       method: "PUT",
       payload: data,
-      onOKResponse: (payload) => {
-        setShouldRefreshSchedule(true);
-        setShouldRefreshFound(true);
-        return payload;
-      },
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${authToken ?? ""}`,
@@ -176,11 +168,6 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return serverQuery({
       path: apiPaths.groupWalks.walk(walkId),
       method: "DELETE",
-      onOKResponse: (payload) => {
-        setShouldRefreshSchedule(true);
-        setShouldRefreshFound(true);
-        return payload;
-      },
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${authToken ?? ""}`,
@@ -191,17 +178,12 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const joinGroupWalk = async (
     walkId: string,
-    joinedWithPets: string[],
+    data: any,
     asyncAbortController?: AbortController
   ) => {
     return serverQuery({
       path: apiPaths.groupWalks.join(walkId),
-      payload: joinedWithPets,
-      onOKResponse: (payload) => {
-        setShouldRefreshSchedule(true);
-        setShouldRefreshFound(true);
-        return payload;
-      },
+      payload: data,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${authToken ?? ""}`,
@@ -216,11 +198,18 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
   ) => {
     return serverQuery({
       path: apiPaths.groupWalks.leave(walkId),
-      onOKResponse: (payload) => {
-        setShouldRefreshSchedule(true);
-        setShouldRefreshFound(true);
-        return payload;
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken ?? ""}`,
       },
+      asyncAbortController: asyncAbortController,
+    });
+  };
+
+  const getUsersDogs = async (asyncAbortController?: AbortController) => {
+    return serverQuery({
+      path: apiPaths.groupWalks.listUsersDogs(userId ?? ""),
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${authToken ?? ""}`,
@@ -329,14 +318,13 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <WalksContext.Provider
       value={{
-        shouldRefreshSchedule,
-        shouldRefreshFound,
         getGroupWalk,
         createGroupWalk,
         updateGroupWalk,
         deleteGroupWalk,
         joinGroupWalk,
         leaveGroupWalk,
+        getUsersDogs,
         getTagSuggestions,
         getGroupWalks,
         findGroupWalks,

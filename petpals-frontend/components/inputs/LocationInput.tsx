@@ -18,6 +18,7 @@ import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import axios from "axios";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { ThemedTextField } from "./ThemedTextField";
+import ThemedLoadingIndicator from "../decorations/animated/ThemedLoadingIndicator";
 
 Geocoder.init(Constants.expoConfig?.extra?.googleMapsApiKey);
 
@@ -34,46 +35,42 @@ export type MarkerData = {
 };
 
 export type LocationInputProps = {
-  initialLocation: { latitude: number; longitude: number; name?: string };
+  initialLocationName: string;
+  initialLatitude: number;
+  initialLongitude: number;
+  onLocationChange: (name: string, lat: number, lng: number) => void;
+  onError?: (message: string) => void;
   initialDelta?: number;
   minDelta?: number;
   maxDelta?: number;
   viewStyle?: ViewProps["style"];
   mapProps?: MapViewProps;
-  markers?: MarkerData[];
-  pins?: MarkerData[];
-  users?: MarkerData[];
-  paths?: MarkerData[][];
 };
 
 export function LocationInput({
-  initialLocation,
+  initialLocationName,
+  initialLatitude,
+  initialLongitude,
+  onLocationChange,
+  onError = (message: string) => {},
   initialDelta = 0.012,
   minDelta = 0.001,
   maxDelta = 0.7,
   viewStyle,
   mapProps,
-  markers,
-  pins,
-  users,
-  paths,
+
   ...rest
 }: LocationInputProps) {
+  const [locationName, setLocationName] = useState(initialLocationName);
   const [region, setRegion] = useState({
     latitudeDelta: initialDelta,
     longitudeDelta: initialDelta,
-    ...initialLocation,
+    latitude: initialLatitude,
+    longitude: initialLongitude,
   } as Region);
-  const [name, setName] = useState<string | undefined>(
-    initialLocation.name ?? ""
-  );
-  const [input, setInput] = useState<string | undefined>(
-    initialLocation.name ?? ""
-  );
+
+  const [input, setInput] = useState("");
   const [animating, setAnimating] = useState(false);
-  const [nameIsLoading, setNameIsLoading] = useState(
-    initialLocation.name ? true : false
-  );
   const mapRef = useRef<MapView | null>(null);
 
   const percentToDP = useWindowDimension("shorter");
@@ -133,12 +130,10 @@ export function LocationInput({
               0
             ) -
           distanceScore;
-        console.log(place.name + " " + maxScore);
 
         if (maxScore > placeScore) {
           placeName = place.name;
           placeScore = maxScore;
-          console.log(placeName + " " + placeScore);
         }
       }
     );
@@ -147,21 +142,22 @@ export function LocationInput({
       const component = addressComponents.find((elem) =>
         elem.types.some((type: string) => types.includes(type))
       );
-      return component ? component.long_name : "";
+      return component?.long_name;
     };
 
     let street =
-      findByType(["street_address", "route"]) +
-      (findByType(["street_number"])
-        ? " " + findByType(["street_number"])
-        : "");
+      findByType(["street_address", "route"]) ??
+      "" +
+        (findByType(["street_number"])
+          ? " " + findByType(["street_number"])
+          : "");
     let neighborhood = findByType([
       "neighborhood",
       "sublocality_level_1",
       "colloquial_area",
     ]);
 
-    if (!placeName && !street && !neighborhood) {
+    if (placeName.length === 0 && street.length === 0 && !neighborhood) {
       return formattedAddress;
     }
 
@@ -180,8 +176,7 @@ export function LocationInput({
   }
 
   const getLocationName = async (newRegion: Region) => {
-    setNameIsLoading(true);
-    setName(newRegion.latitude + ", " + newRegion.longitude);
+    setLocationName("Loading...");
 
     await Geocoder.from(region)
       .then((response) => {
@@ -189,25 +184,29 @@ export function LocationInput({
           formatAddress(
             response.results[0].address_components,
             response.results[0].formatted_address
-          ).then((res) => setName(res));
+          ).then((res) => {
+            setLocationName(res);
+            onLocationChange(res, region.latitude, region.longitude);
+          });
         }
-        setNameIsLoading(false);
       })
       .catch((error) => {
-        setNameIsLoading(false);
-        console.error("Error in Geocoding:", error);
+        setTimeout(() => {
+          let newName = newRegion.latitude + ", " + newRegion.longitude;
+          setLocationName(newName);
+          onLocationChange(newName, region.latitude, region.longitude);
+        }, 300);
+        console.log("Error in Geocoding:", error);
+        onError("Unable to fetch location name.");
       });
   };
 
-  useEffect(() => {
-    getLocationName(region);
-  }, []);
-
   const getLocationCoordinates = async (address: string) => {
+    let currentName = locationName;
+    setLocationName("Loading...");
+
     await Geocoder.from(address)
       .then((response) => {
-        console.log(JSON.stringify(response));
-
         if (response.results.length > 0) {
           let newRegion = {
             latitude: response.results[0].geometry.location.lat,
@@ -216,15 +215,23 @@ export function LocationInput({
             longitudeDelta: initialDelta,
           } as Region;
 
+          formatAddress(
+            response.results[0].address_components,
+            response.results[0].formatted_address
+          ).then((res) => {
+            setLocationName(res);
+            onLocationChange(res, region.latitude, region.longitude);
+          });
+
           setAnimating(true);
           mapRef.current?.animateToRegion(newRegion, 1000);
           setTimeout(() => setAnimating(false), 1000);
         }
-        setNameIsLoading(false);
       })
       .catch((error) => {
-        setNameIsLoading(false);
-        console.error("Error in Geocoding:", error);
+        setTimeout(() => setLocationName(currentName), 300);
+        console.log("Error in Geocoding:", error);
+        onError("Unable to fetch the location.");
       });
   };
 
@@ -294,7 +301,6 @@ export function LocationInput({
               latitude: region.latitude,
               longitude: region.longitude,
             }}
-            pinColor={useThemeColor("alarm")}
           />
         </MapView>
       </View>
@@ -310,13 +316,13 @@ export function LocationInput({
         <ThemedText
           textStyleOptions={{ size: "small" }}
           backgroundColorName="transparent"
-          numberOfLines={1}
           style={{
             paddingLeft: percentToDP(1),
             paddingRight: percentToDP(2),
+            textAlign: "center",
           }}
         >
-          {name}
+          {locationName}
         </ThemedText>
       </HorizontalView>
     </View>

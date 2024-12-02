@@ -13,7 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +27,7 @@ public class GroupWalkService {
     private final GroupWalkRepository groupWalkRepository;
     private final UserService userService;
     private final DogService dogService;
+    private final FriendshipService friendshipService;
     private final AWSImageService awsImageService;
 
     public List<GroupWalk> getAllGroupWalks() {
@@ -43,6 +44,7 @@ public class GroupWalkService {
         if (request.getTitle() == null) throw new GroupWalkDataException("Title is required.");
         if (request.getLocationName() == null) throw new GroupWalkDataException("Location name is required");
         if (request.getDatetime() == null) throw new GroupWalkDataException("Datetime is required");
+        if (request.getParticipatingDogsIds() == null || request.getParticipatingDogsIds().isEmpty()) throw new GroupWalkDataException("Must participate with at least one dog.");
 
         GroupWalk groupWalk = new GroupWalk();
         groupWalk.setTitle(request.getTitle());
@@ -73,6 +75,7 @@ public class GroupWalkService {
         if (request.getTitle() == null) throw new GroupWalkDataException("Title is required.");
         if (request.getLocationName() == null) throw new GroupWalkDataException("Location name is required");
         if (request.getDatetime() == null) throw new GroupWalkDataException("Datetime is required");
+        if (request.getParticipatingDogsIds() == null || request.getParticipatingDogsIds().isEmpty()) throw new GroupWalkDataException("Must participate with at least one dog.");
 
         groupWalk.setTitle(request.getTitle());
         groupWalk.setDescription(request.getDescription());
@@ -81,6 +84,29 @@ public class GroupWalkService {
         groupWalk.setLatitude(request.getLatitude());
         groupWalk.setLongitude(request.getLongitude());
         groupWalk.setTags(request.getTags());
+
+        // Update participants
+        if (request.getParticipatingDogsIds() != null) {
+            // Fetch the creator's dogs
+            List<Dog> userDogs = dogService.getDogsByUserId(groupWalk.getCreator().getId());
+
+            // Remove all creator's dog as participants
+            userDogs.forEach(dog -> {
+                groupWalk.getParticipants().remove(dog);
+                dog.getJoinedWalks().remove(groupWalk);
+            });
+
+            // Filter the request's dog IDs to ensure they belong to the user
+            List<Dog> validDogs = userDogs.stream()
+                    .filter(dog -> request.getParticipatingDogsIds().contains(dog.getId()))
+                    .toList();
+
+            // Add the dogs confirmed to be valid as participants
+            validDogs.forEach(dog -> {
+                groupWalk.getParticipants().add(dog);
+                dog.getJoinedWalks().add(groupWalk);
+            });
+        }
 
         return groupWalkRepository.save(groupWalk);
     }
@@ -96,31 +122,44 @@ public class GroupWalkService {
     @Transactional
     public GroupWalk joinWalk(String walkId, String userId, GroupWalkJoinRequest request) {
         GroupWalk groupWalk = getGroupWalkById(walkId);
-        for (String dogId : request.getDogIds()) {
-            Dog dog = dogService.getDogById(dogId);
-            if (!Objects.equals(dog.getUser().getId(), userId))
-                throw new GroupWalkDataException("All dogs must belong to the user.");
-            if (groupWalk.getParticipants().contains(dog))
-                throw new GroupWalkDataException("Dog already is a participant.");
-            dog.getJoinedWalks().add(groupWalk);
-            groupWalk.getParticipants().add(dog);
+
+        if (request.getDogIds() != null) {
+            // Fetch the user's dogs
+            List<Dog> userDogs = dogService.getDogsByUserId(userId);
+
+            // Remove all user's dog as participants
+            userDogs.forEach(dog -> {
+                groupWalk.getParticipants().remove(dog);
+                dog.getJoinedWalks().remove(groupWalk);
+            });
+
+            // Filter the request's dog IDs to ensure they belong to the user
+            List<Dog> validDogs = userDogs.stream()
+                    .filter(dog -> request.getDogIds().contains(dog.getId()))
+                    .toList();
+
+            // Add the dogs confirmed to be valid as participants
+            validDogs.forEach(dog -> {
+                groupWalk.getParticipants().add(dog);
+                dog.getJoinedWalks().add(groupWalk);
+            });
         }
 
         return groupWalkRepository.save(groupWalk);
     }
 
     @Transactional
-    public GroupWalk leaveWalk(String walkId, String userId, GroupWalkLeaveRequest request) {
+    public GroupWalk leaveWalk(String walkId, String userId) {//, GroupWalkLeaveRequest request) {
         GroupWalk groupWalk = getGroupWalkById(walkId);
-        for (String dogId : request.getDogIds()) {
-            Dog dog = dogService.getDogById(dogId);
-            if (!Objects.equals(dog.getUser().getId(), userId))
-                throw new GroupWalkDataException("All dogs must belong to the user.");
-            if (!groupWalk.getParticipants().contains(dog))
-                throw new GroupWalkDataException("Dog is not a participant.");
-            dog.getJoinedWalks().remove(groupWalk);
+        // Fetch the user's dogs
+        List<Dog> userDogs = dogService.getDogsByUserId(userId);
+
+        // Remove all creator's dog as participants
+        userDogs.forEach(dog -> {
             groupWalk.getParticipants().remove(dog);
-        }
+            dog.getJoinedWalks().remove(groupWalk);
+        });
+
         return groupWalkRepository.save(groupWalk);
     }
 
@@ -140,9 +179,9 @@ public class GroupWalkService {
 
 
 
-    public LocalDateTime checkDatetime(String datetime) {
+    public ZonedDateTime checkDatetime(String datetime) {
         try {
-            return LocalDateTime.parse(datetime);
+            return ZonedDateTime.parse(datetime);
         } catch (DateTimeParseException e) {
             throw new GroupWalkDataException("Datetime has to be in correct format. For example 2023-11-08T14:30:00");
         }
@@ -164,6 +203,8 @@ public class GroupWalkService {
                                 .imageUrl(Optional.ofNullable(groupWalk.getCreator().getProfilePictureId())
                                         .map(awsImageService::getPresignedUrl)
                                         .orElse(null))
+                                .dogsCount(dogService.getDogsByUserId(groupWalk.getCreator().getId()).size())
+                                .friendsCount(friendshipService.getAcceptedFriendshipsForUser(groupWalk.getCreator().getId()).size())
                                 .build()
                 )
                 .tags(groupWalk.getTags())
@@ -189,7 +230,7 @@ public class GroupWalkService {
 
                     return GroupWalkParticipantResponse.builder()
                             .userId(owner.getId())
-                            .username(owner.getUsername())
+                            .username(owner.getDisplayName())
                             .imageUrl((Optional.ofNullable(owner.getProfilePictureId())
                                     .map(awsImageService::getPresignedUrl)
                                     .orElse(null)))
