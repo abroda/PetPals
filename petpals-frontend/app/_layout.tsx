@@ -20,6 +20,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { UserProvider } from "@/context/UserContext";
 import { Provider as PaperProvider } from "react-native-paper";
 import { DogProvider } from "@/context/DogContext";
+import { FriendshipProvider } from "@/context/FriendshipContext";
 import { heightPercentageToDP } from "react-native-responsive-screen";
 import { WalksProvider } from "@/context/WalksContext";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
@@ -59,6 +60,7 @@ export default function RootLayout() {
               <PostProvider>
                 <WalksProvider>
                   <DogProvider>
+                    <FriendshipProvider>
                     <Stack
                       screenOptions={{
                         headerShown: true,
@@ -87,6 +89,7 @@ export default function RootLayout() {
                       />
                       <Stack.Screen name="+not-found" />
                     </Stack>
+                    </FriendshipProvider>
                   </DogProvider>
                 </WalksProvider>
               </PostProvider>

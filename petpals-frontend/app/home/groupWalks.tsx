@@ -2,7 +2,7 @@ import { ThemedText } from "@/components/basic/ThemedText";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
-import { Href, router } from "expo-router";
+import { Href, router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -25,7 +25,7 @@ export default function GroupWalksScheduleScreen() {
   const today = now.valueOf() - (now.valueOf() % (24 * 3600 * 1000));
   const weekLimit = today + 7 * 24 * 3600 * 1000;
 
-  const { getGroupWalks, shouldRefreshSchedule } = useWalks();
+  const { getGroupWalks } = useWalks();
 
   const [groupWalks, setGroupWalks] = useState<GroupWalk[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -34,55 +34,68 @@ export default function GroupWalksScheduleScreen() {
     new AbortController()
   );
 
+  const [refreshOnFocus, setRefreshOnFocus] = useState(false);
+
   const timelineColor = useThemeColor("text");
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToDP = useWindowDimension("height");
 
   useEffect(() => {
-    if (shouldRefreshSchedule || !groupWalks) {
+    if (!groupWalks) {
       getData();
     }
 
     return () => {
       asyncAbortController.current?.abort();
     };
-  }, [shouldRefreshSchedule]);
+  }, []);
+
+  useFocusEffect(() => {
+    if (refreshOnFocus && !isLoading) {
+      getData();
+      setRefreshOnFocus(false);
+    }
+
+    return () => {
+      setRefreshOnFocus(!isLoading);
+    };
+  });
 
   const getData = useCallback(async () => {
     setIsLoading(true);
     setErrorMessage("");
     asyncAbortController.current = new AbortController();
 
+    // let result = await getGroupWalks(
+    //   // get walks created by user
+    //   "created",
+    //   asyncAbortController.current
+    // );
+
+    // if (result.success) {
+    //   let walks = result.returnValue as GroupWalk[];
+
     let result = await getGroupWalks(
-      // get walks created by user
-      "created",
+      // get walks joined by user
+      "joined",
       asyncAbortController.current
     );
 
     if (result.success) {
-      let walks = result.returnValue as GroupWalk[];
+      let newWalks = result.returnValue as GroupWalk[]; //walks.concat(result.returnValue as GroupWalk[]);
 
-      result = await getGroupWalks(
-        // get walks joined by user
-        "joined",
-        asyncAbortController.current
-      );
+      // newWalks.sort(
+      //   (a, b) =>
+      //     new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
+      // );
 
-      if (result.success) {
-        let newWalks = walks.concat(result.returnValue as GroupWalk[]);
-
-        newWalks.sort(
-          (a, b) =>
-            new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
-        );
-
-        setGroupWalks(newWalks);
-      } else {
-        setErrorMessage(result.returnValue);
-      }
+      setGroupWalks(newWalks);
     } else {
       setErrorMessage(result.returnValue);
     }
+    // } else {
+    //   setErrorMessage(result.returnValue);
+    // }
 
     setIsLoading(false);
   }, [groupWalks]);

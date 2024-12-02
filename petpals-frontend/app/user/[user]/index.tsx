@@ -1,17 +1,12 @@
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useState,
-} from "react";
+
+import React, { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import {
   SafeAreaView,
   View,
   Pressable,
-  Text,
-  FlatList,
   Alert,
+  FlatList,
+  Text,
   TouchableWithoutFeedback,
 } from "react-native";
 import { ThemedText } from "@/components/basic/ThemedText";
@@ -21,72 +16,147 @@ import { ThemedButton } from "@/components/inputs/ThemedButton";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import PetAvatar from "@/components/navigation/PetAvatar";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
-import { UserContext } from "@/context/UserContext";
-import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import { useAuth } from "@/hooks/useAuth";
-import {
-  useNavigation,
-  usePathname,
-  useRouter,
-  router,
-  Href,
-  useFocusEffect,
-} from "expo-router";
+import { useNavigation, usePathname, router, Href, useFocusEffect } from "expo-router";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 import PostFeed from "@/components/lists/PostFeed";
 import { Dog, useDog } from "@/context/DogContext";
 import { useColorScheme } from "@/hooks/theme/useColorScheme";
 import { ThemeColors } from "@/constants/theme/Colors";
-// @ts-ignore
-import DogPlaceholderImage from "@/assets/images/dog_placeholder_theme-color-fair.png";
 import { useUser } from "@/hooks/useUser";
-import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
+import {UserProfile} from "@/context/UserContext";
+import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
+import {useFriendship} from "@/context/FriendshipContext";
 
 export default function UserProfileScreen() {
+
+  // Contexts
   const path = usePathname();
-  const [username, setUsername] = useState(
-    path.slice(path.lastIndexOf("/") + 1)
-  );
-  const { logout, userId } = useAuth();
+  const { addDog, getDogsByUserId } = useDog();
+  const { logout, userId: loggedInUserId } = useAuth();
+  const { fetchUserById, userProfile } = useUser();
+  const navigation = useNavigation();
+  const { sendFriendRequest, removePendingFriendRequest, sentRequests, receivedRequests } =
+    useFriendship(); // Use friendship context
+
+  // Styling
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToPD = useWindowDimension("height");
-  const navigation = useNavigation();
-  const router = useRouter();
+
+  // Functionality
+  const [isRefreshing, setIsRefreshing] = useState(false); // For refresh indicator (if needed)
   const [menuVisible, setMenuVisible] = useState(false);
-  const { addDog, getDogsByUserId } = useDog();
   const [dogs, setDogs] = useState<Dog[]>([]);
   const dogCount = dogs.length;
-  const [isRefreshing, setIsRefreshing] = useState(false); // For refresh indicator (if needed)
+
+  const usernameFromPath = path.slice(path.lastIndexOf("/") + 1);
+  const [username, setUsername] = useState(usernameFromPath);
+
+  const [visitedUser, setVisitedUser] = useState<UserProfile | null>(null);
+  const [hasPendingRequest, setHasPendingRequest] = useState(false); // Track friendship request state
 
   // Colours
   const colorScheme = useColorScheme();
   // @ts-ignore
   const themeColors = ThemeColors[colorScheme];
 
-  // Context
-  const { getUserById, userProfile, isProcessing } = useUser();
+  // Check if viewing own profile
+  const isOwnProfile = username === "me" || loggedInUserId === username;
 
+  // Fetch the profile being viewed
   useEffect(() => {
-    getUserById(username);
-  }, [username]);
+    const resolvedUsername = username === "me" ? loggedInUserId : username;
 
-  const fetchDogs = useCallback(async () => {
-    const userDogs = await getDogsByUserId(userId ?? "");
-    const sortedDogs = userDogs
-      .map((dog) => ({ ...dog, name: dog.name || "Unknown Dog" }))
-      .sort((a, b) => a.name.localeCompare(b.name));
-    setDogs(sortedDogs);
-  }, [userId]); // Only re-run if userId changes
+    if (resolvedUsername) {
+      fetchUserById(resolvedUsername)
+        .then((user) => {
+          setVisitedUser(user);
+        })
+        .catch((error) => {
+          console.error("Failed to fetch visited user:", error);
+        });
+
+
+      const pendingRequest = sentRequests.find(
+        (request) =>
+          request.receiverId === resolvedUsername &&
+          request.status === "PENDING"
+      );
+      setHasPendingRequest(!!pendingRequest);
+
+    }
+  }, [username, loggedInUserId]);
+
+
+  // Update username only if it changes
+  useEffect(() => {
+    if (usernameFromPath !== username) {
+      setUsername(usernameFromPath);
+    }
+  }, [path, usernameFromPath, username]);
+
+
+  const fetchDogs = async () => {
+    const ownerId = username === "me" ? loggedInUserId : username;
+    if (!ownerId) return;
+
+    try {
+      const userDogs = await getDogsByUserId(ownerId);
+      const sortedDogs = userDogs
+        .map((dog) => ({ ...dog, name: dog.name || "Unknown Dog" }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      setDogs(sortedDogs);
+    } catch (error) {
+      console.error("Failed to fetch dogs:", error);
+    }
+  };
 
   // Refresh data whenever the screen is focused
   useFocusEffect(
-    // useCallback(() => { // -- using a hook within a hook is not recommended
-    //   fetchDogs();
-    // }, [userId]) // Only re-run if userId changes
-    () => {
+    useCallback(() => {
       fetchDogs();
-    }
+    }, [loggedInUserId]) // Only re-run if userId changes
   );
+
+
+  // Send Friendship Request
+  const handleSendRequest = async () => {
+    if (!visitedUser) return;
+    const success = await sendFriendRequest(loggedInUserId, visitedUser.id);
+    if (success) {
+      Alert.alert("Friend Request", "Invitation sent!");
+      setHasPendingRequest(true);
+    } else {
+      Alert.alert("Error", "Failed to send invitation.");
+    }
+  };
+
+  // Cancel Pending Friendship Requests
+  const handleCancelRequest = async () => {
+    if (!visitedUser) return;
+
+    const resolvedUsername = username === "me" ? loggedInUserId : username;
+
+    const pendingRequest = sentRequests.find(
+      (request) =>
+        request.receiverId === resolvedUsername &&
+        request.status === "PENDING"
+    );
+    if (pendingRequest) {
+      const success = await removePendingFriendRequest(pendingRequest.id);
+      if (success) {
+        Alert.alert("Friend Request", "Invitation canceled.");
+        setHasPendingRequest(false);
+      } else {
+        Alert.alert("Error", "Failed to cancel invitation.");
+      }
+    } else {
+      console.log("[User/Index] Tried to cancel a friend request, that was not found")
+      return
+    }
+
+  };
+
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -111,29 +181,37 @@ export default function UserProfileScreen() {
               />
             </Pressable>
           )}
+
+          {/* Avatar of the currently logged-in user */}
           <UserAvatar
-            userId={userProfile?.id ?? ""}
+            userId={loggedInUserId || ""}
             imageUrl={userProfile?.imageUrl}
             size={10}
-            doLink={false}
+            doLink={true}
           />
-          <Pressable onPress={() => setMenuVisible(!menuVisible)}>
-            <ThemedIcon
-              name="ellipsis-vertical-outline"
-              style={{
-                marginHorizontal: widthPercentageToDP(1),
-                padding: percentToDP(2),
-              }}
-            />
-          </Pressable>
+
+          {/* Three-dots Menu Pop-up */}
+          {isOwnProfile && (
+            <Pressable onPress={() => setMenuVisible(!menuVisible)}>
+              <ThemedIcon
+                name="ellipsis-vertical-outline"
+                style={{
+                  marginHorizontal: widthPercentageToDP(1),
+                  padding: percentToDP(2),
+                }}
+              />
+            </Pressable>
+          )}
         </View>
       ),
-      headerTitle: username,
+      headerTitle: isOwnProfile
+        ? "My Profile"
+        : visitedUser?.username || "Profile",
       headerStyle: {
         backgroundColor: themeColors.secondary,
       },
     });
-  }, [navigation, username, menuVisible]);
+  }, [navigation, username, menuVisible, visitedUser]);
 
   const handleMenuSelect = (option: string) => {
     setMenuVisible(false);
@@ -210,7 +288,6 @@ export default function UserProfileScreen() {
         backgroundColor: themeColors.secondary,
       }}
     >
-      {/* User Info Segment */}
       <View
         style={{
           marginTop: heightPercentToPD(35),
@@ -220,7 +297,6 @@ export default function UserProfileScreen() {
           width: widthPercentageToDP(100),
         }}
       >
-        {/* User Avatar & Username */}
         <View
           style={{
             alignItems: "center",
@@ -230,8 +306,8 @@ export default function UserProfileScreen() {
         >
           <UserAvatar
             size={50}
-            userId={userProfile?.id ?? ""}
-            imageUrl={userProfile?.imageUrl}
+            userId={visitedUser?.id ?? ""}
+            imageUrl={visitedUser?.imageUrl}
             doLink={false}
             style={{
               marginTop: heightPercentToPD(-15),
@@ -247,7 +323,7 @@ export default function UserProfileScreen() {
               marginVertical: heightPercentToPD(1),
             }}
           >
-            {userProfile?.username || "Unknown User"}
+            {visitedUser?.username || "Unknown User"}
           </ThemedText>
           <ThemedText
             style={{
@@ -259,7 +335,7 @@ export default function UserProfileScreen() {
               marginBottom: heightPercentToPD(5),
             }}
           >
-            {userProfile?.description || "No description"}
+            {visitedUser?.description || "No description"}
           </ThemedText>
         </View>
 
@@ -278,18 +354,16 @@ export default function UserProfileScreen() {
                 fontSize: 24,
                 lineHeight: 26,
                 fontWeight: "bold",
-                color: themeColors.textOnSecondary,
+                color: themeColors.textOnSecondary
               }}
             >
               21
             </ThemedText>
-            <ThemedText
-              style={{
-                fontSize: 12,
-                lineHeight: 14,
-                color: themeColors.textOnSecondary,
-              }}
-            >
+            <ThemedText style={{
+              fontSize: 12,
+              lineHeight: 14,
+              color: themeColors.textOnSecondary
+            }}>
               friends
             </ThemedText>
           </View>
@@ -299,18 +373,16 @@ export default function UserProfileScreen() {
                 fontSize: 24,
                 lineHeight: 26,
                 fontWeight: "bold",
-                color: themeColors.textOnSecondary,
+                color: themeColors.textOnSecondary
               }}
             >
               2
             </ThemedText>
-            <ThemedText
-              style={{
-                fontSize: 12,
-                lineHeight: 14,
-                color: themeColors.textOnSecondary,
-              }}
-            >
+            <ThemedText style={{
+              fontSize: 12,
+              lineHeight: 14,
+              color: themeColors.textOnSecondary
+            }}>
               km this week
             </ThemedText>
           </View>
@@ -320,51 +392,98 @@ export default function UserProfileScreen() {
                 fontSize: 24,
                 lineHeight: 26,
                 fontWeight: "bold",
-                color: themeColors.textOnSecondary,
+                color: themeColors.textOnSecondary
               }}
             >
               {dogCount}
             </ThemedText>
-            <ThemedText
-              style={{
-                fontSize: 12,
-                lineHeight: 14,
-                color: themeColors.textOnSecondary,
-              }}
-            >
-              {dogCount === 1 ? "dog" : "dogs"}
-            </ThemedText>
+            <ThemedText style={{
+              fontSize: 12,
+              lineHeight: 14,
+              color: themeColors.textOnSecondary
+            }}>{dogCount === 1 ? "dog" : "dogs"}</ThemedText>
           </View>
         </HorizontalView>
 
-        <HorizontalView
-          justifyOption="center"
-          style={{
-            backgroundColor: themeColors.tertiary,
-            width: widthPercentageToDP(100),
-            justifyContent: "space-around",
-            paddingHorizontal: widthPercentageToDP(5),
-          }}
-        >
-          <ThemedButton
-            label="Send invitation"
-            color={themeColors.tertiary}
+
+        {/* Buttons */}
+        {!isOwnProfile && (
+          <HorizontalView
+            justifyOption="center"
             style={{
-              width: widthPercentageToDP(40),
-              backgroundColor: themeColors.primary,
-              borderRadius: 100,
+              backgroundColor: themeColors.tertiary,
+              width: widthPercentageToDP(100),
+              justifyContent: "space-around",
+              paddingHorizontal: widthPercentageToDP(5),
             }}
-          />
-          <ThemedButton
-            label="Message"
-            color={themeColors.tertiary}
+          >
+            {hasPendingRequest ? (
+              <ThemedButton
+                label="Cancel invitation"
+                onPress={handleCancelRequest}
+                color={themeColors.tertiary}
+                style={{
+                  width: widthPercentageToDP(40),
+                  backgroundColor: themeColors.primary,
+                  borderRadius: 100,
+                }}
+              />
+            ) : (
+              <ThemedButton
+                label="Send invitation"
+                onPress={handleSendRequest}
+                color={themeColors.tertiary}
+                style={{
+                  width: widthPercentageToDP(40),
+                  backgroundColor: themeColors.primary,
+                  borderRadius: 100,
+                }}
+              />
+            )}
+            <ThemedButton
+              label="Message"
+              color={themeColors.tertiary}
+              style={{
+                width: widthPercentageToDP(40),
+                backgroundColor: themeColors.primary,
+                borderRadius: 100,
+              }}
+            />
+          </HorizontalView>
+        )}
+
+        {isOwnProfile && (
+          <HorizontalView
+            justifyOption="center"
             style={{
-              width: widthPercentageToDP(40),
-              backgroundColor: themeColors.primary,
-              borderRadius: 100,
+              backgroundColor: themeColors.tertiary,
+              width: widthPercentageToDP(100),
+              justifyContent: "space-around",
+              paddingHorizontal: widthPercentageToDP(5),
             }}
-          />
-        </HorizontalView>
+          >
+            <ThemedButton
+              label="My friends"
+              color={themeColors.tertiary}
+              style={{
+                width: widthPercentageToDP(40),
+                backgroundColor: themeColors.primary,
+                borderRadius: 100,
+              }}
+            />
+            <ThemedButton
+              label="Add dog"
+              onPress={() => router.push(`/user/${username}/pet/new`)}
+              color={themeColors.tertiary}
+              style={{
+                width: widthPercentageToDP(40),
+                backgroundColor: themeColors.primary,
+                borderRadius: 100,
+              }}
+            />
+          </HorizontalView>
+        )}
+
       </View>
       <View
         style={{
@@ -385,26 +504,13 @@ export default function UserProfileScreen() {
         >
           Dogs
         </ThemedText>
-
-        <ThemedButton
-          label="Add dog"
-          onPress={() => router.push(`/user/${username}/pet/new`)}
-          color={themeColors.tertiary}
-          style={{
-            width: widthPercentageToDP(40),
-            backgroundColor: themeColors.primary,
-            borderRadius: 100,
-          }}
-        />
       </View>
-
-      {/* Horizontal FlatList for dogs */}
       <FlatList
         data={dogs}
         keyExtractor={(item) => item.id}
         horizontal
         refreshing={isRefreshing}
-        onRefresh={fetchDogs} // Pull-to-refresh support
+        onRefresh={fetchDogs}
         showsHorizontalScrollIndicator={false}
         renderItem={renderDogItem}
         contentContainerStyle={{
@@ -423,7 +529,7 @@ export default function UserProfileScreen() {
         backgroundColor: themeColors.secondary,
       }}
     >
-      <FlatList // question: why not scrollview? or flatlist (unscrollable) with header dogs and posts as children?
+      <FlatList
         style={{
           width: widthPercentageToDP(100),
         }}
@@ -445,7 +551,7 @@ export default function UserProfileScreen() {
             <PostFeed />
           </>
         )}
-        renderItem={(item) => <></>} // required argument!
+        renderItem={(item) => <></>}
       />
       {menuVisible && (
         <View
@@ -457,7 +563,6 @@ export default function UserProfileScreen() {
             right: widthPercentageToDP(5),
             width: widthPercentageToDP(40),
             backgroundColor: themeColors.tertiary,
-
             borderRadius: percentToDP(4),
             shadowOpacity: 0.3,
             shadowRadius: 10,
@@ -486,7 +591,6 @@ export default function UserProfileScreen() {
               style={{
                 padding: percentToDP(5),
                 color: themeColors.primary,
-
                 fontSize: percentToDP(4.5),
                 lineHeight: percentToDP(5),
               }}

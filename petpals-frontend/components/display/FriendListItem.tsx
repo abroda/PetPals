@@ -6,40 +6,61 @@ import { Avatar, View, Text } from "react-native-ui-lib";
 import { useState } from "react";
 import { Link, router } from "expo-router";
 import { ThemedText } from "../basic/ThemedText";
-import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
+import {widthPercentageToDP} from "react-native-responsive-screen";
+import UserAvatar from "@/components/navigation/UserAvatar";
+import {useColorScheme} from "@/hooks/theme/useColorScheme";
+import {ThemeColors} from "@/constants/theme/Colors";
+import {useWindowDimension} from "@/hooks/theme/useWindowDimension";
 
-export default function FriendListItem(props: { username: string }) {
-  const [selected, setSelected] = useState("");
+export default function FriendListItem (props:{
+  username: any,
+  description: any,
+  userId: any })
+{
+
   const percentToDP = useWindowDimension("shorter");
+  const heighPercentToDP = useWindowDimension("height");
+  const colorScheme = useColorScheme();
+  // @ts-ignore
+  const themeColors = ThemeColors[colorScheme];
 
   return (
-    <ThemedView
-      style={{
-        flexDirection: "row",
-        width: percentToDP(100),
-        margin: percentToDP(4),
-        justifyContent: "flex-start",
-      }}
+    <Pressable
+      onPress={() =>
+        router.push(
+            `/user/${props.userId}`
+        )
+      }
     >
-      <Pressable onPress={() => router.push(`/user/${props.username}`)}>
-        <Avatar
-          source={{
-            uri: "https://external-preview.redd.it/PzM9Myb5uugh3qrxvb1F0nVTsdXJKRl0NB88MuAPwZA.jpg?auto=webp&s=6627165dbd61ab8a8d7fc026b5ce9199c593fe93",
-          }}
-        />
-      </Pressable>
-      <ThemedView style={{ justifyContent: "center" }}>
-        <ThemedText
-          style={{
-            paddingHorizontal: percentToDP(2),
-            fontSize: percentToDP(8),
-          }}
-          textStyleOptions={{ size: "big", weight: "bold" }}
-          textColorName="link"
-        >
-          {props.username}
-        </ThemedText>
-      </ThemedView>
-    </ThemedView>
-  );
-}
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          padding: widthPercentageToDP(4),
+          marginBottom: widthPercentageToDP(2),
+          borderRadius: widthPercentageToDP(2),
+          backgroundColor: themeColors.tertiary,
+        }}
+      >
+        <UserAvatar size={20} userId={props.userId} doLink={true}/>
+        <View style={{marginLeft: widthPercentageToDP(4)}}>
+          <ThemedText
+            style={{fontSize: widthPercentageToDP(4), fontWeight: "bold"}}
+            textColorName="textOnSecondary"
+          >
+            {props.username}
+          </ThemedText>
+          <ThemedText
+            style={{
+              fontSize: widthPercentageToDP(3.5),
+              width: widthPercentageToDP(60),
+            }}
+            textColorName="textOnSecondary"
+          >
+            {props.description || "No description available"}
+          </ThemedText>
+        </View>
+      </View>
+    </Pressable>
+
+  )};

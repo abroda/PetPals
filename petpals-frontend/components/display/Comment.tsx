@@ -14,6 +14,7 @@ import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { CommentContent } from "@/context/WalksContext";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import { ViewProps } from "react-native-ui-lib";
+import { countToString } from "@/helpers/countToString";
 
 export default function Comment({
   commentId,
@@ -59,7 +60,7 @@ export default function Comment({
             backgroundColorName="transparent"
             style={{ marginLeft: percentToDP(4) }}
           >
-            {comment?.creator.name ?? "Commenter username"}
+            {comment?.creator.username ?? "Commenter username"}
           </ThemedText>
         </HorizontalView>
         <HorizontalView
@@ -76,7 +77,9 @@ export default function Comment({
               }}
             />
           </Pressable>
-          <ThemedText backgroundColorName="transparent">3</ThemedText>
+          <ThemedText backgroundColorName="transparent">
+            {countToString((comment?.likes ?? 0) + (comment?.liked ? 1 : 0))}
+          </ThemedText>
         </HorizontalView>
       </HorizontalView>
 

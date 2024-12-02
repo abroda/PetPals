@@ -25,27 +25,31 @@ export default function DeleteDialog({
 }: {
   message: string;
   onDismiss: () => void;
-  onSubmit: () => Promise<{ success: boolean; returnValue: any }>;
+  onSubmit: (
+    abortController: AbortController
+  ) => Promise<{ success: boolean; returnValue: any }>;
 }) {
-  const [validationMessage, setValidationMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const asyncAbortController = useRef<AbortController | undefined>(undefined);
+
   const percentToDP = useWindowDimension("shorter");
 
-  const asyncAbortController = useRef<AbortController | undefined>(undefined);
   useEffect(() => {
-    asyncAbortController.current = new AbortController();
     return () => {
       asyncAbortController.current?.abort();
     };
   }, []);
 
   async function submit() {
-    setValidationMessage("");
-    let result = await onSubmit();
+    setErrorMessage("");
+    asyncAbortController.current = new AbortController();
+
+    let result = await onSubmit(asyncAbortController.current!);
 
     if (result.success) {
       onDismiss();
     } else {
-      setValidationMessage(result.returnValue);
+      setErrorMessage(result.returnValue);
     }
   }
 
@@ -66,13 +70,21 @@ export default function DeleteDialog({
           textStyleOptions={{ size: "big", weight: "bold" }}
           style={{ marginBottom: percentToDP(4) }}
         >
-          {message}
+          Delete content
+        </ThemedText>
+        <ThemedText>{message}</ThemedText>
+        <ThemedText
+          textColorName="alarm"
+          textStyleOptions={{ size: "small" }}
+          style={{ marginBottom: percentToDP(2) }}
+        >
+          {errorMessage}
         </ThemedText>
         <ThemedButton
           label="Delete"
+          textColorName="text"
           backgroundColorName="alarm"
           style={{
-            marginTop: percentToDP(3),
             marginBottom: percentToDP(2),
             alignSelf: "center",
             width: percentToDP(75),

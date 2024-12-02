@@ -3,7 +3,13 @@ import { ThemedText } from "@/components/basic/ThemedText";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
-import { Href, router, useFocusEffect, useNavigation } from "expo-router";
+import {
+  Href,
+  router,
+  useFocusEffect,
+  useLocalSearchParams,
+  useNavigation,
+} from "expo-router";
 import {
   useCallback,
   useEffect,
@@ -32,25 +38,27 @@ import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import { View } from "react-native-ui-lib";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 
-const elementsOnPage = 3;
+const elementsOnPage = 15;
 
-export default function FindGroupWalkScreen(props: {
-  initialFilter?: GroupWalkTag[];
-}) {
+export default function FindGroupWalkScreen() {
   const now = new Date();
   const today = now.valueOf() - (now.valueOf() % (24 * 3600 * 1000));
   const weekLimit = today + 7 * 24 * 3600 * 1000;
 
-  const { findGroupWalks, shouldRefreshFound } = useWalks();
+  const { initialFilter } = useLocalSearchParams<{ initialFilter: string }>();
+
+  const { findGroupWalks } = useWalks();
 
   const [foundGroupWalks, setFoundGroupWalks] =
     useState<PagedGroupWalks | null>(null);
   const [tagFilter, setTagFilter] = useState(
-    props.initialFilter ? props.initialFilter : ([] as GroupWalkTag[])
+    (initialFilter ? [initialFilter] : []) as GroupWalkTag[]
   );
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [dialogVisible, setDialogVisible] = useState(false);
+
+  const [refreshOnFocus, setRefreshOnFocus] = useState(false);
 
   const asyncAbortController = useRef<AbortController | undefined>();
 
@@ -59,7 +67,7 @@ export default function FindGroupWalkScreen(props: {
   const heightPercentToDP = useWindowDimension("height");
 
   useEffect(() => {
-    if (shouldRefreshFound || !foundGroupWalks) {
+    if (!foundGroupWalks) {
       getData();
     }
 
@@ -68,12 +76,27 @@ export default function FindGroupWalkScreen(props: {
     };
   }, []);
 
+  useFocusEffect(() => {
+    if (refreshOnFocus && !isLoading && !dialogVisible) {
+      getData();
+      setRefreshOnFocus(false);
+    }
+
+    return () => {
+      setRefreshOnFocus(!isLoading && !dialogVisible);
+    };
+  });
+
   const getData = async (page?: number, newFilter?: GroupWalkTag[]) => {
     setIsLoading(true);
     setErrorMessage("");
 
+    console.log("Filters: ");
+    console.log(tagFilter);
+    console.log(newFilter);
+
     let pageNumber = page ?? foundGroupWalks?.page.number ?? 0;
-    let filter = newFilter ?? tagFilter;
+    let filter = newFilter ?? tagFilter ?? [];
     asyncAbortController.current = new AbortController();
 
     let result = await findGroupWalks(
@@ -138,8 +161,10 @@ export default function FindGroupWalkScreen(props: {
         <FilterResultsDialog
           onDismiss={() => setDialogVisible(false)}
           onSubmit={(tags) => {
-            setTagFilter(tags);
-            getData(0, tags);
+            if (tagFilter !== tags) {
+              setTagFilter(tags);
+              getData(0, tags);
+            }
           }}
           filter={tagFilter}
         />

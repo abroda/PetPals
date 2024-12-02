@@ -19,4 +19,5 @@ public class GroupWalkEditRequest {
     private double latitude;
     private double longitude;
     private List<String> tags;
+    private List<String> participatingDogsIds;
 }

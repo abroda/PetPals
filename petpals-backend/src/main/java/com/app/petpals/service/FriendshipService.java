@@ -102,6 +102,21 @@ public class FriendshipService {
     }
 
     @Transactional
+    public void removePendingFriendRequest(String requestId) {
+        Optional<Friendship> requestOptional = friendshipRepository.findById(requestId);
+
+        if (requestOptional.isPresent()) {
+            Friendship request = requestOptional.get();
+            if (request.getStatus() != FriendshipRequestStatus.PENDING) {
+                throw new FriendshipRequestDataException("Only pending requests can be removed.");
+            }
+            friendshipRepository.delete(request);
+        } else {
+            throw new FriendshipRequestNotFoundException("Friend request not found.");
+        }
+    }
+
+    @Transactional
     public void removeFriend(String userId, String friendId) {
         if (Objects.equals(userId, friendId)) {
             throw new UserDataException("You can't unfriend yourself.");
@@ -129,4 +144,17 @@ public class FriendshipService {
             throw new FriendshipRequestNotFoundException("Friend relationship does not exist.");
         }
     }
+
+    @Transactional
+    public List<Friendship> getFriendRequestsForUser(String userId) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+
+        if (optionalUser.isPresent()) {
+            // Fetch all requests where the user is the sender or receiver
+            return friendshipRepository.findAllBySenderIdOrReceiverId(userId, userId);
+        } else {
+            throw new UserNotFoundException("User not found.");
+        }
+    }
+
 }

@@ -31,7 +31,7 @@ export default function PostFeed({
 
   // Initial load
   useEffect(() => {
-    getData();
+    //getData();
 
     return () => {
       asyncAbortController.current?.abort();
@@ -73,7 +73,7 @@ export default function PostFeed({
         {...flatListStyle}
         onEndReached={() => {
           if (hasMore && !isProcessing) {
-            getData();
+            //getData();
           }
         }}
       />

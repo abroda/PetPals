@@ -48,7 +48,7 @@ export default function CommentSection({
         borderRadius: percentToDP(10),
         paddingVertical: 0,
         paddingHorizontal: 0,
-        marginBottom: percentToDP(30),
+        marginBottom: percentToDP(20),
       }}
     >
       <ThemedText

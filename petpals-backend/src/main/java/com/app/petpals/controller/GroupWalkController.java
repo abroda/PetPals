@@ -80,10 +80,10 @@ public class GroupWalkController {
 
     @PostMapping("/{groupWalkId}/leave")
     @Operation(summary = "Leave walk by id.", security = @SecurityRequirement(name = "bearerAuth"))
-    private ResponseEntity<GroupWalkResponse> joinGroupWalkById(@PathVariable String groupWalkId, @RequestBody GroupWalkLeaveRequest request) {
+    private ResponseEntity<GroupWalkResponse> joinGroupWalkById(@PathVariable String groupWalkId){//, @RequestBody GroupWalkLeaveRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User authUser = (User) auth.getPrincipal();
-        GroupWalk groupWalkList = groupWalkService.leaveWalk(groupWalkId, authUser.getId(), request);
+        GroupWalk groupWalkList = groupWalkService.leaveWalk(groupWalkId, authUser.getId());//, request);
         return ResponseEntity.ok(groupWalkService.createGroupWalkResponse(groupWalkList));
     }
 
