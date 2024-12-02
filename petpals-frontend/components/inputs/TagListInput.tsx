@@ -112,8 +112,7 @@ export default function TagListInput({
             onPress={() => {
               if (addTagEnabled) {
                 onAddTag(tagInput.trimStart().trimEnd());
-                setTagInput("");
-                setShowSuggestions(false);
+                onChangeText("");
               }
             }}
             style={{
