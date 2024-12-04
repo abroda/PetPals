@@ -18,7 +18,13 @@ export const apiPaths = {
   profiles: {},
   friends: {},
   chats: {},
-  walks: {},
+  walks: {
+    start: databaseURL + "api/walk/start", // POST w/ initial location
+    pause: databaseURL + "api/walk/pause", // POST
+    end: databaseURL + "api/walk/end", // POST
+    sendLocation: databaseURL + "api/walk/updateLocation", // POST w/ location
+    getActiveUsers: databaseURL + "api/walk/userLocations", // GET (returns Participant[])
+  },
   users: {
     getAllUsers: databaseURL + "api/users",
     getUserById: (id: string) => databaseURL + "api/users/" + id,

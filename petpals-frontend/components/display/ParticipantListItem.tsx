@@ -1,6 +1,6 @@
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { ThemedText } from "../basic/ThemedText";
-import { Participant } from "@/context/WalksContext";
+import { Participant } from "@/context/GroupWalksContext";
 import PetAvatar from "../navigation/PetAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import HorizontalView from "../basic/containers/HorizontalView";

@@ -9,7 +9,7 @@ import { ThemedIcon } from "../decorations/static/ThemedIcon";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { router } from "expo-router";
 import { ThemedText } from "../basic/ThemedText";
-import { GroupWalkTag } from "@/context/WalksContext";
+import { GroupWalkTag } from "@/context/GroupWalksContext";
 
 export type TagProps = ButtonProps & {
   backgroundColorName?: ColorName;

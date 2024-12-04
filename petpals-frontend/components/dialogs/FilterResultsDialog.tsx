@@ -5,7 +5,7 @@ import { ThemedTextField } from "../inputs/ThemedTextField";
 import ThemedDialog from "./ThemedDialog";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { KeyboardAwareScrollView, TextFieldRef } from "react-native-ui-lib";
-import { GroupWalkTag, tagRegex } from "@/context/WalksContext";
+import { GroupWalkTag, tagRegex } from "@/context/GroupWalksContext";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
 import TagList from "../lists/TagList";
 import TagListInput from "../inputs/TagListInput";

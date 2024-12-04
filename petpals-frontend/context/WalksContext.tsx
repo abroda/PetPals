@@ -3,108 +3,49 @@ import { apiPaths } from "@/constants/config/api";
 import { serverQuery } from "@/helpers/serverQuery";
 import { useAuth } from "@/hooks/useAuth";
 
-export type Participant = {
+export type MapPosition = {
   userId: string;
-  username: string;
-  imageURL?: string;
-  dogsCount?: number;
-  friendsCount?: number;
-  dogs?: { dogId: string; name: string; imageUrl?: string }[];
-};
-
-export type GroupWalkTag = string;
-export const tagRegex = '^[^!@#$%^&*(),.?":{}|<>;+]{2,}$';
-
-export type CommentContent = {
-  id: string;
-  creator: Participant;
-  content: string;
-  liked: boolean;
-  likes: number;
-};
-
-export type GroupWalk = {
-  id: string;
-  creator: Participant;
-  title: string;
-  description: string;
-  datetime: Date;
-  locationName: string;
   latitude: number;
   longitude: number;
-  tags: GroupWalkTag[];
-  participants: Participant[];
+  timestamp: Date;
 };
 
-export type PageInfo = {
-  size: number;
-  number: number;
-  totalElements: number;
-  totalPages: number;
-};
-
-export type PagedGroupWalks = {
-  content: GroupWalk[];
-  page: PageInfo;
+export type PathVertex = {
+  latitude: number;
+  longitude: number;
+  timestamp: Date;
 };
 
 export type WalksContextType = {
-  getGroupWalk: (
-    walkId: string,
+  startWalk: (
+    latitude: number,
+    longitude: number,
+    dogsParticipating: string[],
+    walkId?: string,
     asyncAbortController?: AbortController
   ) => Promise<{ success: boolean; returnValue: any }>;
-  createGroupWalk: (
-    data: GroupWalk | any,
+  pauseWalk: (
+    latitude: number,
+    longitude: number,
+    walkId?: string,
     asyncAbortController?: AbortController
   ) => Promise<{ success: boolean; returnValue: any }>;
-  updateGroupWalk: (
-    walkId: string,
-    data: GroupWalk | any,
+  endWalk: (
+    latitude: number,
+    longitude: number,
+    walkId?: string,
     asyncAbortController?: AbortController
   ) => Promise<{ success: boolean; returnValue: any }>;
-  deleteGroupWalk: (
-    walkId: string,
+  sendLocation: (
+    latitude: number,
+    longitude: number,
+    walkId?: string,
     asyncAbortController?: AbortController
   ) => Promise<{ success: boolean; returnValue: any }>;
-  joinGroupWalk: (
-    walkId: string,
-    data: any,
-    asyncAbortController?: AbortController
-  ) => Promise<{ success: boolean; returnValue: any }>;
-  leaveGroupWalk: (
-    walkId: string,
-    asyncAbortController?: AbortController
-  ) => Promise<{ success: boolean; returnValue: any }>;
-  getUsersDogs: (
-    asyncAbortController?: AbortController
-  ) => Promise<{ success: boolean; returnValue: any }>;
-  getTagSuggestions: (
-    input: string,
-    asyncAbortController?: AbortController
-  ) => Promise<{ success: boolean; returnValue: any }>;
-  getGroupWalks: (
-    from: "joined" | "created",
-    asyncAbortController?: AbortController
-  ) => Promise<{ success: boolean; returnValue: any }>;
-  findGroupWalks: (
-    tags: GroupWalkTag[],
-    page: number,
-    elementsOnPage: number,
-    asyncAbortController?: AbortController
-  ) => Promise<{ success: boolean; returnValue: any }>;
-  addGroupWalkComment: (
-    walkId: string,
-    data: CommentContent,
-    asyncAbortController?: AbortController
-  ) => Promise<{ success: boolean; returnValue: any }>;
-  deleteGroupWalkComment: (
-    walkId: string,
-    commentId: string,
-    asyncAbortController?: AbortController
-  ) => Promise<{ success: boolean; returnValue: any }>;
-  toggleLikeOnGroupWalkComment: (
-    walkId: string,
-    commentId: string,
+  getActiveUsers: (
+    latitude: number,
+    longitude: number,
+    walkId?: string,
     asyncAbortController?: AbortController
   ) => Promise<{ success: boolean; returnValue: any }>;
 };
@@ -114,13 +55,23 @@ export const WalksContext = createContext<WalksContextType | null>(null);
 export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const { userId, authToken } = useAuth();
 
-  const getGroupWalk = async (
-    walkId: string,
+  const startWalk = async (
+    latitude: number,
+    longitude: number,
+    dogsParticipating: string[],
+    walkId?: string,
     asyncAbortController?: AbortController
   ) => {
     return serverQuery({
-      path: apiPaths.groupWalks.walk(walkId),
-      method: "GET",
+      path: apiPaths.walks.start,
+      payload: {
+        userId: userId,
+        latitude: latitude,
+        longitude: longitude,
+        timestamp: new Date(),
+        dogsParticipating: dogsParticipating,
+        walkId: walkId ?? null,
+      },
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${authToken ?? ""}`,
@@ -129,13 +80,21 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
     });
   };
 
-  const createGroupWalk = async (
-    data: any,
+  const pauseWalk = async (
+    latitude: number,
+    longitude: number,
+    walkId?: string,
     asyncAbortController?: AbortController
   ) => {
     return serverQuery({
-      path: apiPaths.groupWalks.create,
-      payload: data,
+      path: apiPaths.walks.pause,
+      payload: {
+        userId: userId,
+        latitude: latitude,
+        longitude: longitude,
+        timestamp: new Date(),
+        walkId: walkId ?? null,
+      },
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${authToken ?? ""}`,
@@ -144,15 +103,21 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
     });
   };
 
-  const updateGroupWalk = async (
-    walkId: string,
-    data: any,
+  const endWalk = async (
+    latitude: number,
+    longitude: number,
+    walkId?: string,
     asyncAbortController?: AbortController
   ) => {
     return serverQuery({
-      path: apiPaths.groupWalks.walk(walkId),
-      method: "PUT",
-      payload: data,
+      path: apiPaths.walks.end,
+      payload: {
+        userId: userId,
+        latitude: latitude,
+        longitude: longitude,
+        timestamp: new Date(),
+        walkId: walkId ?? null,
+      },
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${authToken ?? ""}`,
@@ -161,13 +126,21 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
     });
   };
 
-  const deleteGroupWalk = async (
-    walkId: string,
+  const sendLocation = async (
+    latitude: number,
+    longitude: number,
+    walkId?: string,
     asyncAbortController?: AbortController
   ) => {
     return serverQuery({
-      path: apiPaths.groupWalks.walk(walkId),
-      method: "DELETE",
+      path: apiPaths.walks.sendLocation,
+      payload: {
+        userId: userId,
+        latitude: latitude,
+        longitude: longitude,
+        timestamp: new Date(),
+        walkId: walkId ?? null,
+      },
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${authToken ?? ""}`,
@@ -176,137 +149,21 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
     });
   };
 
-  const joinGroupWalk = async (
-    walkId: string,
-    data: any,
+  const getActiveUsers = async (
+    latitude: number,
+    longitude: number,
+    walkId?: string,
     asyncAbortController?: AbortController
   ) => {
     return serverQuery({
-      path: apiPaths.groupWalks.join(walkId),
-      payload: data,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${authToken ?? ""}`,
+      path: apiPaths.walks.sendLocation,
+      payload: {
+        userId: userId,
+        latitude: latitude,
+        longitude: longitude,
+        timestamp: new Date(),
+        walkId: walkId ?? null,
       },
-      asyncAbortController: asyncAbortController,
-    });
-  };
-
-  const leaveGroupWalk = async (
-    walkId: string,
-    asyncAbortController?: AbortController
-  ) => {
-    return serverQuery({
-      path: apiPaths.groupWalks.leave(walkId),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${authToken ?? ""}`,
-      },
-      asyncAbortController: asyncAbortController,
-    });
-  };
-
-  const getUsersDogs = async (asyncAbortController?: AbortController) => {
-    return serverQuery({
-      path: apiPaths.groupWalks.listUsersDogs(userId ?? ""),
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${authToken ?? ""}`,
-      },
-      asyncAbortController: asyncAbortController,
-    });
-  };
-
-  const getTagSuggestions = async (
-    input: string,
-    asyncAbortController?: AbortController
-  ) => {
-    return serverQuery({
-      path: apiPaths.groupWalks.tagSuggestions(input),
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${authToken ?? ""}`,
-      },
-      asyncAbortController: asyncAbortController,
-    });
-  };
-
-  const getGroupWalks = async (
-    from: "created" | "joined",
-    asyncAbortController?: AbortController
-  ) => {
-    return serverQuery({
-      path:
-        from === "created"
-          ? apiPaths.groupWalks.listCreated(userId ?? "")
-          : apiPaths.groupWalks.listJoined(userId ?? ""),
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${authToken ?? ""}`,
-      },
-      asyncAbortController: asyncAbortController,
-    });
-  };
-
-  const findGroupWalks = async (
-    tags: GroupWalkTag[],
-    page: number,
-    elementsOnPage: number,
-    asyncAbortController?: AbortController
-  ) => {
-    return serverQuery({
-      path: apiPaths.groupWalks.list(page, elementsOnPage, tags),
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${authToken ?? ""}`,
-      },
-      asyncAbortController: asyncAbortController,
-    });
-  };
-
-  const addGroupWalkComment = async (
-    walkId: string,
-    data: CommentContent,
-    asyncAbortController?: AbortController
-  ) => {
-    return serverQuery({
-      path: apiPaths.groupWalks.addComment(walkId),
-      payload: data,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${authToken ?? ""}`,
-      },
-      asyncAbortController: asyncAbortController,
-    });
-  };
-
-  const deleteGroupWalkComment = async (
-    walkId: string,
-    commentId: string,
-    asyncAbortController?: AbortController
-  ) => {
-    return serverQuery({
-      path: apiPaths.groupWalks.comment(walkId, commentId),
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${authToken ?? ""}`,
-      },
-      asyncAbortController: asyncAbortController,
-    });
-  };
-
-  const toggleLikeOnGroupWalkComment = async (
-    walkId: string,
-    commentId: string,
-    asyncAbortController?: AbortController
-  ) => {
-    return serverQuery({
-      path: apiPaths.groupWalks.commentToggleLike(walkId, commentId),
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${authToken ?? ""}`,
@@ -318,19 +175,11 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <WalksContext.Provider
       value={{
-        getGroupWalk,
-        createGroupWalk,
-        updateGroupWalk,
-        deleteGroupWalk,
-        joinGroupWalk,
-        leaveGroupWalk,
-        getUsersDogs,
-        getTagSuggestions,
-        getGroupWalks,
-        findGroupWalks,
-        addGroupWalkComment,
-        deleteGroupWalkComment,
-        toggleLikeOnGroupWalkComment,
+        startWalk,
+        pauseWalk,
+        endWalk,
+        sendLocation,
+        getActiveUsers,
       }}
     >
       {children}

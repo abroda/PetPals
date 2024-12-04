@@ -8,14 +8,14 @@ import { ThemedText } from "../basic/ThemedText";
 import HorizontalView from "../basic/containers/HorizontalView";
 import UserAvatar from "../navigation/UserAvatar";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
-import { GroupWalk } from "@/context/WalksContext";
+import { GroupWalk } from "@/context/GroupWalksContext";
 import { Card, View } from "react-native-ui-lib";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
 import { Tag } from "./Tag";
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
-import { useWalks } from "@/hooks/useWalks";
+import { useGroupWalks } from "@/hooks/useGroupWalks";
 
 export default function GroupWalkListItem({
   groupWalk,

@@ -29,7 +29,17 @@
       "favicon": "./assets/images/favicon.png"
     },
     "jsEngine": "hermes",
-    "plugins": ["expo-router", "expo-font"],
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location.",
+          "isAndroidBackgroundLocationEnabled": true
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true
     },

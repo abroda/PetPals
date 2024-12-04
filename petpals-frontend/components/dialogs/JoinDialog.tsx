@@ -7,9 +7,9 @@ import { ThemedView } from "@/components/basic/containers/ThemedView";
 import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoadingIndicator";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
-import { useWalks } from "@/hooks/useWalks";
+import { useGroupWalks } from "@/hooks/useGroupWalks";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
-import { Participant } from "@/context/WalksContext";
+import { Participant } from "@/context/GroupWalksContext";
 import ThemedDialog from "./ThemedDialog";
 import { DogPicker } from "../inputs/DogPicker";
 import { Dog } from "@/context/DogContext";
@@ -29,7 +29,7 @@ export default function JoinDialog(props: {
   const [errorMessage, setErrorMessage] = useState(" ");
 
   const { userId } = useAuth();
-  const { joinGroupWalk, leaveGroupWalk } = useWalks();
+  const { joinGroupWalk, leaveGroupWalk } = useGroupWalks();
   const [isLoading, setIsLoading] = useState(false);
 
   const buttonColor = useThemeColor("link");

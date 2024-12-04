@@ -21,8 +21,9 @@ import { UserProvider } from "@/context/UserContext";
 import { Provider as PaperProvider } from "react-native-paper";
 import { DogProvider } from "@/context/DogContext";
 import { heightPercentageToDP } from "react-native-responsive-screen";
-import { WalksProvider } from "@/context/WalksContext";
+import { GroupWalksProvider } from "@/context/GroupWalksContext";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
+import { WalksProvider } from "@/context/WalksContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -57,38 +58,40 @@ export default function RootLayout() {
           <AuthProvider>
             <UserProvider>
               <PostProvider>
-                <WalksProvider>
-                  <DogProvider>
-                    <Stack
-                      screenOptions={{
-                        headerShown: true,
-                        headerShadowVisible: false,
-                        headerTransparent: true,
-                        headerTintColor: textColor,
-                        headerStyle: { backgroundColor: backgroundColor },
-                        // headerTransparent: false, // Changed background color
-                        // headerStyle: {
-                        //     backgroundColor: lightGreen, // Changed background color
-                        // },
-                        // headerTintColor: cream, // Set icon and text color
-                        headerTitle: "",
-                        headerBackVisible: true,
-                        headerBackTitleVisible: false,
-                        headerTitleStyle: {
-                          fontFamily: headerStyle.fontFamily,
-                          fontWeight: headerStyle.fontWeight,
-                          fontSize: headerStyle.fontSize,
-                        },
-                      }}
-                    >
-                      <Stack.Screen
-                        name="index"
-                        options={{ title: "PetPals" }}
-                      />
-                      <Stack.Screen name="+not-found" />
-                    </Stack>
-                  </DogProvider>
-                </WalksProvider>
+                <DogProvider>
+                  <GroupWalksProvider>
+                    <WalksProvider>
+                      <Stack
+                        screenOptions={{
+                          headerShown: true,
+                          headerShadowVisible: false,
+                          headerTransparent: true,
+                          headerTintColor: textColor,
+                          headerStyle: { backgroundColor: backgroundColor },
+                          // headerTransparent: false, // Changed background color
+                          // headerStyle: {
+                          //     backgroundColor: lightGreen, // Changed background color
+                          // },
+                          // headerTintColor: cream, // Set icon and text color
+                          headerTitle: "",
+                          headerBackVisible: true,
+                          //headerBackTitleVisible: false,
+                          headerTitleStyle: {
+                            fontFamily: headerStyle.fontFamily,
+                            fontWeight: headerStyle.fontWeight,
+                            fontSize: headerStyle.fontSize,
+                          },
+                        }}
+                      >
+                        <Stack.Screen
+                          name="index"
+                          options={{ title: "PetPals" }}
+                        />
+                        <Stack.Screen name="+not-found" />
+                      </Stack>
+                    </WalksProvider>
+                  </GroupWalksProvider>
+                </DogProvider>
               </PostProvider>
             </UserProvider>
           </AuthProvider>

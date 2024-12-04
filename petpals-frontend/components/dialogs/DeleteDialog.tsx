@@ -13,7 +13,7 @@ import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import ThemedLoadingIndicator from "../decorations/animated/ThemedLoadingIndicator";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { KeyboardAwareScrollView, TextFieldRef } from "react-native-ui-lib";
-import { GroupWalkTag, tagRegex } from "@/context/WalksContext";
+import { GroupWalkTag, tagRegex } from "@/context/GroupWalksContext";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
 import { Tag } from "../display/Tag";
 import TagList from "../lists/TagList";

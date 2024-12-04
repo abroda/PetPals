@@ -4,11 +4,11 @@ import { useAuth } from "@/hooks/useAuth";
 import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoadingIndicator";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { SafeAreaView } from "react-native-safe-area-context";
 import HorizontalView from "@/components/basic/containers/HorizontalView";
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import "react-native-get-random-values";
 
 export default function WelcomeScreen() {
@@ -22,13 +22,23 @@ export default function WelcomeScreen() {
     }
   }, []);
 
+  const navigation = useNavigation();
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerShown: false,
+    });
+  }, [navigation]);
+
   return (
     <SafeAreaView
       style={{ flex: 1, margin: 0, padding: 0, backgroundColor: "transparent" }}
       edges={["left", "right", "bottom"]}
     >
       <ThemedScrollView
-        style={{ height: heightPercentToDP(100), paddingTop: percentToDP(20) }}
+        style={{
+          height: heightPercentToDP(100),
+          paddingTop: percentToDP(15),
+        }}
       >
         {isLoading && (
           <ThemedLoadingIndicator

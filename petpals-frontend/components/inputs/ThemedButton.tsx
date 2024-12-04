@@ -16,7 +16,7 @@ export type ThemedButtonProps = ButtonProps & {
   textColorName?: ColorName;
   textThemedColor?: ThemedColor;
   textStyleOptions?: TextStyleOptions;
-  shape?: "long" | "half" | "short" | "round";
+  shape?: "long" | "half" | "short" | "round" | "bigRound";
   border?: boolean;
   iconName?: ComponentProps<typeof Ionicons>["name"];
   iconSize?: number;
@@ -53,7 +53,7 @@ export const ThemedButton = ({
         },
       ]}
       size={
-        shape === "long"
+        shape === "long" || shape === "bigRound"
           ? "large"
           : shape == "half"
           ? "medium"
@@ -75,9 +75,13 @@ export const ThemedButton = ({
               ? 48
               : shape === "short"
               ? 27
-              : 15
+              : shape === "round"
+              ? 15
+              : 24
           ),
-          height: percentToDP(shape === "short" ? 10 : 15),
+          height: percentToDP(
+            shape === "short" ? 10 : shape === "bigRound" ? 24 : 15
+          ),
           borderWidth: border ? 2 : 0,
           alignContent: "center",
           alignItems: "center",

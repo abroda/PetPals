@@ -7,8 +7,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import Timeline from "react-native-timeline-flatlist";
-import { GroupWalk } from "@/context/WalksContext";
-import { useWalks } from "@/hooks/useWalks";
+import { GroupWalk } from "@/context/GroupWalksContext";
+import { useGroupWalks } from "@/hooks/useGroupWalks";
 import GroupWalksTimelineItem from "@/components/lists/GroupWalksTimelineItem";
 import HorizontalView from "@/components/basic/containers/HorizontalView";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
@@ -25,7 +25,7 @@ export default function GroupWalksScheduleScreen() {
   const today = now.valueOf() - (now.valueOf() % (24 * 3600 * 1000));
   const weekLimit = today + 7 * 24 * 3600 * 1000;
 
-  const { getGroupWalks } = useWalks();
+  const { getGroupWalks } = useGroupWalks();
 
   const [groupWalks, setGroupWalks] = useState<GroupWalk[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);

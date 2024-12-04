@@ -23,8 +23,8 @@ import {
   GroupWalk,
   GroupWalkTag,
   PagedGroupWalks,
-} from "@/context/WalksContext";
-import { useWalks } from "@/hooks/useWalks";
+} from "@/context/GroupWalksContext";
+import { useGroupWalks } from "@/hooks/useGroupWalks";
 import HorizontalView from "@/components/basic/containers/HorizontalView";
 import GroupWalksTimelineItem from "@/components/lists/GroupWalksTimelineItem";
 import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoadingIndicator";
@@ -47,7 +47,7 @@ export default function FindGroupWalkScreen() {
 
   const { initialFilter } = useLocalSearchParams<{ initialFilter: string }>();
 
-  const { findGroupWalks } = useWalks();
+  const { findGroupWalks } = useGroupWalks();
 
   const [foundGroupWalks, setFoundGroupWalks] =
     useState<PagedGroupWalks | null>(null);

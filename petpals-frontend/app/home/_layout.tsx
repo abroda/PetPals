@@ -36,10 +36,10 @@ export default function HomeLayout() {
           position: "absolute",
         },
       }}
-      sceneContainerStyle={{
-        backgroundColor: backgroundColor,
-        borderColor: backgroundColor,
-      }}
+      // sceneContainerStyle={{
+      //   backgroundColor: backgroundColor,
+      //   borderColor: backgroundColor,
+      // }}
     >
       <Tabs.Screen
         name="index"
@@ -48,18 +48,6 @@ export default function HomeLayout() {
           tabBarIcon: ({ focused }) => (
             <ThemedIcon
               name={focused ? "home" : "home-outline"}
-              colorName={focused ? "primary" : "link"}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="walkStats"
-        options={{
-          title: "Walk Stats",
-          tabBarIcon: ({ focused }) => (
-            <ThemedIcon
-              name={focused ? "stats-chart" : "stats-chart-outline"}
               colorName={focused ? "primary" : "link"}
             />
           ),

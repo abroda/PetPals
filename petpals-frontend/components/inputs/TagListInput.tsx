@@ -4,13 +4,13 @@ import { ThemedTextField } from "../inputs/ThemedTextField";
 
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { TextFieldRef } from "react-native-ui-lib";
-import { GroupWalkTag, tagRegex } from "@/context/WalksContext";
+import { GroupWalkTag, tagRegex } from "@/context/GroupWalksContext";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
 import TagList from "../lists/TagList";
 import { ThemedView } from "../basic/containers/ThemedView";
 import ThemedLoadingIndicator from "../decorations/animated/ThemedLoadingIndicator";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
-import { useWalks } from "@/hooks/useWalks";
+import { useGroupWalks } from "@/hooks/useGroupWalks";
 
 export default function TagListInput({
   onAddTag = (tag: GroupWalkTag) => {},
@@ -31,7 +31,7 @@ export default function TagListInput({
   const [isLoading, setIsLoading] = useState(false);
   const tagInputRef = useRef<TextFieldRef>(null);
 
-  const { getTagSuggestions } = useWalks();
+  const { getTagSuggestions } = useGroupWalks();
 
   const percentToDP = useWindowDimension("shorter");
   const borderColor = useThemeColor("primary");

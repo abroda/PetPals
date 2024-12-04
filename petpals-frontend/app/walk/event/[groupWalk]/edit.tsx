@@ -18,9 +18,13 @@ import { DateTimePicker, TextFieldRef } from "react-native-ui-lib";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useWalks } from "@/hooks/useWalks";
+import { useGroupWalks } from "@/hooks/useGroupWalks";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
-import { GroupWalk, GroupWalkTag, Participant } from "@/context/WalksContext";
+import {
+  GroupWalk,
+  GroupWalkTag,
+  Participant,
+} from "@/context/GroupWalksContext";
 import TagListInput from "@/components/inputs/TagListInput";
 import { DogPicker } from "@/components/inputs/DogPicker";
 import { LocationInput } from "@/components/inputs/LocationInput";
@@ -39,9 +43,11 @@ export default function EditGroupWalkScreen(props: { create?: boolean }) {
   const [description, setDescription] = useState("");
   const [datetime, setDatetime] = useState(now);
 
+  //initial location = Wrocław city centre
   const [latitude, setLatitude] = useState(51.108592525);
   const [longitude, setLongitude] = useState(17.038330603);
   const [locationName, setLocationName] = useState(latitude + ", " + longitude);
+
   const [tags, setTags] = useState<GroupWalkTag[]>([]);
   const [dogs, setDogs] = useState([] as Dog[]);
   const [dogsParticipating, setDogsParticipating] = useState([] as string[]);
@@ -55,7 +61,7 @@ export default function EditGroupWalkScreen(props: { create?: boolean }) {
     updateGroupWalk,
     deleteGroupWalk,
     getUsersDogs,
-  } = useWalks();
+  } = useGroupWalks();
   const { userId } = useAuth();
 
   const [isLoading, setIsLoading] = useState(false);

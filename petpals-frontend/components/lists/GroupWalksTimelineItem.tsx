@@ -3,7 +3,7 @@ import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { useState } from "react";
 import { ThemedText } from "../basic/ThemedText";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
-import { GroupWalk } from "@/context/WalksContext";
+import { GroupWalk } from "@/context/GroupWalksContext";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import { FlatList } from "react-native-gesture-handler";
 import GroupWalkListItem from "../display/GroupWalkListItem";

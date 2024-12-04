@@ -24,9 +24,13 @@ import HorizontalView from "@/components/basic/containers/HorizontalView";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
-import { useWalks } from "@/hooks/useWalks";
+import { useGroupWalks } from "@/hooks/useGroupWalks";
 import TagList from "@/components/lists/TagList";
-import { CommentContent, GroupWalk, Participant } from "@/context/WalksContext";
+import {
+  CommentContent,
+  GroupWalk,
+  Participant,
+} from "@/context/GroupWalksContext";
 import { LocationMap } from "@/components/display/LocationMap";
 import JoinDialog from "@/components/dialogs/JoinDialog";
 import { Dog, useDog } from "@/context/DogContext";
@@ -50,7 +54,7 @@ export default function GroupWalkScreen() {
   const { userId } = useAuth();
 
   const [comments, setComments] = useState([] as CommentContent[]);
-  const { getGroupWalk, addGroupWalkComment, getUsersDogs } = useWalks();
+  const { getGroupWalk, addGroupWalkComment, getUsersDogs } = useGroupWalks();
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -374,7 +378,4 @@ export default function GroupWalkScreen() {
       )}
     </SafeAreaView>
   );
-}
-function setGroupWalksData(returnValue: any) {
-  throw new Error("Function not implemented.");
 }

@@ -1,6 +1,6 @@
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
-import { Participant } from "@/context/WalksContext";
+import { Participant } from "@/context/GroupWalksContext";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FlatList } from "react-native-gesture-handler";
 import { ParticipantListItem } from "@/components/display/ParticipantListItem";

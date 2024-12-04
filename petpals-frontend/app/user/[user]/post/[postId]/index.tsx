@@ -25,7 +25,7 @@ import { PostType } from "@/context/PostContext";
 import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoadingIndicator";
 import CommentSection from "@/components/lists/CommentSection";
 import { testComments, testData } from "@/app/walk/event/testData";
-import { CommentContent } from "@/context/WalksContext";
+import { CommentContent } from "@/context/GroupWalksContext";
 
 type PostScreenRouteProp = RouteProp<{ params: { postId: string } }, "params">;
 

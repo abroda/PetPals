@@ -3,7 +3,7 @@ import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { FlatList } from "react-native-gesture-handler";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import Comment from "../display/Comment";
-import { CommentContent, GroupWalkTag } from "@/context/WalksContext";
+import { CommentContent, GroupWalkTag } from "@/context/GroupWalksContext";
 import HorizontalView, {
   HorizontalViewProps,
 } from "../basic/containers/HorizontalView";

@@ -4,12 +4,13 @@ import React, {
   LegacyRef,
   ReactElement,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
 import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
 import { useAuth } from "@/hooks/useAuth";
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import ThemedLoadingIndicator from "@/components/decorations/animated/ThemedLoadingIndicator";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 import AppLogo from "@/components/decorations/static/AppLogo";
@@ -47,6 +48,7 @@ export default function LoginScreen() {
   const heighPercentToDP = useWindowDimension("height");
 
   const asyncAbortController = useRef<AbortController | undefined>(undefined);
+
   useEffect(() => {
     asyncAbortController.current = new AbortController();
     return () => {

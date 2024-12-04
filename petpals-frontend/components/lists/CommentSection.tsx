@@ -3,7 +3,7 @@ import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { FlatList } from "react-native-gesture-handler";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import Comment from "../display/Comment";
-import { CommentContent } from "@/context/WalksContext";
+import { CommentContent } from "@/context/GroupWalksContext";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
 import { useCallback, useRef, useState } from "react";
 import { TextFieldRef } from "react-native-ui-lib";
