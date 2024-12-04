@@ -1,11 +1,12 @@
 import {Alert, Dimensions, FlatList, View} from "react-native";
-
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { SegmentedControl } from "react-native-ui-lib";
-import {useEffect, useState} from "react";
 import FriendListItem from "@/components/display/FriendListItem";
 import ChatListItem from "@/components/display/ChatListItem";
 import FriendRequestListItem from "@/components/display/FriendRequestListItem";
+import AppHeader from "@/components/decorations/static/AppHeader";
+
+import {useEffect, useState} from "react";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
@@ -46,7 +47,7 @@ export default function FriendsScreen() {
 
 
   const renderRequestsTab = () => (
-    <ThemedView backgroundColor={themeColors.secondary} style={{
+    <ThemedView backgroundColor={themeColors.tertiary} style={{
       flex: 1,
       paddingVertical: widthPercentageToDP(6),
       paddingHorizontal: widthPercentageToDP(4),
@@ -108,46 +109,47 @@ export default function FriendsScreen() {
 
   const renderMessagesTab = () => (
     <ThemedView
-      backgroundColor={themeColors.secondary}
+      backgroundColor={themeColors.tertiary}
       style={{
         flex: 1,
         paddingVertical: widthPercentageToDP(6),
         paddingHorizontal: widthPercentageToDP(4),
       }}
     >
-      <ThemedText
-        textStyleOptions={{ size: "veryBig", weight: "bold" }}
-        backgroundColorName={"secondary"}
-      >
-        Messages
-      </ThemedText>
-      <FlatList
-        data={["Alice", "Bob", "Charlie"]} // Replace with actual chat data
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => <ChatListItem username={item} />}
-        contentContainerStyle={{
-          paddingVertical: widthPercentageToDP(5),
-        }}
-      />
+      {/*<ThemedText*/}
+      {/*  textStyleOptions={{ size: "veryBig", weight: "bold" }}*/}
+      {/*  backgroundColorName={"secondary"}*/}
+      {/*>*/}
+      {/*  Messages*/}
+      {/*</ThemedText>*/}
+      {/*<FlatList*/}
+      {/*  data={["Alice", "Bob", "Charlie"]} // Replace with actual chat data*/}
+      {/*  keyExtractor={(item, index) => index.toString()}*/}
+      {/*  renderItem={({ item }) => <ChatListItem username={item} />}*/}
+      {/*  contentContainerStyle={{*/}
+      {/*    paddingVertical: widthPercentageToDP(5),*/}
+      {/*  }}*/}
+      {/*/>*/}
     </ThemedView>
   )
 
 
   const renderFriendsTab = () => (
     <ThemedView
-      backgroundColor={themeColors.secondary}
+      backgroundColor={themeColors.tertiary}
       style={{
         flex: 1,
-        paddingVertical: widthPercentageToDP(6),
-        paddingHorizontal: widthPercentageToDP(4),
+        paddingVertical: widthPercentageToDP(2),
+        paddingHorizontal: widthPercentageToDP(5),
       }}
     >
-      <ThemedText
-        textStyleOptions={{ size: "veryBig", weight: "bold" }}
-        backgroundColorName={"secondary"}
-      >
-        Friends
-      </ThemedText>
+      {/*<ThemedText*/}
+      {/*  textStyleOptions={{ size: "veryBig", weight: "bold" }}*/}
+      {/*  backgroundColorName={"tertiary"}*/}
+      {/*>*/}
+      {/*  Friends*/}
+      {/*</ThemedText>*/}
+
       <FlatList
         data={friends} // Use friends from FriendshipContext
         keyExtractor={(item) => item.id} // Ensure each friend has a unique ID
@@ -159,7 +161,7 @@ export default function FriendsScreen() {
           />
         )}
         contentContainerStyle={{
-          paddingVertical: widthPercentageToDP(5),
+
         }}
         ListEmptyComponent={
           <ThemedText
@@ -177,7 +179,7 @@ export default function FriendsScreen() {
   );
 
   const baseLabelStyle = useTextStyle({
-    size: "big",
+    size: "medium",
     weight: "regular",
     font: "default",
   });
@@ -188,7 +190,7 @@ export default function FriendsScreen() {
 
   }
   const combinedStyle={...baseLabelStyle, ...additionalStyle}
-  const themePrimaryColor = useThemeColor("primary");
+  const themePrimaryColor = useThemeColor("tertiary");
   const themeInactiveColor = useThemeColor("textOnSecondary");
 
   // Dynamic function to style each label
@@ -201,9 +203,11 @@ export default function FriendsScreen() {
   // @ts-ignore
   return (
     <SafeAreaView style={{
-      backgroundColor: themeColors.secondary,
-      flex: 1,
+      backgroundColor: themeColors.tertiary,
+      height: heighPercentToDP(100),
+      width: widthPercentageToDP(100),
     }}>
+      <AppHeader backgroundColorName={"secondary"}/>
       <SegmentedControl
         segments={[
           {
@@ -235,7 +239,7 @@ export default function FriendsScreen() {
         inactiveColor={themeColors.textOnSecondary}
         borderRadius={percentToDP(4)}
         backgroundColor={themeColors.transparent}
-        activeBackgroundColor={"transparent"} // Transparent background for active segment
+        activeBackgroundColor={themeColors.primary} // Transparent background for active segment
         inactiveBackgroundColor={"transparent"} // Transparent background for inactive segments
         outlineWidth={0}
         style={{

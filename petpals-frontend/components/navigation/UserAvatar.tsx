@@ -21,11 +21,11 @@ export default function UserAvatar(props: {
 
   useEffect(() => {
     const fetchUserImage = async () => {
-      console.log("[UserAvatar] Received userId to find: ", props.userId);
+      // console.log("[UserAvatar] Received userId to find: ", props.userId);
       if (!props.imageUrl && props.userId) {
         try {
           const user = await fetchUserById(props.userId);
-          console.log("[UserAvatar] Fetching user for avatar: ", user);
+          // console.log("[UserAvatar] Fetching user for avatar: ", user);
           setAvatarUrl(user.imageUrl || null); // Use fetched image URL if available
         } catch (error) {
           console.error("Failed to fetch user data for avatar:", error);

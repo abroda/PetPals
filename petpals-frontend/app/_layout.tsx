@@ -5,7 +5,7 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import {Navigator, Stack} from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
@@ -24,15 +24,10 @@ import { FriendshipProvider } from "@/context/FriendshipContext";
 import { heightPercentageToDP } from "react-native-responsive-screen";
 import { WalksProvider } from "@/context/WalksContext";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
+import Slot = Navigator.Slot;
 
 SplashScreen.preventAutoHideAsync();
 
-// Colours
-const darkGreen = "#0A2421";
-const lightGreen = "#1C302A";
-const accentGreen = "#B4D779";
-const accentTeal = "#52B8A3";
-const cream = "#FAF7EA";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -52,6 +47,7 @@ export default function RootLayout() {
   }
 
   return (
+
     <PaperProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DarkTheme}>
@@ -61,34 +57,30 @@ export default function RootLayout() {
                 <WalksProvider>
                   <DogProvider>
                     <FriendshipProvider>
-                    <Stack
-                      screenOptions={{
-                        headerShown: true,
-                        headerShadowVisible: false,
-                        headerTransparent: true,
-                        headerTintColor: textColor,
-                        headerStyle: { backgroundColor: backgroundColor },
-                        // headerTransparent: false, // Changed background color
-                        // headerStyle: {
-                        //     backgroundColor: lightGreen, // Changed background color
-                        // },
-                        // headerTintColor: cream, // Set icon and text color
-                        headerTitle: "",
-                        headerBackVisible: true,
-                        headerBackTitleVisible: false,
-                        headerTitleStyle: {
-                          fontFamily: headerStyle.fontFamily,
-                          fontWeight: headerStyle.fontWeight,
-                          fontSize: headerStyle.fontSize,
-                        },
-                      }}
-                    >
-                      <Stack.Screen
-                        name="index"
-                        options={{ title: "PetPals" }}
-                      />
-                      <Stack.Screen name="+not-found" />
-                    </Stack>
+                      <Stack
+                        screenOptions={{
+                          headerShown: true,
+                          headerShadowVisible: false,
+                          headerTransparent: true,
+                          headerTintColor: textColor,
+                          headerStyle: { backgroundColor: backgroundColor },
+                          headerTitle: "",
+                          headerBackVisible: true,
+                          headerBackTitleVisible: false,
+                          headerTitleStyle: {
+                            fontFamily: headerStyle.fontFamily,
+                            fontWeight: headerStyle.fontWeight,
+                            fontSize: headerStyle.fontSize,
+                          },
+                        }}
+                      >
+                        {/* Special configuration for the home screen */}
+                        <Stack.Screen name="index" options={{ title: "PetPals" }} />
+
+                        {/* Not found screen */}
+                        <Stack.Screen name="+not-found" />
+                        <Slot />
+                      </Stack>
                     </FriendshipProvider>
                   </DogProvider>
                 </WalksProvider>
@@ -98,5 +90,6 @@ export default function RootLayout() {
         </ThemeProvider>
       </GestureHandlerRootView>
     </PaperProvider>
+
   );
 }

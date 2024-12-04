@@ -36,26 +36,42 @@ export default function FriendListItem (props:{
         style={{
           flexDirection: "row",
           alignItems: "center",
-          padding: widthPercentageToDP(4),
+          padding: widthPercentageToDP(2),
           marginBottom: widthPercentageToDP(2),
-          borderRadius: widthPercentageToDP(2),
-          backgroundColor: themeColors.tertiary,
+          borderRadius: widthPercentageToDP(4),
+          backgroundColor: themeColors.secondary,
         }}
       >
-        <UserAvatar size={20} userId={props.userId} doLink={true}/>
-        <View style={{marginLeft: widthPercentageToDP(4)}}>
+        {/* User avatar */}
+        <UserAvatar size={15} userId={props.userId} doLink={true}/>
+
+        <View style={{
+          marginHorizontal: 'auto',
+        }}>
+
+          {/* Username */}
           <ThemedText
-            style={{fontSize: widthPercentageToDP(4), fontWeight: "bold"}}
+            style={{
+              fontSize: widthPercentageToDP(4.5),
+              lineHeight: widthPercentageToDP(4.5),
+              fontWeight: "bold",
+              marginVertical: widthPercentageToDP(2)
+          }}
             textColorName="textOnSecondary"
+            backgroundColorName={"secondary"}
           >
             {props.username}
           </ThemedText>
+
+          {/* Description */}
           <ThemedText
             style={{
               fontSize: widthPercentageToDP(3.5),
-              width: widthPercentageToDP(60),
+              lineHeight: widthPercentageToDP(3.5),
+              width: percentToDP(60),
             }}
             textColorName="textOnSecondary"
+            backgroundColorName={"secondary"}
           >
             {props.description || "No description available"}
           </ThemedText>

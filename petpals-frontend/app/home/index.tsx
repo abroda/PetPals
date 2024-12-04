@@ -18,8 +18,11 @@ import { useUser } from "@/hooks/useUser";
 import SearchBar from "@/components/inputs/SearchBar";
 import UserListItem from "@/components/lists/UserListItem";
 import UserSearchList from "@/components/lists/UserSearchList";
+import AppHeader from "@/components/decorations/static/AppHeader";
+
 import { widthPercentageToDP } from "react-native-responsive-screen";
 import { ColorName } from "react-native-ui-lib";
+import themeContext from "@react-navigation/native/src/theming/ThemeContext";
 
 export default function HomeScreen() {
   const [notificationsVisible, setNotificationsVisible] = useState(false);
@@ -43,24 +46,6 @@ export default function HomeScreen() {
     searchUsers,
   } = useUser();
 
-  // Fetches all users
-  // const fetchUsers = async (query: string) => {
-  //   setIsSearching(true);
-  //   try {
-  //     const response = await fetch(`/api/users`); // Adjust the endpoint as necessary
-  //     const data = await response.json();
-  //     const publicUsers = data.filter(
-  //       (user) =>
-  //         user.visibility === "PUBLIC" &&
-  //         user.username.toLowerCase().includes(query.toLowerCase())
-  //     );
-  //     setSearchResults(publicUsers);
-  //   } catch (error) {
-  //     console.error("Error fetching users:", error);
-  //   } finally {
-  //     setIsSearching(false);
-  //   }
-  // };
 
   // For User search
   const handleSearch = async (query: string, context: string) => {
@@ -76,80 +61,16 @@ export default function HomeScreen() {
     }
   };
 
-  // const handleSearch = async (query: string, context: string) => {
-  //   if (context === "users") {
-  //     setIsSearching(true);
-  //     setSearchQuery(query);
-  //     const results = await searchUsers(query);
-  //     setSearchResults(results);
-  //     setIsSearching(false);
-  //   }
-  // };
-
   return (
     <SafeAreaView>
       <ThemedView
         colorName="secondary"
         style={{ height: heightPercentToDP(100) }}
       >
-        <ThemedView
-          colorName="secondary"
-          style={{ height: heightPercentToDP(10) }}
-        >
-          <HorizontalView style={{ paddingHorizontal: percentToDP(5) }}>
-            {/* APP LOGO */}
-            <AppLogo
-              size={10}
-              version="horizontal"
-            />
 
-            <ThemedView>
-              <ThemedButton
-                shape="short"
-                center
-                label="Add post"
-                onPress={() =>
-                  router.push("/user/Username/post/new" as Href<string>)
-                }
-                iconSource={() => (
-                  <ThemedIcon
-                    name="add"
-                    size={20}
-                    style={{
-                      paddingRight: percentToDP(0.7),
-                      paddingBottom: percentToDP(0.7),
-                    }}
-                    colorName="textOnPrimary"
-                  />
-                )}
-                style={{ marginRight: percentToDP(5), width: percentToDP(30) }}
-              />
-            </ThemedView>
+          {/* Custom header with logo and notfications and user avatar */}
+        <AppHeader backgroundColorName={"tertiary"}/>
 
-            {/* NOTIFICATIONS ICON */}
-            <Pressable
-              onPress={() => {
-                console.log(notificationsVisible);
-                setNotificationsVisible(!notificationsVisible);
-              }}
-            >
-              <ThemedIcon
-                size={percentToDP(6)}
-                name="notifications"
-              />
-            </Pressable>
-
-            {/* USER AVATAR */}
-            <ThemedView style={{ marginLeft: percentToDP(3) }}>
-              <UserAvatar
-                size={10}
-                doLink={true}
-                userId={"me"}
-                imageUrl={userProfile?.imageUrl}
-              />
-            </ThemedView>
-          </HorizontalView>
-        </ThemedView>
 
         {/* SEARCH BAR */}
         <SearchBar
@@ -227,7 +148,35 @@ export default function HomeScreen() {
             />
           </ThemedView>
         ) : (
-          <PostFeed />
+          <View style={{
+            alignItems: 'center',
+            paddingVertical: heightPercentToDP(2),
+          }}>
+            <ThemedView colorName={"secondary"}>
+              <ThemedButton
+                shape="short"
+                center
+                label="Add post"
+                onPress={() =>
+                  router.push("/user/Username/post/new" as Href<string>)
+                }
+                iconSource={() => (
+                  <ThemedIcon
+                    name="add"
+                    size={20}
+                    style={{
+                      paddingRight: percentToDP(0.7),
+                      paddingBottom: percentToDP(0.7),
+                    }}
+                    colorName="textOnPrimary"
+                  />
+                )}
+                style={{ marginRight: percentToDP(5), width: percentToDP(30) }}
+              />
+              <PostFeed />
+            </ThemedView>
+
+          </View>
         )}
 
         {/*/!* User Results *!/*/}

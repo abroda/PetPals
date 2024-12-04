@@ -38,6 +38,14 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [userProfile, setUserProfile] = useState<UserProfile>();
   const { authToken, userId } = useAuth(); // Assuming useAuth provides authToken
 
+  useEffect(() => {
+    if (userId) {
+      getUserById(userId).catch((error) => {
+        console.error("Failed to fetch user profile:", error);
+      });
+    }
+  }, [userId]);
+
   const sendJsonQuery = async (
     path: string,
     method: string = "POST",

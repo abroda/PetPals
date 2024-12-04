@@ -17,7 +17,7 @@ import UserAvatar from "@/components/navigation/UserAvatar";
 import PetAvatar from "@/components/navigation/PetAvatar";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigation, usePathname, router, Href, useFocusEffect } from "expo-router";
+import {useNavigation, usePathname, router, Href, useFocusEffect, useRouter} from "expo-router";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 import PostFeed from "@/components/lists/PostFeed";
 import { Dog, useDog } from "@/context/DogContext";
@@ -32,6 +32,7 @@ export default function UserProfileScreen() {
 
   // Contexts
   const path = usePathname();
+  const router = useRouter();
   const { addDog, getDogsByUserId } = useDog();
   const { logout, userId: loggedInUserId } = useAuth();
   const { fetchUserById, userProfile } = useUser();
@@ -39,9 +40,14 @@ export default function UserProfileScreen() {
   const { sendFriendRequest, removePendingFriendRequest, sentRequests, receivedRequests } =
     useFriendship(); // Use friendship context
 
+
   // Styling
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToPD = useWindowDimension("height");
+  const colorScheme = useColorScheme();
+  // @ts-ignore
+  const themeColors = ThemeColors[colorScheme];
+
 
   // Functionality
   const [isRefreshing, setIsRefreshing] = useState(false); // For refresh indicator (if needed)
@@ -55,10 +61,7 @@ export default function UserProfileScreen() {
   const [visitedUser, setVisitedUser] = useState<UserProfile | null>(null);
   const [hasPendingRequest, setHasPendingRequest] = useState(false); // Track friendship request state
 
-  // Colours
-  const colorScheme = useColorScheme();
-  // @ts-ignore
-  const themeColors = ThemeColors[colorScheme];
+
 
   // Check if viewing own profile
   const isOwnProfile = username === "me" || loggedInUserId === username;
@@ -290,7 +293,7 @@ export default function UserProfileScreen() {
     >
       <View
         style={{
-          marginTop: heightPercentToPD(35),
+          marginTop: heightPercentToPD(30),
           marginBottom: heightPercentToPD(3),
           backgroundColor: themeColors.tertiary,
           paddingBottom: heightPercentToPD(5),
@@ -317,10 +320,10 @@ export default function UserProfileScreen() {
             style={{
               width: widthPercentageToDP(85),
               textAlign: "center",
-              fontSize: 36,
-              lineHeight: 40,
+              fontSize: percentToDP(8),
+              lineHeight: percentToDP(8),
               color: themeColors.textOnSecondary,
-              marginVertical: heightPercentToPD(1),
+              marginVertical: heightPercentToPD(2),
             }}
           >
             {visitedUser?.username || "Unknown User"}
@@ -328,8 +331,8 @@ export default function UserProfileScreen() {
           <ThemedText
             style={{
               width: widthPercentageToDP(85),
-              fontSize: 15,
-              lineHeight: 17,
+              fontSize: percentToDP(4),
+              lineHeight: percentToDP(5),
               textAlign: "center",
               color: themeColors.textOnSecondary,
               marginBottom: heightPercentToPD(5),
@@ -465,6 +468,7 @@ export default function UserProfileScreen() {
             <ThemedButton
               label="My friends"
               color={themeColors.tertiary}
+              onPress={() => router.push(`/home/socials`)}
               style={{
                 width: widthPercentageToDP(40),
                 backgroundColor: themeColors.primary,

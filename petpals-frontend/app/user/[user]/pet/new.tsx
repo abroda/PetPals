@@ -57,16 +57,24 @@ export default function NewPetScreen() {
   const colorScheme = useColorScheme();
   // @ts-ignore
   const themeColors = ThemeColors[colorScheme];
-  const navigation = useNavigation();
+  // const navigation = useNavigation();
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerTitle: "Create new dog",
-      headerStyle: {
-        backgroundColor: themeColors.secondary,
-      },
-    });
-  }, [navigation]);
+  // useLayoutEffect(() => {
+  //   navigation.setOptions({
+  //     headerTitle: "Create new dog",
+  //     headerStyle: {
+  //       backgroundColor: themeColors.secondary,
+  //     },
+  //   });
+  // }, [navigation]);
+
+  if (!userId) {
+    return (
+      <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ThemedText>Loading user profile...</ThemedText>
+      </SafeAreaView>
+    );
+  }
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({

@@ -10,11 +10,20 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import HorizontalView from "@/components/basic/containers/HorizontalView";
 import { useEffect } from "react";
 import "react-native-get-random-values";
+import {widthPercentageToDP} from "react-native-responsive-screen";
+import themeContext from "@react-navigation/native/src/theming/ThemeContext";
+import { useColorScheme } from "@/hooks/theme/useColorScheme";
+import { ThemeColors } from "@/constants/theme/Colors";
 
 export default function WelcomeScreen() {
   const { isLoading, isProcessing, userId, authToken } = useAuth();
+
+  // Styling
   const percentToDP = useWindowDimension("shorter");
-  const heightPercentToDP = useWindowDimension("height");
+  const heightPercentToPD = useWindowDimension("height");
+  const colorScheme = useColorScheme();
+  // @ts-ignore
+  const themeColors = ThemeColors[colorScheme];
 
   useEffect(() => {
     if (!isLoading && !isProcessing && userId && authToken) {
@@ -24,11 +33,11 @@ export default function WelcomeScreen() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, margin: 0, padding: 0, backgroundColor: "transparent" }}
+      style={{ flex: 1, margin: 0, padding: 0, backgroundColor: themeColors.tertiary}}
       edges={["left", "right", "bottom"]}
     >
       <ThemedScrollView
-        style={{ height: heightPercentToDP(100), paddingTop: percentToDP(20) }}
+        style={{ width: widthPercentageToDP(100), marginTop: percentToDP(10)}}
       >
         {isLoading && (
           <ThemedLoadingIndicator
