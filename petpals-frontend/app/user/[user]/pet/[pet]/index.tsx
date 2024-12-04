@@ -19,10 +19,9 @@ import HorizontalView from "@/components/basic/containers/HorizontalView";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
-import { usePathname, router } from "expo-router";
+import {usePathname, router, useNavigation} from "expo-router";
 import { Image } from "react-native-ui-lib";
 import { Dog, useDog } from "@/context/DogContext";
-import { useNavigation } from "@react-navigation/native";
 import { UserContext } from "@/context/UserContext";
 import { useColorScheme } from "@/hooks/theme/useColorScheme";
 import { ThemeColors } from "@/constants/theme/Colors";
@@ -38,6 +37,8 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import DogTag from "@/components/display/DogTag";
 
+
+
 export default function PetProfileScreen() {
   const path = usePathname();
   const username = path.split("/")[2];
@@ -52,12 +53,14 @@ export default function PetProfileScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [menuVisible, setMenuVisible] = useState(false);
   const [imageUri, setImageUri] = useState<string | null>(null);
-  const navigation = useNavigation();
+  // const navigation = useNavigation();
 
   // Colours
   const colorScheme = useColorScheme();
   // @ts-ignore
   const themeColors = ThemeColors[colorScheme];
+
+  const navigation = useNavigation();
 
   const dogTags = [
     "playful",
@@ -90,7 +93,7 @@ export default function PetProfileScreen() {
     fetchDogData();
   }, [petId]);
 
-  // Customize header layout and options
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -103,22 +106,11 @@ export default function PetProfileScreen() {
             marginVertical: heightPercentToPD(1),
           }}
         >
-          {/* User Avatar Link to User Profile */}
-          <Pressable
-            onPress={() => router.push(`/user/${username}`)}
-            style={{ marginRight: percentToDP(2) }}
-          >
-            <UserAvatar
-              userId={userId ?? ""}
-              size={12}
-              doLink={false}
-              imageUrl={userProfile.imageUrl}
-            />
-          </Pressable>
+
 
           {/* Three-dots Icon for Dropdown Menu */}
           <Pressable
-            onPress={() => setMenuVisible(!menuVisible)}
+            onPressOut={() => setMenuVisible(!menuVisible)}
             style={{
               padding: percentToDP(2),
             }}
@@ -395,9 +387,9 @@ export default function PetProfileScreen() {
             position: "absolute",
             zIndex: 100,
             elevation: 100,
-            top: heightPercentToPD(16),
-            right: widthPercentageToDP(5),
-            width: widthPercentageToDP(40),
+            top: heightPercentToPD(10),
+            right: widthPercentageToDP(4),
+            width: widthPercentageToDP(50),
             backgroundColor: themeColors.tertiary,
 
             borderRadius: percentToDP(4),
@@ -409,7 +401,7 @@ export default function PetProfileScreen() {
             justifyContent: "space-evenly",
           }}
         >
-          <Pressable onPress={() => handleMenuSelect("Edit")}>
+          <Pressable onPressOut={() => handleMenuSelect("Edit")}>
             <Text
               style={{
                 padding: percentToDP(5),
@@ -423,7 +415,7 @@ export default function PetProfileScreen() {
               Edit
             </Text>
           </Pressable>
-          <Pressable onPress={() => handleMenuSelect("Delete")}>
+          <Pressable onPressOut={() => handleMenuSelect("Delete")}>
             <Text
               style={{
                 padding: percentToDP(5),

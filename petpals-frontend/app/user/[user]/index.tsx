@@ -174,7 +174,7 @@ export default function UserProfileScreen() {
           }}
         >
           {username === "me" && (
-            <Pressable onPress={() => Alert.alert("Notifications")}>
+            <Pressable onPressOut={() => Alert.alert("Notifications")}>
               <ThemedIcon
                 name="notifications-outline"
                 style={{
@@ -195,7 +195,7 @@ export default function UserProfileScreen() {
 
           {/* Three-dots Menu Pop-up */}
           {isOwnProfile && (
-            <Pressable onPress={() => setMenuVisible(!menuVisible)}>
+            <Pressable onPressOut={() => setMenuVisible(!menuVisible)}>
               <ThemedIcon
                 name="ellipsis-vertical-outline"
                 style={{
@@ -563,9 +563,9 @@ export default function UserProfileScreen() {
             position: "absolute",
             zIndex: 100,
             elevation: 100,
-            top: heightPercentToPD(16),
-            right: widthPercentageToDP(5),
-            width: widthPercentageToDP(40),
+            top: heightPercentToPD(10),
+            right: widthPercentageToDP(4),
+            width: widthPercentageToDP(50),
             backgroundColor: themeColors.tertiary,
             borderRadius: percentToDP(4),
             shadowOpacity: 0.3,

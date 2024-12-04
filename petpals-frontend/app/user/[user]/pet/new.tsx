@@ -13,7 +13,7 @@ import { useDog } from "@/context/DogContext";
 import { useAuth } from "@/hooks/useAuth";
 import React, { useLayoutEffect, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
-import { router, useRouter } from "expo-router";
+import {router, useNavigation, useRouter} from "expo-router";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { Assets } from "react-native-ui-lib";
@@ -28,9 +28,8 @@ import {
 // );
 // @ts-ignore
 import DogPlaceholderImage from "@/assets/images/dog_placeholder_theme-color-fair.png";
-import UserAvatar from "@/components/navigation/UserAvatar";
-import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
-import { useNavigation } from "@react-navigation/native";
+
+
 
 export default function NewPetScreen() {
   // @ts-ignore
@@ -57,8 +56,10 @@ export default function NewPetScreen() {
   const colorScheme = useColorScheme();
   // @ts-ignore
   const themeColors = ThemeColors[colorScheme];
-  // const navigation = useNavigation();
 
+
+  // PROBLEM
+  // const navigation = useNavigation();
   // useLayoutEffect(() => {
   //   navigation.setOptions({
   //     headerTitle: "Create new dog",
