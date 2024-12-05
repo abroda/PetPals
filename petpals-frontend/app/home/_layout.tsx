@@ -49,6 +49,7 @@ export default function HomeLayout() {
             <ThemedIcon
               name={focused ? "home" : "home-outline"}
               colorName={focused ? "primary" : "link"}
+              size={30}
             />
           ),
         }}
@@ -61,6 +62,7 @@ export default function HomeLayout() {
             <ThemedIcon
               name={focused ? "walk" : "walk-outline"}
               colorName={focused ? "primary" : "link"}
+              size={30}
             />
           ),
         }}
@@ -73,6 +75,7 @@ export default function HomeLayout() {
             <ThemedIcon
               name={focused ? "calendar" : "calendar-outline"}
               colorName={focused ? "primary" : "link"}
+              size={30}
             />
           ),
         }}
@@ -85,6 +88,7 @@ export default function HomeLayout() {
             <ThemedIcon
               name={focused ? "people" : "people-outline"}
               colorName={focused ? "primary" : "link"}
+              size={30}
             />
           ),
         }}

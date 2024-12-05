@@ -18,7 +18,6 @@ export default function HorizontalView({
     <ThemedView
       style={[
         {
-          flex: 1,
           flexDirection: "row",
           alignItems: "center",
           justifyContent: justifyOption,

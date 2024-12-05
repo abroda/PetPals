@@ -25,6 +25,9 @@ import { TextField, TextFieldRef } from "react-native-ui-lib";
 import { heightPercentageToDP } from "react-native-responsive-screen";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useColorScheme } from "@/hooks/theme/useColorScheme";
+import { ThemeColors } from "@/constants/theme/Colors";
+
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -32,20 +35,18 @@ export default function LoginScreen() {
   const [validationMessage, setValidationMessage] = useState("");
   const [dialogVisible, setDialogVisible] = useState(false);
 
-  // Colours
-  const darkGreen = "#0A2421";
-  const lightGreen = "#1C302A";
-  const accentGreen = "#B4D779";
-  const accentTeal = "#52B8A3";
-  const cream = "#FAF7EA";
 
   const { isLoading, isProcessing, login } = useAuth();
 
   const emailRef = useRef<TextFieldRef>(null);
   const passwordRef = useRef<TextFieldRef>(null);
 
+  // Styling
   const percentToDP = useWindowDimension("shorter");
-  const heighPercentToDP = useWindowDimension("height");
+  const heightPercentToPD = useWindowDimension("height");
+  const colorScheme = useColorScheme();
+  // @ts-ignore
+  const themeColors = ThemeColors[colorScheme];
 
   const asyncAbortController = useRef<AbortController | undefined>(undefined);
 
@@ -80,16 +81,15 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, margin: 0, padding: 0, backgroundColor: lightGreen }}
+      style={{
+        flex: 1,
+        margin: 0,
+        padding: 0
+    }}
       edges={["left", "right", "bottom"]}
     >
       <ThemedScrollView
         style={{
-          flex: 1,
-          margin: 0,
-
-          padding: 0,
-          paddingTop: percentToDP(15),
         }}
       >
         {dialogVisible && (

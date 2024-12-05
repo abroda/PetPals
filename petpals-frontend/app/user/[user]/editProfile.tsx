@@ -21,10 +21,14 @@ import { ThemedButton } from "@/components/inputs/ThemedButton";
 import * as ImagePicker from "expo-image-picker";
 import { useColorScheme } from "@/hooks/theme/useColorScheme";
 import { ThemeColors } from "@/constants/theme/Colors";
+import {useUser} from "@/hooks/useUser";
+import {useAuth} from "@/hooks/useAuth";
 
 export default function EditUserProfileScreen() {
   const path = usePathname();
   const username = path.slice(path.lastIndexOf("/") + 1);
+  const {userId} = useAuth();
+
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToPD = useWindowDimension("height");
   const navigation = useNavigation();
@@ -35,15 +39,15 @@ export default function EditUserProfileScreen() {
   const themeColors = ThemeColors[colorScheme];
 
   // Context and States
-  const { getUserById, userProfile, updateUser, changeUserAvatar } =
-    useContext(UserContext);
+  const { getUserById, userProfile, updateUser, changeUserAvatar } = useUser();
 
   const [usernameText, setUsernameText] = useState("");
   const [descriptionText, setDescriptionText] = useState("");
   const [emailText, setEmailText] = useState("");
 
   useEffect(() => {
-    getUserById(userProfile.id); // Fetch user data
+    console.log("[EditProfile] Getting user data for userprofile: ", userProfile);
+    getUserById(userId); // Fetch user data
   }, []);
 
   useEffect(() => {
@@ -53,6 +57,14 @@ export default function EditUserProfileScreen() {
       setEmailText(userProfile.email);
     }
   }, [userProfile]);
+
+  if (!userProfile) {
+    return (
+      <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ThemedText>Loading user profile...</ThemedText>
+      </SafeAreaView>
+    );
+  }
 
   // Memoized Save Function
   const saveProfile = useCallback(async () => {

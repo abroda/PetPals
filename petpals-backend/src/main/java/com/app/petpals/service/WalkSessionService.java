@@ -25,17 +25,17 @@ public class WalkSessionService {
         WalkSession session = new WalkSession();
         session.setUser(user);
         session.setStartTime(startTime);
-        session.setDistance(BigDecimal.valueOf(0.0));
+        session.setDistanceInMeters(0);
         session.setDogs(dogs);
         WalkSession savedSession = walkSessionRepository.save(session);
         return savedSession.getId();
     }
 
-    public void endWalk(String sessionId, LocalDateTime endTime, double totalDistance) {
+    public void endWalk(String sessionId, LocalDateTime endTime, int totalDistance) {
         WalkSession session = walkSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new RuntimeException("Session not found: " + sessionId));
         session.setEndTime(endTime);
-        session.setDistance(BigDecimal.valueOf(totalDistance));
+        session.setDistanceInMeters(totalDistance);
         walkSessionRepository.save(session);
     }
 

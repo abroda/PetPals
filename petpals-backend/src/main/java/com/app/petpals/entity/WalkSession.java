@@ -18,7 +18,7 @@ public class WalkSession {
     private String id;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private BigDecimal distance;
+    private Integer distanceInMeters;
 
     @ManyToMany
     @JoinTable(

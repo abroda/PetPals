@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -104,11 +105,14 @@ public class MQTTLocationService {
                 throw new IllegalArgumentException("One or more dog IDs are invalid or do not belong to the user");
             }
 
+            String groupWalkId = node.has("groupWalkId") ? node.get("groupWalkId").asText() : null;
+            // TODO: check if all dogs are signed up for this walk - later
+
             // Start a new walk session in the database
             String sessionId = walkSessionService.startWalk(userId, startTime, dogs);
 
             // Initialize metadata in Redis
-            redisLocationService.initWalk(userId, visibility, friends);
+            redisLocationService.initWalk(userId, visibility, friends, groupWalkId);
 
             System.out.println("Walk started for user: " + userId + ", session ID: " + sessionId);
         } catch (Exception e) {
@@ -129,7 +133,7 @@ public class MQTTLocationService {
             List<LocationResponse> locations = new ArrayList<>();
             if (locationsNode.isArray()) {
                 for (JsonNode locationNode : locationsNode) {
-                    LocationResponse location = parseLocation(userId, locationNode.asText());
+                    LocationResponse location = parseLocationNode(userId, locationNode);
                     locations.add(location);
                 }
             }
@@ -144,7 +148,7 @@ public class MQTTLocationService {
             String sessionId = session.getId();
 
             // Calculate total distance walked
-            double totalDistance = redisLocationService.calculateTotalDistance(locations);
+            int totalDistance = redisLocationService.calculateTotalDistance(locations);
 
             // Finalize the session in the database
             walkSessionService.endWalk(sessionId, endTime, totalDistance);
@@ -152,12 +156,22 @@ public class MQTTLocationService {
             // Notify nearby users to remove this user
             List<LocationResponse> nearbyUsers = redisLocationService.findNearbyUsersForUser(userId);
             for (LocationResponse nearbyUser : nearbyUsers) {
-                String updatedNearbyUsersJson = redisLocationService.updateNearbyUsersForRemoval(nearbyUser.getUserId(), userId);
-                publishUpdatedNearbyUsers(nearbyUser.getUserId(), updatedNearbyUsersJson);
+                if (!Objects.equals(nearbyUser.getUserId(), userId)){
+                    String updatedNearbyUsersJson = redisLocationService.updateNearbyUsersForRemoval(nearbyUser.getUserId(), userId);
+                    publishUpdatedNearbyUsers(nearbyUser.getUserId(), updatedNearbyUsersJson);
+                }
             }
 
+            String groupWalkId = node.has("groupWalkId") ? node.get("groupWalkId").asText() : null;
             // Clear Redis data for the user
-            redisLocationService.clearWalkData(userId);
+            redisLocationService.clearWalkData(userId, groupWalkId);
+            // TODO: update users location when they leave the walk for other participants
+            if (groupWalkId != null && !groupWalkId.isEmpty()) {
+                List<LocationResponse> groupWalkLocations = redisLocationService.findGroupWalkParticipantsLocations(groupWalkId);
+                for (LocationResponse groupWalkLocation : groupWalkLocations) {
+                    publishGroupWalkUsers(groupWalkLocation.getUserId(), groupWalkId, groupWalkLocations);
+                }
+            }
 
             System.out.println("Walk ended for user: " + userId + ", total distance: " + totalDistance + " km");
         } catch (Exception e) {
@@ -201,6 +215,23 @@ public class MQTTLocationService {
                 publishNearbyUsers(affectedUser, nearbyForAffectedUser);
             }
 
+            // TODO: get all locations of group walk participants (if groupWalkId != null)
+            var node = objectMapper.readTree(payload);
+            String groupWalkId = node.has("groupWalkId") ? node.get("groupWalkId").asText() : null;
+            if (groupWalkId != null && !groupWalkId.isEmpty()){
+                List<LocationResponse> groupWalkLocations = redisLocationService.findGroupWalkParticipantsLocations(groupWalkId);
+
+                // TODO: publish those locations to requesting user.
+//                publishGroupWalkUsers(userId, groupWalkId, groupWalkLocations);
+
+                // TODO: for each participant publish requesting users location.
+                for (LocationResponse groupWalkLocation : groupWalkLocations) {
+                    publishGroupWalkUsers(groupWalkLocation.getUserId(), groupWalkId, groupWalkLocations);
+                }
+            }
+
+            // TODO: /location/walk/walkId/userId
+
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Error handling location update: " + e.getMessage());
@@ -223,11 +254,42 @@ public class MQTTLocationService {
         }
     }
 
+    // Publish a list of nearby users to a specific user's topic
+    private void publishGroupWalkUsers(String userId, String groupWalkId, List<LocationResponse> groupWalkUsers) {
+        try {
+            // Convert the list of LocationResponse to JSON
+            String nearbyUsersJson = objectMapper.writeValueAsString(groupWalkUsers);
+
+            // Publish the JSON string to the user's topic
+            String topic = "location/walk/" + groupWalkId + "/" + userId;
+            mqttClient.publish(topic, new MqttMessage(nearbyUsersJson.getBytes()));
+            System.out.println("Published nearby users to topic: " + topic);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Failed to publish nearby users for userId " + userId);
+        }
+    }
+
     // Helper method to parse location from JSON payload
     private LocationResponse parseLocation(String userId, String payload) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         var node = objectMapper.readTree(payload);
 
+        if (!node.has("latitude") || !node.has("longitude") || !node.has("timestamp")) {
+            throw new IllegalArgumentException("Invalid payload: missing required fields (latitude, longitude, or timestamp)");
+        }
+
+        double latitude = node.get("latitude").asDouble();
+        double longitude = node.get("longitude").asDouble();
+        LocalDateTime timestamp = Instant.parse(node.get("timestamp").asText())
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+
+        return new LocationResponse(userId, latitude, longitude, timestamp);
+    }
+
+    // Helper method to parse location from JSON payload
+    private LocationResponse parseLocationNode(String userId, JsonNode node) throws JsonProcessingException {
         if (!node.has("latitude") || !node.has("longitude") || !node.has("timestamp")) {
             throw new IllegalArgumentException("Invalid payload: missing required fields (latitude, longitude, or timestamp)");
         }

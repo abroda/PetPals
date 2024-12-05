@@ -15,6 +15,7 @@ export type UserContextType = {
   responseMessage: string;
   userProfile?: UserProfile;
   getUserById: (id: string) => Promise<boolean>;
+  fetchUserById: (id: string) =>  Promise<UserProfile | null>;
   updateUser: (id: string, data: Partial<UserProfile>) => Promise<boolean>;
   changeUserAvatar: (id: string, file: File | Blob) => Promise<false | true>;
   searchUsers: (query: string) => Promise<UserProfile[]>;
@@ -36,6 +37,14 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [responseMessage, setResponseMessage] = useState("");
   const [userProfile, setUserProfile] = useState<UserProfile>();
   const { authToken, userId } = useAuth(); // Assuming useAuth provides authToken
+
+  useEffect(() => {
+    if (userId) {
+      getUserById(userId).catch((error) => {
+        console.error("Failed to fetch user profile:", error);
+      });
+    }
+  }, [userId]);
 
   const sendJsonQuery = async (
     path: string,
@@ -162,6 +171,37 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
       }
     );
   };
+
+
+  // Get a user by id and return this user data (similar to getUserById, but does not populate UserProfile)
+  const fetchUserById = async (id: string): Promise<UserProfile | null> => {
+    console.log(`Fetching user by ID: ${id}`);
+    let fetchedUser: UserProfile | null = null;
+
+    await sendJsonQuery(
+      apiPaths.users.getUserById(id),
+      "GET",
+      {},
+      (payload) => {
+        console.log("User data fetched successfully:", payload);
+        fetchedUser = {
+          id: payload.id,
+          email: payload.email,
+          username: payload.username,
+          description: payload.description,
+          imageUrl: payload.imageUrl,
+          visibility: payload.visibility,
+        };
+      },
+      (payload) => {
+        console.error("Failed to fetch user:", payload);
+        setResponseMessage("Failed to fetch user: " + payload.message);
+      }
+    );
+
+    return fetchedUser;
+  };
+
 
 
   // Update user data
@@ -311,6 +351,7 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
   };
 
 
+
   return (
     <UserContext.Provider
       value={{
@@ -318,6 +359,7 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
         responseMessage,
         userProfile,
         getUserById,
+        fetchUserById,
         updateUser,
         changeUserAvatar, // Add this line
         searchUsers,

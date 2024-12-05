@@ -1,9 +1,4 @@
-import {
-  DarkTheme,
-  DefaultTheme,
-  NavigationContainer,
-  ThemeProvider,
-} from "@react-navigation/native";
+import { DarkTheme, ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -14,25 +9,17 @@ import { useColorScheme } from "@/hooks/theme/useColorScheme";
 import { assetsFonts } from "@/constants/theme/TextStyles";
 import { AuthProvider } from "@/context/AuthContext";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
-import HomeLayout from "./home/_layout";
 import { PostProvider } from "@/context/PostContext";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { UserProvider } from "@/context/UserContext";
 import { Provider as PaperProvider } from "react-native-paper";
 import { DogProvider } from "@/context/DogContext";
-import { heightPercentageToDP } from "react-native-responsive-screen";
+import { FriendshipProvider } from "@/context/FriendshipContext";
 import { GroupWalksProvider } from "@/context/GroupWalksContext";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
 import { WalksProvider } from "@/context/WalksContext";
 
 SplashScreen.preventAutoHideAsync();
-
-// Colours
-const darkGreen = "#0A2421";
-const lightGreen = "#1C302A";
-const accentGreen = "#B4D779";
-const accentTeal = "#52B8A3";
-const cream = "#FAF7EA";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -61,34 +48,31 @@ export default function RootLayout() {
                 <DogProvider>
                   <GroupWalksProvider>
                     <WalksProvider>
-                      <Stack
-                        screenOptions={{
-                          headerShown: true,
-                          headerShadowVisible: false,
-                          headerTransparent: true,
-                          headerTintColor: textColor,
-                          headerStyle: { backgroundColor: backgroundColor },
-                          // headerTransparent: false, // Changed background color
-                          // headerStyle: {
-                          //     backgroundColor: lightGreen, // Changed background color
-                          // },
-                          // headerTintColor: cream, // Set icon and text color
-                          headerTitle: "",
-                          headerBackVisible: true,
-                          //headerBackTitleVisible: false,
-                          headerTitleStyle: {
-                            fontFamily: headerStyle.fontFamily,
-                            fontWeight: headerStyle.fontWeight,
-                            fontSize: headerStyle.fontSize,
-                          },
-                        }}
-                      >
-                        <Stack.Screen
-                          name="index"
-                          options={{ title: "PetPals" }}
-                        />
-                        <Stack.Screen name="+not-found" />
-                      </Stack>
+                      <FriendshipProvider>
+                        <Stack
+                          screenOptions={{
+                            headerShown: true,
+                            headerShadowVisible: false,
+                            headerTransparent: true,
+                            headerTintColor: textColor,
+                            headerStyle: { backgroundColor: backgroundColor },
+                            headerTitle: "",
+                            headerBackVisible: true,
+                            // headerBackTitleVisible: false,
+                            headerTitleStyle: {
+                              fontFamily: headerStyle.fontFamily,
+                              fontWeight: headerStyle.fontWeight,
+                              fontSize: headerStyle.fontSize,
+                            },
+                          }}
+                        >
+                          <Stack.Screen
+                            name="index"
+                            options={{ title: "PetPals" }}
+                          />
+                          <Stack.Screen name="+not-found" />
+                        </Stack>
+                      </FriendshipProvider>
                     </WalksProvider>
                   </GroupWalksProvider>
                 </DogProvider>

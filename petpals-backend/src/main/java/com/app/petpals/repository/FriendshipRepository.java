@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -23,4 +22,6 @@ public interface FriendshipRepository extends JpaRepository<Friendship, String> 
             "AND f.status = :status")
     List<String> findOtherUserIdsByUserIdAndStatus(@Param("userId") String userId,
                                                    @Param("status") FriendshipRequestStatus status);
+    // New method to fetch all requests for a user
+    List<Friendship> findAllBySenderIdOrReceiverId(String senderId, String receiverId);
 }
