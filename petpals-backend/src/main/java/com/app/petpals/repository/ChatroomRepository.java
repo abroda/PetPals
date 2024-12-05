@@ -1,6 +1,7 @@
 package com.app.petpals.repository;
 
 import com.app.petpals.entity.Chatroom;
+import com.app.petpals.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,4 +28,19 @@ public interface ChatroomRepository extends JpaRepository<Chatroom, String> {
             "GROUP BY c.id " +
             "HAVING COUNT(u.id) = :size")
     Optional<Chatroom> findChatroomWithExactUsers(@Param("userIds") List<String> userIds, @Param("size") long size);
+
+    @Query("SELECT c FROM Chatroom c JOIN c.users u WHERE u.id = :userId")
+    List<Chatroom> findChatroomsByUserId(@Param("userId") String userId);
+
+    // Alternatively, if you prefer using a User entity
+    @Query("SELECT c FROM Chatroom c JOIN c.users u WHERE u = :user")
+    List<Chatroom> findChatroomsByUser(@Param("user") User user);
+
+    @Query(
+            value = "SELECT DISTINCT c.* FROM chatroom c " +
+                    "JOIN chat_users cu ON c.id = cu.chat_id " +
+                    "WHERE cu.user_id = :userId",
+            nativeQuery = true
+    )
+    List<Chatroom> findChatroomsByUserIdNative(@Param("userId") String userId);
 }

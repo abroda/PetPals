@@ -6,6 +6,7 @@ import com.app.petpals.entity.User;
 import com.app.petpals.exception.chat.ChatroomDataException;
 import com.app.petpals.payload.chat.ChatMessageDTO;
 import com.app.petpals.payload.chat.ChatroomResponse;
+import com.app.petpals.payload.chat.MessageResponse;
 import com.app.petpals.repository.ChatMessageRepository;
 import com.app.petpals.repository.ChatroomRepository;
 import jakarta.transaction.Transactional;
@@ -13,10 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +30,7 @@ public class ChatroomService {
         if (userIds.size() <= 1) {
             throw new ChatroomDataException("Chatroom requires at least two participants.");
         }
-        Set<User> users = new HashSet<>();
+        List<User> users = new ArrayList<>();
         userIds.forEach(userId -> {
             User user = userService.getById(userId);
             users.add(user);
@@ -39,18 +38,51 @@ public class ChatroomService {
 
         Optional<Chatroom> chatroomOptional = chatroomRepository.findChatroomWithExactUsers(userIds, userIds.size());
         if (chatroomOptional.isPresent()) {
-            return ChatroomResponse.builder().chatroomId(chatroomOptional.get().getId()).build();
+            Chatroom chatroom = chatroomOptional.get();
+            ChatMessage chatMessage = chatMessageRepository.findLastMessageByChatroomId(chatroom.getId()).orElse(null);
+
+            return ChatroomResponse.builder()
+                    .chatroomId(chatroom.getId())
+                    .participants(chatroom.getUsers().stream().map(User::getId).collect(Collectors.toList()))
+                    .lastMessage(chatMessage != null ? MessageResponse.builder()
+                            .content(chatMessage.getContent())
+                            .sendAt(chatMessage.getSentAt())
+                            .senderId(chatMessage.getSender().getId())
+                            .build() : null)
+                    .build();
         } else {
             Chatroom chatroom = new Chatroom();
             chatroom.setCreatedAt(LocalDateTime.now());
 
             chatroom.setUsers(users);
             Chatroom savedChatroom = chatroomRepository.save(chatroom);
-//            savedChatroomusers.forEach(user -> {
-//                user.getChats().add(savedChatroom);
-//            });
-            return ChatroomResponse.builder().chatroomId(savedChatroom.getId()).build();
+            return ChatroomResponse.builder()
+                    .chatroomId(savedChatroom.getId())
+                    .participants(savedChatroom.getUsers().stream().map(User::getId).collect(Collectors.toList()))
+                    .lastMessage(null)
+                    .build();
         }
+    }
+
+    public List<ChatroomResponse> getAllChatroomsForUser(String userId) {
+        User user = userService.getById(userId);
+        List<Chatroom> chatrooms = chatroomRepository.findChatroomsByUser(user);
+
+        List<ChatroomResponse> chatroomResponses = new ArrayList<>();
+        chatrooms.forEach(chatroom -> {
+            ChatMessage chatMessage = chatMessageRepository.findLastMessageByChatroomId(chatroom.getId()).orElse(null);
+            chatroomResponses.add(ChatroomResponse.builder()
+                    .chatroomId(chatroom.getId())
+                    .participants(chatroom.getUsers().stream().map(User::getId).collect(Collectors.toList()))
+                    .lastMessage(chatMessage != null ? MessageResponse.builder()
+                            .content(chatMessage.getContent())
+                            .sendAt(chatMessage.getSentAt())
+                            .senderId(chatMessage.getSender().getId())
+                            .build() : null)
+                    .build());
+        });
+
+        return chatroomResponses;
     }
 
     public void saveMessage(ChatMessageDTO messageDTO) {

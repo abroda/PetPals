@@ -5,14 +5,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatroomResponse {
+public class ChatroomIdsResponse {
     private String chatroomId;
-    private List<String> participants;
-    private MessageResponse lastMessage;
 }

@@ -138,7 +138,7 @@ public class User implements UserDetails {
     private List<WalkSession> walks;
 
     @ManyToMany(mappedBy = "users") // Inverse side of the relationship
-    private Set<Chatroom> chats;
+    private List<Chatroom> chats;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
