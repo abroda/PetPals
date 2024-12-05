@@ -1,11 +1,13 @@
 package com.app.petpals.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "chat_message")
+@Data
 public class ChatMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

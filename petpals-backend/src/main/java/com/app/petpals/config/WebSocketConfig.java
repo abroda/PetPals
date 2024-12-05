@@ -24,6 +24,7 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+import java.security.Principal;
 import java.util.List;
 
 @Configuration
@@ -38,7 +39,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/user");
         registry.setApplicationDestinationPrefixes("/app");
-        registry.setUserDestinationPrefix("/user");
     }
 
     @Override
@@ -78,6 +78,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     if (authHeader == null || !jwtService.isTokenValid(token, userDetails)) {
                         throw new IllegalArgumentException("Invalid Authorization Token");
                     }
+
+                    accessor.setUser((Principal) userDetails);
                 }
                 return message;
             }
