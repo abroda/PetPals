@@ -1,7 +1,7 @@
 package com.app.petpals.controller;
 
 import com.app.petpals.entity.User;
-import com.app.petpals.payload.chat.ChatroomIdsResponse;
+import com.app.petpals.payload.TextResponse;
 import com.app.petpals.payload.chat.ChatroomResponse;
 import com.app.petpals.payload.chat.CreateChatroomRequest;
 import com.app.petpals.service.ChatroomService;
@@ -37,5 +37,11 @@ public class ChatroomController {
     public ResponseEntity<ChatroomResponse> createChatroom(@RequestBody CreateChatroomRequest request) {
         ChatroomResponse response = chatroomService.getOrCreateChatroom(request.getUserIds());
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{chatroomId}")
+    public ResponseEntity<TextResponse> deleteChatroom(@PathVariable("chatroomId") String chatroomId) {
+        chatroomService.deleteChatroom(chatroomId);
+        return ResponseEntity.ok(TextResponse.builder().message("Chatroom deleted successfully").build());
     }
 }

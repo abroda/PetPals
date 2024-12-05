@@ -14,4 +14,10 @@ public class ChatGlobalExceptionHandler {
         ChatErrorResponse error = new ChatErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage(), System.currentTimeMillis());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
+
+    @ExceptionHandler(ChatroomNotFoundException.class)
+    public ResponseEntity<ChatErrorResponse> handleChatroomNotFoundException(ChatroomNotFoundException e) {
+        ChatErrorResponse error = new ChatErrorResponse(HttpStatus.NOT_FOUND.value(), e.getMessage(), System.currentTimeMillis());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
 }

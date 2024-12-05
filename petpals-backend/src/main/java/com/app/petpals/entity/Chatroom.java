@@ -29,5 +29,5 @@ public class Chatroom {
 
     @JsonManagedReference
     @OneToMany(mappedBy = "chatroom", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ChatMessage> messages;
+    private List<ChatMessage> messages;
 }

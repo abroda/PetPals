@@ -4,6 +4,7 @@ import com.app.petpals.entity.ChatMessage;
 import com.app.petpals.entity.Chatroom;
 import com.app.petpals.entity.User;
 import com.app.petpals.exception.chat.ChatroomDataException;
+import com.app.petpals.exception.chat.ChatroomNotFoundException;
 import com.app.petpals.payload.chat.ChatMessageDTO;
 import com.app.petpals.payload.chat.ChatroomResponse;
 import com.app.petpals.payload.chat.MessageResponse;
@@ -83,6 +84,11 @@ public class ChatroomService {
         });
 
         return chatroomResponses;
+    }
+
+    public void deleteChatroom(String chatId){
+        Chatroom chatroom = chatroomRepository.findById(chatId).orElseThrow(() -> new ChatroomNotFoundException("Chatroom not found."));
+        chatroomRepository.delete(chatroom);
     }
 
     public void saveMessage(ChatMessageDTO messageDTO) {
