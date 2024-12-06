@@ -13,8 +13,17 @@ export interface Dog {
   weight?: number; // Weight in kg (optional)
 }
 
+export interface Tag {
+  id: string;
+  tag: string;
+  category: string;
+}
+
 interface DogContextProps {
   addDog: (userId: string, dogData: Partial<Dog>) => Promise<Dog | null>;
+  updateDogTags: (dogId: string, tagIds: string[]) => Promise<void>;
+  getAvailableTags: () => Promise<Tag[]>;
+  getTagById: (id: string) => Promise<Tag | null>;
   updateDogPicture: (dogId: string, formData: FormData) => Promise<void>;
   getDogsByUserId: (userId: string) => Promise<Dog[]>;
   getDogById: (id: string) => Promise<Dog | null>;
@@ -26,6 +35,7 @@ interface DogContextProps {
 
 const DogContext = createContext<DogContextProps | undefined>(undefined);
 
+
 export const useDog = () => {
   const context = useContext(DogContext);
   if (!context) {
@@ -34,11 +44,15 @@ export const useDog = () => {
   return context;
 };
 
+
 // @ts-ignore
 export const DogProvider: FC<{ children: ReactNode }> = ({ children }) => {
+
   const { authToken } = useAuth();
+
   const [responseMessage, setResponseMessage] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+
 
   // JSON request function with error handling
   const sendJsonQuery = async (
@@ -58,15 +72,14 @@ export const DogProvider: FC<{ children: ReactNode }> = ({ children }) => {
       headers,
       body: payload ? JSON.stringify(payload) : undefined,
     });
-
     setIsProcessing(false);
 
     if (!response.ok) {
       throw new Error(await response.text());
     }
-
     return response.json();
   };
+
 
   // File upload function for images
   const sendFileQuery = async (
@@ -86,7 +99,6 @@ export const DogProvider: FC<{ children: ReactNode }> = ({ children }) => {
       headers: { Authorization: `Bearer ${authToken}` },
       body: formData,
     });
-
     setIsProcessing(false);
 
     if (!response.ok) {
@@ -95,11 +107,11 @@ export const DogProvider: FC<{ children: ReactNode }> = ({ children }) => {
       onFailure({ message: errorText });
       return false;
     }
-
     const payload = await response.json();
     onSuccess(payload);
     return true;
   };
+
 
   // Add a new dog
   const addDog = async (
@@ -120,6 +132,34 @@ export const DogProvider: FC<{ children: ReactNode }> = ({ children }) => {
       return null;
     }
   };
+
+
+  // Get all Tags
+  const getAvailableTags = async (): Promise<Tag[]> => {
+    const response = await sendJsonQuery(apiPaths.dogs.getAllTags, "GET");
+    console.log("[DogContext] Get all available tags: ", response as Tag[])
+    return response as Tag[];
+  };
+
+  // Get a tag by its id
+  const getTagById = async (tagId: string): Promise<Tag | null> => {
+    try {
+      console.log("[DogContext] Fetching tag by ID:", tagId); // Add this logging
+      const response = await sendJsonQuery(apiPaths.dogs.getTagById(tagId), "GET");
+      return response as Tag;
+    } catch (error) {
+      console.error(`[DogContext] Failed to fetch tag by ID: ${tagId}`, error);
+      return null;
+    }
+  };
+
+
+  // Update Tags for a Dog
+  const updateDogTags = async (dogId: string, tagIds: string[]): Promise<void> => {
+    await sendJsonQuery(apiPaths.dogs.updateDogTags(dogId), "PUT", { tagIds });
+    setResponseMessage("Tags updated successfully!");
+  };
+
 
   // Update dog picture
   const updateDogPicture = async (dogId: string, formData: FormData) => {
@@ -155,20 +195,46 @@ export const DogProvider: FC<{ children: ReactNode }> = ({ children }) => {
     );
   };
 
+
   // Get dog by ID
   const getDogById = async (id: string): Promise<Dog | null> => {
     try {
       const response = await sendJsonQuery(apiPaths.dogs.getDogById(id), "GET");
-      return response as Dog;
+
+      // Explicitly map the API response to the Dog type
+      const dogResponse: Dog = {
+        id: response.id,
+        name: response.name,
+        description: response.description,
+        imageUrl: response.imageUrl || null,
+        tags: response.tags || [],
+        age: response.age, // Optional, only include if the API response contains it
+        breed: response.breed, // Optional, only include if the API response contains it
+        weight: response.weight, // Optional, only include if the API response contains it
+      };
+
+      console.log("[DogContext] Dog response: ", dogResponse);
+      return dogResponse;
     } catch (error) {
       console.error("[DogContext] Failed to fetch dog:", error);
       return null;
     }
   };
 
+
   const updateDog = async (id: string, data: Partial<Dog>) => {
-    return await sendJsonQuery(apiPaths.dogs.updateDog(id), "PUT", data);
+    console.log("[DogContext] updateDog got data: ", data);
+
+    // Extract and structure tags
+    const payload = {
+      ...data,
+      tagIds: data.tags, // Send tags as `tagIds` array
+    };
+
+    console.log("[DogContext] Sending updateDog payload: ", payload);
+    return await sendJsonQuery(apiPaths.dogs.updateDog(id), "PUT", payload);
   };
+
 
   // Delete a dog by ID
   const deleteDog = async (id: string): Promise<void> => {
@@ -194,6 +260,9 @@ export const DogProvider: FC<{ children: ReactNode }> = ({ children }) => {
     <DogContext.Provider
       value={{
         addDog,
+        updateDogTags,
+        getAvailableTags,
+        getTagById,
         updateDogPicture,
         getDogsByUserId,
         getDogById,

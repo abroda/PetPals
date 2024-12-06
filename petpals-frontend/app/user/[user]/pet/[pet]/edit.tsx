@@ -12,29 +12,33 @@ import {
   Pressable,
   Text,
   ScrollView,
+  TouchableOpacity, FlatList,
 } from "react-native";
-import { usePathname, router } from "expo-router";
-import { ThemedText } from "@/components/basic/ThemedText";
-import { ThemedView } from "@/components/basic/containers/ThemedView";
+import {usePathname, router} from "expo-router";
+import {ThemedText} from "@/components/basic/ThemedText";
+import {ThemedView} from "@/components/basic/containers/ThemedView";
 import HorizontalView from "@/components/basic/containers/HorizontalView";
-import { Dog, useDog } from "@/context/DogContext";
+import {Dog, Tag, useDog} from "@/context/DogContext";
 import * as ImagePicker from "expo-image-picker";
-import { Image } from "react-native-ui-lib";
+import {Image} from "react-native-ui-lib";
 import {
   heightPercentageToDP,
   widthPercentageToDP,
 } from "react-native-responsive-screen";
-import { useNavigation } from "expo-router";
+import {useNavigation} from "expo-router";
 
 // @ts-ignore
 import DogPlaceholderImage from "@/assets/images/dog_placeholder_theme-color-fair.png";
-import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
+import {useWindowDimension} from "@/hooks/theme/useWindowDimension";
 
-import { useColorScheme } from "@/hooks/theme/useColorScheme";
-import { ThemeColors } from "@/constants/theme/Colors";
-import { ThemedButton } from "@/components/inputs/ThemedButton";
+import {useColorScheme} from "@/hooks/theme/useColorScheme";
+import {ThemeColors} from "@/constants/theme/Colors";
+import {ThemedButton} from "@/components/inputs/ThemedButton";
+import TagSelector from "@/components/display/DogTagSelector";
+
 
 export default function EditDogProfileScreen() {
+
   const path = usePathname();
   const username = path.split("/")[2];
   const petId = path.split("/")[4];
@@ -42,7 +46,8 @@ export default function EditDogProfileScreen() {
   const percentToDP = useWindowDimension("shorter");
 
   const title = "Edit Dog";
-  const { getDogById, updateDog, updateDogPicture } = useDog();
+
+  const {getDogById, updateDog, updateDogPicture, getAvailableTags} = useDog();
 
   // Colours
   const colorScheme = useColorScheme();
@@ -51,33 +56,87 @@ export default function EditDogProfileScreen() {
 
   // State
   const [dog, setDog] = useState<Dog | null>(null);
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [newBreed, setNewBreed] = useState("Unknown Breed");
+  const [newAge, setNewAge] = useState(0);
+  const [newWeight, setNewWeight] = useState(0);
   const [tags, setTags] = useState<string[]>([]);
-  const [newTag, setNewTag] = useState("");
+
+  const [availableTags, setAvailableTags] = useState<Record<string, Tag[]>>({});
   const [imageUri, setImageUri] = useState<string | null>(null);
+
+  const [selectedTags, setSelectedTags] = useState<Record<string, string[]>>({});
+
 
   const fetchDogData = useCallback(async () => {
     try {
-      console.log("[Pet/Edit] Dog owner username: ", username);
-      console.log("[Pet/Edit] Fetching data for dog with id: ", petId);
       const dogData = await getDogById(petId);
       setDog(dogData);
       setName(dogData?.name ?? "");
       setDescription(dogData?.description ?? "");
-      setTags(dogData?.tags.map((tag) => tag.tag) ?? []);
+      setTags(dogData?.tags.map((tag) => tag.id) ?? []);
       setImageUri(dogData?.imageUrl ?? null);
-      console.log("[Pet/Edit] Dog data fetched: ", dogData);
-    } catch (error) {
-      console.error("[Pet/Edit] Failed to fetch dog data:", error);
-    }
-  }, []);
 
-  // Fetch the dog's data
-  // @ts-ignore
+      // Construct initialSelectedTags for DogTagSelector
+      const initialSelectedTags: Record<string, string[]> = {};
+      dogData?.tags.forEach((category) => {
+        if (category.tags) {
+          category.tags.forEach((tag) => {
+            if (!initialSelectedTags[category.category]) {
+              initialSelectedTags[category.category] = [];
+            }
+            initialSelectedTags[category.category].push(tag.id);
+          });
+        }
+      });
+      setSelectedTags(initialSelectedTags);
+      console.log("[EditDogProfileScreen] Initial Selected Tags: ", initialSelectedTags);
+    } catch (error) {
+      console.error("[EditDogScreen] Failed to fetch dog data:", error);
+    }
+  }, [petId]);
+
+  // const fetchDogData = useCallback(async () => {
+  //   try {
+  //     const dogData = await getDogById(petId);
+  //     setDog(dogData);
+  //     setName(dogData?.name ?? "");
+  //     setDescription(dogData?.description ?? "");
+  //     setTags(dogData?.tags.map((tag) => tag.id) ?? []);
+  //     setImageUri(dogData?.imageUrl ?? null);
+  //   } catch (error) {
+  //     console.error("[EditDogScreen] Failed to fetch dog data:", error);
+  //   }
+  // }, []);
+
+
+  const fetchTags = useCallback(async () => {
+    try {
+      const tagsByCategory = await getAvailableTags();
+      console.log("[EditDogScreen] Fetched Tags:", tagsByCategory);
+
+      // Restructure the data so each category directly contains the tags
+      const groupedTags = tagsByCategory.reduce(
+        (acc: Record<string, Tag[]>, categoryObj: { category: string; tags: Tag[] }) => {
+          acc[categoryObj.category] = categoryObj.tags; // Assign tags directly under the category
+          return acc;
+        },
+        {}
+      );
+      console.log("[EditDogScreen] Grouped Tags After Processing:", groupedTags);
+      setAvailableTags(groupedTags);
+    } catch (error) {
+      console.error("[EditDogScreen] Failed to fetch tags:", error);
+    }
+  }, [getAvailableTags]);
+
   useEffect(() => {
     fetchDogData();
+    fetchTags();
   }, [petId]);
+
 
   // Image Picker
   const handlePickImage = async () => {
@@ -95,11 +154,18 @@ export default function EditDogProfileScreen() {
   // Handle Save
   const handleSave = async () => {
     try {
+      // Flatten selectedTags into a single array of tag IDs
+      const tagIds = Object.values(selectedTags).flat();
+      console.log("[EditDog] Tags sent: ", tagIds);
+
       // Update the dog's information
       await updateDog(petId, {
         name: name,
         description: description,
-        tags: tags.map((t) => ({ id: t, tag: t })), // Ideally, convert tags to tag IDs if needed
+        breed: newBreed,
+        age: newAge,
+        weight: newWeight,
+        tags: tagIds, // Convert to tag objects
       });
 
       // Update the dog's image if a new one was picked
@@ -123,17 +189,30 @@ export default function EditDogProfileScreen() {
     }
   };
 
-  // Add New Tag
-  const handleAddTag = () => {
-    if (newTag.trim()) {
-      setTags([...tags, newTag.trim()]);
-      setNewTag("");
-    }
+  const handleTagToggle = (tagId: string, category: string, isMulti: boolean) => {
+    setTags((prevTags) => {
+      if (isMulti) {
+        // Multi-choice: Add or remove the tag
+        if (prevTags.includes(tagId)) {
+          return prevTags.filter((id) => id !== tagId);
+        } else {
+          return [...prevTags, tagId];
+        }
+      } else {
+        // Single-choice: Replace all tags of the same category
+        const tagsWithoutCategory = prevTags.filter(
+          (id) => !availableTags[category].some((tag) => tag.id === id)
+        );
+        return [...tagsWithoutCategory, tagId];
+      }
+    });
   };
+
+  const isTagSelected = (tagId: string) => tags.includes(tagId);
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerTitle: title,
+      headerTitle: "Edit Dog",
       headerStyle: {
         backgroundColor: themeColors.secondary,
       },
@@ -141,18 +220,24 @@ export default function EditDogProfileScreen() {
   }, []);
 
   return (
+
     <SafeAreaView
       style={{
         flex: 1,
+
       }}
     >
-      <ThemedView
-        style={{
-          flex: 1,
-        }}
-      >
-        <ScrollView>
-          {/* Dog Avatar Container */}
+      <ScrollView scrollEnabled={true} style={{
+        flexGrow: 1,
+        paddingBottom: percentToDP(5),
+      }}>
+        <ThemedView
+          style={{
+            flex: 1,
+          }}
+        >
+
+          {/* Background rectangle */}
           <View
             style={{
               height: heightPercentageToDP(30),
@@ -167,7 +252,8 @@ export default function EditDogProfileScreen() {
           <View
             style={{
               backgroundColor: themeColors.tertiary,
-              height: heightPercentageToDP(70),
+              paddingHorizontal: percentToDP(10),
+              paddingBottom: percentToDP(10),
             }}
           >
             {/* Change Dog Image */}
@@ -178,17 +264,18 @@ export default function EditDogProfileScreen() {
               }}
             >
               <Image
-                source={imageUri ? { uri: imageUri } : DogPlaceholderImage}
+                source={imageUri ? {uri: imageUri} : DogPlaceholderImage}
                 style={{
-                  width: widthPercentageToDP(70),
-                  height: widthPercentageToDP(70),
-                  marginTop: heightPercentageToDP(-15),
+                  width: widthPercentageToDP(80),
+                  height: widthPercentageToDP(80),
+                  marginTop: heightPercentageToDP(-20),
                   borderWidth: 1,
                   borderColor: themeColors.tertiary,
                 }}
                 onError={() => setImageUri(null)}
                 borderRadius={percentToDP(8)}
               />
+
               <ThemedText
                 style={{
                   textAlign: "center",
@@ -209,6 +296,7 @@ export default function EditDogProfileScreen() {
             <View
               style={{
                 marginHorizontal: "auto",
+                marginTop: percentToDP(2),
                 width: widthPercentageToDP(80),
                 justifyContent: "space-evenly",
                 alignContent: "space-evenly",
@@ -220,7 +308,7 @@ export default function EditDogProfileScreen() {
                 style={{
                   backgroundColor: "none",
                   color: themeColors.primary,
-                  fontSize: 14,
+                  fontSize: percentToDP(4),
                   fontWeight: "light",
                   marginBottom: heightPercentageToDP(-1),
                   marginLeft: heightPercentageToDP(3),
@@ -231,15 +319,15 @@ export default function EditDogProfileScreen() {
               </ThemedText>
               <TextInput
                 style={{
-                  paddingHorizontal: percentToDP(6),
-                  paddingVertical: percentToDP(2),
+                  paddingHorizontal: percentToDP(7),
+                  paddingVertical: percentToDP(3),
                   borderRadius: percentToDP(5),
                   borderWidth: 1,
                   borderColor: themeColors.secondary,
                   color: themeColors.textOnSecondary,
-                  fontSize: 14,
+                  fontSize: percentToDP(4),
                   letterSpacing: 0.5,
-                  marginBottom: heightPercentageToDP(1),
+                  marginBottom: heightPercentageToDP(2),
                 }}
                 value={name}
                 onChangeText={setName}
@@ -252,7 +340,7 @@ export default function EditDogProfileScreen() {
                 style={{
                   backgroundColor: "none",
                   color: themeColors.primary,
-                  fontSize: 14,
+                  fontSize: percentToDP(4),
                   fontWeight: "light",
                   marginBottom: heightPercentageToDP(-1),
                   marginLeft: heightPercentageToDP(3),
@@ -263,20 +351,21 @@ export default function EditDogProfileScreen() {
               </ThemedText>
               <TextInput
                 style={{
-                  paddingHorizontal: percentToDP(6),
-                  paddingVertical: percentToDP(2),
+                  paddingHorizontal: percentToDP(7),
+                  paddingVertical: percentToDP(3),
                   borderRadius: percentToDP(5),
                   borderWidth: 1,
                   borderColor: themeColors.secondary,
                   color: themeColors.textOnSecondary,
-                  fontSize: 14,
+                  fontSize: percentToDP(4),
                   letterSpacing: 0.5,
-                  marginBottom: heightPercentageToDP(1),
+                  marginBottom: heightPercentageToDP(2),
                 }}
                 value={description}
                 onChangeText={setDescription}
                 placeholder="Description"
                 placeholderTextColor="#AAA"
+                maxLength={200}
                 multiline
               />
 
@@ -285,69 +374,33 @@ export default function EditDogProfileScreen() {
                 style={{
                   backgroundColor: "none",
                   color: themeColors.primary,
-                  fontSize: 14,
+                  fontSize: percentToDP(4),
                   fontWeight: "light",
-                  marginBottom: heightPercentageToDP(-3),
+                  marginBottom: heightPercentageToDP(-1),
                   marginLeft: heightPercentageToDP(3),
                   zIndex: 2,
                 }}
               >
                 Tags
               </ThemedText>
-              <HorizontalView
-                justifyOption="flex-start"
-                style={{ flexWrap: "wrap", marginBottom: 15 }}
-              >
-                {tags.map((tag, index) => (
-                  <View
-                    key={index}
-                    style={{
-                      backgroundColor: themeColors.primary,
-                      paddingHorizontal: 10,
-                      paddingVertical: 2,
-                      borderRadius: 5,
-                      marginRight: 5,
-                      marginTop: 5,
-                    }}
-                  >
-                    <ThemedText>{tag}</ThemedText>
-                  </View>
-                ))}
-              </HorizontalView>
 
-              {/* Add New Tag */}
-              <TextInput
-                style={{
-                  paddingHorizontal: percentToDP(6),
-                  paddingVertical: percentToDP(2),
-                  borderRadius: percentToDP(6),
-                  borderWidth: 1,
-                  borderColor: themeColors.secondary,
-                  color: themeColors.textOnSecondary,
-                  fontSize: 16,
-                  letterSpacing: 0.5,
-                  marginBottom: heightPercentageToDP(1),
-                }}
-                value={newTag}
-                onChangeText={setNewTag}
-                placeholder="Add new tag"
-                placeholderTextColor="#AAA"
-              />
+              <View style={{
+                borderWidth: 1,
+                borderColor: themeColors.secondary,
+                borderRadius: percentToDP(5),
+                paddingVertical: percentToDP(5),
+                paddingHorizontal: percentToDP(2),
+                marginBottom: percentToDP(10),
+              }}>
+                <TagSelector
+                  availableTags={availableTags}
+                  selectedTags={selectedTags} // Pass initial selected tags
+                  onTagSelectionChange={setSelectedTags} // Capture tag selections
+                />
+              </View>
 
-              <ThemedButton
-                label="Add Tag"
-                onPress={handleAddTag}
-                color={themeColors.primary}
-                style={{
-                  width: widthPercentageToDP(80),
-                  backgroundColor: "transparent",
-                  paddingVertical: percentToDP(2),
-                  borderRadius: percentToDP(4),
-                  borderWidth: 1,
-                  borderColor: themeColors.primary,
-                  marginBottom: heightPercentageToDP(1),
-                }}
-              />
+
+
               <ThemedButton
                 label="Save"
                 onPress={handleSave}
@@ -364,8 +417,9 @@ export default function EditDogProfileScreen() {
               />
             </View>
           </View>
-        </ScrollView>
-      </ThemedView>
+
+        </ThemedView>
+      </ScrollView>
     </SafeAreaView>
   );
 }

@@ -18,8 +18,8 @@ export const TextStyleConstants = {
   tiny: 14,
   small: 16,
   medium: 18,
-  big: 20,
-  veryBig: 22,
+  big: 22,
+  veryBig: 28,
   // families
   default: "LeagueSpartan",
   logo: "JosefinSans",

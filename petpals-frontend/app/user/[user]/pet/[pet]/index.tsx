@@ -21,7 +21,7 @@ import UserAvatar from "@/components/navigation/UserAvatar";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import {usePathname, router, useNavigation} from "expo-router";
 import { Image } from "react-native-ui-lib";
-import { Dog, useDog } from "@/context/DogContext";
+import {Dog, Tag, useDog} from "@/context/DogContext";
 import { UserContext } from "@/context/UserContext";
 import { useColorScheme } from "@/hooks/theme/useColorScheme";
 import { ThemeColors } from "@/constants/theme/Colors";
@@ -40,20 +40,41 @@ import DogTag from "@/components/display/DogTag";
 
 
 export default function PetProfileScreen() {
+
   const path = usePathname();
   const username = path.split("/")[2];
   const petId = path.split("/").pop();
   const { userId } = useAuth();
   // @ts-ignore
+
   const { getUserById, userProfile, isProcessing } = useContext(UserContext);
+  const { getDogById, deleteDog, getAvailableTags, getTagById } = useDog();
 
   // States
-  const { getDogById, deleteDog } = useDog();
   const [dog, setDog] = useState<Dog | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [menuVisible, setMenuVisible] = useState(false);
   const [imageUri, setImageUri] = useState<string | null>(null);
   // const navigation = useNavigation();
+
+  const [flatListTags, setFlatListTags] = useState<Tag[]>([]);
+
+  useEffect(() => {
+    if (dog?.tags) {
+      const allTags: Tag[] = dog.tags.flatMap((category) => {
+        // Check if `tags` exists in the category and return them
+        return category.tags?.map((tag) => ({
+          id: tag.id,
+          tag: tag.tag,
+          category: category.category, // Include category if needed
+        })) || [];
+      });
+
+      console.log("[Dog/Index] Fetched Tags for FlatList:", allTags);
+      setFlatListTags(allTags);
+    }
+  }, [dog]);
+
 
   // Colours
   const colorScheme = useColorScheme();
@@ -69,16 +90,20 @@ export default function PetProfileScreen() {
     "puppy",
     "well-mannered",
   ];
-  const renderDogTag = ({ item }: { item: string }) => <DogTag tag={item} />;
+  // Display Dog Tags
+  const renderDogTag = ({ item }: { item: Tag }) => (
+    <DogTag id={item.id} tag={item.tag} category={item.category} />
+  );
 
   // Functions
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToPD = useWindowDimension("height");
 
+
   const fetchDogData = useCallback(async () => {
     try {
       const dogData = await getDogById(petId ?? "");
-      setDog(dogData ?? null);
+      setDog(dogData); // `tags` are already included in the dogData response
       setImageUri(dogData?.imageUrl ?? null);
       console.log("[Pet/Index] Dog was fetched: ", dogData);
     } catch (error) {
@@ -126,6 +151,7 @@ export default function PetProfileScreen() {
     });
   }, [navigation, username, dog, menuVisible]);
 
+
   const handleMenuSelect = (option: string) => {
     setMenuVisible(false);
     if (option === "Edit") {
@@ -134,6 +160,7 @@ export default function PetProfileScreen() {
       handleDeleteDog();
     }
   };
+
 
   const handleDeleteDog = async () => {
     Alert.alert(
@@ -183,6 +210,8 @@ export default function PetProfileScreen() {
     );
   }
 
+
+
   // @ts-ignore
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -209,16 +238,17 @@ export default function PetProfileScreen() {
             style={{
               backgroundColor: themeColors.tertiary,
               width: widthPercentageToDP(100),
+              paddingBottom: percentToDP(10),
             }}
           >
             {/* Dog Image with Placeholder on Error */}
             <Image
               source={imageUri ? { uri: imageUri } : DogPlaceholderImage}
               style={{
-                width: widthPercentageToDP(70),
-                height: widthPercentageToDP(70),
+                width: widthPercentageToDP(80),
+                height: widthPercentageToDP(80),
                 alignSelf: "center",
-                marginTop: heightPercentToPD(-15),
+                marginTop: percentToDP(-35),
                 borderWidth: 1,
                 borderColor: themeColors.tertiary,
               }}
@@ -229,17 +259,15 @@ export default function PetProfileScreen() {
             <View
               style={{
                 alignItems: "center",
-                backgroundColor: "transparent",
               }}
             >
+
+              {/* Name */}
               <ThemedText
+                textColorName={"textOnSecondary"}
+                textStyleOptions={{size: 'veryBig', weight: 'bold'}}
                 style={{
                   textAlign: "center",
-                  fontSize: 34,
-                  lineHeight: 36,
-                  letterSpacing: 1,
-                  fontWeight: "bold",
-                  color: themeColors.textOnSecondary,
                   marginTop: heightPercentToPD(2),
                   marginBottom: heightPercentToPD(1),
                 }}
@@ -247,39 +275,65 @@ export default function PetProfileScreen() {
                 {dog.name}
               </ThemedText>
 
+
+              {/* Breed */}
               <ThemedText
+                textColorName={"placeholderText"}
+                textStyleOptions={{size: "tiny", weight: 'light'}}
                 style={{
-                  color: "grey",
-                  fontSize: 14,
                   fontStyle: "italic",
                   marginBottom: heightPercentToPD(2),
                 }}
               >
-                Dog Breed Placeholder
+                {dog.breed ? dog.breed : "Unknown Breed"}
               </ThemedText>
 
-              <FlatList
-                data={dogTags}
-                horizontal
-                scrollEnabled={true}
-                style={{
-                  width: widthPercentageToDP(80),
-                }}
-                showsHorizontalScrollIndicator={false}
-                renderItem={renderDogTag}
-                contentContainerStyle={{
-                  flexDirection: "row",
-                  backgroundColor: "transparent",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              />
+
+              {/* Dog Tags */}
+              {flatListTags?.length ? (
+                <FlatList
+                  data={flatListTags}
+                  keyExtractor={(item) => item.id}
+                  renderItem={renderDogTag}
+                  horizontal={true}
+                  scrollEnabled={true}
+                  showsHorizontalScrollIndicator={false}
+                  style={{
+                    width: widthPercentageToDP(80),
+                  }}
+                  contentContainerStyle={{
+                    flexDirection: "row",
+                    backgroundColor: 'transparent',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    flexWrap: "wrap",
+                  }}
+                />
+              ) : (
+                <ThemedText
+                  textColorName={"tertiary"}
+                  textStyleOptions={{size: "tiny"}}
+                  style={{
+                    backgroundColor: themeColors.primary,
+                    borderRadius: widthPercentageToDP(5), // Strongly rounded rectangle
+                    paddingVertical: widthPercentageToDP(1),
+                    paddingHorizontal: widthPercentageToDP(1.8),
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: widthPercentageToDP(0.7),
+                    fontWeight: 'bold',
+                  }}
+                >
+                  No tags yet
+                </ThemedText>
+              )}
+
 
               {/* Separator */}
               <View
                 style={{
                   backgroundColor: themeColors.secondary,
-                  height: heightPercentToPD(0.5),
+                  height: heightPercentToPD(0.6),
                   width: widthPercentageToDP(80),
                   marginTop: heightPercentToPD(2),
                   marginBottom: heightPercentToPD(5),
@@ -288,11 +342,11 @@ export default function PetProfileScreen() {
 
               {/* Dog Description */}
               <ThemedText
+                textStyleOptions={{size: "medium"}}
+                textColorName={"textOnSecondary"}
                 style={{
                   backgroundColor: "transparent",
                   textAlign: "center",
-                  fontSize: 15,
-                  color: themeColors.textOnSecondary,
                   paddingHorizontal: widthPercentageToDP(10),
                 }}
               >
@@ -304,7 +358,7 @@ export default function PetProfileScreen() {
                 style={{
                   alignSelf: "center",
                   backgroundColor: themeColors.secondary,
-                  height: heightPercentToPD(0.5),
+                  height: heightPercentToPD(0.6),
                   width: widthPercentageToDP(80),
                   marginTop: heightPercentToPD(5),
                   marginBottom: heightPercentToPD(2),
@@ -312,73 +366,84 @@ export default function PetProfileScreen() {
               />
             </View>
 
+            {/* Horizontal box for weight and age */}
             <View
               style={{
                 flexDirection: "row",
-                width: widthPercentageToDP(50),
-                marginHorizontal: "auto",
+                width: widthPercentageToDP(80),
+                marginHorizontal: 'auto',
                 alignContent: "center",
-                marginBottom: heightPercentToPD(5),
-              }}
-            >
-              <ThemedText
-                style={{
-                  width: widthPercentageToDP(70),
-                  textAlign: "center",
-                  fontWeight: "bold",
-                  fontSize: 15,
-                  color: themeColors.textOnSecondary,
-                }}
-              >
-                Weight
-              </ThemedText>
+                justifyContent:'center',
+              }}>
 
-              <ThemedText
-                style={{
-                  width: widthPercentageToDP(70),
+              {/* Weight */}
+              <View style={{
+                flexDirection: 'column',
+                marginHorizontal: 'auto',
+                padding: percentToDP(2),
+              }}>
+                {dog.weight && dog.weight != 0 ? (
+                  <ThemedText
+                    textStyleOptions={{size: "veryBig", weight: "bold"}}
+                    style={{
+                      textAlign: "center",
+                    }}>
+                    {dog.weight}
+                  </ThemedText>) : (
+
+                  <ThemedText
+                    textStyleOptions={{size: "veryBig", weight: "bold"}}
+                    style={{
+                      textAlign: "center",
+                    }}>
+                  -
+                  </ThemedText>)
+                }
+
+                <ThemedText style={{
                   textAlign: "center",
-                  fontWeight: "bold",
-                  fontSize: 15,
-                  color: themeColors.textOnSecondary,
-                }}
-              >
-                Age
-              </ThemedText>
+                }}>
+                  kg of weight
+                </ThemedText>
+              </View>
+
+              {/* Age */}
+              <View style={{
+                flexDirection: 'column',
+                marginHorizontal: 'auto',
+                padding: percentToDP(2),
+              }}>
+                {dog.age && dog.age != 0 ? (
+                  <ThemedText
+                    textColorName={"textOnSecondary"}
+                    textStyleOptions={{size: "veryBig", weight: "bold"}}
+                    style={{
+                      textAlign: "center",
+                    }}>
+                    {dog.age}
+                  </ThemedText>) : (
+                  <ThemedText textStyleOptions={{size: "veryBig", weight: "bold"}}
+                    style={{
+                      textAlign: "center",
+                  }}>
+                    -
+                  </ThemedText>
+                )}
+                <ThemedText style={{
+
+                  textAlign: "center",
+                }}>
+                  years old
+                </ThemedText>
+              </View>
+
             </View>
 
-            <View
-              style={{
-                flexDirection: "row",
-                width: widthPercentageToDP(50),
-                marginHorizontal: "auto",
-                alignContent: "center",
-              }}
-            >
-              <ThemedText
-                style={{
-                  width: widthPercentageToDP(70),
-                  textAlign: "center",
-                  fontWeight: "bold",
-                  fontSize: 15,
-                  color: themeColors.textOnSecondary,
-                }}
-              >
-                Owner:
-              </ThemedText>
-              <ThemedText
-                style={{
-                  width: widthPercentageToDP(70),
-                  textAlign: "center",
-                  fontSize: 15,
-                  color: "gray",
-                }}
-              >
-                {username}
-              </ThemedText>
-            </View>
           </View>
         </ScrollView>
       </ThemedView>
+
+
 
       {/* Dropdown Menu */}
       {menuVisible && (
