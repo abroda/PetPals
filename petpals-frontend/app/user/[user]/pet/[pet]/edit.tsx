@@ -59,9 +59,9 @@ export default function EditDogProfileScreen() {
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [newBreed, setNewBreed] = useState("Unknown Breed");
-  const [newAge, setNewAge] = useState(0);
-  const [newWeight, setNewWeight] = useState(0);
+  const [newBreed, setNewBreed] = useState("");
+  const [newAge, setNewAge] = useState("");
+  const [newWeight, setNewWeight] = useState("");
   const [tags, setTags] = useState<string[]>([]);
 
   const [availableTags, setAvailableTags] = useState<Record<string, Tag[]>>({});
@@ -163,8 +163,8 @@ export default function EditDogProfileScreen() {
         name: name,
         description: description,
         breed: newBreed,
-        age: newAge,
-        weight: newWeight,
+        age: Number(newAge),
+        weight: Number(newWeight),
         tags: tagIds, // Convert to tag objects
       });
 
@@ -330,6 +330,7 @@ export default function EditDogProfileScreen() {
                   marginBottom: heightPercentageToDP(2),
                 }}
                 value={name}
+                maxLength={48}
                 onChangeText={setName}
                 placeholder="Dog's Name"
                 placeholderTextColor="#AAA"
@@ -367,6 +368,105 @@ export default function EditDogProfileScreen() {
                 placeholderTextColor="#AAA"
                 maxLength={200}
                 multiline
+              />
+
+              {/* Breed */}
+              <ThemedText
+                style={{
+                  backgroundColor: "none",
+                  color: themeColors.primary,
+                  fontSize: percentToDP(4),
+                  fontWeight: "light",
+                  marginBottom: heightPercentageToDP(-1),
+                  marginLeft: heightPercentageToDP(3),
+                  zIndex: 2,
+                }}
+              >
+                Breed
+              </ThemedText>
+              <TextInput
+                style={{
+                  paddingHorizontal: percentToDP(7),
+                  paddingVertical: percentToDP(3),
+                  borderRadius: percentToDP(5),
+                  borderWidth: 1,
+                  borderColor: themeColors.secondary,
+                  color: themeColors.textOnSecondary,
+                  fontSize: percentToDP(4),
+                  letterSpacing: 0.5,
+                  marginBottom: heightPercentageToDP(2),
+                }}
+                value={newBreed}
+                maxLength={48}
+                onChangeText={setNewBreed}
+                placeholder="Dog's Breed"
+                placeholderTextColor="#AAA"
+              />
+
+              {/* Age */}
+              <ThemedText
+                style={{
+                  backgroundColor: "none",
+                  color: themeColors.primary,
+                  fontSize: percentToDP(4),
+                  fontWeight: "light",
+                  marginBottom: heightPercentageToDP(-1),
+                  marginLeft: heightPercentageToDP(3),
+                  zIndex: 2,
+                }}
+              >
+                Age
+              </ThemedText>
+              <TextInput
+                keyboardType={"numeric"}
+                style={{
+                  paddingHorizontal: percentToDP(7),
+                  paddingVertical: percentToDP(3),
+                  borderRadius: percentToDP(5),
+                  borderWidth: 1,
+                  borderColor: themeColors.secondary,
+                  color: themeColors.textOnSecondary,
+                  fontSize: percentToDP(4),
+                  letterSpacing: 0.5,
+                  marginBottom: heightPercentageToDP(2),
+                }}
+                value={newAge}
+                onChangeText={setNewAge}
+                placeholder="Dog's Age (in years)"
+                placeholderTextColor="#AAA"
+              />
+
+              {/* Weight */}
+              <ThemedText
+                style={{
+                  backgroundColor: "none",
+                  color: themeColors.primary,
+                  fontSize: percentToDP(4),
+                  fontWeight: "light",
+                  marginBottom: heightPercentageToDP(-1),
+                  marginLeft: heightPercentageToDP(3),
+                  zIndex: 2,
+                }}
+              >
+                Weight
+              </ThemedText>
+              <TextInput
+                keyboardType={"numeric"}
+                style={{
+                  paddingHorizontal: percentToDP(7),
+                  paddingVertical: percentToDP(3),
+                  borderRadius: percentToDP(5),
+                  borderWidth: 1,
+                  borderColor: themeColors.secondary,
+                  color: themeColors.textOnSecondary,
+                  fontSize: percentToDP(4),
+                  letterSpacing: 0.5,
+                  marginBottom: heightPercentageToDP(2),
+                }}
+                value={newWeight}
+                onChangeText={setNewWeight}
+                placeholder="Dog's Weight (in kg)"
+                placeholderTextColor="#AAA"
               />
 
               {/* Tags */}
