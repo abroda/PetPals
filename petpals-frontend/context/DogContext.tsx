@@ -199,6 +199,7 @@ export const DogProvider: FC<{ children: ReactNode }> = ({ children }) => {
   // Get dog by ID
   const getDogById = async (id: string): Promise<Dog | null> => {
     try {
+      console.log("[DogContext] getDogById: ", id);
       const response = await sendJsonQuery(apiPaths.dogs.getDogById(id), "GET");
 
       // Explicitly map the API response to the Dog type
@@ -213,7 +214,7 @@ export const DogProvider: FC<{ children: ReactNode }> = ({ children }) => {
         weight: response.weight, // Optional, only include if the API response contains it
       };
 
-      console.log("[DogContext] Dog response: ", dogResponse);
+      console.log("[DogContext] Got dog data: ", dogResponse.name);
       return dogResponse;
     } catch (error) {
       console.error("[DogContext] Failed to fetch dog:", error);
@@ -242,10 +243,11 @@ export const DogProvider: FC<{ children: ReactNode }> = ({ children }) => {
       await sendJsonQuery(apiPaths.dogs.deleteDog(id), "DELETE");
       setResponseMessage("[DogContext] Dog deleted successfully!");
     } catch (error) {
-      console.error("[DogContext] Failed to delete dog:", error);
+      //console.error("[DogContext] Failed to delete dog:", error);
       setResponseMessage("[DogContext] Failed to delete dog");
     }
   };
+
 
   const getDogsByUserId = async (userId: string): Promise<Dog[]> => {
     const response = await fetch(apiPaths.users.getDogsByUserId(userId), {

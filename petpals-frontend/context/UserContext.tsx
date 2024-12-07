@@ -41,7 +41,7 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
   useEffect(() => {
     if (userId) {
       getUserById(userId).catch((error) => {
-        console.error("Failed to fetch user profile:", error);
+        console.error("[UserContext] Failed to fetch user profile:", error);
       });
     }
   }, [userId]);
@@ -92,7 +92,7 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
     return fetch(path, options)
       .then((response: Response) => {
-        console.log("Raw response received:", response);
+        //console.log("Raw response received:", response);
 
         // Check if there is content to parse
         if (!response.ok) {
@@ -137,14 +137,14 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   // Fetch user data by ID
   const getUserById = async (id: string) => {
-    console.log(`Fetching user by ID: ${id}`);
+    console.log(`[UserContext] getUserById: ${id}`);
 
     return sendJsonQuery(
       apiPaths.users.getUserById(id),
       "GET",
       {},
       (payload) => {
-        console.log("User data fetched successfully:", payload);
+        console.log("[UserContext] getUserById | fetched successfully:", payload.username, payload.email,)
         setUserProfile({
           id: payload.id,
           email: payload.email,
@@ -153,21 +153,21 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
           imageUrl: payload.imageUrl,
           visibility: payload.visibility,
         });
-        setResponseMessage("User data fetched successfully!");
-        console.log(
-          "Fetched data:\nid -- ",
-          payload.id,
-          " | email -- ",
-          payload.email,
-          " | username -- ",
-          payload.username,
-          "imgaeUrl -- ",
-          payload.imageUrl
-        );
+        setResponseMessage("[UserContext] User data fetched successfully!");
+        // console.log(
+        //   "Fetched data:\nid -- ",
+        //   payload.id,
+        //   " | email -- ",
+        //   payload.email,
+        //   " | username -- ",
+        //   payload.username,
+        //   "imgaeUrl -- ",
+        //   payload.imageUrl
+        // );
       },
       (payload) => {
-        console.error("Failed to fetch user:", payload);
-        setResponseMessage("Failed to fetch user: " + payload.message);
+        console.error("[UserContext] Failed to fetch user:", payload);
+        setResponseMessage("[UserContext] Failed to fetch user: " + payload.message);
       }
     );
   };
@@ -175,7 +175,7 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   // Get a user by id and return this user data (similar to getUserById, but does not populate UserProfile)
   const fetchUserById = async (id: string): Promise<UserProfile | null> => {
-    console.log(`Fetching user by ID: ${id}`);
+    console.log(`[UserContext] fetchUserById: ${id}`);
     let fetchedUser: UserProfile | null = null;
 
     await sendJsonQuery(
@@ -183,7 +183,7 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
       "GET",
       {},
       (payload) => {
-        console.log("User data fetched successfully:", payload);
+        console.log("[UserContext] fetchUserById | fetched successfully:", payload.username);
         fetchedUser = {
           id: payload.id,
           email: payload.email,
@@ -194,8 +194,8 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
         };
       },
       (payload) => {
-        console.error("Failed to fetch user:", payload);
-        setResponseMessage("Failed to fetch user: " + payload.message);
+        console.error("[UserContext] Failed to fetch user:", payload);
+        setResponseMessage("[UserContext] Failed to fetch user: " + payload.message);
       }
     );
 

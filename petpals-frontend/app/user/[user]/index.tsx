@@ -33,7 +33,7 @@ export default function UserProfileScreen() {
   // Contexts
   const path = usePathname();
   const router = useRouter();
-  const { addDog, getDogsByUserId } = useDog();
+  const { addDog, getDogsByUserId, deleteDog } = useDog();
   const { logout, userId: loggedInUserId } = useAuth();
   const { fetchUserById, userProfile } = useUser();
   const navigation = useNavigation();
@@ -231,57 +231,89 @@ export default function UserProfileScreen() {
     }
   };
 
-  const renderDogItem = ({ item }: { item: any }) => (
-    <View
-      style={{
-        marginRight: 8,
-        paddingVertical: 10,
-      }}
-    >
-      <View
-        style={{
-          width: widthPercentageToDP(42),
-          height: widthPercentageToDP(70),
-          backgroundColor: themeColors.tertiary,
-          padding: widthPercentageToDP(4),
-          borderRadius: 10,
-          alignItems: "center",
-        }}
-      >
-        <PetAvatar
-          size={35}
-          source={item.imageUrl}
-          userId={userProfile?.username ?? ""}
-          petId={item.id}
-          doLink={true}
-        />
-        <ThemedText
+
+
+  const renderDogItem = ({ item }: { item: Dog }) => {
+    const handleDeleteDog = () => {
+      Alert.alert(
+        "Delete Dog",
+        "Are you sure you want to delete this dog?",
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "Yes",
+            onPress: async () => {
+              try {
+                await deleteDog(item.id); // Call the context function
+                Alert.alert("Success", "Dog was successfully deleted.");
+                fetchDogs(); // Refresh the dog list after deletion
+              } catch (error) {
+                Alert.alert("Error", "Failed to delete the dog.");
+              }
+            },
+          },
+        ],
+        { cancelable: true }
+      );
+    };
+
+    return (
+      <Pressable onLongPress={isOwnProfile ? handleDeleteDog : undefined}>
+        <View
           style={{
-            fontSize: 22,
-            lineHeight: 24,
-            color: themeColors.textOnSecondary,
-            fontWeight: "bold",
-            marginVertical: heightPercentToPD(2),
+            marginRight: 8,
+            paddingVertical: 10,
           }}
         >
-          {item.name}
-        </ThemedText>
-        <ThemedText
-          numberOfLines={2}
-          ellipsizeMode="tail"
-          style={{
-            fontSize: 14,
-            lineHeight: 18,
-            color: themeColors.textOnSecondary,
-            fontWeight: "regular",
-            marginBottom: heightPercentToPD(2),
-          }}
-        >
-          {item.description}
-        </ThemedText>
-      </View>
-    </View>
-  );
+          <View
+            style={{
+              width: widthPercentageToDP(42),
+              height: widthPercentageToDP(70),
+              backgroundColor: themeColors.tertiary,
+              padding: widthPercentageToDP(4),
+              borderRadius: 10,
+              alignItems: "center",
+            }}
+          >
+            <PetAvatar
+              size={35}
+              source={item.imageUrl}
+              userId={username}
+              petId={item.id}
+              doLink={true}
+            />
+            <ThemedText
+              style={{
+                fontSize: 22,
+                lineHeight: 24,
+                color: themeColors.textOnSecondary,
+                fontWeight: "bold",
+                marginVertical: heightPercentToPD(2),
+              }}
+            >
+              {item.name}
+            </ThemedText>
+            <ThemedText
+              numberOfLines={2}
+              ellipsizeMode="tail"
+              style={{
+                fontSize: 14,
+                lineHeight: 18,
+                color: themeColors.textOnSecondary,
+                fontWeight: "regular",
+                marginBottom: heightPercentToPD(2),
+              }}
+            >
+              {item.description}
+            </ThemedText>
+          </View>
+        </View>
+      </Pressable>
+    );
+  };
 
   const ListHeaderComponent = () => (
     <ThemedView
@@ -563,7 +595,7 @@ export default function UserProfileScreen() {
             position: "absolute",
             zIndex: 100,
             elevation: 100,
-            top: heightPercentToPD(10),
+            top: percentToDP(30),
             right: widthPercentageToDP(4),
             width: widthPercentageToDP(50),
             backgroundColor: themeColors.tertiary,

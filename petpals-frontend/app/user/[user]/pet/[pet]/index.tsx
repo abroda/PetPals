@@ -22,7 +22,6 @@ import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import {usePathname, router, useNavigation} from "expo-router";
 import { Image } from "react-native-ui-lib";
 import {Dog, Tag, useDog} from "@/context/DogContext";
-import { UserContext } from "@/context/UserContext";
 import { useColorScheme } from "@/hooks/theme/useColorScheme";
 import { ThemeColors } from "@/constants/theme/Colors";
 
@@ -47,7 +46,6 @@ export default function PetProfileScreen() {
   const { userId } = useAuth();
   // @ts-ignore
 
-  const { getUserById, userProfile, isProcessing } = useContext(UserContext);
   const { getDogById, deleteDog, getAvailableTags, getTagById } = useDog();
 
   // States
@@ -58,6 +56,27 @@ export default function PetProfileScreen() {
   // const navigation = useNavigation();
 
   const [flatListTags, setFlatListTags] = useState<Tag[]>([]);
+
+  const fetchDogData = useCallback(async () => {
+    try {
+      console.log("[Pet/Index] getDogById: ", petId)
+
+      const dogData = await getDogById(petId ?? "");
+      setDog(dogData);
+      setImageUri(dogData?.imageUrl ?? null);
+
+      console.log("[Pet/Index] Dog was fetched: ", dogData);
+    } catch (error) {
+      console.error("Failed to fetch dog data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Get dog data
+  useEffect(() => {
+    fetchDogData();
+  }, [petId]);
 
   useEffect(() => {
     if (dog?.tags) {
@@ -100,23 +119,7 @@ export default function PetProfileScreen() {
   const heightPercentToPD = useWindowDimension("height");
 
 
-  const fetchDogData = useCallback(async () => {
-    try {
-      const dogData = await getDogById(petId ?? "");
-      setDog(dogData); // `tags` are already included in the dogData response
-      setImageUri(dogData?.imageUrl ?? null);
-      console.log("[Pet/Index] Dog was fetched: ", dogData);
-    } catch (error) {
-      console.error("Failed to fetch dog data:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
 
-  // Get dog data
-  useEffect(() => {
-    fetchDogData();
-  }, [petId]);
 
 
   useLayoutEffect(() => {

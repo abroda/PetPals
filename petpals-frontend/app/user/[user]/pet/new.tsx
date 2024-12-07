@@ -9,9 +9,9 @@ import {
   View,
   Pressable,
 } from "react-native";
-import { useDog } from "@/context/DogContext";
+import {Dog, Tag, useDog} from "@/context/DogContext";
 import { useAuth } from "@/hooks/useAuth";
-import React, { useLayoutEffect, useState } from "react";
+import React, {useCallback, useEffect, useLayoutEffect, useState} from "react";
 import * as ImagePicker from "expo-image-picker";
 import {router, useNavigation, useRouter} from "expo-router";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
@@ -28,23 +28,30 @@ import {
 // );
 // @ts-ignore
 import DogPlaceholderImage from "@/assets/images/dog_placeholder_theme-color-fair.png";
+import TagSelector from "@/components/display/DogTagSelector";
 
 
 
 export default function NewPetScreen() {
-  // @ts-ignore
-  const { addDog, updateDogPicture } = useDog();
   const { userId } = useAuth();
   const router = useRouter();
 
+  const {addDog, getDogById, updateDog, updateDogPicture, getAvailableTags} = useDog();
+
   // Dog Info
+  const [dog, setDog] = useState<Dog | null>(null);
+
   const [dogName, setDogName] = useState("");
   const [dogDescription, setDogDescription] = useState("");
-  const [dogTags, setDogTags] = useState("");
-  const [image, setImage] = useState<string | null>(null);
-  const [breed, setBreed] = useState("");
-  const [weight, setWeight] = useState("");
-  const [age, setAge] = useState("");
+  const [imageUri, setImageUri] = useState<string | null>(null);
+
+  const [newBreed, setNewBreed] = useState("");
+  const [newAge, setNewAge] = useState("");
+  const [newWeight, setNewWeight] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+
+  const [availableTags, setAvailableTags] = useState<Record<string, Tag[]>>({});
+  const [selectedTags, setSelectedTags] = useState<Record<string, string[]>>({});
 
   const [isSaving, setIsSaving] = useState(false); // Track saving state
 
@@ -57,17 +64,33 @@ export default function NewPetScreen() {
   // @ts-ignore
   const themeColors = ThemeColors[colorScheme];
 
+  const fetchTags = useCallback(async () => {
+    try {
+      const tagsByCategory = await getAvailableTags();
+      console.log("[EditDogScreen] Fetched Tags:", tagsByCategory);
 
-  // PROBLEM
-  // const navigation = useNavigation();
-  // useLayoutEffect(() => {
-  //   navigation.setOptions({
-  //     headerTitle: "Create new dog",
-  //     headerStyle: {
-  //       backgroundColor: themeColors.secondary,
-  //     },
-  //   });
-  // }, [navigation]);
+      // Restructure the data so each category directly contains the tags
+      const groupedTags = tagsByCategory.reduce(
+        // @ts-ignore
+        (acc: Record<string, Tag[]>, categoryObj: { category: string; tags: Tag[] }) => {
+          acc[categoryObj.category] = categoryObj.tags; // Assign tags directly under the category
+          return acc;
+        },
+        {}
+      );
+      console.log("[EditDogScreen] Grouped Tags After Processing:", groupedTags);
+      // @ts-ignore
+      setAvailableTags(groupedTags);
+    } catch (error) {
+      console.error("[EditDogScreen] Failed to fetch tags:", error);
+    }
+  }, [getAvailableTags]);
+
+  useEffect(() => {
+    fetchTags();
+  }, []);
+
+
 
   if (!userId) {
     return (
@@ -77,7 +100,8 @@ export default function NewPetScreen() {
     );
   }
 
-  const pickImage = async () => {
+  // Image Picker
+  const handlePickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -85,11 +109,10 @@ export default function NewPetScreen() {
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      setImageUri(result.assets[0].uri);
     }
-    // @ts-ignore
-    console.log("New image was set to const: ", result.assets[0].uri);
   };
+
 
   const handleAddDog = async () => {
     if (!dogName.trim()) {
@@ -99,44 +122,53 @@ export default function NewPetScreen() {
 
     setIsSaving(true);
     try {
+      // Flatten selectedTags into a single array of tag IDs
+      const tagIds = Object.values(selectedTags).flat();
+      console.log("[NewDog] Tags sent: ", tagIds);
+
       // Prepare dog data with tags as an array
       const dogData = {
         name: dogName,
         description: dogDescription,
-        tagIds: dogTags ? dogTags.split(",").map((tag) => tag.trim()) : [],
+        breed: newBreed,
+        age: Number(newAge),
+        weight: Number(newWeight),
+        tagIds: tagIds, // Make sure to use `tagIds` if this is what your backend expects
       };
 
-      // Add the dog without the image first
-      // @ts-ignore
-      const newDog = await addDog(userId, dogData);
-      console.log("New dog data: ", newDog);
-      console.log("New dog id: ", newDog?.id);
+      console.log("[NewDog] Dog data being sent: ", dogData);
 
-      // If there’s an image selected and the new dog was successfully created
-      if (image && newDog?.id) {
-        // Fetch image as a blob
-        const response = await fetch(image);
+      // Add the dog without the image first
+      const newDog = await addDog(userId, dogData);
+
+      console.log("[NewDog] New dog response: ", newDog);
+
+      // Update the dog's image if a new one was picked
+      if (imageUri && newDog?.id) {
+        console.log("[NewDog] Uploading image for dog ID: ", newDog.id);
+
+        const response = await fetch(imageUri);
         const blob = await response.blob();
 
-        // Convert blob to FormData as the backend expects a file
         const formData = new FormData();
         formData.append("file", {
-          uri: image,
+          uri: imageUri,
           name: "dog_image.jpg",
           type: blob.type,
         } as unknown as File);
 
-        console.log("Uploading dog picture...");
-        // Use the updated DogContext function to handle file upload
-        await updateDogPicture(newDog.id, formData); // Pass FormData directly here
-        console.log("Dog picture uploaded successfully!");
+        console.log("[NewDog] FormData prepared: ", formData);
+
+        await updateDogPicture(newDog.id, formData);
+
+        console.log("[NewDog] Image uploaded successfully");
       }
 
       Alert.alert("Success", "Dog added successfully!");
       setIsSaving(false);
       router.back(); // Go back to the previous screen
     } catch (error) {
-      console.error("Failed to add dog:", error);
+      console.error("[NewDog] Failed to add dog: ", error);
       Alert.alert("Error", "Failed to add dog.");
     }
   };
@@ -167,23 +199,24 @@ export default function NewPetScreen() {
           >
             {/* Change Dog Image */}
             <Pressable
-              onPress={pickImage}
+              onPress={handlePickImage}
               style={{
                 alignItems: "center",
               }}
             >
               <Image
-                source={image ? { uri: image } : DogPlaceholderImage}
+                source={imageUri ? {uri: imageUri} : DogPlaceholderImage}
                 style={{
-                  width: widthPercentageToDP(70),
-                  height: widthPercentageToDP(70),
-                  marginTop: heightPercentageToDP(-15),
+                  width: widthPercentageToDP(80),
+                  height: widthPercentageToDP(80),
+                  marginTop: heightPercentageToDP(-20),
                   borderWidth: 1,
                   borderColor: themeColors.tertiary,
                 }}
-                onError={() => setImage(null)}
+                onError={() => setImageUri(null)}
                 borderRadius={percentToDP(8)}
               />
+
               <ThemedText
                 style={{
                   textAlign: "center",
@@ -257,7 +290,7 @@ export default function NewPetScreen() {
                 onChangeText={setDogDescription}
                 multiline
                 numberOfLines={4}
-                maxLength={48}
+                maxLength={200}
                 style={{
                   paddingHorizontal: widthPercentToPD(6),
                   paddingVertical: widthPercentToPD(2),
@@ -271,133 +304,137 @@ export default function NewPetScreen() {
                 }}
               />
 
-              <ThemedText
-                style={{
-                  color: themeColors.primary,
-                  fontSize: 14,
-                  marginLeft: widthPercentToPD(2),
-                  backgroundColor: "transparent",
-                }}
-              >
-                Tags
-              </ThemedText>
-              <TextInput
-                placeholder="Enter tags separated by commas"
-                placeholderTextColor={"#CAC8BE"}
-                value={dogTags}
-                onChangeText={setDogTags}
-                style={{
-                  paddingHorizontal: widthPercentToPD(6),
-                  paddingVertical: widthPercentToPD(2),
-                  borderRadius: percentToDP(4),
-                  borderColor: themeColors.secondary,
-                  borderWidth: 1,
-                  fontSize: 14,
-                  color: themeColors.textOnSecondary,
-                  marginBottom: heightPercentToPD(2),
-                }}
-              />
 
+              {/* Breed */}
               <ThemedText
                 style={{
+                  backgroundColor: "none",
                   color: themeColors.primary,
-                  fontSize: 14,
-                  marginLeft: widthPercentToPD(2),
-                  backgroundColor: "transparent",
+                  fontSize: percentToDP(4),
+                  fontWeight: "light",
+                  marginBottom: heightPercentageToDP(-1),
+                  marginLeft: heightPercentageToDP(3),
+                  zIndex: 2,
                 }}
               >
                 Breed
               </ThemedText>
-
               <TextInput
-                placeholder="Enter dog's breed"
-                placeholderTextColor={"#CAC8BE"}
-                value={breed}
-                onChangeText={setBreed}
-                maxLength={24}
                 style={{
-                  paddingHorizontal: widthPercentToPD(6),
-                  paddingVertical: widthPercentToPD(2),
-                  borderRadius: percentToDP(4),
-                  borderColor: themeColors.secondary,
+                  paddingHorizontal: percentToDP(7),
+                  paddingVertical: percentToDP(3),
+                  borderRadius: percentToDP(5),
                   borderWidth: 1,
-                  fontSize: 14,
+                  borderColor: themeColors.secondary,
                   color: themeColors.textOnSecondary,
-                  marginBottom: heightPercentToPD(2),
+                  fontSize: percentToDP(4),
+                  letterSpacing: 0.5,
+                  marginBottom: heightPercentageToDP(2),
                 }}
+                value={newBreed}
+                maxLength={48}
+                onChangeText={setNewBreed}
+                placeholder="Dog's Breed"
+                placeholderTextColor="#AAA"
               />
 
-              <View
+              {/* Age */}
+              <ThemedText
                 style={{
-                  flexDirection: "row",
-                  height: heightPercentToPD(12),
-                  marginVertical: heightPercentToPD(2),
-                  width: widthPercentToPD(90),
+                  backgroundColor: "none",
+                  color: themeColors.primary,
+                  fontSize: percentToDP(4),
+                  fontWeight: "light",
+                  marginBottom: heightPercentageToDP(-1),
+                  marginLeft: heightPercentageToDP(3),
+                  zIndex: 2,
                 }}
               >
-                <View style={{ flexDirection: "column" }}>
-                  <ThemedText
-                    style={{
-                      color: themeColors.primary,
-                      fontSize: 14,
-                      marginLeft: widthPercentToPD(2),
-                      backgroundColor: "transparent",
-                    }}
-                  >
-                    Weight
-                  </ThemedText>
+                Age
+              </ThemedText>
+              <TextInput
+                keyboardType={"numeric"}
+                style={{
+                  paddingHorizontal: percentToDP(7),
+                  paddingVertical: percentToDP(3),
+                  borderRadius: percentToDP(5),
+                  borderWidth: 1,
+                  borderColor: themeColors.secondary,
+                  color: themeColors.textOnSecondary,
+                  fontSize: percentToDP(4),
+                  letterSpacing: 0.5,
+                  marginBottom: heightPercentageToDP(2),
+                }}
+                value={newAge}
+                onChangeText={setNewAge}
+                placeholder="Dog's Age (in years)"
+                placeholderTextColor="#AAA"
+              />
 
-                  <TextInput
-                    placeholder="Enter dog's weight"
-                    placeholderTextColor={"#CAC8BE"}
-                    value={weight}
-                    onChangeText={setWeight}
-                    keyboardType={"numeric"}
-                    maxLength={24}
-                    style={{
-                      paddingHorizontal: widthPercentToPD(6),
-                      paddingVertical: widthPercentToPD(2),
-                      borderRadius: percentToDP(4),
-                      borderColor: themeColors.secondary,
-                      borderWidth: 1,
-                      fontSize: 14,
-                      color: themeColors.textOnSecondary,
-                      marginBottom: heightPercentToPD(2),
-                    }}
-                  />
-                </View>
+              {/* Weight */}
+              <ThemedText
+                style={{
+                  backgroundColor: "none",
+                  color: themeColors.primary,
+                  fontSize: percentToDP(4),
+                  fontWeight: "light",
+                  marginBottom: heightPercentageToDP(-1),
+                  marginLeft: heightPercentageToDP(3),
+                  zIndex: 2,
+                }}
+              >
+                Weight
+              </ThemedText>
+              <TextInput
+                keyboardType={"numeric"}
+                style={{
+                  paddingHorizontal: percentToDP(7),
+                  paddingVertical: percentToDP(3),
+                  borderRadius: percentToDP(5),
+                  borderWidth: 1,
+                  borderColor: themeColors.secondary,
+                  color: themeColors.textOnSecondary,
+                  fontSize: percentToDP(4),
+                  letterSpacing: 0.5,
+                  marginBottom: heightPercentageToDP(2),
+                }}
+                value={newWeight}
+                onChangeText={setNewWeight}
+                placeholder="Dog's Weight (in kg)"
+                placeholderTextColor="#AAA"
+              />
 
-                <View style={{ flexDirection: "column" }}>
-                  <ThemedText
-                    style={{
-                      color: themeColors.primary,
-                      fontSize: 14,
-                      marginLeft: widthPercentToPD(2),
-                      backgroundColor: "transparent",
-                    }}
-                  >
-                    Age
-                  </ThemedText>
-                  <TextInput
-                    placeholder="Enter dog's age"
-                    placeholderTextColor={"#CAC8BE"}
-                    value={age}
-                    onChangeText={setAge}
-                    keyboardType={"numeric"}
-                    maxLength={24}
-                    style={{
-                      paddingHorizontal: widthPercentToPD(6),
-                      paddingVertical: widthPercentToPD(2),
-                      borderRadius: percentToDP(4),
-                      borderColor: themeColors.secondary,
-                      borderWidth: 1,
-                      fontSize: 14,
-                      color: themeColors.textOnSecondary,
-                      marginBottom: heightPercentToPD(2),
-                    }}
-                  />
-                </View>
+              {/* Tags */}
+              <ThemedText
+                style={{
+                  backgroundColor: "none",
+                  color: themeColors.primary,
+                  fontSize: percentToDP(4),
+                  fontWeight: "light",
+                  marginBottom: heightPercentageToDP(-1),
+                  marginLeft: heightPercentageToDP(3),
+                  zIndex: 2,
+                }}
+              >
+                Tags
+              </ThemedText>
+
+              <View style={{
+                borderWidth: 1,
+                borderColor: themeColors.secondary,
+                borderRadius: percentToDP(5),
+                paddingVertical: percentToDP(5),
+                paddingHorizontal: percentToDP(2),
+                marginBottom: percentToDP(10),
+              }}>
+                <TagSelector
+                  availableTags={availableTags}
+                  selectedTags={selectedTags} // Pass initial selected tags
+                  onTagSelectionChange={setSelectedTags} // Capture tag selections
+                />
               </View>
+
+
 
               {isSaving ? (
                 <ThemedText
