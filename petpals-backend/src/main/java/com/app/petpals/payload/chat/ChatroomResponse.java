@@ -14,5 +14,4 @@ import java.util.List;
 public class ChatroomResponse {
     private String chatroomId;
     private List<String> participants;
-    private MessageResponse lastMessage;
 }

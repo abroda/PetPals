@@ -14,5 +14,5 @@ import java.time.LocalDateTime;
 public class MessageResponse {
     private String content;
     private String senderId;
-    private LocalDateTime sendAt;
+    private String sendAt;
 }

@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatroomIdsResponse {
+public class LatestMessageResponse {
     private String chatroomId;
+    private MessageResponse latestMessage;
 }

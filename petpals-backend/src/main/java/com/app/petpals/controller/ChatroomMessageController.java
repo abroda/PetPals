@@ -1,9 +1,9 @@
 package com.app.petpals.controller;
 
 import com.app.petpals.entity.ChatMessage;
+import com.app.petpals.payload.chat.LatestMessageResponse;
 import com.app.petpals.payload.chat.MessageRequest;
 import com.app.petpals.payload.chat.MessageResponse;
-import com.app.petpals.payload.groupWalk.GroupWalkResponse;
 import com.app.petpals.service.ChatroomMessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -40,6 +40,13 @@ public class ChatroomMessageController {
         Page<ChatMessage> chatMessages = chatroomMessageService.getChatroomMessagesByChatroomId(chatroomId, pageable);
         Page<MessageResponse> messageResponses = chatMessages.map(chatroomMessageService::createMessageResponse);
         return ResponseEntity.ok(messageResponses);
+    }
+
+    @GetMapping("/messages/latest")
+    @Operation(summary = "Get all messages for chatrooms.", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<List<LatestMessageResponse>> getLatestChatroomMessages(@RequestParam List<String> chatroomIds) {
+        List<LatestMessageResponse> messages = chatroomMessageService.getLatestChatroomMessages(chatroomIds);
+        return ResponseEntity.ok(messages);
     }
 
     @PostMapping("/messages")

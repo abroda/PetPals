@@ -3,6 +3,7 @@ package com.app.petpals.service;
 import com.app.petpals.entity.ChatMessage;
 import com.app.petpals.entity.Chatroom;
 import com.app.petpals.entity.User;
+import com.app.petpals.payload.chat.LatestMessageResponse;
 import com.app.petpals.payload.chat.MessageRequest;
 import com.app.petpals.payload.chat.MessageResponse;
 import com.app.petpals.repository.ChatMessageRepository;
@@ -12,7 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -31,6 +32,23 @@ public class ChatroomMessageService {
         return chatMessageRepository.findMessagesByChatroomId(chatroomId, pageable);
     }
 
+    public List<LatestMessageResponse> getLatestChatroomMessages(List<String> chatroomIds) {
+        List<LatestMessageResponse> lastMessages = new ArrayList<>();
+        chatroomIds.stream().forEach(chatroomId -> {
+            chatroomService.getChatroomById(chatroomId);
+            ChatMessage chatMessage = chatMessageRepository.findLastMessageByChatroomId(chatroomId).orElse(null);
+            lastMessages.add(LatestMessageResponse.builder()
+                    .chatroomId(chatroomId)
+                    .latestMessage(chatMessage != null ? MessageResponse.builder()
+                            .senderId(chatMessage.getSender().getId())
+                            .sendAt(chatMessage.getSentAt().toString())
+                            .content(chatMessage.getContent())
+                            .build() : null)
+                    .build());
+        });
+        return lastMessages;
+    }
+
     public ChatMessage addChatroomMessage(MessageRequest request) {
         Chatroom chatroom = chatroomService.getChatroomById(request.getChatroomId());
         User sender = userService.getById(request.getSenderId());
@@ -47,7 +65,7 @@ public class ChatroomMessageService {
     public MessageResponse createMessageResponse(ChatMessage chatMessage) {
         return MessageResponse.builder()
                 .content(chatMessage.getContent())
-                .sendAt(chatMessage.getSentAt())
+                .sendAt(chatMessage.getSentAt().toString())
                 .senderId(chatMessage.getSender().getId())
                 .build();
     }
