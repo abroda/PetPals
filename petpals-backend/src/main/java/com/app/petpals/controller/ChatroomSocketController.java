@@ -1,7 +1,6 @@
 package com.app.petpals.controller;
 
-import com.app.petpals.entity.Chatroom;
-import com.app.petpals.payload.chat.ChatMessageDTO;
+import com.app.petpals.payload.chat.MessageRequest;
 import com.app.petpals.service.ChatroomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -16,7 +15,7 @@ public class ChatroomSocketController {
     private final ChatroomService chatroomService;
 
     @MessageMapping("/chat")
-    public void sendMessage(ChatMessageDTO messageDTO) {
+    public void sendMessage(MessageRequest messageDTO) {
         chatroomService.saveMessage(messageDTO);
         String destination = "/topic/chat/" + messageDTO.getChatroomId();
         messagingTemplate.convertAndSend(destination, messageDTO);

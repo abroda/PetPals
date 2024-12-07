@@ -5,7 +5,7 @@ import com.app.petpals.entity.Chatroom;
 import com.app.petpals.entity.User;
 import com.app.petpals.exception.chat.ChatroomDataException;
 import com.app.petpals.exception.chat.ChatroomNotFoundException;
-import com.app.petpals.payload.chat.ChatMessageDTO;
+import com.app.petpals.payload.chat.MessageRequest;
 import com.app.petpals.payload.chat.ChatroomResponse;
 import com.app.petpals.payload.chat.MessageResponse;
 import com.app.petpals.repository.ChatMessageRepository;
@@ -25,6 +25,10 @@ public class ChatroomService {
     private final ChatroomRepository chatroomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final UserService userService;
+
+    public Chatroom getChatroomById(String id) {
+        return chatroomRepository.findById(id).orElseThrow(() -> new ChatroomNotFoundException("Chatroom not found."));
+    }
 
     @Transactional
     public ChatroomResponse getOrCreateChatroom(List<String> userIds) {
@@ -91,7 +95,7 @@ public class ChatroomService {
         chatroomRepository.delete(chatroom);
     }
 
-    public void saveMessage(ChatMessageDTO messageDTO) {
+    public void saveMessage(MessageRequest messageDTO) {
         Chatroom chatroom = chatroomRepository.findById(messageDTO.getChatroomId())
                 .orElseThrow(() -> new IllegalArgumentException("Chatroom not found"));
 

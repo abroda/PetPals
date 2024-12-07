@@ -79,7 +79,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         throw new IllegalArgumentException("Invalid Authorization Token");
                     }
 
-                    accessor.setUser((Principal) userDetails);
+//                    accessor.setUser((Principal) userDetails);
+                    System.out.println("Here!");
                 }
                 return message;
             }
