@@ -7,6 +7,8 @@ import com.app.petpals.payload.chat.MessageRequest;
 import com.app.petpals.payload.chat.MessageResponse;
 import com.app.petpals.repository.ChatMessageRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,6 +24,11 @@ public class ChatroomMessageService {
 
     public List<ChatMessage> getChatroomMessagesByChatroomId(String chatroomId) {
         return chatMessageRepository.findByChatroomIdOrderBySentAt(chatroomId);
+    }
+
+    public Page<ChatMessage> getChatroomMessagesByChatroomId(String chatroomId, Pageable pageable) {
+        chatroomService.getChatroomById(chatroomId);
+        return chatMessageRepository.findMessagesByChatroomId(chatroomId, pageable);
     }
 
     public ChatMessage addChatroomMessage(MessageRequest request) {
