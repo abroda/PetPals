@@ -6,12 +6,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.apache.logging.log4j.message.Message;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
@@ -134,6 +136,14 @@ public class User implements UserDetails {
     @JsonManagedReference
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WalkSession> walks;
+
+    @ManyToMany(mappedBy = "users") // Inverse side of the relationship
+    private List<Chatroom> chats;
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ChatMessage> messages;
+
 
     public User() {
     }
