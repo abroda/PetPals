@@ -5,18 +5,21 @@ import { ThemeColors } from "@/constants/theme/Colors";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { ThemedText } from "@/components/basic/ThemedText";
 
+// Used only locally here
 interface Tag {
   id: string;
   tag: string;
 }
 
+// Used only locally here
 interface AvailableTags {
   [category: string]: Tag[];
 }
 
+
 interface TagSelectorProps {
-  availableTags: AvailableTags;
-  selectedTags?: Record<string, string[]>; // Optional initial selected tags
+  availableTags: AvailableTags; // all available tags
+  selectedTags?: Record<string, string[]>; // optional initial selected tags (if any)
   onTagSelectionChange?: (updatedTags: Record<string, string[]>) => void;
 }
 
@@ -25,22 +28,32 @@ const TagSelector: React.FC<TagSelectorProps> = ({
                                                    selectedTags: initialSelectedTags = {},
                                                    onTagSelectionChange,
                                                  }) => {
+
+
   const [selectedTags, setSelectedTags] = useState<Record<string, string[]>>(
     initialSelectedTags
   );
+
+
+  // Styling
+  const colorScheme = useColorScheme();
+  const themeColors = ThemeColors[colorScheme];
   const percentToDP = useWindowDimension("shorter");
 
-  // Colours
-  const colorScheme = useColorScheme();
-  // @ts-ignore
-  const themeColors = ThemeColors[colorScheme];
 
-  // Update internal state when initialSelectedTags changes
+
+
+
+
+
+  // Update state when initialSelectedTags changes
   useEffect(() => {
     setSelectedTags(initialSelectedTags);
     console.log("[DogTagSelector] Got initial tags: ", initialSelectedTags)
   }, [initialSelectedTags]);
 
+
+  // HELPER:
   // Check if the category allows multiple choices
   const isMultiChoiceCategory = (category: string) => {
     const multiChoiceCategories = [
@@ -52,6 +65,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
     return multiChoiceCategories.includes(category);
   };
 
+  // HELPER:
   // Handle tag selection
   const handleTagToggle = (category: string, tagId: string) => {
     setSelectedTags((prev) => {
@@ -74,6 +88,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
       return updatedState;
     });
   };
+
 
   // Render each tag item
   const renderTag = (category: string) => ({ item }: { item: Tag }) => {
@@ -106,7 +121,8 @@ const TagSelector: React.FC<TagSelectorProps> = ({
     );
   };
 
-  // Render each category
+
+  // Render each tag category
   const renderCategory = ({ item }: { item: string }) => {
     const category = item;
 
@@ -134,14 +150,14 @@ const TagSelector: React.FC<TagSelectorProps> = ({
           horizontal={true}
           contentContainerStyle={{
             flexDirection: "row",
-            flexWrap: "wrap",
           }}
         />
       </View>
     );
   };
 
-  // Get a summary of selected tags
+
+  // Get a summary list of selected tags
   const renderSelectedTags = () => {
     const selected = Object.entries(selectedTags).flatMap(([category, tags]) =>
       tags.map((tagId) => {
@@ -191,8 +207,25 @@ const TagSelector: React.FC<TagSelectorProps> = ({
     ));
   };
 
+
+  // If not yet loaded or missing
+  // FALLBACK
+  if (!availableTags || Object.keys(availableTags).length === 0) {
+    return (
+      <ThemedText backgroundColorName={"transparent"} style={{
+        alignItems: 'center',
+        justifyContent: 'center',
+        alignContent: 'center',
+      }}>
+        Loading tags...
+      </ThemedText>
+    );}
+
+
+
   return (
     <View style={{ padding: 10 }}>
+
       {/* Render available tags grouped by category */}
       <FlatList
         data={Object.keys(availableTags)}

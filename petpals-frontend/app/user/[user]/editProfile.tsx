@@ -46,8 +46,10 @@ export default function EditUserProfileScreen() {
   const [emailText, setEmailText] = useState("");
 
   useEffect(() => {
-    console.log("[EditProfile] Getting user data for userprofile: ", userProfile);
-    getUserById(userId); // Fetch user data
+    if(userId){
+      console.log("[EditProfile] Getting user data: ", userId);
+      getUserById(userId); // Fetch user data
+    }
   }, []);
 
   useEffect(() => {

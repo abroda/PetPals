@@ -126,13 +126,32 @@ export default function NewPetScreen() {
       const tagIds = Object.values(selectedTags).flat();
       console.log("[NewDog] Tags sent: ", tagIds);
 
+      // Weight validation - checks if 0 <= weight < 130
+      // and rounds weight to 0.1
+      let weightValue = Number(Number(newWeight).toFixed(1));
+      if (isNaN(weightValue) || Number(newWeight) <= 0 || Number(newWeight)>130.0) {
+        Alert.alert("Validation", "Weight must be a valid number (0.1 - 130) with one decimal point");
+        // @ts-ignore
+        weightValue = null;
+        return;
+      }
+
+      // Age validation - checks if 0 <= age < 35
+      let ageValue = Number(Number(newAge).toFixed(0));
+      if (isNaN(ageValue) || Number(newAge) <= 0 || Number(newAge) > 35) {
+        Alert.alert("Validation", "Age must be a valid number (1-35)");
+        // @ts-ignore
+        ageValue = null;
+      }
+
+
       // Prepare dog data with tags as an array
       const dogData = {
         name: dogName,
         description: dogDescription,
         breed: newBreed,
-        age: Number(newAge),
-        weight: Number(newWeight),
+        age: ageValue,
+        weight: weightValue,
         tagIds: tagIds, // Make sure to use `tagIds` if this is what your backend expects
       };
 

@@ -3,7 +3,7 @@ import { ImageStyle, Pressable, StyleProp } from "react-native";
 import { Avatar } from "react-native-ui-lib";
 import { router } from "expo-router";
 import { useAuth } from "@/hooks/useAuth";
-import { useUser } from "@/hooks/useUser"; // Assuming this is where getUserById is located
+import { useUser } from "@/hooks/useUser";
 import {useWindowDimension} from "@/hooks/theme/useWindowDimension";
 
 export default function UserAvatar(props: {
@@ -21,14 +21,15 @@ export default function UserAvatar(props: {
 
   useEffect(() => {
     const fetchUserImage = async () => {
-      // console.log("[UserAvatar] Received userId to find: ", props.userId);
+
       if (!props.imageUrl && props.userId) {
+        console.log("[UserAvatar] fetching user by id: ", props.userId);
         try {
           const user = await fetchUserById(props.userId);
           // console.log("[UserAvatar] Fetching user for avatar: ", user);
           setAvatarUrl(user.imageUrl || null); // Use fetched image URL if available
         } catch (error) {
-          console.error("Failed to fetch user data for avatar:", error);
+          console.error("[UserAvatar] Failed to fetch user data:", error);
           setAvatarUrl(null); // Default to null if there's an error
         }
       }

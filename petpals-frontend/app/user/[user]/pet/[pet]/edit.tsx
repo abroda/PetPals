@@ -76,6 +76,9 @@ export default function EditDogProfileScreen() {
       setDog(dogData);
       setName(dogData?.name ?? "");
       setDescription(dogData?.description ?? "");
+      setNewAge(dogData?.age?.toString() ?? "");
+      setNewBreed(dogData?.breed ?? "");
+      setNewWeight(dogData?.weight?.toString() ?? "");
       setTags(dogData?.tags.map((tag) => tag.id) ?? []);
       setImageUri(dogData?.imageUrl ?? null);
 
@@ -158,13 +161,32 @@ export default function EditDogProfileScreen() {
       const tagIds = Object.values(selectedTags).flat();
       console.log("[EditDog] Tags sent: ", tagIds);
 
+      // Weight validation - checks if 0 <= weight < 130
+      // and rounds weight to 0.1
+      let weightValue = Number(Number(newWeight).toFixed(1));
+      if (isNaN(weightValue) || Number(newWeight) <= 0 || Number(newWeight)>130.0) {
+        Alert.alert("Validation", "Weight must be a valid number (0.1 - 130) with one decimal point");
+        // @ts-ignore
+        weightValue = null;
+        return;
+      }
+
+      // Age validation - checks if 0 <= age < 35
+      let ageValue = Number(Number(newAge).toFixed(0));
+      if (isNaN(ageValue) || Number(newAge) <= 0 || Number(newAge) > 35) {
+        Alert.alert("Validation", "Age must be a valid number (1-35)");
+        // @ts-ignore
+        ageValue = null;
+      }
+
+
       // Update the dog's information
       await updateDog(petId, {
         name: name,
         description: description,
         breed: newBreed,
-        age: Number(newAge),
-        weight: Number(newWeight),
+        age: ageValue,
+        weight: weightValue,
         tags: tagIds, // Convert to tag objects
       });
 
@@ -268,7 +290,7 @@ export default function EditDogProfileScreen() {
                 style={{
                   width: widthPercentageToDP(80),
                   height: widthPercentageToDP(80),
-                  marginTop: heightPercentageToDP(-20),
+                  marginTop: heightPercentageToDP(-15),
                   borderWidth: 1,
                   borderColor: themeColors.tertiary,
                 }}

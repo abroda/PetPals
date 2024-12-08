@@ -137,7 +137,7 @@ export const DogProvider: FC<{ children: ReactNode }> = ({ children }) => {
   // Get all Tags
   const getAvailableTags = async (): Promise<Tag[]> => {
     const response = await sendJsonQuery(apiPaths.dogs.getAllTags, "GET");
-    console.log("[DogContext] Get all available tags: ", response as Tag[])
+    //console.log("[DogContext] Get all available tags: ", response as Tag[])
     return response as Tag[];
   };
 

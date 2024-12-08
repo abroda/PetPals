@@ -39,12 +39,12 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const { authToken, userId } = useAuth(); // Assuming useAuth provides authToken
 
   useEffect(() => {
-    if (userId) {
+    if (authToken && userId) {
       getUserById(userId).catch((error) => {
         console.error("[UserContext] Failed to fetch user profile:", error);
       });
     }
-  }, [userId]);
+  }, [authToken, userId]);
 
   const sendJsonQuery = async (
     path: string,
@@ -144,7 +144,7 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
       "GET",
       {},
       (payload) => {
-        console.log("[UserContext] getUserById | fetched successfully:", payload.username, payload.email,)
+        console.log("[UserContext] getUserById | success:", payload.username, payload.email,)
         setUserProfile({
           id: payload.id,
           email: payload.email,
@@ -153,7 +153,7 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
           imageUrl: payload.imageUrl,
           visibility: payload.visibility,
         });
-        setResponseMessage("[UserContext] User data fetched successfully!");
+        setResponseMessage("[UserContext] Got user data!");
         // console.log(
         //   "Fetched data:\nid -- ",
         //   payload.id,
@@ -166,8 +166,8 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
         // );
       },
       (payload) => {
-        console.error("[UserContext] Failed to fetch user:", payload);
-        setResponseMessage("[UserContext] Failed to fetch user: " + payload.message);
+        console.error("[UserContext] Failed to get user by id:", id);
+        setResponseMessage("[UserContext] Failed to get user: " + payload.message);
       }
     );
   };
@@ -183,7 +183,7 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
       "GET",
       {},
       (payload) => {
-        console.log("[UserContext] fetchUserById | fetched successfully:", payload.username);
+        console.log("[UserContext] fetchUserById | success:", payload.username);
         fetchedUser = {
           id: payload.id,
           email: payload.email,
@@ -194,7 +194,7 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
         };
       },
       (payload) => {
-        console.error("[UserContext] Failed to fetch user:", payload);
+        console.error("[UserContext] fetchUserByID | failed: ", id);
         setResponseMessage("[UserContext] Failed to fetch user: " + payload.message);
       }
     );

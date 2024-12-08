@@ -41,8 +41,6 @@ export default function HomeScreen() {
   const {
     userProfile,
     isProcessing,
-    getUserById,
-    responseMessage,
     searchUsers,
   } = useUser();
 

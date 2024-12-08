@@ -80,6 +80,8 @@ public class DogService {
                 throw new DogDataException("Weight must have at most 1 decimal place.");
             } else if (request.getWeight() != null && request.getWeight().precision() > 4) {
                 throw new DogDataException("Weight can only have up to 4 digits, including decimals.");
+            } else {
+                dog.setWeight(request.getWeight());
             }
             if (request.getTagIds() != null) {
                 dog.setTags(dogTagRepository.findAllByIdIn(request.getTagIds()));

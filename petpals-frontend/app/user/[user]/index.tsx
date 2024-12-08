@@ -71,6 +71,7 @@ export default function UserProfileScreen() {
     const resolvedUsername = username === "me" ? loggedInUserId : username;
 
     if (resolvedUsername) {
+      console.log("[User/Index] UserProfile | Fetching user by id: ", resolvedUsername)
       fetchUserById(resolvedUsername)
         .then((user) => {
           setVisitedUser(user);
@@ -91,12 +92,6 @@ export default function UserProfileScreen() {
   }, [username, loggedInUserId]);
 
 
-  // Update username only if it changes
-  useEffect(() => {
-    if (usernameFromPath !== username) {
-      setUsername(usernameFromPath);
-    }
-  }, [path, usernameFromPath, username]);
 
 
   const fetchDogs = async () => {
@@ -117,7 +112,10 @@ export default function UserProfileScreen() {
   // Refresh data whenever the screen is focused
   useFocusEffect(
     useCallback(() => {
-      fetchDogs();
+      if (loggedInUserId && username){
+        fetchDogs();
+      }
+
     }, [loggedInUserId]) // Only re-run if userId changes
   );
 

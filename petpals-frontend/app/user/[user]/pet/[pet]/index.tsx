@@ -21,6 +21,7 @@ import UserAvatar from "@/components/navigation/UserAvatar";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import {usePathname, router, useNavigation} from "expo-router";
 import { Image } from "react-native-ui-lib";
+
 import {Dog, Tag, useDog} from "@/context/DogContext";
 import { useColorScheme } from "@/hooks/theme/useColorScheme";
 import { ThemeColors } from "@/constants/theme/Colors";
@@ -29,11 +30,13 @@ import { ThemeColors } from "@/constants/theme/Colors";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 // @ts-ignore
 import DogPlaceholderImage from "@/assets/images/dog_placeholder_theme-color-fair.png";
+
 import {
   widthPercentageToDP,
   heightPercentageToDP,
 } from "react-native-responsive-screen";
 import { useAuth } from "@/hooks/useAuth";
+
 import DogTag from "@/components/display/DogTag";
 
 
@@ -60,14 +63,15 @@ export default function PetProfileScreen() {
   const fetchDogData = useCallback(async () => {
     try {
       console.log("[Pet/Index] getDogById: ", petId)
+      if(petId){
+        const dogData = await getDogById(petId ?? "");
+        setDog(dogData);
+        setImageUri(dogData?.imageUrl ?? null);
+        console.log("[Pet/Index] Dog was fetched: ", dogData);
+      }
 
-      const dogData = await getDogById(petId ?? "");
-      setDog(dogData);
-      setImageUri(dogData?.imageUrl ?? null);
-
-      console.log("[Pet/Index] Dog was fetched: ", dogData);
     } catch (error) {
-      console.error("Failed to fetch dog data:", error);
+      console.error("[Pet/Index] Failed to fetch dog data:", error);
     } finally {
       setIsLoading(false);
     }
@@ -93,6 +97,8 @@ export default function PetProfileScreen() {
       setFlatListTags(allTags);
     }
   }, [dog]);
+
+
 
 
   // Colours
@@ -248,10 +254,10 @@ export default function PetProfileScreen() {
             <Image
               source={imageUri ? { uri: imageUri } : DogPlaceholderImage}
               style={{
-                width: widthPercentageToDP(80),
-                height: widthPercentageToDP(80),
+                width: widthPercentageToDP(75),
+                height: widthPercentageToDP(75),
                 alignSelf: "center",
-                marginTop: percentToDP(-35),
+                marginTop: percentToDP(-30),
                 borderWidth: 1,
                 borderColor: themeColors.tertiary,
               }}
@@ -282,9 +288,10 @@ export default function PetProfileScreen() {
               {/* Breed */}
               <ThemedText
                 textColorName={"placeholderText"}
-                textStyleOptions={{size: "tiny", weight: 'light'}}
+                textStyleOptions={{size: "tiny", }}
                 style={{
                   fontStyle: "italic",
+                  fontWeight: 'light',
                   marginBottom: heightPercentToPD(2),
                 }}
               >
@@ -309,7 +316,6 @@ export default function PetProfileScreen() {
                     backgroundColor: 'transparent',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    flexWrap: "wrap",
                   }}
                 />
               ) : (
@@ -455,7 +461,7 @@ export default function PetProfileScreen() {
             position: "absolute",
             zIndex: 100,
             elevation: 100,
-            top: heightPercentToPD(10),
+            top: heightPercentToPD(15),
             right: widthPercentageToDP(4),
             width: widthPercentageToDP(50),
             backgroundColor: themeColors.tertiary,

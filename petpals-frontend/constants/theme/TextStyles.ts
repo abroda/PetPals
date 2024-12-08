@@ -5,6 +5,7 @@ export const assetsFonts = {
   "LeagueSpartan-Regular": require("../../assets/fonts/LeagueSpartan-Regular.ttf"),
   "LeagueSpartan-SemiBold": require("../../assets/fonts/LeagueSpartan-SemiBold.ttf"),
   "LeagueSpartan-Bold": require("../../assets/fonts/LeagueSpartan-Bold.ttf"),
+  "LeagueSpartan-Light.ttf": require("../../assets/fonts/LeagueSpartan-Light.ttf"),
 };
 
 export const TextStyleConstants = {
