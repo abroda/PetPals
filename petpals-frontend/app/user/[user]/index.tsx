@@ -339,7 +339,6 @@ export default function UserProfileScreen() {
         >
           <UserAvatar
             size={50}
-            userId={visitedUser?.id ?? ""}
             imageUrl={visitedUser?.imageUrl}
             doLink={false}
             style={{

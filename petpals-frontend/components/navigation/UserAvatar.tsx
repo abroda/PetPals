@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUser } from "@/hooks/useUser";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
+import UserPlaceholder from "@/assets/images/user_placeholder_theme-color-fair.png"
 
 export default function UserAvatar(props: {
   size: number;
@@ -19,26 +20,44 @@ export default function UserAvatar(props: {
   const { fetchUserById } = useUser(); // Function to fetch user data by ID
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const percentToDP = useWindowDimension("shorter");
+  const [hasFetched, setHasFetched] = useState(false);
 
   const borderColor = useThemeColor("primary");
 
   useEffect(() => {
-    const fetchUserImage = async () => {
-      if (!props.imageUrl && props.userId) {
-        console.log("[UserAvatar] fetching user by id: ", props.userId);
-        try {
-          const user = await fetchUserById(props.userId);
-          // console.log("[UserAvatar] Fetching user for avatar: ", user);
-          setAvatarUrl(user?.imageUrl ?? null); // Use fetched image URL if available
-        } catch (error) {
-          console.error("[UserAvatar] Failed to fetch user data:", error);
-          setAvatarUrl(null); // Default to null if there's an error
-        }
-      }
-    };
 
-    fetchUserImage();
-  }, [props.imageUrl, props.userId]);
+    if (props.imageUrl) {
+      console.log("[UserAvatar] got valid imageUrl:", props.imageUrl);
+      setAvatarUrl(props.imageUrl);
+    } else {
+      setAvatarUrl(null)
+    }
+
+    // if (!props.imageUrl && props.imageUrl == "NoImage"){
+    //   setAvatarUrl(null);
+    // }
+    // else {
+    //     if (!props.imageUrl && props.userId) {
+    //     console.log("[UserAvatar] fetching user by id: ", props.userId);
+    //     try {
+    //       fetchUserById(props.userId).then((user)=> {setAvatarUrl(user?.imageUrl ?? null)});
+    //     } catch (error) {
+    //       console.error("[UserAvatar] Failed to fetch user data:", error);
+    //       setAvatarUrl(null); // Default to null if there's an error
+    //     }
+    //   }
+    // }
+
+  }, [props.imageUrl, props.userId, avatarUrl]);
+
+
+  useEffect(() => {
+    console.log("[UserAvatar] Props changed:", {
+      userId: props.userId,
+      imageUrl: props.imageUrl,
+    });
+  }, [props.userId, props.imageUrl]);
+
 
   return (
     <Pressable
@@ -63,12 +82,11 @@ export default function UserAvatar(props: {
     >
       <Avatar
         size={percentToDP(props.size)}
-        source={{
-          uri:
-            props.imageUrl ||
-            avatarUrl ||
-            "https://external-preview.redd.it/PzM9Myb5uugh3qrxvb1F0nVTsdXJKRl0NB88MuAPwZA.jpg?auto=webp&s=6627165dbd61ab8a8d7fc026b5ce9199c593fe93", // Fallback URL
-        }}
+        source={
+          avatarUrl
+            ? { uri: avatarUrl } // Use the fetched or passed avatar URL
+            : UserPlaceholder // Fallback to placeholder image
+        }
         containerStyle={[
           { borderRadius: percentToDP(props.size) / 2 },
           props.style,
