@@ -201,13 +201,13 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
     setIsProcessing(false);
 
-    TaskManager.isTaskRegisteredAsync("background-location-task").then(
-      (registered) => {
-        if (registered) {
-          TaskManager.unregisterTaskAsync("background-location-task");
-        }
-      }
-    );
+    // TaskManager.isTaskRegisteredAsync("background-location-task").then(
+    //   (registered) => {
+    //     if (registered) {
+    //       TaskManager.unregisterTaskAsync("background-location-task");
+    //     }
+    //   }
+    // );
   };
 
   const load = async () => {

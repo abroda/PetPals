@@ -10,10 +10,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAmount;
@@ -47,19 +44,15 @@ public class UserWalksController {
     }
 
     @GetMapping("/{userId}/groupWalks/joined/ongoing")
-    @Operation(summary = "Get currently ongoing group walks joined by the user.", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Get all joined group walks.", security = @SecurityRequirement(name = "bearerAuth"))
     private ResponseEntity<List<GroupWalkResponse>> getOngoingJoinedGroupWalks(@PathVariable("userId") String userId) {
         User user = userService.getById(userId);
-        Set<GroupWalk> joinedWalks = user.getDogs().stream()
+        Set<GroupWalk> uniqueJoinedWalks = user.getDogs().stream()
                 .flatMap(dog -> dog.getJoinedWalks().stream())
+                .filter(walk -> walk.getDatetime().isAfter(ZonedDateTime.now().minusHours(1)) && walk.getDatetime().isBefore(ZonedDateTime.now().plusMinutes(15)))
                 .collect(Collectors.toSet());
-        System.out.println(joinedWalks);
-//        Set<GroupWalk> uniqueJoinedWalks = user.getDogs().stream()
-//                .flatMap(dog -> dog.getJoinedWalks().stream())
-//                .filter(walk -> walk.getDatetime().isBefore(ZonedDateTime.now().plusHours(1)) && walk.getDatetime().isAfter(ZonedDateTime.now().minusMinutes(15)))
-//                .collect(Collectors.toSet());
-//        System.out.println(uniqueJoinedWalks);
-        return ResponseEntity.ok(joinedWalks.stream().map(groupWalkService::createGroupWalkResponse).collect(Collectors.toList()));
+
+        return ResponseEntity.ok(uniqueJoinedWalks.stream().map(groupWalkService::createGroupWalkResponse).collect(Collectors.toList()));
     }
 }
 

@@ -8,7 +8,7 @@ import { ThemedButton } from "@/components/inputs/ThemedButton";
 import ThemedToast from "@/components/popups/ThemedToast";
 import { Dog } from "@/context/DogContext";
 import { GroupWalk, Participant } from "@/context/GroupWalksContext";
-import { PathVertex } from "@/context/WalksContext";
+import { MarkerData, PathVertex } from "@/context/WalksContext";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
@@ -24,6 +24,7 @@ import PetAvatar from "@/components/navigation/PetAvatar";
 import StartWalkDialog from "@/components/dialogs/StartWalkDialog";
 import EndWalkDialog from "@/components/dialogs/EndWalkDialog";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { DogPicker } from "@/components/inputs/DogPicker";
 
 export default function ActiveWalkScreen() {
   const walkId = useLocalSearchParams().walkId as string | undefined;
@@ -31,10 +32,9 @@ export default function ActiveWalkScreen() {
   const [ongoingGroupWalks, setOngoingGroupWalks] = useState<GroupWalk[]>([]);
   const [groupWalk, setGroupWalk] = useState<GroupWalk | null>();
   const [dogs, setDogs] = useState([] as Dog[]);
-  const [dogsParticipating, setDogsParticipating] = useState([] as string[]);
-  const [visibilityMode, setVisibilityMode] = useState("public");
 
-  const [dialogVisible, setDialogVisible] = useState(false);
+  const [startDialogVisible, setStartDialogVisible] = useState(false);
+  const [endDialogVisible, setEndDialogVisible] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -48,6 +48,8 @@ export default function ActiveWalkScreen() {
     summaryVisible,
     firstTimeout,
     secondTimeout,
+    dogsParticipating,
+    visibilityMode,
     groupWalkId,
     userLocation,
     walkStartTime,
@@ -108,12 +110,6 @@ export default function ActiveWalkScreen() {
 
         if (result.success) {
           let walk = result.returnValue as GroupWalk;
-
-          setDogsParticipating(
-            walk.participants
-              .filter((elem) => elem.userId === userId)
-              .flatMap((elem) => elem.dogs!.map((dog) => dog.dogId))
-          );
           setGroupWalk(walk);
         } else {
           setErrorMessage(result.returnValue);
@@ -123,8 +119,7 @@ export default function ActiveWalkScreen() {
         console.log("get data (available walks)");
         asyncAbortController.current = new AbortController();
 
-        result = await getGroupWalks("joined", asyncAbortController.current);
-        //getOngoingGroupWalks(asyncAbortController.current);
+        result = await getOngoingGroupWalks(asyncAbortController.current);
 
         if (result.success) {
           let walks = result.returnValue as GroupWalk[];
@@ -158,7 +153,10 @@ export default function ActiveWalkScreen() {
   useEffect(() => {
     let intervalId = null;
     if (isRecording) {
-      intervalId = setInterval(updateState, 6000); // 2500);
+      intervalId = setInterval(
+        () => console.log("Should update"), //updateState
+        6000
+      ); // 2500);
     }
 
     return () => {
@@ -282,7 +280,7 @@ export default function ActiveWalkScreen() {
           backgroundColorName="transparent"
           style={{
             paddingHorizontal: percentToDP(4),
-            marginBottom: percentToDP(5),
+            marginBottom: percentToDP(4),
           }}
         >
           {isRecording ? "Recording walk" : "Start walking"}
@@ -291,13 +289,13 @@ export default function ActiveWalkScreen() {
         <ThemedText
           textStyleOptions={{ size: "biggerMedium" }}
           style={{
-            marginBottom: percentToDP(4),
+            marginBottom: percentToDP(3),
             marginHorizontal: percentToDP(4),
           }}
         >
           {!isRecording
             ? 'Press "Start" to begin recording.'
-            : walkId
+            : groupWalkId
               ? `Group walk: ${groupWalk?.title}`
               : "Solitary walk"}
         </ThemedText>
@@ -306,8 +304,8 @@ export default function ActiveWalkScreen() {
           <HorizontalView
             colorName="transparent"
             style={{
-              marginHorizontal: percentToDP(2),
-              marginBottom: percentToDP(1),
+              marginHorizontal: percentToDP(3),
+              marginBottom: percentToDP(3),
               zIndex: 1,
             }}
           >
@@ -315,36 +313,52 @@ export default function ActiveWalkScreen() {
               justifyOption="flex-start"
               colorName="transparent"
             >
-              {dogs.map((dog) => (
-                <ThemedView colorName="transparent">
-                  <PetAvatar
-                    key={dog.id}
-                    size={12}
-                    userId={userId ?? ""}
-                    petId={dog.id}
-                  />
-                  <ThemedText
-                    center
-                    textStyleOptions={{ weight: "semibold" }}
+              {dogs
+                .filter((dog) => dogsParticipating.includes(dog.id))
+                .map((dog) => (
+                  <ThemedView
+                    key={dog.id + "t"}
+                    colorName="transparent"
+                    style={{
+                      marginRight: percentToDP(2),
+                    }}
                   >
-                    {dog.name}
-                  </ThemedText>
-                </ThemedView>
-              ))}
+                    <PetAvatar
+                      key={dog.id + "a"}
+                      size={10}
+                      userId={userId ?? ""}
+                      petId={dog.id}
+                      toggleEnabled
+                      marked={true}
+                    />
+                    <ThemedText
+                      center
+                      textStyleOptions={{ size: "tiny" }}
+                      style={{
+                        marginTop: percentToDP(1),
+                        marginLeft: percentToDP(-1),
+                      }}
+                    >
+                      {dog.name}
+                    </ThemedText>
+                  </ThemedView>
+                ))}
             </HorizontalView>
             <ThemedView
               colorName="secondary"
               style={{
-                width: percentToDP(12),
-                height: percentToDP(12),
                 borderRadius: percentToDP(10),
               }}
             >
-              <ThemedIcon
-                name="eye-outline"
-                colorName="primary"
-                style={{ zIndex: 1, padding: percentToDP(2) }}
-              />
+              <ThemedText style={{ textAlign: "center" }}>
+                Visibility
+              </ThemedText>
+              <ThemedText
+                textColorName="primary"
+                style={{ textAlign: "center" }}
+              >
+                {visibilityMode}
+              </ThemedText>
             </ThemedView>
           </HorizontalView>
         )}
@@ -364,9 +378,17 @@ export default function ActiveWalkScreen() {
             marginBottom: percentToDP(-10),
           }}
           markers={
-            isRecording
+            isRecording && groupWalk
               ? [
-                  // TODO
+                  {
+                    coordinates: {
+                      latitude: groupWalk.latitude,
+                      longitude: groupWalk.longitude,
+                    },
+                    title: "Group walk location",
+                    description: groupWalk.locationName,
+                    color: "green",
+                  } as MarkerData,
                 ]
               : []
           }
@@ -388,7 +410,11 @@ export default function ActiveWalkScreen() {
         >
           <ThemedButton
             onPress={() => {
-              setDialogVisible(true);
+              if (isRecording) {
+                setEndDialogVisible(true);
+              } else {
+                setStartDialogVisible(true);
+              }
               getData();
             }}
             backgroundColorName={isRecording ? "alarm" : "accent"}
@@ -530,22 +556,24 @@ export default function ActiveWalkScreen() {
           </HorizontalView>
         </ThemedView>
       </ThemedScrollView>
-      {dialogVisible && !isRecording && (
+      {startDialogVisible && !isRecording && (
         <StartWalkDialog
           groupWalks={ongoingGroupWalks}
           dogs={dogs}
-          onStart={startWalk}
-          onDismiss={() => setDialogVisible(false)}
+          onStart={(dogsParticipating, visibility, groupWalk) => {
+            return startWalk(dogsParticipating, visibilityMode, groupWalk);
+          }}
+          onDismiss={() => setStartDialogVisible(false)}
         />
       )}
-      {dialogVisible && isRecording && (
+      {endDialogVisible && isRecording && (
         <EndWalkDialog
           message={
             firstTimeout === 0
-              ? `If you wish to continue recording the walk, close this dialog. Time until automatic end: ${secondTimeout}`
+              ? `If you wish to continue recording the walk, close this dialog. Time until automatic end of the walk: ${secondTimeout}`
               : "Are you sure you want to end recording the walk?"
           }
-          onDismiss={() => setDialogVisible(false)}
+          onDismiss={() => setEndDialogVisible(false)}
           onEnd={endWalk}
         />
       )}

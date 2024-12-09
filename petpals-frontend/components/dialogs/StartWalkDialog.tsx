@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
 import { useAuth } from "@/hooks/useAuth";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
@@ -24,18 +24,18 @@ export default function StartWalkDialog(props: {
   dogs: Dog[];
   onStart: (
     dogsParticipating: string[],
-    visibility: string,
+    visibility: "Public" | "Friends" | "Private",
     groupWalk?: GroupWalk
   ) => Promise<{ success: boolean; returnValue: any }>;
   onDismiss: () => void;
 }) {
-  const [chosenGroupWalk, setChoesnGroupWalk] = useState<
+  const [chosenGroupWalk, setChosenGroupWalk] = useState<
     GroupWalk | undefined
   >();
   const [dogsParticipating, setDogsParticipating] = useState([] as string[]);
   const [visibilityMode, setVisibilityMode] = useState<
-    "public" | "friends only" | "private"
-  >("public");
+    "Public" | "Friends" | "Private"
+  >("Public");
   const [errorMessage, setErrorMessage] = useState(" ");
 
   const [isLoading, setIsLoading] = useState(false);
@@ -48,7 +48,7 @@ export default function StartWalkDialog(props: {
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToDP = useWindowDimension("height");
 
-  const submit = useCallback(async () => {
+  const submit = async () => {
     if (dogsParticipating.length === 0) {
       setErrorMessage("At least one dog needs to participate.");
       return;
@@ -59,7 +59,7 @@ export default function StartWalkDialog(props: {
 
     let result = await props.onStart(
       dogsParticipating,
-      "private",
+      visibilityMode,
       chosenGroupWalk
     );
 
@@ -70,7 +70,7 @@ export default function StartWalkDialog(props: {
     } else {
       setErrorMessage(result.returnValue);
     }
-  }, []);
+  };
 
   return (
     <ThemedDialog
@@ -105,8 +105,7 @@ export default function StartWalkDialog(props: {
                 key={"r"}
                 label="Solitary walk"
                 onPress={() => {
-                  setChoesnGroupWalk(undefined);
-                  setDogsParticipating([]);
+                  setChosenGroupWalk(undefined);
                 }}
                 color={radioButtonColor}
                 labelStyle={{ color: textColor, ...textStyle }}
@@ -141,7 +140,7 @@ export default function StartWalkDialog(props: {
                   key={elem.id + "r"}
                   label={`${new Date(elem.datetime).toLocaleTimeString(undefined, { timeStyle: "short" })} - ${elem.title}`}
                   onPress={() => {
-                    setChoesnGroupWalk(elem);
+                    setChosenGroupWalk(elem);
                     setDogsParticipating(
                       elem.participants
                         .find((item) => item.userId === userId)
@@ -157,11 +156,7 @@ export default function StartWalkDialog(props: {
                     key={elem.id + "d"}
                     header="Dogs attending"
                     dogs={props.dogs}
-                    dogsParticipating={
-                      elem.participants
-                        .find((item) => item.userId === userId)
-                        ?.dogs?.map((d) => d.dogId) ?? []
-                    }
+                    dogsParticipating={dogsParticipating}
                     onToggle={(dogId: string) => {}}
                     style={{
                       marginBottom: percentToDP(2),
@@ -189,11 +184,11 @@ export default function StartWalkDialog(props: {
             textColorName="primary"
             backgroundColorName="transparent"
             onPress={() =>
-              visibilityMode === "public"
-                ? setVisibilityMode("friends only")
-                : visibilityMode === "friends only"
-                  ? setVisibilityMode("private")
-                  : setVisibilityMode("public")
+              visibilityMode === "Public"
+                ? setVisibilityMode("Friends")
+                : visibilityMode === "Friends"
+                  ? setVisibilityMode("Private")
+                  : setVisibilityMode("Public")
             }
           >
             {visibilityMode}
