@@ -35,6 +35,7 @@ import {useColorScheme} from "@/hooks/theme/useColorScheme";
 import {ThemeColors} from "@/constants/theme/Colors";
 import {ThemedButton} from "@/components/inputs/ThemedButton";
 import TagSelector from "@/components/display/DogTagSelector";
+import BreedInputField from "@/components/inputs/BreedInputField";
 
 
 export default function EditDogProfileScreen() {
@@ -406,24 +407,30 @@ export default function EditDogProfileScreen() {
               >
                 Breed
               </ThemedText>
-              <TextInput
-                style={{
-                  paddingHorizontal: percentToDP(7),
-                  paddingVertical: percentToDP(3),
-                  borderRadius: percentToDP(5),
-                  borderWidth: 1,
-                  borderColor: themeColors.secondary,
-                  color: themeColors.textOnSecondary,
-                  fontSize: percentToDP(4),
-                  letterSpacing: 0.5,
-                  marginBottom: heightPercentageToDP(2),
-                }}
-                value={newBreed}
-                maxLength={48}
-                onChangeText={setNewBreed}
-                placeholder="Dog's Breed"
-                placeholderTextColor="#AAA"
+              <BreedInputField
+                newBreed={newBreed}
+                setNewBreed={setNewBreed}
+                themeColors={themeColors}
+                percentToDP={percentToDP}
               />
+              {/*<TextInput*/}
+              {/*  style={{*/}
+              {/*    paddingHorizontal: percentToDP(7),*/}
+              {/*    paddingVertical: percentToDP(3),*/}
+              {/*    borderRadius: percentToDP(5),*/}
+              {/*    borderWidth: 1,*/}
+              {/*    borderColor: themeColors.secondary,*/}
+              {/*    color: themeColors.textOnSecondary,*/}
+              {/*    fontSize: percentToDP(4),*/}
+              {/*    letterSpacing: 0.5,*/}
+              {/*    marginBottom: heightPercentageToDP(2),*/}
+              {/*  }}*/}
+              {/*  value={newBreed}*/}
+              {/*  maxLength={48}*/}
+              {/*  onChangeText={setNewBreed}*/}
+              {/*  placeholder="Dog's Breed"*/}
+              {/*  placeholderTextColor="#AAA"*/}
+              {/*/>*/}
 
               {/* Age */}
               <ThemedText

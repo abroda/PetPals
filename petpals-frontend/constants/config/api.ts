@@ -1,4 +1,4 @@
-export const databaseURL = "http://192.168.162.222:8080/";
+export const databaseURL = "http://192.168.246.237:8080/";
 
 export const apiPaths = {
   auth: {
@@ -62,6 +62,7 @@ export const apiPaths = {
       databaseURL + "api/dogs/" + id + "/picture",
     deleteDog: (id: string) => databaseURL + "api/dogs/" + id,
     getDogsByTagId: (tagId: string) => databaseURL + "api/dogs/tags/" + tagId,
+    getAllTags: databaseURL + "api/dogtags",
   },
   groupWalks: {
     create: databaseURL + "api/groupWalks", // POST
