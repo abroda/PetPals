@@ -33,30 +33,8 @@ export default function UserAvatar(props: {
       setAvatarUrl(null)
     }
 
-    // if (!props.imageUrl && props.imageUrl == "NoImage"){
-    //   setAvatarUrl(null);
-    // }
-    // else {
-    //     if (!props.imageUrl && props.userId) {
-    //     console.log("[UserAvatar] fetching user by id: ", props.userId);
-    //     try {
-    //       fetchUserById(props.userId).then((user)=> {setAvatarUrl(user?.imageUrl ?? null)});
-    //     } catch (error) {
-    //       console.error("[UserAvatar] Failed to fetch user data:", error);
-    //       setAvatarUrl(null); // Default to null if there's an error
-    //     }
-    //   }
-    // }
-
   }, [props.imageUrl, props.userId, avatarUrl]);
 
-
-  useEffect(() => {
-    console.log("[UserAvatar] Props changed:", {
-      userId: props.userId,
-      imageUrl: props.imageUrl,
-    });
-  }, [props.userId, props.imageUrl]);
 
 
   return (

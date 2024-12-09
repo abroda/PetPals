@@ -157,7 +157,7 @@ export default function FriendsScreen() {
           <FriendListItem
             username={item.username}
             description={item.description}
-            userId={item.id}
+            imageUrl={item.imageUrl}
           />
         )}
         contentContainerStyle={{
