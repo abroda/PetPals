@@ -44,7 +44,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-//                .setAllowedOriginPatterns("http://localhost:*")
+                .setAllowedOriginPatterns("http://localhost:*")
                 .withSockJS();
     }
 
@@ -66,7 +66,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             public Message<?> preSend(Message<?> message, MessageChannel channel) {
                 StompHeaderAccessor accessor =
                         MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-
+                System.out.println("HERE!");
                 if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
                     String authHeader = accessor.getFirstNativeHeader("Authorization");
                     System.out.println("Authorization Header: " + authHeader);
@@ -77,9 +77,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     if (authHeader == null || !jwtService.isTokenValid(token, userDetails)) {
                         throw new IllegalArgumentException("Invalid Authorization Token");
                     }
-
-//                    accessor.setUser((Principal) userDetails);
-                    System.out.println("Here!");
                 }
                 return message;
             }

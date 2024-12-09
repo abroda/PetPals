@@ -11,6 +11,7 @@ import {useAuth} from "@/hooks/useAuth";
 import HorizontalView from "@/components/basic/containers/HorizontalView";
 import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
 import {useThemeColor} from "@/hooks/theme/useThemeColor";
+import {useWebSocket} from "@/context/WebSocketContext";
 
 export default function ChatScreen() {
     const path = usePathname();
@@ -25,6 +26,7 @@ export default function ChatScreen() {
     const {userId, authToken} = useAuth()
     const tertiaryColor = useThemeColor("tertiary");
     const primaryColor = useThemeColor("primary");
+    const {sendMessage} = useWebSocket();
 
     // Fetch messages when the component loads
     useEffect(() => {
@@ -111,7 +113,7 @@ export default function ChatScreen() {
                     onChangeText={setInputMessage}
                     width={75}
                 />
-                <ThemedButton onPress={() => console.log("send message")} shape={"round"}
+                <ThemedButton onPress={() => sendMessage(chatroomId, inputMessage, setInputMessage)} shape={"round"}
                               style={{width: percentToDP(16), height: percentToDP(16)}}
                               iconSource={() => <ThemedIcon size={30} name={"send"}
                                                             colorName={"textOnPrimary"}></ThemedIcon>}

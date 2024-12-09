@@ -3,11 +3,12 @@ import {Client} from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import {ChatMessageResponse, ChatroomResponse, useChat} from "@/context/ChatContext";
 import {useAuth} from "@/hooks/useAuth";
-import {apiPaths, websocketURL} from "@/constants/config/api";
+// import {apiPaths, websocketURL} from "@/constants/config/api";
 
 type ChatContextType = {
     stompClient: Client | null;
     connectWebSocket: () => void;
+    sendMessage: (chatroomId: string, inputMessage: string, setInputMessage: React.Dispatch<React.SetStateAction<string>>) => void;
 };
 
 const WebSocketContext = createContext<ChatContextType | null>(null);
@@ -15,11 +16,13 @@ const WebSocketContext = createContext<ChatContextType | null>(null);
 export const WebSocketProvider = ({children}: { children: React.ReactNode }) => {
     const [stompClient, setStompClient] = useState<Client | null>(null);
     const { chats, setChatMessages, setLatestMessages } = useChat();
-    const {authToken} = useAuth()
+    const {authToken, userId} = useAuth()
 
     const connectWebSocket = () => {
+        console.log("[WEBSOCKET] token: " + authToken)
+        console.log("[WEBSOCKET] websocketURL: http://10.182.46.5:8080/ws")
         const client = new Client({
-            webSocketFactory: () => new SockJS(websocketURL),
+            webSocketFactory: () => new SockJS('http://10.182.46.5:8080/ws'),
             connectHeaders: {
                 Authorization: `Bearer ${authToken}`,
             },
@@ -57,11 +60,31 @@ export const WebSocketProvider = ({children}: { children: React.ReactNode }) => 
         }));
     };
 
+    const sendMessage = (chatroomId: string, inputMessage: string, setInputMessage: React.Dispatch<React.SetStateAction<string>>) => {
+        if (stompClient) {
+            const messagePayload = {
+                chatroomId,
+                senderId: userId,
+                content: inputMessage,
+            };
+            console.log("MESSAGE: " + messagePayload)
+            stompClient.publish({
+                destination: '/app/chat', // Maps to the `@MessageMapping("/chat")` endpoint
+                body: JSON.stringify(messagePayload),
+            });
+
+            setInputMessage('');
+        } else {
+            console.log('WebSocket not connected');
+        }
+    };
+
     return (
         <WebSocketContext.Provider
             value={{
                 stompClient,
-                connectWebSocket
+                connectWebSocket,
+                sendMessage
             }}>
             {children}
         </WebSocketContext.Provider>

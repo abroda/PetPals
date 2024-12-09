@@ -2,6 +2,7 @@ import React, {createContext, FC, ReactNode, useContext, useState} from "react";
 import {apiPaths} from "@/constants/config/api";
 import {serverQuery} from "@/helpers/serverQuery";
 import {useAuth} from "@/hooks/useAuth";
+import {useWebSocket} from "@/context/WebSocketContext";
 
 // ChatMessageResponse.ts
 export type ChatMessageResponse = {

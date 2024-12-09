@@ -55,7 +55,9 @@ export default function FriendsScreen() {
 
     // Connect to WebSocket whenever the chat list changes
     useEffect(() => {
+        console.log("[SOCIALS] connecting to websocket - checking chats")
         if (chats.length > 0 && authToken) {
+            console.log("[SOCIALS] connecting to websocket")
             connectWebSocket();
         }
     }, [chats]);
