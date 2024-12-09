@@ -1,4 +1,4 @@
-export const databaseURL = "http://192.168.126.237:8080/";
+export const databaseURL = "http://192.168.246.237:8080/";
 
 export const apiPaths = {
   auth: {
@@ -50,6 +50,9 @@ export const apiPaths = {
   },
   dogs: {
     getDogById: (id: string) => databaseURL + "api/dogs/" + id,
+    updateDogTags: (id: string) => databaseURL + "api/dogs/" + id + "/tags", // PUT to update tags
+    getAllTags: databaseURL + "api/dogtags", // GET all tags grouped by category
+    getTagById: (id: string) => databaseURL + "api/dogtags/" + id,
     updateDog: (id: string) => databaseURL + "api/dogs/" + id,
     updateDogPicture: (id: string) =>
       databaseURL + "api/dogs/" + id + "/picture",
