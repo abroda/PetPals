@@ -29,6 +29,7 @@ import {
 // @ts-ignore
 import DogPlaceholderImage from "@/assets/images/dog_placeholder_theme-color-fair.png";
 import TagSelector from "@/components/display/DogTagSelector";
+import BreedInputField from "@/components/inputs/BreedInputField";
 
 
 
@@ -67,7 +68,7 @@ export default function NewPetScreen() {
   const fetchTags = useCallback(async () => {
     try {
       const tagsByCategory = await getAvailableTags();
-      console.log("[EditDogScreen] Fetched Tags:", tagsByCategory);
+      console.log("[Pet/New] Fetched Tags:", tagsByCategory);
 
       // Restructure the data so each category directly contains the tags
       const groupedTags = tagsByCategory.reduce(
@@ -78,11 +79,11 @@ export default function NewPetScreen() {
         },
         {}
       );
-      console.log("[EditDogScreen] Grouped Tags After Processing:", groupedTags);
+      console.log("[Pet/New] Grouped Tags After Processing:", groupedTags);
       // @ts-ignore
       setAvailableTags(groupedTags);
     } catch (error) {
-      console.error("[EditDogScreen] Failed to fetch tags:", error);
+      console.error("[Pet/New] Failed to fetch tags:", error);
     }
   }, [getAvailableTags]);
 
@@ -331,30 +332,36 @@ export default function NewPetScreen() {
                   color: themeColors.primary,
                   fontSize: percentToDP(4),
                   fontWeight: "light",
-                  marginBottom: heightPercentageToDP(-1),
+                  marginBottom: heightPercentageToDP(0),
                   marginLeft: heightPercentageToDP(3),
-                  zIndex: 2,
+                  zIndex: 10,
                 }}
               >
                 Breed
               </ThemedText>
-              <TextInput
-                style={{
-                  paddingHorizontal: percentToDP(7),
-                  paddingVertical: percentToDP(3),
-                  borderRadius: percentToDP(5),
-                  borderWidth: 1,
-                  borderColor: themeColors.secondary,
-                  color: themeColors.textOnSecondary,
-                  fontSize: percentToDP(4),
-                  letterSpacing: 0.5,
-                  marginBottom: heightPercentageToDP(2),
-                }}
-                value={newBreed}
-                maxLength={48}
-                onChangeText={setNewBreed}
-                placeholder="Dog's Breed"
-                placeholderTextColor="#AAA"
+              {/*<TextInput*/}
+              {/*  style={{*/}
+              {/*    paddingHorizontal: percentToDP(7),*/}
+              {/*    paddingVertical: percentToDP(3),*/}
+              {/*    borderRadius: percentToDP(5),*/}
+              {/*    borderWidth: 1,*/}
+              {/*    borderColor: themeColors.secondary,*/}
+              {/*    color: themeColors.textOnSecondary,*/}
+              {/*    fontSize: percentToDP(4),*/}
+              {/*    letterSpacing: 0.5,*/}
+              {/*    marginBottom: heightPercentageToDP(2),*/}
+              {/*  }}*/}
+              {/*  value={newBreed}*/}
+              {/*  maxLength={48}*/}
+              {/*  onChangeText={setNewBreed}*/}
+              {/*  placeholder="Dog's Breed"*/}
+              {/*  placeholderTextColor="#AAA"*/}
+              {/*/>*/}
+              <BreedInputField
+                newBreed={newBreed}
+                setNewBreed={setNewBreed}
+                themeColors={themeColors}
+                percentToDP={percentToDP}
               />
 
               {/* Age */}

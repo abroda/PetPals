@@ -1,5 +1,4 @@
-export const databaseURL = "http://10.182.46.5:8080/";
-export const websocketURL = "http://10.182.46.5:8080/ws"
+export const databaseURL = "http://192.168.0.104:8080/";
 
 export const apiPaths = {
   auth: {
@@ -67,6 +66,7 @@ export const apiPaths = {
       databaseURL + "api/dogs/" + id + "/picture",
     deleteDog: (id: string) => databaseURL + "api/dogs/" + id,
     getDogsByTagId: (tagId: string) => databaseURL + "api/dogs/tags/" + tagId,
+    getAllTags: databaseURL + "api/dogtags",
   },
   groupWalks: {
     create: databaseURL + "api/groupWalks", // POST
@@ -100,4 +100,3 @@ export const apiPaths = {
       databaseURL + `api/groupWalks/${walkId}/comments/${commentId}/toggleLike`, // POST
   },
 };
-

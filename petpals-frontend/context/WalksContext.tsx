@@ -15,12 +15,11 @@ import mqtt from "@taoqf/react-native-mqtt";
 import { LatLng } from "react-native-maps";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// import * as TaskManager from "expo-task-manager";
+import * as TaskManager from "expo-task-manager";
 import * as Location from "expo-location";
 import { useGroupWalks } from "@/hooks/useGroupWalks";
 import { GroupWalk, Participant } from "./GroupWalksContext";
 import { Dog } from "./DogContext";
-import { MarkerData } from "@/components/display/MainMap";
 
 // TaskManager.defineTask(
 //   "background-location-task",
@@ -31,14 +30,14 @@ import { MarkerData } from "@/components/display/MainMap";
 //       console.error("Background task error:", error);
 //       return;
 //     }
-//
+
 //     if (data && data.locations && data.locations[0]) {
 //       const location = data.locations[0];
-//
+
 //       console.log("Background publishing location to MQTT:", location);
-//
+
 //       const userId = await AsyncStorage.getItem("userId");
-//
+
 //       if (userId) {
 //         const vertex = {
 //           latitude: location.coords.latitude,
@@ -46,18 +45,18 @@ import { MarkerData } from "@/components/display/MainMap";
 //           timestamp: location.timestamp,
 //         } as PathVertex;
 //         const message = JSON.stringify(vertex);
-//
+
 //         await AsyncStorage.setItem("userLocation", message);
 //         let pathString = await AsyncStorage.getItem("walkPath");
 //         if (pathString) {
 //           let path = JSON.parse(pathString) as PathVertex[];
-//
+
 //           await AsyncStorage.setItem(
 //             "walkPath",
 //             JSON.stringify([...path, vertex])
 //           );
 //         }
-//
+
 //         let backgroundMqttClient = mqtt.connect(
 //           "wss://e5d6e57acc5e4674831a0132e5180769.s1.eu.hivemq.cloud:8883/mqtt",
 //           {
@@ -66,7 +65,7 @@ import { MarkerData } from "@/components/display/MainMap";
 //             clientId: `user-${userId ?? "null"}`,
 //           }
 //         );
-//
+
 //         backgroundMqttClient.on("connect", () => {
 //           console.log("Background MQTT client connected");
 //           backgroundMqttClient.publish(`location/user/${userId}`, message, {
@@ -75,7 +74,7 @@ import { MarkerData } from "@/components/display/MainMap";
 //           });
 //           backgroundMqttClient.end();
 //         });
-//
+
 //         backgroundMqttClient.on("error", (error) => {
 //           console.error("Background MQTT client error:", error);
 //         });
@@ -87,6 +86,18 @@ import { MarkerData } from "@/components/display/MainMap";
 //     }
 //   }
 // );
+
+export type MarkerData = {
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+  title: string;
+  description: string;
+  color: string;
+  pictureURL: string;
+  linksTo: string;
+};
 
 export type MapPosition = {
   userId: string;
@@ -107,6 +118,8 @@ export type WalksContextType = {
   summaryVisible: boolean;
   firstTimeout: number;
   secondTimeout: number;
+  visibilityMode: "Public" | "Friends" | "Private";
+  dogsParticipating: string[];
   groupWalkId: string | null;
   userLocation: PathVertex;
   walkStartTime: Date | null;
@@ -120,7 +133,7 @@ export type WalksContextType = {
   ) => Promise<{ success: boolean; returnValue: any }>;
   startWalk: (
     dogsParticipating: string[],
-    visibilityMode: string,
+    visibilityMode: "Public" | "Friends" | "Private",
     groupWalk?: GroupWalk
   ) => Promise<{ success: boolean; returnValue: any }>;
   updateState: () => Promise<void>;
@@ -145,7 +158,9 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [groupWalkId, setGroupWalkId] = useState<string | null>(null);
 
   const [dogsParticipating, setDogsParticipating] = useState([] as string[]);
-  const [visibilityMode, setVisibilityMode] = useState("public");
+  const [visibilityMode, setVisibilityMode] = useState<
+    "Public" | "Friends" | "Private"
+  >("Public");
 
   const [userLocation, setUserLocation] = useState({
     latitude: 51.108592525,
@@ -168,6 +183,7 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
   // once on mount
   useEffect(() => {
     tryRestoreFromStorage().then((activeWalk) => {
+      console.log("Active walk!");
       if (activeWalk) {
         connectToMQTT();
       }
@@ -182,62 +198,62 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const tryRestoreFromStorage = async () => {
     console.log("try to restore saved state");
 
-    let walkStartTime = await AsyncStorage.getItem("walkStartTime");
-    if (!walkStartTime) {
-      setIsRecording(false);
-      console.log("no saved state");
-      return false;
-    }
+    // let walkStartTime = await AsyncStorage.getItem("walkStartTime");
+    // if (!walkStartTime) {
+    //   setIsRecording(false);
+    //   console.log("no saved state");
+    //   return false;
+    // }
 
-    setIsRecording(true);
+    // setIsRecording(true);
 
-    let date = JSON.parse(walkStartTime) as Date;
-    setWalkStartTime(date);
+    // let date = JSON.parse(walkStartTime) as Date;
+    // setWalkStartTime(date);
 
-    let userLocation = await AsyncStorage.getItem("userLocation");
-    let vertex = userLocation
-      ? (JSON.parse(userLocation) as PathVertex)
-      : ({
-          latitude: 51.108592525,
-          longitude: 17.038330603,
-          timestamp: new Date(),
-        } as PathVertex);
-    setUserLocation(vertex);
+    // let userLocation = await AsyncStorage.getItem("userLocation");
+    // let vertex = userLocation
+    //   ? (JSON.parse(userLocation) as PathVertex)
+    //   : ({
+    //       latitude: 51.108592525,
+    //       longitude: 17.038330603,
+    //       timestamp: new Date(),
+    //     } as PathVertex);
+    // setUserLocation(vertex);
 
-    let walkPath = await AsyncStorage.getItem("walkPath");
-    let path = walkPath ? (JSON.parse(walkPath) as PathVertex[]) : [];
-    setWalkPath(path);
+    // let walkPath = await AsyncStorage.getItem("walkPath");
+    // let path = walkPath ? (JSON.parse(walkPath) as PathVertex[]) : [];
+    // setWalkPath(path);
 
-    let firstTimeout = await AsyncStorage.getItem("firstTimeout");
-    let time = firstTimeout ? (JSON.parse(firstTimeout) as number) : 0;
-    setFirstTimeout(time);
+    // let firstTimeout = await AsyncStorage.getItem("firstTimeout");
+    // let time = firstTimeout ? (JSON.parse(firstTimeout) as number) : 0;
+    // setFirstTimeout(time);
 
-    let secondTimeout = await AsyncStorage.getItem("secondTimeout");
-    time = secondTimeout ? (JSON.parse(secondTimeout) as number) : 0;
-    setSecondTimeout(time);
+    // let secondTimeout = await AsyncStorage.getItem("secondTimeout");
+    // time = secondTimeout ? (JSON.parse(secondTimeout) as number) : 0;
+    // setSecondTimeout(time);
 
-    let groupWalkId = await AsyncStorage.getItem("groupWalkId");
-    let id = groupWalkId ? (JSON.parse(groupWalkId) as string) : null;
-    setGroupWalkId(id);
+    // let groupWalkId = await AsyncStorage.getItem("groupWalkId");
+    // let id = groupWalkId ? (JSON.parse(groupWalkId) as string) : null;
+    // setGroupWalkId(id);
 
-    let walkDistance = await AsyncStorage.getItem("walkDistance");
-    let dist = walkDistance ? (JSON.parse(walkDistance) as number) : 0;
-    setWalkDistance(dist);
+    // let walkDistance = await AsyncStorage.getItem("walkDistance");
+    // let dist = walkDistance ? (JSON.parse(walkDistance) as number) : 0;
+    // setWalkDistance(dist);
 
-    let summaryVisible = await AsyncStorage.getItem("summaryVisible");
-    let show = summaryVisible ? (JSON.parse(summaryVisible) as boolean) : false;
-    setSummaryVisible(show);
+    // let summaryVisible = await AsyncStorage.getItem("summaryVisible");
+    // let show = summaryVisible ? (JSON.parse(summaryVisible) as boolean) : false;
+    // setSummaryVisible(show);
 
-    if (summaryVisible) {
-      setIsRecording(false);
-    }
+    // if (summaryVisible) {
+    //   setIsRecording(false);
+    // }
 
     return true;
   };
 
   const connectToMQTT = async () => {
     const client = mqtt.connect(
-      "wss://62547b40ec024d1099d2aae7fe842f47.s1.eu.hivemq.cloud:8884/mqtt",
+      "wss://e5d6e57acc5e4674831a0132e5180769.s1.eu.hivemq.cloud:8883/mqtt",
       {
         username: "abroda",
         password: "Petpals123",
@@ -274,7 +290,8 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
     });
 
     client.on("close", () => {
-      console.log("Disconnected from MQTT broker");
+      console.log("x Disconnected from MQTT broker");
+      client.end();
     });
 
     setMqttClient(client);
@@ -312,12 +329,15 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const startWalk = async (
     dogsParticipating: string[],
-    visibilityMode: string,
+    visibilityMode: "Public" | "Friends" | "Private",
     groupWalk?: GroupWalk
   ) => {
-    console.log("start walk");
-    // reset variables
-    reset();
+    console.log("start walk with");
+    console.log("dogs: " + JSON.stringify(dogsParticipating));
+    console.log("vis: " + JSON.stringify(visibilityMode));
+    console.log("walk: " + JSON.stringify(groupWalk));
+    // initialize default variables
+    initialize();
 
     // ensure mqtt is on
     if (!mqttClient || !mqttClient.connected) {
@@ -468,7 +488,29 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
     setSummaryVisible(true);
     await AsyncStorage.setItem("summaryVisible", JSON.stringify(true));
 
+    // DELETE LATER
+    clearStorage();
+
     return { success: true, returnValue: "" };
+  };
+
+  const initialize = async () => {
+    console.log("reset");
+    await clearStorage();
+
+    // set defaults
+    setSummaryVisible(false);
+    setFirstTimeout(3 * 3600 * 1000);
+    setSecondTimeout(30 * 60 * 1000);
+
+    setWalkStartTime(new Date());
+    setWalkDistance(0);
+    setWalkPath([]);
+    setNearbyUsers([]);
+    setOtherParticipants([]);
+
+    mqttClient?.end();
+    setMqttClient(null);
   };
 
   const reset = async () => {
@@ -525,6 +567,8 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
         summaryVisible,
         firstTimeout,
         secondTimeout,
+        visibilityMode,
+        dogsParticipating,
         groupWalkId,
         userLocation,
         walkStartTime,

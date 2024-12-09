@@ -15,7 +15,9 @@ import {useWindowDimension} from "@/hooks/theme/useWindowDimension";
 export default function FriendListItem (props:{
   username: any,
   description: any,
-  userId: any })
+  userId: any,
+  imageUrl: string,
+})
 {
 
   const percentToDP = useWindowDimension("shorter");
@@ -43,7 +45,7 @@ export default function FriendListItem (props:{
         }}
       >
         {/* User avatar */}
-        <UserAvatar size={15} userId={props.userId} doLink={true}/>
+        <UserAvatar size={15} userId={props.userId} imageUrl={props.imageUrl} doLink={true}/>
 
         <View style={{
           marginHorizontal: 'auto',

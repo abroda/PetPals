@@ -91,10 +91,6 @@ export default function FindGroupWalkScreen() {
     setIsLoading(true);
     setErrorMessage("");
 
-    console.log("Filters: ");
-    console.log(tagFilter);
-    console.log(newFilter);
-
     let pageNumber = page ?? foundGroupWalks?.page.number ?? 0;
     let filter = newFilter ?? tagFilter ?? [];
     asyncAbortController.current = new AbortController();

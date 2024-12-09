@@ -22,23 +22,11 @@ import { ThemedIcon } from "../decorations/static/ThemedIcon";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
-import { PathVertex } from "@/context/WalksContext";
+import { MarkerData, PathVertex } from "@/context/WalksContext";
 import UserAvatar from "../navigation/UserAvatar";
 import { Participant } from "@/context/GroupWalksContext";
 
 Geocoder.init(Constants.expoConfig?.extra?.googleMapsApiKey);
-
-export type MarkerData = {
-  coordinates: {
-    latitude: number;
-    longitude: number;
-  };
-  title: string;
-  description: string;
-  color: string;
-  pictureURL: string;
-  linksTo: string;
-};
 
 export type MainMapProps = {
   locationName?: string;
@@ -72,7 +60,6 @@ export function MainMap({
   path,
   ...rest
 }: MainMapProps) {
-  console.log(latitude + ", " + longitude);
   let initialRegion = {
     latitude: latitude,
     longitude: longitude,
