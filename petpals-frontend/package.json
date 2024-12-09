@@ -22,7 +22,9 @@
     "@react-native-community/cli-server-api": "^16.0.0",
     "@react-native-community/datetimepicker": "8.0.1",
     "@react-navigation/native": "^6.0.2",
+    "@stomp/stompjs": "^7.0.0",
     "@taoqf/react-native-mqtt": "^3.0.4",
+    "@types/sockjs-client": "^1.5.4",
     "axios": "^1.7.7",
     "data-fns": "^1.1.0",
     "date-fns": "^4.1.0",
@@ -60,7 +62,8 @@
     "react-native-ui-lib": "^7.32.0",
     "react-native-web": "~0.19.10",
     "react-native-webview": "13.8.6",
-    "react-query": "^3.39.3"
+    "react-query": "^3.39.3",
+    "sockjs-client": "^1.6.1"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",

@@ -15,78 +15,78 @@ import mqtt from "@taoqf/react-native-mqtt";
 import { LatLng } from "react-native-maps";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import * as TaskManager from "expo-task-manager";
+// import * as TaskManager from "expo-task-manager";
 import * as Location from "expo-location";
 import { useGroupWalks } from "@/hooks/useGroupWalks";
 import { GroupWalk, Participant } from "./GroupWalksContext";
 import { Dog } from "./DogContext";
 import { MarkerData } from "@/components/display/MainMap";
 
-TaskManager.defineTask(
-  "background-location-task",
-  async ({ data, error }: { data: any; error: any }) => {
-    await AsyncStorage.setItem("backgroundTaskActive", JSON.stringify(true));
-    console.error("Background task active");
-    if (error) {
-      console.error("Background task error:", error);
-      return;
-    }
-
-    if (data && data.locations && data.locations[0]) {
-      const location = data.locations[0];
-
-      console.log("Background publishing location to MQTT:", location);
-
-      const userId = await AsyncStorage.getItem("userId");
-
-      if (userId) {
-        const vertex = {
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          timestamp: location.timestamp,
-        } as PathVertex;
-        const message = JSON.stringify(vertex);
-
-        await AsyncStorage.setItem("userLocation", message);
-        let pathString = await AsyncStorage.getItem("walkPath");
-        if (pathString) {
-          let path = JSON.parse(pathString) as PathVertex[];
-
-          await AsyncStorage.setItem(
-            "walkPath",
-            JSON.stringify([...path, vertex])
-          );
-        }
-
-        let backgroundMqttClient = mqtt.connect(
-          "wss://e5d6e57acc5e4674831a0132e5180769.s1.eu.hivemq.cloud:8883/mqtt",
-          {
-            username: "abroda",
-            password: "Petpals123",
-            clientId: `user-${userId ?? "null"}`,
-          }
-        );
-
-        backgroundMqttClient.on("connect", () => {
-          console.log("Background MQTT client connected");
-          backgroundMqttClient.publish(`location/user/${userId}`, message, {
-            qos: 0,
-            retain: false,
-          });
-          backgroundMqttClient.end();
-        });
-
-        backgroundMqttClient.on("error", (error) => {
-          console.error("Background MQTT client error:", error);
-        });
-      } else {
-        console.log("Background location: Client not connected.");
-      }
-    } else {
-      console.log("Background location: data.locations doesn't exist.");
-    }
-  }
-);
+// TaskManager.defineTask(
+//   "background-location-task",
+//   async ({ data, error }: { data: any; error: any }) => {
+//     await AsyncStorage.setItem("backgroundTaskActive", JSON.stringify(true));
+//     console.error("Background task active");
+//     if (error) {
+//       console.error("Background task error:", error);
+//       return;
+//     }
+//
+//     if (data && data.locations && data.locations[0]) {
+//       const location = data.locations[0];
+//
+//       console.log("Background publishing location to MQTT:", location);
+//
+//       const userId = await AsyncStorage.getItem("userId");
+//
+//       if (userId) {
+//         const vertex = {
+//           latitude: location.coords.latitude,
+//           longitude: location.coords.longitude,
+//           timestamp: location.timestamp,
+//         } as PathVertex;
+//         const message = JSON.stringify(vertex);
+//
+//         await AsyncStorage.setItem("userLocation", message);
+//         let pathString = await AsyncStorage.getItem("walkPath");
+//         if (pathString) {
+//           let path = JSON.parse(pathString) as PathVertex[];
+//
+//           await AsyncStorage.setItem(
+//             "walkPath",
+//             JSON.stringify([...path, vertex])
+//           );
+//         }
+//
+//         let backgroundMqttClient = mqtt.connect(
+//           "wss://e5d6e57acc5e4674831a0132e5180769.s1.eu.hivemq.cloud:8883/mqtt",
+//           {
+//             username: "abroda",
+//             password: "Petpals123",
+//             clientId: `user-${userId ?? "null"}`,
+//           }
+//         );
+//
+//         backgroundMqttClient.on("connect", () => {
+//           console.log("Background MQTT client connected");
+//           backgroundMqttClient.publish(`location/user/${userId}`, message, {
+//             qos: 0,
+//             retain: false,
+//           });
+//           backgroundMqttClient.end();
+//         });
+//
+//         backgroundMqttClient.on("error", (error) => {
+//           console.error("Background MQTT client error:", error);
+//         });
+//       } else {
+//         console.log("Background location: Client not connected.");
+//       }
+//     } else {
+//       console.log("Background location: data.locations doesn't exist.");
+//     }
+//   }
+// );
 
 export type MapPosition = {
   userId: string;

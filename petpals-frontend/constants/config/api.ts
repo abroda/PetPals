@@ -1,4 +1,5 @@
-export const databaseURL = "http://192.168.0.104:8080/";
+export const databaseURL = "http://10.182.46.5:8080/";
+export const websocketURL = "http://10.182.46.5:8080/ws"
 
 export const apiPaths = {
   auth: {
@@ -29,7 +30,11 @@ export const apiPaths = {
     removeFriend: databaseURL + "api/users/remove",
     getFriends: (userId: string) => databaseURL + `api/users/${userId}/friends`,
   },
-  chats: {},
+  chats: {
+    chatrooms: databaseURL + "api/chatroom", // GET
+    latestMessages: databaseURL + "api/chatroom/messages/latest", // GET
+    messages: (chatroomId: string) => databaseURL + `api/chatroom/${chatroomId}/messages` // GET
+  },
   walks: {
     listOngoing: (userId: string) =>
       databaseURL + `api/users/${userId}/groupWalks/joined/ongoing`, // GET
@@ -95,3 +100,4 @@ export const apiPaths = {
       databaseURL + `api/groupWalks/${walkId}/comments/${commentId}/toggleLike`, // POST
   },
 };
+

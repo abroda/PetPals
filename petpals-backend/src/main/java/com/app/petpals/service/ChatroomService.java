@@ -1,13 +1,11 @@
 package com.app.petpals.service;
 
-import com.app.petpals.entity.ChatMessage;
 import com.app.petpals.entity.Chatroom;
 import com.app.petpals.entity.User;
 import com.app.petpals.exception.chat.ChatroomDataException;
 import com.app.petpals.exception.chat.ChatroomNotFoundException;
-import com.app.petpals.payload.chat.MessageRequest;
+import com.app.petpals.payload.chat.ChatroomParticipant;
 import com.app.petpals.payload.chat.ChatroomResponse;
-import com.app.petpals.payload.chat.MessageResponse;
 import com.app.petpals.repository.ChatMessageRepository;
 import com.app.petpals.repository.ChatroomRepository;
 import jakarta.transaction.Transactional;
@@ -15,7 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 public class ChatroomService {
 
     private final ChatroomRepository chatroomRepository;
-    private final ChatMessageRepository chatMessageRepository;
     private final UserService userService;
 
     public Chatroom getChatroomById(String id) {
@@ -46,7 +45,11 @@ public class ChatroomService {
             Chatroom chatroom = chatroomOptional.get();
             return ChatroomResponse.builder()
                     .chatroomId(chatroom.getId())
-                    .participants(chatroom.getUsers().stream().map(User::getId).collect(Collectors.toList()))
+                    .participants(chatroom.getUsers().stream().map((participant) -> ChatroomParticipant.builder()
+                                    .id(participant.getId())
+                                    .username(participant.getDisplayName())
+                                    .build())
+                            .collect(Collectors.toList()))
                     .build();
         } else {
             Chatroom chatroom = new Chatroom();
@@ -55,7 +58,10 @@ public class ChatroomService {
             Chatroom savedChatroom = chatroomRepository.save(chatroom);
             return ChatroomResponse.builder()
                     .chatroomId(savedChatroom.getId())
-                    .participants(savedChatroom.getUsers().stream().map(User::getId).collect(Collectors.toList()))
+                    .participants(savedChatroom.getUsers().stream().map((participant) -> ChatroomParticipant.builder()
+                            .id(participant.getId())
+                            .username(participant.getDisplayName())
+                            .build()).collect(Collectors.toList()))
                     .build();
         }
     }
@@ -68,14 +74,17 @@ public class ChatroomService {
         chatrooms.forEach(chatroom -> {
             chatroomResponses.add(ChatroomResponse.builder()
                     .chatroomId(chatroom.getId())
-                    .participants(chatroom.getUsers().stream().map(User::getId).collect(Collectors.toList()))
+                    .participants(chatroom.getUsers().stream().map((participant) -> ChatroomParticipant.builder()
+                            .id(participant.getId())
+                            .username(participant.getDisplayName())
+                            .build()).collect(Collectors.toList()))
                     .build());
         });
 
         return chatroomResponses;
     }
 
-    public void deleteChatroom(String chatId){
+    public void deleteChatroom(String chatId) {
         Chatroom chatroom = chatroomRepository.findById(chatId).orElseThrow(() -> new ChatroomNotFoundException("Chatroom not found."));
         chatroomRepository.delete(chatroom);
     }

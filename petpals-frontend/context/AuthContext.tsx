@@ -8,7 +8,7 @@ import React, {
 import { apiPaths } from "@/constants/config/api";
 import asyncStorage from "@react-native-async-storage/async-storage/src/AsyncStorage";
 import { serverQuery } from "@/helpers/serverQuery";
-import * as TaskManager from "expo-task-manager";
+// import * as TaskManager from "expo-task-manager";
 
 export type AuthContextType = {
   isLoading: boolean;
@@ -201,13 +201,13 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
     setIsProcessing(false);
 
-    TaskManager.isTaskRegisteredAsync("background-location-task").then(
-      (registered) => {
-        if (registered) {
-          TaskManager.unregisterTaskAsync("background-location-task");
-        }
-      }
-    );
+    // TaskManager.isTaskRegisteredAsync("background-location-task").then(
+    //   (registered) => {
+    //     if (registered) {
+    //       TaskManager.unregisterTaskAsync("background-location-task");
+    //     }
+    //   }
+    // );
   };
 
   const load = async () => {

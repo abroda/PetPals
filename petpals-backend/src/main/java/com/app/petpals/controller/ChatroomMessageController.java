@@ -43,7 +43,7 @@ public class ChatroomMessageController {
     }
 
     @GetMapping("/messages/latest")
-    @Operation(summary = "Get all messages for chatrooms.", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Get latest message for chatrooms.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<List<LatestMessageResponse>> getLatestChatroomMessages(@RequestParam List<String> chatroomIds) {
         List<LatestMessageResponse> messages = chatroomMessageService.getLatestChatroomMessages(chatroomIds);
         return ResponseEntity.ok(messages);

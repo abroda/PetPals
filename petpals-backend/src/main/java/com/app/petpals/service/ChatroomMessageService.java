@@ -3,6 +3,7 @@ package com.app.petpals.service;
 import com.app.petpals.entity.ChatMessage;
 import com.app.petpals.entity.Chatroom;
 import com.app.petpals.entity.User;
+import com.app.petpals.payload.chat.ChatroomParticipant;
 import com.app.petpals.payload.chat.LatestMessageResponse;
 import com.app.petpals.payload.chat.MessageRequest;
 import com.app.petpals.payload.chat.MessageResponse;
@@ -40,7 +41,10 @@ public class ChatroomMessageService {
             lastMessages.add(LatestMessageResponse.builder()
                     .chatroomId(chatroomId)
                     .latestMessage(chatMessage != null ? MessageResponse.builder()
-                            .senderId(chatMessage.getSender().getId())
+                            .sender(ChatroomParticipant.builder()
+                                    .id(chatMessage.getSender().getId())
+                                    .username(chatMessage.getSender().getDisplayName())
+                                    .build())
                             .sendAt(chatMessage.getSentAt().toString())
                             .content(chatMessage.getContent())
                             .build() : null)
@@ -66,7 +70,10 @@ public class ChatroomMessageService {
         return MessageResponse.builder()
                 .content(chatMessage.getContent())
                 .sendAt(chatMessage.getSentAt().toString())
-                .senderId(chatMessage.getSender().getId())
+                .sender(ChatroomParticipant.builder()
+                        .id(chatMessage.getSender().getId())
+                        .username(chatMessage.getSender().getDisplayName())
+                        .build())
                 .build();
     }
 }
