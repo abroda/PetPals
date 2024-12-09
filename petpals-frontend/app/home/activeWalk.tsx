@@ -3,66 +3,38 @@ import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { ThemedText } from "@/components/basic/ThemedText";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
-import JoinDialog from "@/components/dialogs/JoinDialog";
-import ParticipantsDialog from "@/components/dialogs/ParticipantsDialog";
 import { MainMap } from "@/components/display/MainMap";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
-import UserAvatar from "@/components/navigation/UserAvatar";
 import ThemedToast from "@/components/popups/ThemedToast";
 import { Dog } from "@/context/DogContext";
 import { GroupWalk, Participant } from "@/context/GroupWalksContext";
 import { PathVertex } from "@/context/WalksContext";
-import { countToString } from "@/helpers/countToString";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { useAuth } from "@/hooks/useAuth";
 import { useGroupWalks } from "@/hooks/useGroupWalks";
 import { useWalks } from "@/hooks/useWalks";
-import {
-  Href,
-  router,
-  useFocusEffect,
-  useLocalSearchParams,
-  useNavigation,
-} from "expo-router";
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
-import { Pressable } from "react-native";
-import { RefreshControl, TouchableOpacity } from "react-native-gesture-handler";
+import { useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import * as Location from "expo-location";
-import { DogPicker } from "@/components/inputs/DogPicker";
 import PetAvatar from "@/components/navigation/PetAvatar";
-import { LatLng } from "react-native-maps";
 import StartWalkDialog from "@/components/dialogs/StartWalkDialog";
 import EndWalkDialog from "@/components/dialogs/EndWalkDialog";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ActiveWalkScreen() {
   const walkId = useLocalSearchParams().walkId as string | undefined;
-  const [groupWalk, setGroupWalk] = useState<GroupWalk | null>(null);
+
+  const [ongoingGroupWalks, setOngoingGroupWalks] = useState<GroupWalk[]>([]);
+  const [groupWalk, setGroupWalk] = useState<GroupWalk | null>();
   const [dogs, setDogs] = useState([] as Dog[]);
   const [dogsParticipating, setDogsParticipating] = useState([] as string[]);
+  const [visibilityMode, setVisibilityMode] = useState("public");
 
-  const [isRecording, setIsRecording] = useState(false);
-  const [joined, setJoined] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
-  const [summaryVisible, setSummaryVisible] = useState(false);
-
-  const [latitude, setLatitude] = useState(51.108592525);
-  const [longitude, setLongitude] = useState(17.038330603);
-
-  const [walkStartTime, setWalkStartTime] = useState<Date | null>(null);
-  const [distanceWalked, setDistanceWalked] = useState(2.31);
-  const [currentPath, setCurrentPath] = useState([] as PathVertex[]);
-  const [participants, setParticipants] = useState([] as Participant[]);
-  const [activeUsers, setActiveUsers] = useState([] as Participant[]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -70,9 +42,27 @@ export default function ActiveWalkScreen() {
 
   const [refreshOnFocus, setRefreshOnFocus] = useState(false);
 
-  const { startWalk, pauseWalk, endWalk, sendLocation, getActiveUsers } =
-    useWalks();
-  const { getGroupWalk, getUsersDogs } = useGroupWalks();
+  const {
+    permissionsGranted,
+    isRecording,
+    summaryVisible,
+    firstTimeout,
+    secondTimeout,
+    groupWalkId,
+    userLocation,
+    walkStartTime,
+    walkDistance,
+    walkPath,
+    nearbyUsers,
+    otherParticipants,
+    checkLocationPermissions,
+    getOngoingGroupWalks,
+    startWalk,
+    updateState,
+    endWalk,
+    reset,
+  } = useWalks();
+  const { getGroupWalk, getUsersDogs, getGroupWalks } = useGroupWalks();
   const { userId } = useAuth();
 
   const headerColor = useThemeColor("primary");
@@ -83,50 +73,25 @@ export default function ActiveWalkScreen() {
   const heightPercentToDP = useWindowDimension("height");
   const widthPercentToDP = useWindowDimension("width");
 
+  // on mount
   useEffect(() => {
-    getData();
+    checkLocationPermissions();
+
+    if (isRecording) {
+      getData();
+    }
 
     return () => {
       asyncAbortController.current?.abort();
     };
   }, []);
 
-  useEffect(() => {
-    async function getCurrentLocation() {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setErrorMessage("Permission to access location was denied");
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      setLatitude(location.coords.latitude);
-      setLongitude(location.coords.longitude);
-    }
-
-    getCurrentLocation();
-  }, []);
-
-  useFocusEffect(() => {
-    if (refreshOnFocus && !isLoading) {
-      getData();
-      setRefreshOnFocus(false);
-    }
-
-    return () => {
-      setRefreshOnFocus(!isLoading);
-    };
-  });
-
   const getData = async () => {
+    console.log("get data (dogs)");
     setIsLoading(true);
     setErrorMessage("");
 
     asyncAbortController.current = new AbortController();
-
-    let location = await Location.getCurrentPositionAsync();
-    setLatitude(location.coords.latitude);
-    setLongitude(location.coords.longitude);
 
     let result = await getUsersDogs();
 
@@ -134,10 +99,12 @@ export default function ActiveWalkScreen() {
       let dogs = result.returnValue as Dog[];
       setDogs(dogs);
 
-      if (walkId) {
+      // if recording a group walk, get only relevant walk
+      if (isRecording && groupWalkId) {
+        console.log("get data (single walk)");
         asyncAbortController.current = new AbortController();
 
-        result = await getGroupWalk(walkId, asyncAbortController.current);
+        result = await getGroupWalk(groupWalkId, asyncAbortController.current);
 
         if (result.success) {
           let walk = result.returnValue as GroupWalk;
@@ -151,6 +118,21 @@ export default function ActiveWalkScreen() {
         } else {
           setErrorMessage(result.returnValue);
         }
+      } else if (!isRecording) {
+        // if not recording, get the list of available walks
+        console.log("get data (available walks)");
+        asyncAbortController.current = new AbortController();
+
+        result = await getGroupWalks("joined", asyncAbortController.current);
+        //getOngoingGroupWalks(asyncAbortController.current);
+
+        if (result.success) {
+          let walks = result.returnValue as GroupWalk[];
+
+          setOngoingGroupWalks(walks);
+        } else {
+          setErrorMessage(result.returnValue);
+        }
       }
     } else {
       setErrorMessage(result.returnValue);
@@ -159,49 +141,32 @@ export default function ActiveWalkScreen() {
     setIsLoading(false);
   };
 
-  const startWalkRecording = async () => {
-    setIsLoading(true);
-    setErrorMessage("");
-
-    let now = new Date();
-
-    asyncAbortController.current = new AbortController();
-
-    let result = await startWalk(
-      latitude,
-      longitude,
-      dogsParticipating,
-      walkId,
-      asyncAbortController.current
-    );
-
-    if (result.success) {
-      setIsRecording(true);
-      setCurrentPath([
-        {
-          latitude: latitude,
-          longitude: longitude,
-          timestamp: now,
-        } as PathVertex,
-      ]);
-      setWalkStartTime(now);
-      setDistanceWalked(0);
-    } else {
-      setErrorMessage(result.returnValue);
+  // on focus
+  useFocusEffect(() => {
+    if (refreshOnFocus && !isLoading) {
+      checkLocationPermissions(); // check permissions -> if not -> show error message
+      getData(); // refresh dog/walk data
+      setRefreshOnFocus(false);
     }
 
-    setIsLoading(false);
-  };
+    return () => {
+      setRefreshOnFocus(!isLoading);
+    };
+  });
 
-  const pauseWalkRecording = async () => {};
+  // update locations every 2.5 seconds when recording
+  useEffect(() => {
+    let intervalId = null;
+    if (isRecording) {
+      intervalId = setInterval(updateState, 6000); // 2500);
+    }
 
-  const endWalkRecording = async () => {};
-
-  const sendCurrentLocation = async () => {
-    // TODO get location
-  };
-
-  const getUserLocations = async () => {};
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isRecording]);
 
   const getTotalDistance = () => {
     if (!walkStartTime || !isRecording) {
@@ -209,9 +174,9 @@ export default function ActiveWalkScreen() {
     }
 
     return (
-      Math.floor(distanceWalked).toString() +
+      Math.floor(walkDistance).toString() +
       "." +
-      Math.floor((distanceWalked % 1) * 10).toString() +
+      Math.floor((walkDistance % 1) * 10).toString() +
       " km"
     );
   };
@@ -246,18 +211,18 @@ export default function ActiveWalkScreen() {
 
     let diffInSecs = (new Date().valueOf() - walkStartTime.valueOf()) / 1000;
     let diffInHrs = diffInSecs / 3600;
-    let avgSpeed = distanceWalked / diffInHrs;
+    let avgSpeed = walkDistance / diffInHrs;
 
     let met =
       avgSpeed < 4
         ? 2.0 + 0.375 * avgSpeed
         : avgSpeed < 6
-        ? 3.5 + (avgSpeed - 4.0)
-        : avgSpeed < 12
-        ? 7.0 + 0.5 * (avgSpeed - 6.0)
-        : avgSpeed < 20
-        ? 10 + 0.3 * (avgSpeed - 12.0)
-        : 12.4 + 0.2 * (avgSpeed - 20.0);
+          ? 3.5 + (avgSpeed - 4.0)
+          : avgSpeed < 12
+            ? 7.0 + 0.5 * (avgSpeed - 6.0)
+            : avgSpeed < 20
+              ? 10 + 0.3 * (avgSpeed - 12.0)
+              : 12.4 + 0.2 * (avgSpeed - 20.0);
 
     let weight = 70;
 
@@ -279,7 +244,7 @@ export default function ActiveWalkScreen() {
     let diffInSecs = (new Date().valueOf() - walkStartTime.valueOf()) / 1000;
     let diffInHrs = diffInSecs / 3600;
 
-    let speed = distanceWalked / diffInHrs;
+    let speed = walkDistance / diffInHrs;
     return (
       Math.floor(speed).toString() +
       "." +
@@ -294,6 +259,13 @@ export default function ActiveWalkScreen() {
         visible={!isLoading && errorMessage.length > 0}
         message={errorMessage} // {"Check your internet connection."}
         preset="offline"
+        aboveTabBar
+      />
+      <ThemedToast
+        visible={!permissionsGranted}
+        message={"Location permissions were denied."}
+        preset="failure"
+        aboveTabBar
       />
       <ThemedScrollView
         scrollEnabled={false}
@@ -305,7 +277,7 @@ export default function ActiveWalkScreen() {
       >
         {/* HEADER */}
         <ThemedText
-          textStyleOptions={{ size: "veryBig", weight: "bold" }}
+          textStyleOptions={{ size: "big", weight: "bold" }}
           textColorName="primary"
           backgroundColorName="transparent"
           style={{
@@ -317,7 +289,7 @@ export default function ActiveWalkScreen() {
         </ThemedText>
         {/* DETAILS */}
         <ThemedText
-          textStyleOptions={{ size: "big" }}
+          textStyleOptions={{ size: "biggerMedium" }}
           style={{
             marginBottom: percentToDP(4),
             marginHorizontal: percentToDP(4),
@@ -326,8 +298,8 @@ export default function ActiveWalkScreen() {
           {!isRecording
             ? 'Press "Start" to begin recording.'
             : walkId
-            ? `Group walk: ${groupWalk?.title}`
-            : "Solitary walk"}
+              ? `Group walk: ${groupWalk?.title}`
+              : "Solitary walk"}
         </ThemedText>
         {/* PETS + VISIBILITY INDICATORS */}
         {isRecording && (
@@ -378,8 +350,8 @@ export default function ActiveWalkScreen() {
         )}
         {/* MAP */}
         <MainMap
-          latitude={latitude}
-          longitude={longitude}
+          latitude={userLocation.latitude}
+          longitude={userLocation.longitude}
           mapProps={{
             pitchEnabled: false,
             rotateEnabled: true,
@@ -398,14 +370,9 @@ export default function ActiveWalkScreen() {
                 ]
               : []
           }
-          users={
-            isRecording
-              ? [
-                  // TODO
-                ]
-              : []
-          }
-          path={isRecording ? currentPath : []}
+          nearbyUsers={nearbyUsers}
+          otherParticipants={otherParticipants}
+          path={isRecording ? walkPath : []}
         />
         {/* START/END BUTTON */}
         <ThemedView
@@ -422,7 +389,7 @@ export default function ActiveWalkScreen() {
           <ThemedButton
             onPress={() => {
               setDialogVisible(true);
-              //setIsRecording(!isRecording);
+              getData();
             }}
             backgroundColorName={isRecording ? "alarm" : "accent"}
             style={{
@@ -565,24 +532,21 @@ export default function ActiveWalkScreen() {
       </ThemedScrollView>
       {dialogVisible && !isRecording && (
         <StartWalkDialog
-          groupWalk={groupWalk}
+          groupWalks={ongoingGroupWalks}
           dogs={dogs}
-          onStart={async (
-            dogsParticipating: string[],
-            visibility: string,
-            startingGroupWalk: boolean,
-            abortController: AbortController
-          ) => await { success: false, returnValue: "Not implemented" }}
+          onStart={startWalk}
           onDismiss={() => setDialogVisible(false)}
         />
       )}
       {dialogVisible && isRecording && (
         <EndWalkDialog
-          message={""}
-          onDismiss={() => setDialogVisible(false)}
-          onSubmit={async (abortController) =>
-            await { success: false, returnValue: "TODO" }
+          message={
+            firstTimeout === 0
+              ? `If you wish to continue recording the walk, close this dialog. Time until automatic end: ${secondTimeout}`
+              : "Are you sure you want to end recording the walk?"
           }
+          onDismiss={() => setDialogVisible(false)}
+          onEnd={endWalk}
         />
       )}
       {}

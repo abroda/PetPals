@@ -4,7 +4,8 @@ import { Avatar } from "react-native-ui-lib";
 import { router } from "expo-router";
 import { useAuth } from "@/hooks/useAuth";
 import { useUser } from "@/hooks/useUser";
-import {useWindowDimension} from "@/hooks/theme/useWindowDimension";
+import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
+import { useThemeColor } from "@/hooks/theme/useThemeColor";
 
 export default function UserAvatar(props: {
   size: number;
@@ -19,15 +20,16 @@ export default function UserAvatar(props: {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const percentToDP = useWindowDimension("shorter");
 
+  const borderColor = useThemeColor("primary");
+
   useEffect(() => {
     const fetchUserImage = async () => {
-
       if (!props.imageUrl && props.userId) {
         console.log("[UserAvatar] fetching user by id: ", props.userId);
         try {
           const user = await fetchUserById(props.userId);
           // console.log("[UserAvatar] Fetching user for avatar: ", user);
-          setAvatarUrl(user.imageUrl || null); // Use fetched image URL if available
+          setAvatarUrl(user?.imageUrl ?? null); // Use fetched image URL if available
         } catch (error) {
           console.error("[UserAvatar] Failed to fetch user data:", error);
           setAvatarUrl(null); // Default to null if there's an error
@@ -43,10 +45,10 @@ export default function UserAvatar(props: {
       onPress={() =>
         props.doLink
           ? router.push(
-            loggedInUserId === props.userId
-              ? "/user/me"
-              : `/user/${props.userId}`
-          )
+              loggedInUserId === props.userId
+                ? "/user/me"
+                : `/user/${props.userId}`
+            )
           : {}
       }
       style={

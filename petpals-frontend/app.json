@@ -14,14 +14,24 @@
     },
     "ios": {
       "supportsTablet": true,
-      "userInterfaceStyle": "automatic"
+      "userInterfaceStyle": "automatic",
+      "infoPlist": {
+        "NSLocationAlwaysUsageDescription": "This app needs access to your location in the background.",
+        "UIBackgroundModes": ["location"]
+      }
     },
     "android": {
       "userInterfaceStyle": "automatic",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/logo.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "FOREGROUND_SERVICE",
+        "ACCESS_BACKGROUND_LOCATION"
+      ]
     },
     "web": {
       "bundler": "metro",

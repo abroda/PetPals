@@ -8,6 +8,7 @@ import React, {
 import { apiPaths } from "@/constants/config/api";
 import asyncStorage from "@react-native-async-storage/async-storage/src/AsyncStorage";
 import { serverQuery } from "@/helpers/serverQuery";
+import * as TaskManager from "expo-task-manager";
 
 export type AuthContextType = {
   isLoading: boolean;
@@ -70,36 +71,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       console.log("[AuthContext] User ID available in AuthContext:", userId);
     }
   }, [userId]);
-
-  // const codeRegex = "^[0-9]{6}$";
-
-  // const sendJsonQuery = (path: string, method: string, payload?: any) =>
-  //   fetch(path, {
-  //     method: method,
-  //     mode: "cors",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify(payload),
-  //   }).then((response) => response.json());
-
-  // const checkConnection = async () => {
-  //   setIsProcessing(true);
-  //   setResponseMessage("");
-
-  //   // @ts-ignore
-  //     return sendJsonQuery(apiPaths.checkConnection, "GET")
-  //     .then((_) => {
-  //       setIsProcessing(false);
-  //       return true;
-  //     })
-  //     .catch((err: Error) => {
-  //       console.error(err.message);
-  //       setResponseMessage("Check connection: " + err.message);
-  //       setIsProcessing(false);
-  //       return false;
-  //     });
-  // };
 
   const register = async (
     displayName: string,
@@ -218,32 +189,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     });
   };
 
-  // const login = async (
-  //   email: string,
-  //   password: string,
-  //   asyncAbortController?: AbortController
-  // ) => {
-  //   return await serverQuery({
-  //     path: apiPaths.auth.login,
-  //     payload: {
-  //       email: email,
-  //       password: password,
-  //     },
-  //     onOKResponse: (payload: any) => {
-  //       setUserId(payload.id);
-  //       setUserEmail(email);
-  //       setAuthToken(payload.token);
-  //       asyncStorage.setItem("userId", JSON.stringify(userId));
-  //       asyncStorage.setItem("userEmail", JSON.stringify(userEmail));
-  //       asyncStorage.setItem("authToken", JSON.stringify(authToken));
-  //       return;
-  //     },
-  //     onStart: () => setIsProcessing(true),
-  //     onEnd: () => setIsProcessing(false),
-  //     asyncAbortController: asyncAbortController,
-  //   });
-  // };
-
   const logout = async () => {
     setIsProcessing(true);
 
@@ -255,6 +200,14 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     await asyncStorage.setItem("authToken", "");
 
     setIsProcessing(false);
+
+    TaskManager.isTaskRegisteredAsync("background-location-task").then(
+      (registered) => {
+        if (registered) {
+          TaskManager.unregisterTaskAsync("background-location-task");
+        }
+      }
+    );
   };
 
   const load = async () => {

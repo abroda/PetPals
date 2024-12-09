@@ -2,7 +2,14 @@ import { TextStyleConstants } from "@/constants/theme/TextStyles";
 import { TextStyle } from "react-native";
 
 export type TextStyleOptions = {
-  size?: "tiny" | "small" | "medium" | "big" | "veryBig" | number;
+  size?:
+    | "tiny"
+    | "small"
+    | "medium"
+    | "biggerMedium"
+    | "big"
+    | "veryBig"
+    | number;
   weight?: "thin" | "light" | "regular" | "semibold" | "bold";
   font?: "default" | "logo";
 };

@@ -164,7 +164,7 @@ export default function GroupWalksScheduleScreen() {
         }}
       >
         <ThemedText
-          textStyleOptions={{ size: "veryBig", weight: "bold" }}
+          textStyleOptions={{ size: "big", weight: "bold" }}
           backgroundColorName="transparent"
           style={{
             paddingHorizontal: percentToDP(4),
@@ -188,7 +188,7 @@ export default function GroupWalksScheduleScreen() {
         >
           <HorizontalView>
             <ThemedText
-              textStyleOptions={{ size: "big" }}
+              textStyleOptions={{ size: "biggerMedium" }}
               backgroundColorName="transparent"
               style={{ marginBottom: percentToDP(5) }}
             >

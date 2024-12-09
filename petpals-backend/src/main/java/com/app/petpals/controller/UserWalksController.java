@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.ZonedDateTime;
+import java.time.temporal.TemporalAmount;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -42,6 +44,22 @@ public class UserWalksController {
                 .flatMap(dog -> dog.getJoinedWalks().stream())
                 .collect(Collectors.toSet());
         return ResponseEntity.ok(uniqueJoinedWalks.stream().map(groupWalkService::createGroupWalkResponse).collect(Collectors.toList()));
+    }
+
+    @GetMapping("/{userId}/groupWalks/joined/ongoing")
+    @Operation(summary = "Get currently ongoing group walks joined by the user.", security = @SecurityRequirement(name = "bearerAuth"))
+    private ResponseEntity<List<GroupWalkResponse>> getOngoingJoinedGroupWalks(@PathVariable("userId") String userId) {
+        User user = userService.getById(userId);
+        Set<GroupWalk> joinedWalks = user.getDogs().stream()
+                .flatMap(dog -> dog.getJoinedWalks().stream())
+                .collect(Collectors.toSet());
+        System.out.println(joinedWalks);
+//        Set<GroupWalk> uniqueJoinedWalks = user.getDogs().stream()
+//                .flatMap(dog -> dog.getJoinedWalks().stream())
+//                .filter(walk -> walk.getDatetime().isBefore(ZonedDateTime.now().plusHours(1)) && walk.getDatetime().isAfter(ZonedDateTime.now().minusMinutes(15)))
+//                .collect(Collectors.toSet());
+//        System.out.println(uniqueJoinedWalks);
+        return ResponseEntity.ok(joinedWalks.stream().map(groupWalkService::createGroupWalkResponse).collect(Collectors.toList()));
     }
 }
 

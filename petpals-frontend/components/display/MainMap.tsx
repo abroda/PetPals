@@ -23,6 +23,8 @@ import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import { PathVertex } from "@/context/WalksContext";
+import UserAvatar from "../navigation/UserAvatar";
+import { Participant } from "@/context/GroupWalksContext";
 
 Geocoder.init(Constants.expoConfig?.extra?.googleMapsApiKey);
 
@@ -49,7 +51,8 @@ export type MainMapProps = {
   mapProps?: MapViewProps;
   markers?: MarkerData[];
   pins?: MarkerData[];
-  users?: MarkerData[];
+  nearbyUsers?: (MarkerData & Participant)[];
+  otherParticipants?: (MarkerData & Participant)[];
   path?: PathVertex[];
 };
 
@@ -64,13 +67,9 @@ export function MainMap({
   mapProps,
   markers,
   pins,
-  users,
-  path = [
-    { latitude: 51.108592525, longitude: 17.038330603, timestamp: new Date() },
-    { latitude: 51.108192525, longitude: 17.038330603, timestamp: new Date() },
-    { latitude: 51.108192525, longitude: 17.038340603, timestamp: new Date() },
-    { latitude: 51.108592525, longitude: 17.038340603, timestamp: new Date() },
-  ],
+  nearbyUsers,
+  otherParticipants,
+  path,
   ...rest
 }: MainMapProps) {
   console.log(latitude + ", " + longitude);
@@ -96,6 +95,13 @@ export function MainMap({
   const mapRef = useRef<MapView | null>(null);
 
   const pathColor = useThemeColor("tertiary");
+
+  const testPath = [
+    { latitude: 51.108592525, longitude: 17.038330603, timestamp: new Date() },
+    { latitude: 51.108192525, longitude: 17.038330603, timestamp: new Date() },
+    { latitude: 51.108192525, longitude: 17.038340603, timestamp: new Date() },
+    { latitude: 51.108592525, longitude: 17.038340603, timestamp: new Date() },
+  ];
 
   const recenter = (newRegion: Region) =>
     mapRef.current?.animateToRegion(
@@ -148,15 +154,50 @@ export function MainMap({
             longitude: initialRegion.longitude,
           }}
         />
-        {
-          //path.length > 0 && (
+        {path && path.length > 0 && (
           <Polyline
             coordinates={path} //, initialRegion as LatLng]}
             lineDashPattern={[20, 7]}
             strokeColor={pathColor}
             strokeWidth={3}
-          /> //)
-        }
+          />
+        )}
+        {nearbyUsers &&
+          nearbyUsers.length > 0 &&
+          nearbyUsers.map((elem) => (
+            <Marker
+              key={elem.userId}
+              coordinate={{
+                latitude: initialRegion.latitude,
+                longitude: initialRegion.longitude,
+              }}
+            >
+              <UserAvatar
+                size={10}
+                userId={elem.userId}
+                doLink={true}
+              />
+            </Marker>
+          ))}
+
+        {otherParticipants &&
+          otherParticipants.length > 0 &&
+          otherParticipants.map((elem) => (
+            <Marker
+              key={elem.userId}
+              coordinate={{
+                latitude: initialRegion.latitude,
+                longitude: initialRegion.longitude,
+              }}
+            >
+              <UserAvatar
+                size={10}
+                userId={elem.userId}
+                doLink={true}
+                marked
+              />
+            </Marker>
+          ))}
       </MapView>
     </View>
   );

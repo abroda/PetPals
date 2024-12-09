@@ -14,25 +14,32 @@ import ThemedDialog from "./ThemedDialog";
 import { DogPicker } from "../inputs/DogPicker";
 import { Dog } from "@/context/DogContext";
 import { useWalks } from "@/hooks/useWalks";
-import { RadioButton, RadioGroup } from "react-native-ui-lib";
+import { RadioButton, RadioGroup, View } from "react-native-ui-lib";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
+import { ScrollView } from "react-native-gesture-handler";
+import HorizontalView from "../basic/containers/HorizontalView";
 
 export default function StartWalkDialog(props: {
-  groupWalk: GroupWalk | null;
+  groupWalks: GroupWalk[];
   dogs: Dog[];
   onStart: (
     dogsParticipating: string[],
     visibility: string,
-    startingGroupWalk: boolean,
-    abortController: AbortController
+    groupWalk?: GroupWalk
   ) => Promise<{ success: boolean; returnValue: any }>;
   onDismiss: () => void;
 }) {
-  const [startingGroupWalk, setStartingGroupWalk] = useState(false);
+  const [chosenGroupWalk, setChoesnGroupWalk] = useState<
+    GroupWalk | undefined
+  >();
   const [dogsParticipating, setDogsParticipating] = useState([] as string[]);
+  const [visibilityMode, setVisibilityMode] = useState<
+    "public" | "friends only" | "private"
+  >("public");
   const [errorMessage, setErrorMessage] = useState(" ");
 
   const [isLoading, setIsLoading] = useState(false);
+  const { userId } = useAuth();
 
   const radioButtonColor = useThemeColor("primary");
   const textColor = useThemeColor("text");
@@ -41,20 +48,22 @@ export default function StartWalkDialog(props: {
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToDP = useWindowDimension("height");
 
-  const asyncAbortController = useRef<AbortController | null>(null);
-
-  const start = useCallback(async () => {
+  const submit = useCallback(async () => {
     if (dogsParticipating.length === 0) {
       setErrorMessage("At least one dog needs to participate.");
+      return;
     }
 
-    asyncAbortController.current = new AbortController();
+    setIsLoading(true);
+    setErrorMessage("");
+
     let result = await props.onStart(
       dogsParticipating,
       "private",
-      false,
-      asyncAbortController.current
+      chosenGroupWalk
     );
+
+    setIsLoading(false);
 
     if (result.success) {
       props.onDismiss();
@@ -86,43 +95,110 @@ export default function StartWalkDialog(props: {
         >
           Start recording
         </ThemedText>
-        <RadioGroup>
-          <RadioButton
-            label="Group walk"
-            onPress={() => setStartingGroupWalk(true)}
-            color={radioButtonColor}
-            labelStyle={{ color: textColor, ...textStyle }}
-            selected={startingGroupWalk}
-          />
-          {startingGroupWalk && (
-            <ThemedView>
-              <ThemedText>TODO: group walk details</ThemedText>
-            </ThemedView>
-          )}
-          <RadioButton
-            label="Solitary walk"
-            onPress={() => setStartingGroupWalk(false)}
-            color={radioButtonColor}
-            labelStyle={{ color: textColor, ...textStyle }}
-            selected={!startingGroupWalk}
-          />
-          {!startingGroupWalk && (
-            <DogPicker
-              header="Dogs attending"
-              dogs={props.dogs}
-              dogsParticipating={dogsParticipating}
-              onToggle={(dogId: string) => {
-                dogsParticipating.includes(dogId)
-                  ? setDogsParticipating(
-                      dogsParticipating.filter((elem) => elem !== dogId)
-                    )
-                  : setDogsParticipating([dogId, ...dogsParticipating]);
-              }}
-              style={{ padding: percentToDP(0) }}
-            />
-          )}
-        </RadioGroup>
+        <ScrollView style={{ maxHeight: heightPercentToDP(38) }}>
+          <RadioGroup>
+            <View
+              key={"v"}
+              style={{ marginBottom: percentToDP(2) }}
+            >
+              <RadioButton
+                key={"r"}
+                label="Solitary walk"
+                onPress={() => {
+                  setChoesnGroupWalk(undefined);
+                  setDogsParticipating([]);
+                }}
+                color={radioButtonColor}
+                labelStyle={{ color: textColor, ...textStyle }}
+                selected={!chosenGroupWalk}
+              />
+              {!chosenGroupWalk && (
+                <DogPicker
+                  key={"d"}
+                  header="Dogs attending"
+                  dogs={props.dogs}
+                  dogsParticipating={dogsParticipating}
+                  onToggle={(dogId: string) => {
+                    dogsParticipating.includes(dogId)
+                      ? setDogsParticipating(
+                          dogsParticipating.filter((elem) => elem !== dogId)
+                        )
+                      : setDogsParticipating([dogId, ...dogsParticipating]);
+                  }}
+                  style={{
+                    marginBottom: percentToDP(2),
+                    marginTop: percentToDP(2),
+                  }}
+                />
+              )}
+            </View>
+            {props.groupWalks.map((elem) => (
+              <View
+                key={elem.id + "v"}
+                style={{ marginBottom: percentToDP(2) }}
+              >
+                <RadioButton
+                  key={elem.id + "r"}
+                  label={`${new Date(elem.datetime).toLocaleTimeString(undefined, { timeStyle: "short" })} - ${elem.title}`}
+                  onPress={() => {
+                    setChoesnGroupWalk(elem);
+                    setDogsParticipating(
+                      elem.participants
+                        .find((item) => item.userId === userId)
+                        ?.dogs?.map((d) => d.dogId) ?? []
+                    );
+                  }}
+                  color={radioButtonColor}
+                  labelStyle={{ color: textColor, ...textStyle }}
+                  selected={chosenGroupWalk?.id === elem.id}
+                />
+                {chosenGroupWalk?.id === elem.id && (
+                  <DogPicker
+                    key={elem.id + "d"}
+                    header="Dogs attending"
+                    dogs={props.dogs}
+                    dogsParticipating={
+                      elem.participants
+                        .find((item) => item.userId === userId)
+                        ?.dogs?.map((d) => d.dogId) ?? []
+                    }
+                    onToggle={(dogId: string) => {}}
+                    style={{
+                      marginBottom: percentToDP(2),
+                      marginTop: percentToDP(2),
+                    }}
+                  />
+                )}
+              </View>
+            ))}
+          </RadioGroup>
+        </ScrollView>
+        <HorizontalView
+          colorName="secondary"
+          style={{
+            paddingVertical: percentToDP(4),
+            paddingHorizontal: percentToDP(3),
+            borderRadius: percentToDP(4),
+            marginTop: percentToDP(3),
+            marginBottom: percentToDP(2),
+          }}
+        >
+          <ThemedText backgroundColorName="transparent">Visibility</ThemedText>
 
+          <ThemedText
+            textColorName="primary"
+            backgroundColorName="transparent"
+            onPress={() =>
+              visibilityMode === "public"
+                ? setVisibilityMode("friends only")
+                : visibilityMode === "friends only"
+                  ? setVisibilityMode("private")
+                  : setVisibilityMode("public")
+            }
+          >
+            {visibilityMode}
+          </ThemedText>
+        </HorizontalView>
         {isLoading && (
           <ThemedLoadingIndicator
             size={"large"}
@@ -149,7 +225,7 @@ export default function StartWalkDialog(props: {
               label="Start"
               textColorName="textOnPrimary"
               backgroundColorName="primary"
-              onPress={start}
+              onPress={submit}
               style={{ marginBottom: percentToDP(3), width: percentToDP(75.8) }}
             />
             <ThemedButton

@@ -19,15 +19,13 @@ import { Tag } from "../display/Tag";
 import TagList from "../lists/TagList";
 
 export default function EndWalkDialog({
-  message = "Delete content?",
+  message,
   onDismiss,
-  onSubmit,
+  onEnd,
 }: {
   message: string;
   onDismiss: () => void;
-  onSubmit: (
-    abortController: AbortController
-  ) => Promise<{ success: boolean; returnValue: any }>;
+  onEnd: () => Promise<{ success: boolean; returnValue: any }>;
 }) {
   const [errorMessage, setErrorMessage] = useState("");
   const asyncAbortController = useRef<AbortController | undefined>(undefined);
@@ -42,9 +40,8 @@ export default function EndWalkDialog({
 
   async function submit() {
     setErrorMessage("");
-    asyncAbortController.current = new AbortController();
 
-    let result = await onSubmit(asyncAbortController.current!);
+    let result = await onEnd();
 
     if (result.success) {
       onDismiss();
@@ -70,7 +67,7 @@ export default function EndWalkDialog({
           textStyleOptions={{ size: "big", weight: "bold" }}
           style={{ marginBottom: percentToDP(4) }}
         >
-          Delete content
+          End walk
         </ThemedText>
         <ThemedText>{message}</ThemedText>
         <ThemedText
@@ -81,7 +78,7 @@ export default function EndWalkDialog({
           {errorMessage}
         </ThemedText>
         <ThemedButton
-          label="Delete"
+          label="Stop recording"
           textColorName="text"
           backgroundColorName="alarm"
           style={{

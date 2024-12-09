@@ -1,4 +1,4 @@
-export const databaseURL = "http://192.168.126.237:8080/";
+export const databaseURL = "http://192.168.0.104:8080/";
 
 export const apiPaths = {
   auth: {
@@ -17,10 +17,13 @@ export const apiPaths = {
   },
   profiles: {},
   friends: {
-    getRequests: (userId: string) => databaseURL + `api/users/${userId}/friends/requests`,
+    getRequests: (userId: string) =>
+      databaseURL + `api/users/${userId}/friends/requests`,
     sendRequest: databaseURL + "api/users/friends/request",
-    acceptRequest: (requestId: string) => databaseURL + `api/users/friends/accept/${requestId}`,
-    denyRequest: (requestId: string) => databaseURL + `api/users/friends/deny/${requestId}`,
+    acceptRequest: (requestId: string) =>
+      databaseURL + `api/users/friends/accept/${requestId}`,
+    denyRequest: (requestId: string) =>
+      databaseURL + `api/users/friends/deny/${requestId}`,
     removePendingRequest: (requestId: string) =>
       databaseURL + "api/users/friends/request/" + requestId,
     removeFriend: databaseURL + "api/users/remove",
@@ -28,6 +31,8 @@ export const apiPaths = {
   },
   chats: {},
   walks: {
+    listOngoing: (userId: string) =>
+      databaseURL + `api/users/${userId}/groupWalks/joined/ongoing`, // GET
     start: databaseURL + "api/walk/start", // POST w/ initial location
     pause: databaseURL + "api/walk/pause", // POST
     end: databaseURL + "api/walk/end", // POST

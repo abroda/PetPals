@@ -19,6 +19,7 @@ export const TextStyleConstants = {
   tiny: 14,
   small: 16,
   medium: 18,
+  biggerMedium: 20,
   big: 22,
   veryBig: 28,
   // families
