@@ -1,4 +1,5 @@
-export const databaseURL = "http://192.168.0.104:8080/";
+export const databaseURL = "http://192.168.0.4:8080/";
+export const websocketURL = "http://192.168.0.4:8080/ws"
 
 export const apiPaths = {
   auth: {

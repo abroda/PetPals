@@ -3,7 +3,7 @@ import {Client} from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import {ChatMessageResponse, ChatroomResponse, useChat} from "@/context/ChatContext";
 import {useAuth} from "@/hooks/useAuth";
-// import {apiPaths, websocketURL} from "@/constants/config/api";
+import {apiPaths, websocketURL} from "@/constants/config/api";
 
 type ChatContextType = {
     stompClient: Client | null;
@@ -20,9 +20,16 @@ export const WebSocketProvider = ({children}: { children: React.ReactNode }) => 
 
     const connectWebSocket = () => {
         console.log("[WEBSOCKET] token: " + authToken)
-        console.log("[WEBSOCKET] websocketURL: http://10.182.46.5:8080/ws")
+        console.log("[WEBSOCKET] websocketURL: " + websocketURL)
         const client = new Client({
-            webSocketFactory: () => new SockJS('http://10.182.46.5:8080/ws'),
+            webSocketFactory: () => {
+                // new SockJS(websocketURL)
+                const sock = new SockJS(websocketURL)
+                sock.onerror = (error) => {
+                    console.error("[WEBSOCKET] Websocket error: " + error)
+                };
+                return sock;
+            },
             connectHeaders: {
                 Authorization: `Bearer ${authToken}`,
             },
@@ -44,6 +51,7 @@ export const WebSocketProvider = ({children}: { children: React.ReactNode }) => 
         });
         client.activate();
         setStompClient(client);
+        console.log(client.connected)
     };
 
     const handleNewMessage = (chatId: string, newMessage: ChatMessageResponse) => {

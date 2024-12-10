@@ -1,11 +1,9 @@
 package com.app.petpals.config;
 
 import com.app.petpals.service.JwtService;
-import com.app.petpals.utils.JwtHandshakeInterceptor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
@@ -24,7 +22,6 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
-import java.security.Principal;
 import java.util.List;
 
 @Configuration
