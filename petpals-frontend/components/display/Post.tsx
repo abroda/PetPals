@@ -124,7 +124,7 @@ export default function Post({ postFromFeed }: { postFromFeed: PostType }) {
           textColorName="primary"
           style={{ width: percentToDP(40) }}
           label={`${countToString(post.comments.length)} comment${
-            post.comments.length > 1 ? "s" : ""
+            post.comments.length != 1 ? "s" : ""
           }`}
           iconSource={() => (
             <ThemedIcon
@@ -141,11 +141,12 @@ export default function Post({ postFromFeed }: { postFromFeed: PostType }) {
         <HorizontalView justifyOption={"flex-end"}>
           <Pressable onPress={handlePostLike}>
             <ThemedIcon
-              size={32}
+              size={26}
               name={liked ? "heart" : "heart-outline"}
+              style={{ marginRight: percentToDP(1) }}
             />
           </Pressable>
-          <ThemedText style={{ fontSize: 24 }}>
+          <ThemedText textStyleOptions={{ size: "biggerMedium" }}>
             {countToString(post.likes.length)}
           </ThemedText>
         </HorizontalView>

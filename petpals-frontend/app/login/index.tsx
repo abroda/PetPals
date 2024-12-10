@@ -28,13 +28,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useColorScheme } from "@/hooks/theme/useColorScheme";
 import { ThemeColors } from "@/constants/theme/Colors";
 
-
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [validationMessage, setValidationMessage] = useState("");
   const [dialogVisible, setDialogVisible] = useState(false);
-
 
   const { isLoading, isProcessing, login } = useAuth();
 
@@ -81,17 +79,10 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView
-      style={{
-        flex: 1,
-        margin: 0,
-        padding: 0
-    }}
+      style={{}}
       edges={["left", "right", "bottom"]}
     >
-      <ThemedScrollView
-        style={{
-        }}
-      >
+      <ThemedScrollView style={{ paddingTop: heightPercentToPD(12) }}>
         {dialogVisible && (
           <ResetPasswordDialog
             onDismiss={() => setDialogVisible(false)}
