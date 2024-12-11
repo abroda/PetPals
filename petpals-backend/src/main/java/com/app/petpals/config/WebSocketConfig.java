@@ -17,12 +17,13 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
-import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -31,6 +32,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final Map<String, String> sessionRegistry = new ConcurrentHashMap<>();
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
@@ -45,18 +47,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setAllowedOriginPatterns("http://localhost:*")
                 .withSockJS();
     }
-
-
-//    @Override
-//    public boolean configureMessageConverters(List<MessageConverter> messageConverters) {
-//        DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
-//        resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
-//        MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
-//        converter.setObjectMapper(new ObjectMapper());
-//        converter.setContentTypeResolver(resolver);
-//        messageConverters.add(converter);
-//        return false;
-//    }
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
@@ -77,9 +67,45 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     if (authHeader == null || !jwtService.isTokenValid(token, userDetails)) {
                         throw new IllegalArgumentException("Invalid Authorization Token");
                     }
+
+                    String sessionId = accessor.getSessionId();
+                    if (sessionRegistry.containsValue(userEmail)) {
+                        // Disconnect the existing session
+                        System.out.println(">>>> SESSION ALREADY EXISTS: " + sessionId + "    " + userEmail);
+                        String existingSessionId = getKeyByValue(sessionRegistry, userEmail);
+                        if (existingSessionId != null) {
+                            System.out.println(">>>> REMOVING SESSION: " + existingSessionId);
+                            sessionRegistry.remove(existingSessionId);
+                        }
+                    }
+                    System.out.println(">>>> PUTTING NEW SESSION: " + sessionId + "    " + userEmail);
+                    sessionRegistry.put(sessionId, userEmail);
                 }
+
+                if (accessor != null && StompCommand.DISCONNECT.equals(accessor.getCommand())) {
+                    String sessionId = accessor.getSessionId();
+                    System.out.println(">>>> DISCONNECT: " + sessionId);
+                    sessionRegistry.remove(sessionId);
+                }
+
+                if (accessor != null && StompCommand.MESSAGE.equals(accessor.getCommand())) {
+                    System.out.println("Session Registry Contents: ");
+                    sessionRegistry.forEach((sessionId, userEmail) ->
+                            System.out.println("Session ID: " + sessionId + ", User Email: " + userEmail)
+                    );
+                }
+
                 return message;
             }
         });
+    }
+
+    private String getKeyByValue(Map<String, String> map, String value) {
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            if (value.equals(entry.getValue())) {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 }

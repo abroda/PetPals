@@ -21,12 +21,13 @@ import {useTextStyle} from "@/hooks/theme/useTextStyle";
 import {useWebSocket} from "@/context/WebSocketContext";
 import {useChat} from "@/context/ChatContext";
 import ChatItem from "@/components/display/Chat";
+import {usePathname} from "expo-router";
 
 
 export default function FriendsScreen() {
     const {getFriendRequests, getFriends} = useFriendship();
     const {userId, authToken} = useAuth(); // Assuming logged-in user's ID
-
+    const pathname = usePathname();
     // States
     const {receivedRequests, sentRequests, refreshRequests, friends} = useFriendship();
     const [currentTab, setCurrentTab] = useState(0);
@@ -56,9 +57,14 @@ export default function FriendsScreen() {
     useEffect(() => {
         console.log("[SOCIALS] connecting to websocket - checking chats")
         if (chats.length > 0 && authToken) {
-            console.log("[SOCIALS] connecting to websocket")
-            connectWebSocket();
-            console.log("[SOCIALS] connection call ended")
+            if (stompClient) {
+                console.log("[SOCIALS] deactivate websocket")
+                stompClient.deactivate().then(r => connectWebSocket());
+            } else {
+                console.log("[SOCIALS] connecting to websocket")
+                connectWebSocket();
+                console.log("[SOCIALS] connection call ended")
+            }
         }
     }, [chats]);
 
@@ -84,7 +90,6 @@ export default function FriendsScreen() {
                 <ThemedText textStyleOptions={{size: "veryBig", weight: 'bold'}} backgroundColorName={"secondary"}>
                     Received Requests
                 </ThemedText>
-
                 <FlatList
                     data={receivedRequests}
                     keyExtractor={(item) => item.id}
@@ -150,68 +155,6 @@ export default function FriendsScreen() {
                     <ChatItem chatroomId={item.chatroomId} participants={item.participants}/>
                 )}
             />
-
-            {/* Button to Trigger Create Chat Modal */}
-            {/*<TouchableOpacity*/}
-            {/*    style={styles.createButton}*/}
-            {/*    onPress={() => setCreateModalVisible(true)}*/}
-            {/*>*/}
-            {/*    <Text style={styles.createButtonText}>Create New Chat</Text>*/}
-            {/*</TouchableOpacity>*/}
-
-            {/* Modal for Creating a New Chat */}
-            {/*<Modal visible={createModalVisible} animationType="slide" transparent>*/}
-            {/*    <View style={styles.modalContainer}>*/}
-            {/*        <View style={styles.modalContent}>*/}
-            {/*            <Text style={styles.modalTitle}>Create New Chat</Text>*/}
-            {/*            <TextInput*/}
-            {/*                style={styles.input}*/}
-            {/*                placeholder="Enter User ID"*/}
-            {/*                value={newChatUserId}*/}
-            {/*                onChangeText={setNewChatUserId}*/}
-            {/*            />*/}
-            {/*            <View style={styles.modalButtons}>*/}
-            {/*                <Button title="Create" onPress={createChat}/>*/}
-            {/*                <Button*/}
-            {/*                    title="Cancel"*/}
-            {/*                    color="red"*/}
-            {/*                    onPress={() => setCreateModalVisible(false)}*/}
-            {/*                />*/}
-            {/*            </View>*/}
-            {/*        </View>*/}
-            {/*    </View>*/}
-            {/*</Modal>*/}
-
-            {/*Modal for Deleting a Chat*/}
-            {/*<Modal visible={deleteModalVisible} animationType="slide" transparent>*/}
-            {/*    <View style={styles.modalContainer}>*/}
-            {/*        <View style={styles.modalContent}>*/}
-            {/*            <Text style={styles.modalTitle}>Delete Chat</Text>*/}
-            {/*            <View style={styles.modalButtons}>*/}
-            {/*                <Button title="Delete" onPress={deleteChatroom}/>*/}
-            {/*                <Button*/}
-            {/*                    title="Cancel"*/}
-            {/*                    color="red"*/}
-            {/*                    onPress={() => setDeleteModalVisible(false)}*/}
-            {/*                />*/}
-            {/*            </View>*/}
-            {/*        </View>*/}
-            {/*    </View>*/}
-            {/*</Modal>*/}
-            {/*<ThemedText*/}
-            {/*  textStyleOptions={{ size: "veryBig", weight: "bold" }}*/}
-            {/*  backgroundColorName={"secondary"}*/}
-            {/*>*/}
-            {/*  Messages*/}
-            {/*</ThemedText>*/}
-            {/*<FlatList*/}
-            {/*  data={["Alice", "Bob", "Charlie"]} // Replace with actual chat data*/}
-            {/*  keyExtractor={(item, index) => index.toString()}*/}
-            {/*  renderItem={({ item }) => <ChatListItem username={item} />}*/}
-            {/*  contentContainerStyle={{*/}
-            {/*    paddingVertical: widthPercentageToDP(5),*/}
-            {/*  }}*/}
-            {/*/>*/}
         </ThemedView>
     )
 
@@ -225,13 +168,6 @@ export default function FriendsScreen() {
                 paddingHorizontal: widthPercentageToDP(5),
             }}
         >
-            {/*<ThemedText*/}
-            {/*  textStyleOptions={{ size: "veryBig", weight: "bold" }}*/}
-            {/*  backgroundColorName={"tertiary"}*/}
-            {/*>*/}
-            {/*  Friends*/}
-            {/*</ThemedText>*/}
-
             <FlatList
                 data={friends} // Use friends from FriendshipContext
                 keyExtractor={(item) => item.id} // Ensure each friend has a unique ID
@@ -240,6 +176,7 @@ export default function FriendsScreen() {
                         username={item.username}
                         description={item.description}
                         userId={item.id}
+                        imageUrl={item.imageUrl}
                     />
                 )}
                 contentContainerStyle={{}}

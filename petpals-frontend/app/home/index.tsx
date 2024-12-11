@@ -23,6 +23,7 @@ import AppHeader from "@/components/decorations/static/AppHeader";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 import { ColorName } from "react-native-ui-lib";
 import themeContext from "@react-navigation/native/src/theming/ThemeContext";
+import {useWebSocket} from "@/context/WebSocketContext";
 
 export default function HomeScreen() {
   const [notificationsVisible, setNotificationsVisible] = useState(false);

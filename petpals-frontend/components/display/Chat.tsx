@@ -10,6 +10,7 @@ import {View} from "react-native-ui-lib";
 import {widthPercentageToDP} from "react-native-responsive-screen";
 import {ThemeColors} from "@/constants/theme/Colors";
 import {useColorScheme} from "@/hooks/theme/useColorScheme";
+import {useEffect} from "react";
 
 export default function ChatItem(props: ChatroomResponse) {
     const percentToDP = useWindowDimension("shorter");
@@ -18,6 +19,9 @@ export default function ChatItem(props: ChatroomResponse) {
     const {latestMessages} = useChat()
     const colorScheme = useColorScheme();
     const themeColors = ThemeColors[colorScheme];
+    useEffect(() => {
+        console.log("LAST MESSAGE: ", latestMessages)
+    }, []);
 
     return (
         <Pressable
@@ -75,7 +79,7 @@ export default function ChatItem(props: ChatroomResponse) {
                             lineHeight: widthPercentageToDP(3.5)
                         }}
                                     numberOfLines={1}
-                                    backgroundColorName={"transparent"}>{latestMessages[props.chatroomId]?.sender.username + ': ' + latestMessages[props.chatroomId]?.content || 'No messages yet'}</ThemedText>
+                                    backgroundColorName={"transparent"}>{latestMessages[props.chatroomId] != null ? (latestMessages[props.chatroomId]?.sender.username + ': ' + latestMessages[props.chatroomId]?.content) : 'No messages yet'}</ThemedText>
                         <ThemedText
                             style={{fontSize: widthPercentageToDP(2.5), lineHeight: widthPercentageToDP(3.5)}}
                             backgroundColorName={"transparent"}>{latestMessages[props.chatroomId]?.sendAt ? new Date(latestMessages[props.chatroomId]?.sendAt).toLocaleTimeString() : ''}</ThemedText>

@@ -48,6 +48,7 @@ export type ChatContextType = {
     setLatestMessages: React.Dispatch<Record<string, ChatMessageResponse | null>>;
     getChats: () => void;
     fetchMessages: (hasMore: boolean, setHasMore: React.Dispatch<boolean>, page: number, chatroomId: string, setIsLoading: React.Dispatch<boolean>, reset: boolean) => void;
+    getOrCreateChat: (otherUserId: string) => Promise<{ success: boolean, returnValue: any }>
 };
 
 export const ChatContext = createContext<ChatContextType | null>(null);
@@ -131,6 +132,20 @@ export const ChatProvider: FC<{ children: ReactNode }> = ({children}) => {
         }
     };
 
+    const getOrCreateChat = async (otherUserId: string): Promise<{ success: boolean, returnValue: any }> => {
+        return await serverQuery({
+            path: apiPaths.chats.chatrooms,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${authToken ?? ""}`,
+            },
+            payload: {
+                userIds: [userId, otherUserId]
+            }
+        });
+    }
+
     return (
         <ChatContext.Provider
             value={{
@@ -141,7 +156,8 @@ export const ChatProvider: FC<{ children: ReactNode }> = ({children}) => {
                 latestMessages,
                 setLatestMessages,
                 getChats,
-                fetchMessages
+                fetchMessages,
+                getOrCreateChat
             }}
         >
             {children}

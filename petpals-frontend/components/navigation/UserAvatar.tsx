@@ -28,7 +28,7 @@ export default function UserAvatar(props: {
 
   useEffect(() => {
     if (props.imageUrl) {
-      console.log("[UserAvatar] got valid imageUrl:", props.imageUrl);
+      // console.log("[UserAvatar] got valid imageUrl:", props.imageUrl);
       setAvatarUrl(props.imageUrl);
     } else {
       setAvatarUrl(null);

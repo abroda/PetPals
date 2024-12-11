@@ -31,9 +31,9 @@ export const apiPaths = {
     getFriends: (userId: string) => databaseURL + `api/users/${userId}/friends`,
   },
   chats: {
-    chatrooms: databaseURL + "api/chatroom", // GET
+    chatrooms: databaseURL + "api/chatroom", // GET, POST
     latestMessages: databaseURL + "api/chatroom/messages/latest", // GET
-    messages: (chatroomId: string) => databaseURL + `api/chatroom/${chatroomId}/messages` // GET
+    messages: (chatroomId: string) => databaseURL + `api/chatroom/${chatroomId}/messages`, // GET
   },
   walks: {
     listOngoing: (userId: string) =>
