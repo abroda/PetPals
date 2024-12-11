@@ -60,7 +60,9 @@ public class PostCommentController {
     @PostMapping("/{postId}/comments")
     @Operation(summary = "Add new post comment.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<PostCommentResponse> addPostComment(@PathVariable("postId") String postId, @RequestBody PostCommentAddRequest request) {
-        PostComment postComment = postCommentService.addComment(postId, request);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User authUser = (User) auth.getPrincipal();
+        PostComment postComment = postCommentService.addComment(postId, request, authUser.getId());
         return ResponseEntity.ok(getPostCommentResponseResponse(postComment));
     }
 

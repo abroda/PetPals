@@ -43,10 +43,10 @@ public class PostService {
     }
 
     @Transactional
-    public Post addPost(PostAddRequest request) {
+    public Post addPost(PostAddRequest request, String userId) {
         if (request.getTitle() == null) throw new PostDataException("Post title is required.");
-        if (request.getUserId() == null) throw new PostDataException("Creator id is required.");
-        User creator = userService.getById(request.getUserId());
+        if (userId == null) throw new PostDataException("Creator id is required.");
+        User creator = userService.getById(userId);
         Post post = new Post();
         post.setTitle(request.getTitle());
         post.setDescription(request.getDescription());

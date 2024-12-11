@@ -42,8 +42,8 @@ public class PostCommentService {
     }
 
     @Transactional
-    public PostComment addComment(String postId, PostCommentAddRequest request) {
-        User user = userService.getById(request.getUserId());
+    public PostComment addComment(String postId, PostCommentAddRequest request, String userId) {
+        User user = userService.getById(userId);
         Post post = postService.getPostById(postId);
         PostComment newComment = new PostComment();
         newComment.setContent(request.getContent());

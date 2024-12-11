@@ -70,7 +70,9 @@ public class PostController {
     @PostMapping()
     @Operation(summary = "Add new post.", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<PostResponse> addPost(@RequestBody PostAddRequest request) {
-        Post post = postService.addPost(request);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User authUser = (User) auth.getPrincipal();
+        Post post = postService.addPost(request, authUser.getId());
         return ResponseEntity.ok(getPostResponse(post));
     }
 
