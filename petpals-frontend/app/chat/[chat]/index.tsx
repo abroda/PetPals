@@ -12,6 +12,7 @@ import HorizontalView from "@/components/basic/containers/HorizontalView";
 import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
 import {useThemeColor} from "@/hooks/theme/useThemeColor";
 import {useWebSocket} from "@/context/WebSocketContext";
+import UserAvatar from "@/components/navigation/UserAvatar";
 
 export default function ChatScreen() {
     const path = usePathname();
@@ -60,19 +61,26 @@ export default function ChatScreen() {
                             <ThemedView
                                 colorName={"transparent"}
                                 style={[{
-                                    flexDirection: 'row',
                                     marginVertical: 5,
-                                    paddingHorizontal: 10
+                                    paddingHorizontal: 10,
+                                    alignItems: "flex-end"
                                 }, item.sender.id === userId ? {
                                     justifyContent: 'flex-end',
-                                    alignSelf: 'flex-end'
+                                    alignSelf: 'flex-end',
+                                    flexDirection: 'row-reverse',
                                 } : {
                                     justifyContent: 'flex-start',
-                                    alignSelf: 'flex-start'
+                                    alignSelf: 'flex-start',
+                                    flexDirection: 'row',
                                 }]}>
+                                <UserAvatar size={10}
+                                            userId={item.sender.id}
+                                            imageUrl={item.sender.imageUrl}
+                                            style={{ marginHorizontal: 5 }}
+                                            doLink={true}/>
                                 <ThemedView style={[{
-                                    maxWidth: '70%',
-                                    padding: 10,
+                                    maxWidth: percentToDP(70),
+                                    padding: percentToDP(2),
                                     borderRadius: 15,
                                 }, item.sender.id === userId ? {
                                     backgroundColor: tertiaryColor,
@@ -81,18 +89,18 @@ export default function ChatScreen() {
                                     <ThemedText backgroundColorName={"transparent"}
                                                 style={[item.sender.id === userId ? {
                                                     color: "#fff",
-                                                    textAlign: "right"
-                                                } : {color: tertiaryColor}, {fontSize: 16}]}>{item.sender.username}</ThemedText>
+                                                    // textAlign: "right"
+                                                } : {color: tertiaryColor}, {fontSize: percentToDP(4)}]}>{item.sender.username}</ThemedText>
                                     <ThemedText backgroundColorName={"transparent"}
                                                 style={[item.sender.id === userId ? {
                                                     color: "#fff",
-                                                    textAlign: "right"
-                                                } : {color: tertiaryColor}, {fontSize: 20}]}>{item.content}</ThemedText>
+                                                    // textAlign: "right"
+                                                } : {color: tertiaryColor}, {fontSize: percentToDP(5)}]}>{item.content}</ThemedText>
                                     <ThemedText
                                         backgroundColorName={"transparent"} style={[item.sender.id === userId ? {
                                         color: "#fff",
                                         textAlign: "right"
-                                    } : {color: tertiaryColor}, {fontSize: 12}]}>{new Date(item.sendAt).toLocaleTimeString()}</ThemedText>
+                                    } : {color: tertiaryColor}, {fontSize: percentToDP(3)}]}>{new Date(item.sendAt).toLocaleTimeString()}</ThemedText>
                                 </ThemedView>
                             </ThemedView>
                         )
