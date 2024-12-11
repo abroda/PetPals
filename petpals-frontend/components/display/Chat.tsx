@@ -60,19 +60,6 @@ export default function ChatItem(props: ChatroomResponse) {
                     >
                         {props.participants.filter((participant) => participant.id !== userId).map((participant) => participant.username)[0]}
                     </ThemedText>
-
-                    {/* Description */}
-                    {/*<ThemedText*/}
-                    {/*    style={{*/}
-                    {/*        fontSize: widthPercentageToDP(3.5),*/}
-                    {/*        lineHeight: widthPercentageToDP(3.5),*/}
-                    {/*        width: percentToDP(60),*/}
-                    {/*    }}*/}
-                    {/*    textColorName="textOnSecondary"*/}
-                    {/*    backgroundColorName={"secondary"}*/}
-                    {/*>*/}
-                    {/*    {props.description || "No description available"}*/}
-                    {/*</ThemedText>*/}
                     <ThemedView style={{
                         flex: 1,
                         flexDirection: "row",
@@ -90,7 +77,7 @@ export default function ChatItem(props: ChatroomResponse) {
                                     numberOfLines={1}
                                     backgroundColorName={"transparent"}>{latestMessages[props.chatroomId]?.sender.username + ': ' + latestMessages[props.chatroomId]?.content || 'No messages yet'}</ThemedText>
                         <ThemedText
-                            style={{fontSize: widthPercentageToDP(3.5), lineHeight: widthPercentageToDP(3.5)}}
+                            style={{fontSize: widthPercentageToDP(2.5), lineHeight: widthPercentageToDP(3.5)}}
                             backgroundColorName={"transparent"}>{latestMessages[props.chatroomId]?.sendAt ? new Date(latestMessages[props.chatroomId]?.sendAt).toLocaleTimeString() : ''}</ThemedText>
                     </ThemedView>
                 </View>
