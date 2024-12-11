@@ -1,4 +1,4 @@
-import {FlatList, TouchableOpacity, View} from "react-native";
+import {FlatList, View} from "react-native";
 import {ThemedView} from "@/components/basic/containers/ThemedView";
 import {SegmentedControl} from "react-native-ui-lib";
 import FriendListItem from "@/components/display/FriendListItem";
@@ -18,7 +18,6 @@ import {ThemedText} from "@/components/basic/ThemedText";
 import {useColorScheme} from "@/hooks/theme/useColorScheme";
 import {ThemeColors} from "@/constants/theme/Colors";
 import {useTextStyle} from "@/hooks/theme/useTextStyle";
-import {Href, router} from "expo-router";
 import {useWebSocket} from "@/context/WebSocketContext";
 import {useChat} from "@/context/ChatContext";
 import ChatItem from "@/components/display/Chat";
@@ -26,15 +25,15 @@ import ChatItem from "@/components/display/Chat";
 
 export default function FriendsScreen() {
     const {getFriendRequests, getFriends} = useFriendship();
-    const {userId,authToken} = useAuth(); // Assuming logged-in user's ID
+    const {userId, authToken} = useAuth(); // Assuming logged-in user's ID
 
     // States
     const {receivedRequests, sentRequests, refreshRequests, friends} = useFriendship();
     const [currentTab, setCurrentTab] = useState(0);
 
     //Chats
-    const { stompClient, connectWebSocket } = useWebSocket();
-    const { chats, getChats} = useChat()
+    const {stompClient, connectWebSocket} = useWebSocket();
+    const {chats, getChats} = useChat()
 
     const percentToDP = useWindowDimension("shorter");
     const heighPercentToDP = useWindowDimension("height");
@@ -59,6 +58,7 @@ export default function FriendsScreen() {
         if (chats.length > 0 && authToken) {
             console.log("[SOCIALS] connecting to websocket")
             connectWebSocket();
+            console.log("[SOCIALS] connection call ended")
         }
     }, [chats]);
 
@@ -66,6 +66,7 @@ export default function FriendsScreen() {
     useEffect(() => {
         return () => {
             if (stompClient) {
+                console.log("[SOCIALS] deactivate websocket")
                 stompClient.deactivate();
             }
         };

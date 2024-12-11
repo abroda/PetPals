@@ -36,6 +36,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/user");
         registry.setApplicationDestinationPrefixes("/app");
+
     }
 
     @Override
@@ -45,25 +46,27 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .withSockJS();
     }
 
-    @Override
-    public boolean configureMessageConverters(List<MessageConverter> messageConverters) {
-        DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
-        resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
-        MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
-        converter.setObjectMapper(new ObjectMapper());
-        converter.setContentTypeResolver(resolver);
-        messageConverters.add(converter);
-        return false;
-    }
+
+//    @Override
+//    public boolean configureMessageConverters(List<MessageConverter> messageConverters) {
+//        DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
+//        resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
+//        MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
+//        converter.setObjectMapper(new ObjectMapper());
+//        converter.setContentTypeResolver(resolver);
+//        messageConverters.add(converter);
+//        return false;
+//    }
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
+        System.out.println("Registered interceptors");
         registration.interceptors(new ChannelInterceptor() {
             @Override
             public Message<?> preSend(Message<?> message, MessageChannel channel) {
+                System.out.println("HERE!");
                 StompHeaderAccessor accessor =
                         MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-                System.out.println("HERE!");
                 if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
                     String authHeader = accessor.getFirstNativeHeader("Authorization");
                     System.out.println("Authorization Header: " + authHeader);

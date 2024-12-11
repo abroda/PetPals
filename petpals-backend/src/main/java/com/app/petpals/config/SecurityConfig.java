@@ -40,12 +40,13 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
 
                 .authorizeHttpRequests(authorizeRequests ->
-                        authorizeRequests
-                                .requestMatchers(AUTH_WHITELIST).permitAll()
-                                .requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers("/api/account/password-reset/**").permitAll()
-                                .requestMatchers("/ws/**").permitAll()
-                                .anyRequest().authenticated()
+                                authorizeRequests
+//                                .anyRequest().permitAll()
+                                        .requestMatchers(AUTH_WHITELIST).permitAll()
+                                        .requestMatchers("/api/auth/**").permitAll()
+                                        .requestMatchers("/api/account/password-reset/**").permitAll()
+                                        .requestMatchers("/ws/**").permitAll()
+                                        .anyRequest().authenticated()
 
                 )
                 .sessionManagement(sessionManagement ->

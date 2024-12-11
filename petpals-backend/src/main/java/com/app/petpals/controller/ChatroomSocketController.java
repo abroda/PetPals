@@ -1,17 +1,12 @@
 package com.app.petpals.controller;
 
 import com.app.petpals.entity.ChatMessage;
-import com.app.petpals.entity.User;
 import com.app.petpals.payload.chat.MessageRequest;
 import com.app.petpals.service.ChatroomMessageService;
-import com.app.petpals.service.ChatroomService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 @Controller

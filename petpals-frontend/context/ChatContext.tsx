@@ -2,7 +2,6 @@ import React, {createContext, FC, ReactNode, useContext, useState} from "react";
 import {apiPaths} from "@/constants/config/api";
 import {serverQuery} from "@/helpers/serverQuery";
 import {useAuth} from "@/hooks/useAuth";
-import {useWebSocket} from "@/context/WebSocketContext";
 
 // ChatMessageResponse.ts
 export type ChatMessageResponse = {
@@ -59,7 +58,6 @@ export const ChatProvider: FC<{ children: ReactNode }> = ({children}) => {
     const [latestMessages, setLatestMessages] = useState<Record<string, ChatMessageResponse | null>>({});
 
     const getChats = async () => {
-        console.log("TOKEN: " + authToken)
         const response = await serverQuery({
             path: apiPaths.chats.chatrooms,
             method: "GET",
@@ -68,12 +66,8 @@ export const ChatProvider: FC<{ children: ReactNode }> = ({children}) => {
                 Authorization: `Bearer ${authToken ?? ""}`,
             },
         });
-        console.log("RESPONSE: " + response)
         const chatData: ChatroomResponse[] = await response.returnValue;
-        console.log("CHAT DATA: " + chatData)
         setChats(chatData)
-        console.log("YASS?")
-
         let lastMessagePath = ""
         chatData.forEach((chat: ChatroomResponse) => {
             if (lastMessagePath == "") {
@@ -83,7 +77,6 @@ export const ChatProvider: FC<{ children: ReactNode }> = ({children}) => {
             }
         })
         await getLatestMessages(lastMessagePath).then((res: Record<string, ChatMessageResponse | null>) => {
-            console.log("Obtained latest messages")
             setLatestMessages(res)
         })
     }
@@ -106,7 +99,6 @@ export const ChatProvider: FC<{ children: ReactNode }> = ({children}) => {
     }
 
     const fetchMessages = async (hasMore: boolean, setHasMore: React.Dispatch<boolean>, page: number, chatroomId: string, setIsLoading: React.Dispatch<boolean>, reset: boolean) => {
-        console.log("FETCHING MESSAGES")
         if (!hasMore) return;
         setIsLoading(true);
         try {

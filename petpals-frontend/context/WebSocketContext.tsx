@@ -1,9 +1,9 @@
 import React, {createContext, useContext, useState} from 'react';
-import {Client} from '@stomp/stompjs';
+import {Client, Stomp} from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import {ChatMessageResponse, ChatroomResponse, useChat} from "@/context/ChatContext";
+import {ChatMessageResponse, useChat} from "@/context/ChatContext";
 import {useAuth} from "@/hooks/useAuth";
-import {apiPaths, websocketURL} from "@/constants/config/api";
+import {websocketURL} from "@/constants/config/api";
 
 type ChatContextType = {
     stompClient: Client | null;
@@ -15,29 +15,20 @@ const WebSocketContext = createContext<ChatContextType | null>(null);
 
 export const WebSocketProvider = ({children}: { children: React.ReactNode }) => {
     const [stompClient, setStompClient] = useState<Client | null>(null);
-    const { chats, setChatMessages, setLatestMessages } = useChat();
+    const {chats, setChatMessages, setLatestMessages} = useChat();
     const {authToken, userId} = useAuth()
 
     const connectWebSocket = () => {
-        console.log("[WEBSOCKET] token: " + authToken)
-        console.log("[WEBSOCKET] websocketURL: " + websocketURL)
         const client = new Client({
-            webSocketFactory: () => {
-                // new SockJS(websocketURL)
-                const sock = new SockJS(websocketURL)
-                sock.onerror = (error) => {
-                    console.error("[WEBSOCKET] Websocket error: " + error)
-                };
-                return sock;
-            },
+            webSocketFactory: () => new SockJS(websocketURL),
             connectHeaders: {
                 Authorization: `Bearer ${authToken}`,
             },
-            debug: (str: any) => console.log(str),
+            debug: (str) => console.log(str),
             onConnect: () => {
                 console.log('Connected to WebSocket');
                 chats.forEach((chat) => {
-                    client.subscribe(`/user/chat/${chat.chatroomId}`, (message : any) => {
+                    client.subscribe(`/user/chat/${chat.chatroomId}`, (message) => {
                         console.log(`Message received for chatroom ${chat.chatroomId}:`, message.body);
                         const newMessage: ChatMessageResponse = JSON.parse(message.body);
                         handleNewMessage(chat.chatroomId, newMessage);
@@ -45,13 +36,12 @@ export const WebSocketProvider = ({children}: { children: React.ReactNode }) => 
                 });
             },
             onDisconnect: () => console.log('WebSocket disconnected'),
-            onStompError: (frame: any) => {
+            onStompError: (frame) => {
                 console.error('STOMP error:', frame);
             },
         });
         client.activate();
         setStompClient(client);
-        console.log(client.connected)
     };
 
     const handleNewMessage = (chatId: string, newMessage: ChatMessageResponse) => {
@@ -92,7 +82,7 @@ export const WebSocketProvider = ({children}: { children: React.ReactNode }) => 
             value={{
                 stompClient,
                 connectWebSocket,
-                sendMessage
+                sendMessage,
             }}>
             {children}
         </WebSocketContext.Provider>
