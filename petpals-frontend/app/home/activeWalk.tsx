@@ -153,10 +153,7 @@ export default function ActiveWalkScreen() {
   useEffect(() => {
     let intervalId = null;
     if (isRecording) {
-      intervalId = setInterval(
-        () => console.log("Should update"), //updateState
-        6000
-      ); // 2500);
+      intervalId = setInterval(updateState, 6000); // 2500);
     }
 
     return () => {

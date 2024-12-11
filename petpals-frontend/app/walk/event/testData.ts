@@ -1,3 +1,18 @@
+export const testPosts = [
+  {
+    id: "xxx",
+    title: "New dog in the neighbourhood",
+    description: "Who is the owner?",
+    imageUrl: "https://live.staticflickr.com/54/131841577_0e67642c02_b.jpg",
+    author: {
+      id: "a2e89b8b-53bf-4d8a-8195-1ec2abe2806e",
+      username: "Aleks",
+    },
+    comments: [],
+    likes: [],
+  },
+];
+
 export const testData = [
   {
     id: "1",
@@ -313,46 +328,50 @@ export const testComments = [
   {
     id: "c1",
     creator: {
-      id: "g",
-      name: "gggg_gg_g",
+      userId: "g",
+      username: "gggg_gg_g",
       avatarURL:
         "https://wiki-de.guildwars2.com/images/4/47/Mini_Gesetzlosen-Welpe.jpg",
     },
     content: "See you there!",
     liked: true,
+    likes: 14,
   },
   {
     id: "c2",
     creator: {
-      id: "a",
-      name: "Aaaaa Aa-A'aaaa",
+      userId: "a",
+      username: "Aaaaa Aa-A'aaaa",
       avatarURL:
         "https://wiki-de.guildwars2.com/images/4/47/Mini_Gesetzlosen-Welpe.jpg",
     },
     content: "@ffffffff - only big dogs, sorry",
     liked: false,
+    likes: 2,
   },
   {
     id: "c3",
     creator: {
-      id: "z",
-      name: "gggg_gg_g",
+      userId: "z",
+      username: "gggg_gg_g",
       avatarURL:
         "https://wiki-de.guildwars2.com/images/4/47/Mini_Gesetzlosen-Welpe.jpg",
     },
     content: "haha your profile pic suckz lol",
     liked: false,
+    likes: 0,
   },
   {
     id: "c4",
     creator: {
-      id: "f",
-      name: "ffffffff",
+      userId: "f",
+      username: "ffffffff",
       avatarURL:
         "https://wiki-de.guildwars2.com/images/4/47/Mini_Gesetzlosen-Welpe.jpg",
     },
     content:
       "Can I bring my Peruvian dog too? Abi and Tori are inseparable, I'd hate to leave her behind!",
     liked: false,
+    likes: 5,
   },
 ];

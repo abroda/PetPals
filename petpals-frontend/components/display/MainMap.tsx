@@ -1,26 +1,14 @@
-import { Text, TouchableOpacity, View, ViewProps } from "react-native-ui-lib";
-import axios from "axios";
+import { View, ViewProps } from "react-native-ui-lib";
 import { PROVIDER_GOOGLE } from "react-native-maps/lib/ProviderConstants";
 import MapView, {
-  LatLng,
   MapViewProps,
   Marker,
-  Polygon,
   Polyline,
   Region,
 } from "react-native-maps";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import Constants from "expo-constants";
-import { heightPercentageToDP } from "react-native-responsive-screen";
-import { ThemedButton } from "../inputs/ThemedButton";
-import { ThemedText } from "../basic/ThemedText";
 import Geocoder from "react-native-geocoding";
-import { ThemedScrollView } from "../basic/containers/ThemedScrollView";
-import { Href, router, useFocusEffect } from "expo-router";
-import HorizontalView from "../basic/containers/HorizontalView";
-import { ThemedIcon } from "../decorations/static/ThemedIcon";
-import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
-import { useTextStyle } from "@/hooks/theme/useTextStyle";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import { MarkerData, PathVertex } from "@/context/WalksContext";
 import UserAvatar from "../navigation/UserAvatar";
@@ -134,8 +122,7 @@ export function MainMap({
         {...mapProps}
       >
         <Marker
-          title={"some titl"}
-          description={"Some des"}
+          title={"Your location"}
           coordinate={{
             latitude: initialRegion.latitude,
             longitude: initialRegion.longitude,
@@ -143,7 +130,31 @@ export function MainMap({
         />
         {path && path.length > 0 && (
           <Polyline
-            coordinates={path} //, initialRegion as LatLng]}
+            coordinates={
+              //   [
+              //   {
+              //     latitude: 51.108592525,
+              //     longitude: 17.038330603,
+              //     timestamp: new Date(),
+              //   } as PathVertex,
+              //   {
+              //     latitude: 51.10500525,
+              //     longitude: 17.036930603,
+              //     timestamp: new Date(),
+              //   } as PathVertex,
+              //   {
+              //     latitude: 51.11020525,
+              //     longitude: 17.056930603,
+              //     timestamp: new Date(),
+              //   } as PathVertex,
+              //   ...path,
+              // ]
+              path.map((elem) => ({
+                latitude: elem.latitude,
+                longitude: elem.longitude,
+                timestamp: elem.timestamp,
+              }))
+            } //, initialRegion as LatLng]}
             lineDashPattern={[20, 7]}
             strokeColor={pathColor}
             strokeWidth={3}
@@ -151,12 +162,22 @@ export function MainMap({
         )}
         {nearbyUsers &&
           nearbyUsers.length > 0 &&
+          // [
+          //   ...nearbyUsers,
+          //   {
+          //     coordinates: {
+          //       latitude: 51.108592525,
+          //       longitude: 17.038330603,
+          //     },
+          //     userId: "bac3be56-0e5e-443a-945a-4c493fce170c",
+          //   },
+          // ]
           nearbyUsers.map((elem) => (
             <Marker
               key={elem.userId}
               coordinate={{
-                latitude: initialRegion.latitude,
-                longitude: initialRegion.longitude,
+                latitude: elem.coordinates.latitude,
+                longitude: elem.coordinates.longitude,
               }}
             >
               <UserAvatar
@@ -169,19 +190,28 @@ export function MainMap({
 
         {otherParticipants &&
           otherParticipants.length > 0 &&
+          // [
+          //   ...otherParticipants,
+          //   {
+          //     coordinates: {
+          //       latitude: 51.1092534,
+          //       longitude: 17.048330603,
+          //     },
+          //     userId: "bac3be56-0e5e-443a-945a-4c493fce170c",
+          //   },
+          // ]
           otherParticipants.map((elem) => (
             <Marker
               key={elem.userId}
               coordinate={{
-                latitude: initialRegion.latitude,
-                longitude: initialRegion.longitude,
+                latitude: elem.coordinates.latitude,
+                longitude: elem.coordinates.longitude,
               }}
             >
               <UserAvatar
                 size={10}
                 userId={elem.userId}
                 doLink={true}
-                marked
               />
             </Marker>
           ))}

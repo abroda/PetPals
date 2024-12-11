@@ -10,8 +10,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import HorizontalView from "@/components/basic/containers/HorizontalView";
 import { useEffect, useLayoutEffect } from "react";
 import "react-native-get-random-values";
-import {widthPercentageToDP} from "react-native-responsive-screen";
-import themeContext from "@react-navigation/native/src/theming/ThemeContext";
 import { useColorScheme } from "@/hooks/theme/useColorScheme";
 import { ThemeColors } from "@/constants/theme/Colors";
 
@@ -40,13 +38,18 @@ export default function WelcomeScreen() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, margin: 0, padding: 0, backgroundColor: themeColors.tertiary}}
+      style={{
+        flex: 1,
+        margin: 0,
+        padding: 0,
+        backgroundColor: themeColors.tertiary,
+      }}
       edges={["left", "right", "bottom"]}
     >
       <ThemedScrollView
         style={{
           height: heightPercentToDP(100),
-          paddingTop: percentToDP(15),
+          paddingTop: heightPercentToDP(12),
         }}
       >
         {isLoading && (

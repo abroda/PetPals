@@ -6,7 +6,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUser } from "@/hooks/useUser";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
-import UserPlaceholder from "@/assets/images/user_placeholder_theme-color-fair.png"
+//import UserPlaceholder from "@/assets/images/user_placeholder_theme-color-fair.png";
+
+const userPlaceholder = require("@/assets/images/user_placeholder_theme-color-fair.png");
 
 export default function UserAvatar(props: {
   size: number;
@@ -25,17 +27,13 @@ export default function UserAvatar(props: {
   const borderColor = useThemeColor("primary");
 
   useEffect(() => {
-
     if (props.imageUrl) {
       console.log("[UserAvatar] got valid imageUrl:", props.imageUrl);
       setAvatarUrl(props.imageUrl);
     } else {
-      setAvatarUrl(null)
+      setAvatarUrl(null);
     }
-
   }, [props.imageUrl, props.userId, avatarUrl]);
-
-
 
   return (
     <Pressable
@@ -63,7 +61,7 @@ export default function UserAvatar(props: {
         source={
           avatarUrl
             ? { uri: avatarUrl } // Use the fetched or passed avatar URL
-            : UserPlaceholder // Fallback to placeholder image
+            : userPlaceholder // Fallback to placeholder image
         }
         containerStyle={[
           { borderRadius: percentToDP(props.size) / 2 },

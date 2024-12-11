@@ -402,34 +402,68 @@ export const WalksProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const updateState = async () => {
     console.log("update state");
 
-    // try to get location data from Async Storage (from Bckg Task)
-    let location = await AsyncStorage.getItem("userLocation");
-    let active = await AsyncStorage.getItem("backgroundTaskActive");
+    const calculateDistance = (
+      lat1: number,
+      lon1: number,
+      lat2: number,
+      lon2: number
+    ): number => {
+      const R = 6371e3; // Earth's radius in meters
+      const toRadians = (degrees: number) => (degrees * Math.PI) / 180;
+      const dLat = toRadians(lat2 - lat1);
+      const dLon = toRadians(lon2 - lon1);
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRadians(lat1)) *
+          Math.cos(toRadians(lat2)) *
+          Math.sin(dLon / 2) *
+          Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c; // Distance in meters
+    };
 
-    if (location && active) {
-      console.log("Task active = " + active);
-      console.log("storage ok: location found = " + location);
-      let vertex = JSON.parse(location) as PathVertex;
-      setUserLocation(vertex);
-      setWalkPath([...walkPath, vertex]);
-    } else {
-      // if task not active -> source location
-      console.log("Task active = " + active);
-      console.log("storage error: location = " + location);
-      let loc = await Location.getCurrentPositionAsync();
-      let vertex = {
-        latitude: loc.coords.latitude,
-        longitude: loc.coords.longitude,
-        timestamp: new Date(),
-      };
-      setUserLocation(vertex);
-      setWalkPath([...walkPath, vertex]);
-      console.log("sourced location = " + JSON.stringify(vertex));
-      sendUserLocation();
+    // // try to get location data from Async Storage (from Bckg Task)
+    // let location = await AsyncStorage.getItem("userLocation");
+    // let active = await AsyncStorage.getItem("backgroundTaskActive");
+
+    // if (location && active) {
+    //   console.log("Task active = " + active);
+    //   console.log("storage ok: location found = " + location);
+    //   let vertex = JSON.parse(location) as PathVertex;
+    //   setUserLocation(vertex);
+    //   setWalkPath([...walkPath, vertex]);
+    // } else {
+    //   // if task not active -> source location
+    //   console.log("Task active = " + active);
+    //   console.log("storage error: location = " + location);
+    let loc = await Location.getCurrentPositionAsync();
+    let vertex = {
+      latitude: loc.coords.latitude,
+      longitude: loc.coords.longitude,
+      timestamp: new Date(),
+    };
+    setUserLocation(vertex);
+    setWalkPath([...walkPath, vertex]);
+
+    let dist = 0;
+
+    for (let j = 1; j < walkPath.length; j++) {
+      dist += calculateDistance(
+        walkPath[j - 1].latitude,
+        walkPath[j - 1].longitude,
+        walkPath[j].latitude,
+        walkPath[j].longitude
+      );
     }
 
-    // save to storage
-    updateStorage();
+    setWalkDistance(2.745); //dist);
+    setWalkStartTime(new Date(Date.now() - 30 * 60 * 1000 + 32426));
+    console.log("sourced location = " + JSON.stringify(vertex));
+    //   sendUserLocation();
+    // }
+
+    // // save to storage
+    // updateStorage();
   };
 
   const sendUserLocation = async () => {
