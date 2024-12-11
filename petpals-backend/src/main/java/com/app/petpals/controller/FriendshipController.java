@@ -2,6 +2,7 @@ package com.app.petpals.controller;
 
 import com.app.petpals.entity.Friendship;
 import com.app.petpals.entity.User;
+import com.app.petpals.payload.BooleanResponse;
 import com.app.petpals.payload.account.AccountResponse;
 import com.app.petpals.payload.account.FriendshipDeleteRequest;
 import com.app.petpals.payload.account.FriendshipRequest;
@@ -17,6 +18,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,6 +53,14 @@ public class FriendshipController {
                 ).collect(Collectors.toList());
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/friends/{friendId}")
+    @Operation(summary = "Check if you are friends together.", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<BooleanResponse> checkIfFriends(@PathVariable("friendId") String friendId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User authUser = (User) auth.getPrincipal();
+        return ResponseEntity.ok(BooleanResponse.builder().response(friendshipService.checkIfUsersAreFriends(authUser.getId(), friendId)).build());
     }
 
     @PostMapping("/friends/request")
@@ -118,8 +129,14 @@ public class FriendshipController {
                         .status(request.getStatus().name())
                         .senderId(request.getSender().getId())
                         .senderUsername(request.getSender().getDisplayName())
+                        .senderImageUrl(Optional.ofNullable(request.getSender().getProfilePictureId())
+                                .map(awsImageService::getPresignedUrl)
+                                .orElse(null))
                         .receiverId(request.getReceiver().getId())
                         .receiverUsername(request.getReceiver().getDisplayName())
+                        .receiverImageUrl(Optional.ofNullable(request.getReceiver().getProfilePictureId())
+                                .map(awsImageService::getPresignedUrl)
+                                .orElse(null))
                         .build())
                 .collect(Collectors.toList());
 

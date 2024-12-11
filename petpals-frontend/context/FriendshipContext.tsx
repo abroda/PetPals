@@ -9,8 +9,10 @@ export type FriendshipRequest = {
   id: string;
   senderId: string;
   senderUsername: string;
+  senderImageUrl: string;
   receiverId: string;
   receiverUsername: string;
+  receiverImageUrl: string;
   status: "PENDING" | "ACCEPTED" | "DENIED";
 };
 

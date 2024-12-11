@@ -1,6 +1,6 @@
 import {FlatList, View} from "react-native";
 import {ThemedView} from "@/components/basic/containers/ThemedView";
-import {SegmentedControl} from "react-native-ui-lib";
+import {Picker, SegmentedControl} from "react-native-ui-lib";
 import FriendListItem from "@/components/display/FriendListItem";
 import FriendRequestListItem from "@/components/display/FriendRequestListItem";
 import AppHeader from "@/components/decorations/static/AppHeader";
@@ -23,6 +23,9 @@ import {useChat} from "@/context/ChatContext";
 import ChatItem from "@/components/display/Chat";
 import {usePathname} from "expo-router";
 
+import RNPickerSelect from 'react-native-picker-select';
+import {ThemedButton} from "@/components/inputs/ThemedButton";
+import HorizontalView from "@/components/basic/containers/HorizontalView";
 
 export default function FriendsScreen() {
     const {getFriendRequests, getFriends} = useFriendship();
@@ -31,6 +34,7 @@ export default function FriendsScreen() {
     // States
     const {receivedRequests, sentRequests, refreshRequests, friends} = useFriendship();
     const [currentTab, setCurrentTab] = useState(0);
+    const [currentRequestTab, setCurrentRequestTab] = useState("received");
 
     //Chats
     const {stompClient, connectWebSocket} = useWebSocket();
@@ -87,7 +91,7 @@ export default function FriendsScreen() {
             <View style={{
                 flex: 1,
             }}>
-                <ThemedText textStyleOptions={{size: "veryBig", weight: 'bold'}} backgroundColorName={"secondary"}>
+                <ThemedText textStyleOptions={{size: "veryBig", weight: 'bold'}} backgroundColorName={"transparent"}>
                     Received Requests
                 </ThemedText>
                 <FlatList
@@ -100,6 +104,8 @@ export default function FriendsScreen() {
                             senderId={item.senderId}
                             receiverId={item.receiverId}
                             avatar={item.senderId}
+                            receiverImageUrl={item.receiverImageUrl}
+                            senderImageUrl={item.senderImageUrl}
                             isReceiver={true}
                         />
                     )}
@@ -113,7 +119,7 @@ export default function FriendsScreen() {
                 flex: 1,
                 marginTop: heighPercentToDP(2),
             }}>
-                <ThemedText textStyleOptions={{size: "veryBig", weight: 'bold'}} backgroundColorName={"secondary"}>Sent
+                <ThemedText textStyleOptions={{size: "veryBig", weight: 'bold'}} backgroundColorName={"transparent"}>Sent
                     Requests</ThemedText>
                 <FlatList
                     data={sentRequests}
@@ -121,10 +127,12 @@ export default function FriendsScreen() {
                     renderItem={({item}) => (
                         <FriendRequestListItem
                             requestId={item.id}
-                            username={item.receiverUsername}
+                            username={item.senderUsername}
                             senderId={item.senderId}
                             receiverId={item.receiverId}
-                            avatar={item.receiverId}
+                            avatar={item.senderId}
+                            receiverImageUrl={item.receiverImageUrl}
+                            senderImageUrl={item.senderImageUrl}
                             isReceiver={false}
                         />
                     )}
@@ -269,8 +277,6 @@ export default function FriendsScreen() {
                     alignSelf: "center",
                 }}
                 segmentsStyle={{}}
-
-
             />
 
             {/* Tab Content */}

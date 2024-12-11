@@ -38,7 +38,7 @@ export default function UserProfileScreen() {
     const {logout, userId: loggedInUserId} = useAuth();
     const {fetchUserById, userProfile} = useUser();
     const navigation = useNavigation();
-    const {sendFriendRequest, removePendingFriendRequest, sentRequests, receivedRequests} =
+    const {friends, sendFriendRequest, removePendingFriendRequest, sentRequests, receivedRequests} =
         useFriendship(); // Use friendship context
 
 
@@ -63,9 +63,12 @@ export default function UserProfileScreen() {
     const [hasPendingRequest, setHasPendingRequest] = useState(false); // Track friendship request state
 
     const {getOrCreateChat} = useChat()
-    const {stompClient} = useWebSocket()
     // Check if viewing own profile
     const isOwnProfile = username === "me" || loggedInUserId === username;
+
+    useEffect(() => {
+        console.log("FRIENDS: ", friends)
+    }, []);
 
     // Fetch the profile being viewed
     useEffect(() => {
@@ -162,20 +165,12 @@ export default function UserProfileScreen() {
         if (!visitedUser) return;
         const result = await getOrCreateChat(visitedUser.id)
         if (result.success) {
-            if (stompClient){
-                console.log('Cleaning up WebSocket connection');
-                stompClient.deactivate();
-            }
-            console.log("???")
+            // if (stompClient){
+            //     console.log('Cleaning up WebSocket connection');
+            //     stompClient.deactivate();
+            // }
             router.replace("/home/socials" as Href<string>);
             router.push(`/chat/${result.returnValue.chatroomId}` as Href<string>);
-            // return () => {
-            //     if (stompClient){
-            //         console.log('Cleaning up WebSocket connection');
-            //         stompClient.deactivate();
-            //     }
-            //     console.log("???")
-            // };
         } else {
             Alert.alert("Error", "Failed to initiate a chat.");
         }

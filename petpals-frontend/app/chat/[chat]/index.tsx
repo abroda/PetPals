@@ -31,8 +31,8 @@ export default function ChatScreen() {
 
     // Fetch messages when the component loads
     useEffect(() => {
-        console.log("CHECKING CHATID and TOKEN: " + chatroomId + authToken)
-        if (!chatroomId || !authToken) return;
+        console.log("CHECKING CHATID and TOKEN: " + chatroomId + " : " + path.slice(1, path.lastIndexOf("/")) + " : " + authToken)
+        if (!chatroomId || path.slice(1, path.lastIndexOf("/")) !== "chat" || !authToken) return;
         if (page === 0) {
             // Initial load: Reset messages and fetch fresh data
             console.log("RESETTING MESSAGES FOR NEW CHATROOM");
@@ -108,8 +108,8 @@ export default function ChatScreen() {
                     inverted // Show the latest messages at the bottom
                     onEndReached={handleLoadMore}
                     onEndReachedThreshold={0.1}
-                    ListFooterComponent={() =>
-                        isLoading ? <ThemedText backgroundColorName={"transparent"}>Loading...</ThemedText> : null}
+                    // ListFooterComponent={() =>
+                    //     isLoading ? <ThemedText backgroundColorName={"transparent"}>Loading...</ThemedText> : null}
                 />
             </ThemedView>
 

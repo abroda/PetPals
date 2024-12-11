@@ -22,9 +22,16 @@ import java.util.Optional;
 public class FriendshipService {
     private final UserRepository userRepository;
     private final FriendshipRepository friendshipRepository;
+    private final UserService userService;
 
     public List<String> getAcceptedFriendshipsForUser(String userId) {
         return friendshipRepository.findOtherUserIdsByUserIdAndStatus(userId, FriendshipRequestStatus.ACCEPTED);
+    }
+
+    public boolean checkIfUsersAreFriends(String userId, String friendId){
+        User user = userService.getById(userId);
+        User friend = userService.getById(friendId);
+        return user.getFriends().contains(friend) && friend.getFriends().contains(user);
     }
 
     @Transactional
