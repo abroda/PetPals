@@ -127,7 +127,7 @@ export default function FriendsScreen() {
                     renderItem={({item}) => (
                         <FriendRequestListItem
                             requestId={item.id}
-                            username={item.senderUsername}
+                            username={item.receiverUsername}
                             senderId={item.senderId}
                             receiverId={item.receiverId}
                             avatar={item.senderId}
