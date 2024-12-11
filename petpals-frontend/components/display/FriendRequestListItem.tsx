@@ -147,7 +147,7 @@ export default function FriendRequestListItem(props: {
                     />
                     <ThemedButton
                         textColorName={"accent"}
-                        onPress={handleCancelRequest}
+                        onPress={handleDeny}
                         shape={"round"}
                         border={true}
                         backgroundColorName={"transparent"}
