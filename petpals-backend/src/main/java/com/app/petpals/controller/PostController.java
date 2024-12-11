@@ -1,10 +1,12 @@
 package com.app.petpals.controller;
 
+import com.app.petpals.entity.GroupWalkComment;
 import com.app.petpals.entity.Post;
 import com.app.petpals.entity.PostComment;
 import com.app.petpals.entity.User;
 import com.app.petpals.exception.account.UserUnauthorizedException;
 import com.app.petpals.payload.*;
+import com.app.petpals.payload.groupWalk.GroupWalkCommentResponse;
 import com.app.petpals.payload.post.*;
 import com.app.petpals.service.AWSImageService;
 import com.app.petpals.service.PostService;
@@ -126,19 +128,12 @@ public class PostController {
         return ResponseEntity.ok(TextResponse.builder().message("Deleted post successfully.").build());
     }
 
-    @CheckUserAuthorization(idField = "userId")
-    @PostMapping("/{postId}/like")
-    @Operation(summary = "Like a post.", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<PostResponse> likePost(@PathVariable String postId, @RequestBody LikePostRequest request) {
-        Post post = postService.likePost(postId, request);
-        return ResponseEntity.ok(getPostResponse(post));
-    }
-
-    @CheckUserAuthorization(idField = "userId")
-    @DeleteMapping("/{postId}/like")
-    @Operation(summary = "Remove like from post.", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<PostResponse> removeLikePost(@PathVariable String postId, @RequestBody LikePostRequest request) {
-        Post post = postService.removeLikePost(postId, request);
+    @PostMapping("/{postId}/toggleLike")
+    @Operation(summary = "Toggle like on a post.", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<PostResponse> toggleLikeOnPost(@PathVariable("postId") String postId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User authUser = (User) auth.getPrincipal();
+        Post post = postService.toggleLikePost(postId, authUser.getId());
         return ResponseEntity.ok(getPostResponse(post));
     }
 

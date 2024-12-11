@@ -20,7 +20,6 @@ import {useTextStyle} from "@/hooks/theme/useTextStyle";
 import {WalksProvider} from "@/context/WalksContext";
 import {WebSocketProvider} from "@/context/WebSocketContext";
 import {ChatProvider} from "@/context/ChatContext";
-// import * as encoding from 'text-encoding';
 import {TextEncoder} from 'text-encoding';
 
 global.TextEncoder = TextEncoder;
