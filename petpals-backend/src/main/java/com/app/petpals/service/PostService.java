@@ -73,30 +73,6 @@ public class PostService {
     }
 
     @Transactional
-    public Post likePost(String postId, LikePostRequest request) {
-        User user = userService.getById(request.getUserId());
-        Post post = getPostById(postId);
-        if (!user.getLikedPosts().contains(post) || !post.getLikes().contains(user)) {
-            user.getLikedPosts().add(post);
-            post.getLikes().add(user);
-            userRepository.save(user);
-            return postRepository.save(post);
-        } else throw new PostLikeException("This post is already liked.");
-    }
-
-    @Transactional
-    public Post removeLikePost(String postId, LikePostRequest request) {
-        User user = userService.getById(request.getUserId());
-        Post post = getPostById(postId);
-        if (user.getLikedPosts().contains(post) || post.getLikes().contains(user)) {
-            user.getLikedPosts().remove(post);
-            post.getLikes().remove(user);
-            userRepository.save(user);
-            return postRepository.save(post);
-        } else throw new PostLikeException("This post was not liked yet.");
-    }
-
-    @Transactional
     public Post toggleLikePost(String postId, String userId) {
         User user = userService.getById(userId);
         Post post = getPostById(postId);

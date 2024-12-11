@@ -1,5 +1,6 @@
 package com.app.petpals.controller;
 
+import com.app.petpals.entity.Post;
 import com.app.petpals.entity.PostComment;
 import com.app.petpals.entity.User;
 import com.app.petpals.payload.*;
@@ -81,19 +82,12 @@ public class PostCommentController {
         return ResponseEntity.ok(new TextResponse("Comment deleted successfully."));
     }
 
-    @CheckUserAuthorization(idField = "userId")
-    @PostMapping("/comments/{commentId}/like")
-    @Operation(summary = "Like post comment by commentId.", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<PostCommentResponse> likePostComment(@PathVariable("commentId") String commentId, @RequestBody LikePostCommentRequest request) {
-        PostComment postComment = postCommentService.likePostComment(commentId, request);
-        return ResponseEntity.ok(getPostCommentResponseResponse(postComment));
-    }
-
-    @CheckUserAuthorization(idField = "userId")
-    @DeleteMapping("/comments/{commentId}/like")
-    @Operation(summary = "Remove like post comment by commentId.", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<PostCommentResponse> removeLikePostComment(@PathVariable("commentId") String commentId, @RequestBody LikePostCommentRequest request) {
-        PostComment postComment = postCommentService.removeLikePostComment(commentId, request);
+    @PostMapping("/comments/{commentId}/toggleLike")
+    @Operation(summary = "Toggle like on a post.", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<PostCommentResponse> toggleLikeOnPostComment(@PathVariable("commentId") String commentId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User authUser = (User) auth.getPrincipal();
+        PostComment postComment = postCommentService.toggleLikePostComment(commentId, authUser.getId());
         return ResponseEntity.ok(getPostCommentResponseResponse(postComment));
     }
 

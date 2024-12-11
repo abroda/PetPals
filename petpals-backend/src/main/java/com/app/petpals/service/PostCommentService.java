@@ -3,6 +3,7 @@ package com.app.petpals.service;
 import com.app.petpals.entity.Post;
 import com.app.petpals.entity.PostComment;
 import com.app.petpals.entity.User;
+import com.app.petpals.exception.groupWalk.GroupWalkCommentLikeException;
 import com.app.petpals.exception.post.PostCommentDataException;
 import com.app.petpals.exception.post.PostCommentLikeException;
 import com.app.petpals.exception.post.PostCommentNotFoundException;
@@ -73,26 +74,33 @@ public class PostCommentService {
     }
 
     @Transactional
-    public PostComment likePostComment(String commentId, LikePostCommentRequest request) {
-        User user = userService.getById(request.getUserId());
+    public PostComment toggleLikePostComment(String commentId, String userId) {
+        User user = userService.getById(userId);
         PostComment postComment = getPostCommentById(commentId);
-        if (!user.getLikedPostComments().contains(postComment) || !postComment.getLikes().contains(user)) {
-            user.getLikedPostComments().add(postComment);
-            postComment.getLikes().add(user);
-            userRepository.save(user);
-            return postCommentRepository.save(postComment);
-        } else throw new PostCommentLikeException("This comment was already liked.");
-    }
-
-    @Transactional
-    public PostComment removeLikePostComment(String commentId, LikePostCommentRequest request) {
-        User user = userService.getById(request.getUserId());
-        PostComment postComment = getPostCommentById(commentId);
-        if (user.getLikedPostComments().contains(postComment) || postComment.getLikes().contains(user)) {
+        if (user.getLikedPostComments().contains(postComment) && postComment.getLikes().contains(user)) {
+            // handle removing like from comment
             user.getLikedPostComments().remove(postComment);
             postComment.getLikes().remove(user);
             userRepository.save(user);
             return postCommentRepository.save(postComment);
-        } else throw new PostCommentLikeException("This comment was not liked yet.");
+        } else if (!user.getLikedPostComments().contains(postComment) && !postComment.getLikes().contains(user)) {
+            // handle liking comment
+            user.getLikedPostComments().add(postComment);
+            postComment.getLikes().add(user);
+            userRepository.save(user);
+            return postCommentRepository.save(postComment);
+        } else {
+            // resetting to default unliked state
+            user.getLikedPostComments().remove(postComment);
+            postComment.getLikes().remove(user);
+            userRepository.save(user);
+            postCommentRepository.save(postComment);
+
+            throw new GroupWalkCommentLikeException(
+                    "Inconsistent like state detected between user " + userId +
+                            " and post comment " + postComment + ". The like relationship has been reset. " +
+                            "Please try again."
+            );
+        }
     }
 }
