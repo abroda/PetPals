@@ -139,8 +139,8 @@ export default function FriendsScreen() {
             backgroundColor={themeColors.tertiary}
             style={{
                 flex: 1,
-                paddingVertical: widthPercentageToDP(6),
-                paddingHorizontal: widthPercentageToDP(4),
+                paddingVertical: widthPercentageToDP(2),
+                paddingHorizontal: widthPercentageToDP(5),
             }}
         >
             <FlatList

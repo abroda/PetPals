@@ -19,6 +19,7 @@ export type ChatroomResponse = {
 export type ChatroomParticipant = {
     id: string;
     username: string;
+    imageUrl: string;
 }
 
 export type LatestMessageResponse = {
