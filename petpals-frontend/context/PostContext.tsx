@@ -52,28 +52,6 @@ export const PostProvider = ({ children }) => {
       }
     );
   };
-  // const fetchPosts = async (page: any, size: any) => {
-  //   console.log(`[PostContext] Fetching posts for page ${page}, size ${size}`);
-  //
-  //   return sendJsonQuery(
-  //     `${apiPaths.posts.getAllPosts}?page=${page}&size=${size}`,
-  //     "GET",
-  //     {},
-  //     (payload) => {
-  //       console.log(`[PostContext] Fetched posts for page ${page}:`, payload.content);
-  //
-  //       // Append fetched posts to global state
-  //       // @ts-ignore
-  //       setPosts((prevPosts) => [...prevPosts, ...payload.content]);
-  //       setTotalPages(payload.page?.totalPages || 1);
-  //       setResponseMessage("[PostContext] Fetched posts successfully!");
-  //     },
-  //     (payload) => {
-  //       console.error("[PostContext] Failed to fetch posts:", payload.message);
-  //       setResponseMessage("[PostContext] Failed to fetch posts: " + payload.message);
-  //     }
-  //   );
-  // };
 
   // Fetch post by ID
   const fetchPostById = async (id) => {
@@ -85,15 +63,15 @@ export const PostProvider = ({ children }) => {
       {},
       (payload) => {
         //console.log(`[PostContext] Fetched post with ID ${id}:`, payload);
-        return payload; // Make sure this payload is returned
+        return payload;
       },
       (errorPayload) => {
         console.error(`[PostContext] Failed to fetch post with ID: ${id}`, errorPayload);
-        return null; // Ensure null is returned on error
+        return null;
       }
     );
 
-    return result; // Return the actual payload
+    return result;
   };
 
   // Add a new post
@@ -187,6 +165,133 @@ export const PostProvider = ({ children }) => {
     );
   };
 
+
+  // fetch comments
+  const fetchComments = async (postId) => {
+    console.log(`[PostContext] Fetching comments for post ID: ${postId}`);
+
+    return sendJsonQuery(
+      `${apiPaths.posts.comments.getByPostId(postId)}`,
+      "GET",
+      {},
+      (payload) => {
+        console.log(`[PostContext] Fetched comments for post ID ${postId}:`, payload);
+        return payload; // Return the fetched comments
+      },
+      (payload) => {
+        console.error(`[PostContext] Failed to fetch comments for post ID: ${postId}`);
+        setResponseMessage(`[PostContext] Failed to fetch comments: ${payload.message}`);
+        return [];
+      }
+    );
+  };
+
+  // Add comment
+  const addComment = async (postId, commentContent) => {
+    console.log(`[PostContext] Adding comment to post ID: ${postId}`);
+
+    return sendJsonQuery(
+      `${apiPaths.posts.comments.addComment(postId)}`,
+      "POST",
+      { content: commentContent },
+      (payload) => {
+        console.log(`[PostContext] Comment added to post ID ${postId}:`, payload);
+        setResponseMessage("[PostContext] Comment added successfully!");
+        return payload;
+      },
+      (payload) => {
+        console.error(`[PostContext] Failed to add comment to post ID: ${postId}`);
+        setResponseMessage(`[PostContext] Failed to add comment: ${payload.message}`);
+        return null;
+      }
+    );
+  };
+
+  // Edit comment
+  const editComment = async (commentId, updatedContent) => {
+    console.log(`[PostContext] Editing comment with ID: ${commentId}`);
+
+    return sendJsonQuery(
+      `${apiPaths.posts.comments.editComment(commentId)}`,
+      "PUT",
+      { content: updatedContent },
+      (payload) => {
+        console.log(`[PostContext] Comment edited successfully: ${commentId}`, payload);
+        setResponseMessage("[PostContext] Comment edited successfully!");
+        return payload;
+      },
+      (payload) => {
+        console.error(`[PostContext] Failed to edit comment with ID: ${commentId}`);
+        setResponseMessage(`[PostContext] Failed to edit comment: ${payload.message}`);
+        return null;
+      }
+    );
+  };
+
+  // Delete a comment
+  const deleteComment = async (commentId) => {
+    console.log(`[PostContext] Deleting comment with ID: ${commentId}`);
+
+    return sendJsonQuery(
+      `${apiPaths.posts.comments.deleteComment(commentId)}`,
+      "DELETE",
+      {},
+      () => {
+        console.log(`[PostContext] Comment deleted successfully: ${commentId}`);
+        setResponseMessage("[PostContext] Comment deleted successfully!");
+        return true;
+      },
+      (payload) => {
+        console.error(`[PostContext] Failed to delete comment with ID: ${commentId}`);
+        setResponseMessage(`[PostContext] Failed to delete comment: ${payload.message}`);
+        return false;
+      }
+    );
+  };
+
+  // Like a post
+  const toggleLikePost = async (postId) => {
+    console.log(`[PostContext] Toggling like for post ID: ${postId}`);
+
+    return sendJsonQuery(
+      `${apiPaths.posts.toggleLikePost(postId)}`,
+      "POST",
+      {},
+      (payload) => {
+        console.log(`[PostContext] Toggled like for post ID ${postId}:`, payload);
+        setResponseMessage("[PostContext] Toggled like successfully!");
+        return true;
+      },
+      (payload) => {
+        console.error(`[PostContext] Failed to toggle like for post ID: ${postId}`);
+        setResponseMessage(`[PostContext] Failed to toggle like: ${payload.message}`);
+        return false;
+      }
+    );
+  };
+
+  // Like a comment
+  const toggleLikeComment = async (commentId) => {
+    console.log(`[PostContext] Toggling like for comment ID: ${commentId}`);
+
+    return sendJsonQuery(
+      `${apiPaths.posts.comments.toggleLikeComment(commentId)}`,
+      "POST",
+      {},
+      (payload) => {
+        console.log(`[PostContext] Toggled like for comment ID ${commentId}:`, payload);
+        setResponseMessage("[PostContext] Toggled like successfully!");
+        return true;
+      },
+      (payload) => {
+        console.error(`[PostContext] Failed to toggle like for comment ID: ${commentId}`);
+        setResponseMessage(`[PostContext] Failed to toggle like: ${payload.message}`);
+        return false;
+      }
+    );
+  };
+
+  // - - - - - Sending queries
   const sendFileQuery = async (
     path: string,
     method: string,
@@ -272,6 +377,12 @@ export const PostProvider = ({ children }) => {
         editPost,
         deletePost,
         savePhoto,
+        fetchComments,
+        addComment,
+        editComment,
+        deleteComment,
+        toggleLikePost,
+        toggleLikeComment,
       }}
     >
       {children}

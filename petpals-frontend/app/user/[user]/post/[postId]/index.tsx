@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { SafeAreaView, Pressable, View, Alert, useColorScheme } from "react-native";
+import {SafeAreaView, Pressable, View, Alert, TextInput, Modal, useColorScheme} from "react-native";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { ThemedScrollView } from "@/components/basic/containers/ThemedScrollView";
 import { ThemedText } from "@/components/basic/ThemedText";
@@ -16,6 +16,7 @@ import { Image } from "react-native-ui-lib";
 import { ThemeColors } from "@/constants/theme/Colors";
 import { useAuth } from "@/hooks/useAuth";
 import formatDateTime from "@/helpers/dateStringToFormattedDate";
+import {widthPercentageToDP} from "react-native-responsive-screen";
 
 export default function PostScreen() {
   const path = usePathname();
@@ -24,15 +25,23 @@ export default function PostScreen() {
 
   // Colors
   const colorScheme = useColorScheme();
-  // @ts-ignore
   const themeColors = ThemeColors[colorScheme];
 
   const { userId: loggedInUserId } = useAuth();
-  const { fetchPostById, deletePost, deletePostPicture } = usePostContext();
+  const { fetchPostById, addComment, fetchComments, toggleLikePost, toggleLikeComment, editComment, deleteComment } =
+    usePostContext();
   const asyncAbortController = useRef<AbortController | undefined>();
 
   const [post, setPost] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState("");
   const [liked, setLiked] = useState(false);
+  const [postLikes, setPostLikes] = useState(0);
+  const [isCommentModalVisible, setCommentModalVisible] = useState(false);
+
+  const [editingCommentId, setEditingCommentId] = useState(null); // Track the comment being edited
+  const [editedComment, setEditedComment] = useState(""); // Local state for the new comment content
+
 
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToDP = useWindowDimension("height");
@@ -52,7 +61,6 @@ export default function PostScreen() {
             paddingVertical: percentToDP(2),
           }}
         >
-          {/* Rounded group */}
           <View
             style={{
               backgroundColor: themeColors.tertiary,
@@ -61,47 +69,43 @@ export default function PostScreen() {
               padding: percentToDP(0.5),
             }}
           >
-            {/* Delete Button */}
             {loggedInUserId === authorId && (
-              <Pressable
-                style={{
-                  padding: percentToDP(2),
-                  paddingHorizontal: percentToDP(4),
-                }}
-                onPress={handleDelete}
-              >
-                <ThemedIcon
-                  size={heightPercentToDP(4)}
-                  colorName="error"
-                  name="close-circle"
-                />
-              </Pressable>
+              <>
+                <Pressable
+                  style={{
+                    padding: percentToDP(2),
+                    paddingHorizontal: percentToDP(4),
+                  }}
+                  onPress={handleDelete}
+                >
+                  <ThemedIcon
+                    size={heightPercentToDP(4)}
+                    colorName="error"
+                    name="close-circle"
+                  />
+                </Pressable>
+                <Pressable
+                  style={{
+                    padding: percentToDP(2),
+                    paddingHorizontal: percentToDP(4),
+                  }}
+                  onPress={() => router.push(`/user/${authorId}/post/${postId}/edit`)}
+                >
+                  <ThemedIcon
+                    size={heightPercentToDP(4)}
+                    colorName="primary"
+                    name="pencil"
+                  />
+                </Pressable>
+              </>
             )}
-
-            {/* Edit Button */}
-            {loggedInUserId === authorId && (
-              <Pressable
-                style={{
-                  padding: percentToDP(2),
-                  paddingHorizontal: percentToDP(4),
-                }}
-                onPress={() => router.push(`/user/${authorId}/post/${postId}/edit`)}
-              >
-                <ThemedIcon
-                  size={heightPercentToDP(4)}
-                  colorName="primary"
-                  name="pencil"
-                />
-              </Pressable>
-            )}
-
-            {/* Currently logged-in user's avatar */}
-            <UserAvatar size={12} userId={loggedInUserId} />
+            <UserAvatar size={12} userId={loggedInUserId}  doLink={false}/>
           </View>
         </View>
       ),
     });
   }, [navigation, loggedInUserId, authorId]);
+
 
   // Fetching post data
   useEffect(() => {
@@ -111,7 +115,15 @@ export default function PostScreen() {
       console.log("[Post/Index] Fetched post: ", result.author);
       if (result) {
         setPost(result);
+        setLiked(result.likes.some((like) => like === loggedInUserId));
+        setPostLikes(result.likes.length);
+        console.log("Is there like?  ",result.likes.map((like) => like));
       }
+      loadComments();
+    }
+    async function loadComments() {
+      const commentList = await fetchComments(postId);
+      setComments(commentList);
     }
     loadPost();
 
@@ -120,6 +132,8 @@ export default function PostScreen() {
     };
   }, [fetchPostById]);
 
+
+  // Delete post
   const handleDelete = useCallback(async () => {
     Alert.alert("Confirm Deletion", "Are you sure you want to delete this post?", [
       { text: "Cancel", style: "cancel" },
@@ -127,33 +141,94 @@ export default function PostScreen() {
         text: "Delete",
         style: "destructive",
         onPress: async () => {
-          try {
-            // Delete the post's picture if it exists
-            if (post?.imageUrl) {
-              console.log("[Post/Index] Deleting picture...");
-              const pictureDeleted = await deletePostPicture(postId);
-              if (!pictureDeleted) {
-                throw new Error("Failed to delete post picture.");
-              }
-            }
-
-            // Delete the post itself
-            console.log("[Post/Index] Deleting post...");
-            const postDeleted = await deletePost(postId);
-            if (!postDeleted) {
-              throw new Error("Failed to delete post.");
-            }
-
-            Alert.alert("Success", "Post deleted successfully!");
-            router.replace(`/`);
-          } catch (error) {
-            console.error("[Post/Index] Error deleting post:", error);
-            Alert.alert("Error", "Failed to delete the post. Please try again.");
-          }
+          // Implement post and picture deletion logic
         },
       },
     ]);
-  }, [post, postId, deletePostPicture, deletePost]);
+  }, [post, postId]);
+
+  const handleToggleLike = async () => {
+    if (loggedInUserId === authorId) {
+      Alert.alert("Info", "You cannot like your own post.");
+      return;
+    }
+
+    const success = await toggleLikePost(postId);
+    if (success) {
+      setLiked((prevLiked) => !prevLiked);
+      setPostLikes((prevLikes) => (liked ? prevLikes - 1 : prevLikes + 1)); // Adjust local likes count
+    } else {
+      Alert.alert("Error", "Failed to toggle like. Please try again.");
+    }
+  };
+
+
+  const handleAddComment = async () => {
+    if (newComment.trim().length > 0) {
+      const success = await addComment(postId, newComment);
+      if (success) {
+        setNewComment("");
+        const updatedComments = await fetchComments(postId);
+        setComments(updatedComments);
+        setCommentModalVisible(false);
+      }
+    } else {
+      Alert.alert("Validation Error", "Comment cannot be empty.");
+    }
+  };
+
+  // Edit comment
+  const handleEditComment = (commentId, currentContent) => {
+    setEditingCommentId(commentId); // Set the comment being edited
+    setEditedComment(currentContent); // Pre-fill the modal with the existing comment content
+    setCommentModalVisible(true); // Open the modal for editing
+  };
+
+
+  // Submit edited comment
+  const submitEditedComment = async () => {
+    if (editedComment.trim().length === 0) {
+      Alert.alert("Validation Error", "Comment cannot be empty.");
+      return;
+    }
+    const success = await editComment(editingCommentId, editedComment); // Backend call to edit the comment
+    if (success) {
+      setEditedComment("");
+      setEditingCommentId(null);
+      setCommentModalVisible(false);
+      const updatedComments = await fetchComments(postId); // Refresh comments
+      setComments(updatedComments);
+    } else {
+      Alert.alert("Error", "Failed to edit comment. Please try again.");
+    }
+  };
+
+
+  // Delete comment
+  const handleDeleteComment = async (commentId) => {
+    Alert.alert(
+      "Confirm Deletion",
+      "Are you sure you want to delete this comment?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            const success = await deleteComment(commentId);
+            if (success) {
+              const updatedComments = await fetchComments(postId);
+              setComments(updatedComments); // Refresh comments
+            } else {
+              Alert.alert("Error", "Failed to delete comment. Please try again.");
+            }
+          },
+        },
+      ]
+    );
+  };
+
+
 
   if (!post) {
     return (
@@ -229,7 +304,7 @@ export default function PostScreen() {
             {post.description || "No description"}
           </ThemedText>
 
-          {/* Likes */}
+          {/* Likes Section */}
           <HorizontalView
             justifyOption="space-between"
             style={{
@@ -240,12 +315,229 @@ export default function PostScreen() {
           >
             <ThemedText>{formatDateTime(post.createdAt)}</ThemedText>
 
-            <Pressable onPress={() => setLiked(!liked)}>
-              <ThemedIcon name={liked ? "heart" : "heart-outline"} />
-            </Pressable>
+            <HorizontalView justifyOption="flex-end" alignItems="center">
+              <Pressable
+                onPress={handleToggleLike}
+              >
+                <ThemedIcon
+                  name={liked ? "heart" : "heart-outline"}
+                  style={{ marginRight: 8 }}
+                />
+              </Pressable>
+              <ThemedText>{postLikes}</ThemedText>
+            </HorizontalView>
           </HorizontalView>
+
+          {/* Comments Section */}
+          <ThemedView style={{ padding: percentToDP(5) }}>
+            <ThemedText textStyleOptions={{ size: "big" }}>Comments</ThemedText>
+
+            {comments.map((comment) => (
+              <ThemedView
+                key={comment.commentId}
+                style={{
+                  marginVertical: percentToDP(2),
+                  padding: percentToDP(3),
+                  borderColor: themeColors.secondary,
+                  borderWidth: 1,
+                  borderRadius: percentToDP(4),
+                }}
+              >
+                <HorizontalView
+                  justifyOption="space-between"
+                  style={{ marginBottom: percentToDP(2) }}
+                >
+                  <HorizontalView>
+                    <UserAvatar
+                      size={8}
+                      userId={comment.commenter.userId}
+                      imageUrl={comment.commenter.imageUrl}
+                      doLink={true}
+                    />
+                    <ThemedText style={{ marginLeft: percentToDP(2) }}>
+                      {comment.commenter.username}
+                    </ThemedText>
+                    { (comment.commenter.userId === loggedInUserId) ? (
+                    <ThemedText backgroundColorName={"transparent"} textStyleOptions={{size: 'tiny'}} textColorName={"placeholderText"} style={{ marginLeft: percentToDP(2), fontStyle: 'italic' } }>
+                      Your comment
+                    </ThemedText>) : (<></>)}
+                  </HorizontalView>
+
+                  <HorizontalView justifyOption="flex-end" alignItems="center">
+                    {comment.commenter.userId === loggedInUserId ? (
+                      // If the comment is owned by the logged-in user, display a filled, non-interactive heart
+                      <>
+                        <ThemedIcon name="heart" colorName={"placeholderText"} style={{ marginRight: 8 }} />
+                        <ThemedText>{comment.likes.length}</ThemedText>
+                      </>
+                    ) : (
+                      // Otherwise, allow toggling the like
+                      <>
+                        <Pressable
+                          onPress={async () => {
+                            const success = await toggleLikeComment(comment.commentId);
+                            if (success) {
+                              // @ts-ignore
+                              setComments((prevComments) =>
+                                prevComments.map((c) =>
+                                  c.commentId === comment.commentId
+                                    ? {
+                                      ...c,
+                                      likes: c.likes.some((like) => like === loggedInUserId)
+                                        ? c.likes.filter((like) => like !== loggedInUserId)
+                                        : [...c.likes, loggedInUserId],
+                                    }
+                                    : c
+                                )
+                              );
+                            } else {
+                              Alert.alert("Error", "Failed to toggle like. Please try again.");
+                            }
+                          }}
+                        >
+                          <ThemedIcon
+                            name={
+                              comment.likes.some((like) => like === loggedInUserId)
+                                ? "heart"
+                                : "heart-outline"
+                            }
+                            style={{ marginRight: 8 }}
+                          />
+                        </Pressable>
+                        <ThemedText>{comment.likes.length}</ThemedText>
+                      </>
+                    )}
+                  </HorizontalView>
+                </HorizontalView>
+
+                {/* Comment content */}
+                <ThemedText>{comment.content}</ThemedText>
+
+
+                <HorizontalView style={{
+                  marginTop: percentToDP(5),
+                  alignItems: 'flex-start'
+                }}>
+                  {/* Creation time */}
+                  <ThemedText backgroundColorName={"transparent"} textColorName={"primary"} textStyleOptions={{size: 'small'}} style={{
+                    height: "100%",
+                    textAlignVertical: 'center'
+                  }}>
+                    {formatDateTime(comment.createdAt)}
+                  </ThemedText>
+
+                  {/* Edit and Delete Buttons */}
+                  {loggedInUserId === comment.commenter.userId && (
+                    <HorizontalView justifyOption="flex-end" style={{
+
+                    }}>
+                      <ThemedButton
+                        label={"Edit"}
+                        size={"small"}
+                        style={{
+                          width: "50",
+                          height: "90%",
+                          marginRight: percentToDP(2),
+                        }}
+                        onPress={() => handleEditComment(comment.commentId, comment.content)}
+                      />
+                      <ThemedButton
+                        label={"Delete"}
+                        size={"small"}
+                        style={{
+                          width: "50",
+                          height: "90%",
+                        }}
+                        onPress={() => handleDeleteComment(comment.commentId)}
+                      />
+                      {/*<Pressable*/}
+                      {/*  onPress={() => handleEditComment(comment.commentId, comment.content)}*/}
+                      {/*  style={{*/}
+                      {/*    padding: percentToDP(1),*/}
+                      {/*  }}*/}
+                      {/*>*/}
+                      {/*  <ThemedIcon name="pencil" colorName={"primary"}/>*/}
+                      {/*</Pressable>*/}
+                      {/*<Pressable*/}
+                      {/*  onPress={() => handleDeleteComment(comment.commentId)}*/}
+                      {/*  style={{ marginLeft: percentToDP(3), padding: percentToDP(1), }}*/}
+                      {/*>*/}
+                      {/*  <ThemedIcon name="close" colorName={"primary"} />*/}
+                      {/*</Pressable>*/}
+                    </HorizontalView>
+                  )}
+                </HorizontalView>
+
+
+
+
+              </ThemedView>
+            ))}
+
+            <ThemedButton
+              label="Add Comment"
+              onPress={() => setCommentModalVisible(true)}
+              style={{ marginTop: percentToDP(5),  }}
+            />
+          </ThemedView>
         </ThemedView>
       </ThemedScrollView>
+
+
+
+      {/* Add/Edit Comment Modal */}
+      <Modal visible={isCommentModalVisible} transparent={true} animationType="slide">
+        <ThemedView
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+          }}
+        >
+          <ThemedView
+            style={{
+              width: percentToDP(90),
+              padding: percentToDP(5),
+              backgroundColor: themeColors.background,
+              borderRadius: 8,
+            }}
+          >
+            <ThemedText textStyleOptions={{ size: "big" }}>
+              {editingCommentId ? "Edit Comment" : "Add Comment"}
+            </ThemedText>
+            <TextInput
+              value={editingCommentId ? editedComment : newComment}
+              onChangeText={editingCommentId ? setEditedComment : setNewComment}
+              placeholder="Enter your comment..."
+              maxLength={200}
+              style={{
+                borderWidth: 1,
+                borderColor: themeColors.primary,
+                borderRadius: 4,
+                padding: 10,
+                marginVertical: percentToDP(5),
+              }}
+            />
+            <HorizontalView justifyOption="space-between">
+              <ThemedButton
+                label="Cancel"
+                onPress={() => {
+                  setCommentModalVisible(false);
+                  setEditingCommentId(null);
+                  setEditedComment("");
+                }}
+                style={{ width: "45%" }}
+              />
+              <ThemedButton
+                label="Send"
+                onPress={editingCommentId ? submitEditedComment : handleAddComment}
+                style={{ width: "45%" }}
+              />
+            </HorizontalView>
+          </ThemedView>
+        </ThemedView>
+      </Modal>
     </SafeAreaView>
   );
 }
