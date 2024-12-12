@@ -102,7 +102,7 @@ export const MqttProvider: FC<{ children: ReactNode }> = ({ children }) => {
     });
 
     client.on("offline", () => {
-      console.warn("MQTT client offline");
+      console.log("MQTT client offline");
     });
 
     client.on("reconnect", () => {

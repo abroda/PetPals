@@ -19,6 +19,7 @@ import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import { RefreshControl } from "react-native-gesture-handler";
 import Toast from "react-native-ui-lib/src/incubator/toast";
 import ThemedToast from "@/components/popups/ThemedToast";
+import React from "react";
 
 export default function GroupWalksScheduleScreen() {
   const now = new Date();

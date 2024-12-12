@@ -37,6 +37,7 @@ import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import { View } from "react-native-ui-lib";
 import { widthPercentageToDP } from "react-native-responsive-screen";
+import React from "react";
 
 const elementsOnPage = 15;
 

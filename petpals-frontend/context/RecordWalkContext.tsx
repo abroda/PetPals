@@ -235,7 +235,7 @@ export const RecordWalkProvider: FC<{ children: ReactNode }> = ({
 
   const checkLocationPermissions = async () => {
     console.log("checking permissions");
-    let response = await Location.getBackgroundPermissionsAsync();
+    let response = await Location.getForegroundPermissionsAsync(); //getBackgroundPermissionsAsync();
     if (response.status !== "granted") {
       let requestResponse = await Location.requestForegroundPermissionsAsync(); //requestBackgroundPermissionsAsync();
 

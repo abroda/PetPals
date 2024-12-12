@@ -46,6 +46,7 @@ export default function StartWalkDialog({
   const [errorMessage, setErrorMessage] = useState(" ");
 
   const [isLoading, setIsLoading] = useState(false);
+  const { permissionsGranted } = useRecordWalk();
   const { userId } = useAuth();
 
   const radioButtonColor = useThemeColor("primary");
@@ -58,6 +59,11 @@ export default function StartWalkDialog({
   const submit = async () => {
     if (dogsParticipating.length === 0) {
       setErrorMessage("At least one dog needs to participate.");
+      return;
+    }
+
+    if (!permissionsGranted) {
+      setErrorMessage("Location permissions were denied.");
       return;
     }
 

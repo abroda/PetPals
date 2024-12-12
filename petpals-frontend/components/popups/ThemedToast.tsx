@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { ThemedView } from "../basic/containers/ThemedView";
 import { Dimensions, Modal, ModalProps } from "react-native";
 import { heightPercentageToDP } from "react-native-responsive-screen";
@@ -34,6 +34,7 @@ export default function ThemedToast(
     textStyleOptions?: TextStyleOptions;
   }
 ) {
+  const [visible, setVisible] = useState(props.visible ?? true);
   const backgroundColor = useThemeColor("textField");
   const textColor = useThemeColor("text");
   const iconColor = props.preset
@@ -45,7 +46,7 @@ export default function ThemedToast(
 
   return (
     <Toast
-      visible={props.visible ?? true}
+      visible={visible}
       position={props.position ?? "bottom"}
       autoDismiss={props.autoDismiss ?? 5000}
       swipeable
@@ -59,6 +60,10 @@ export default function ThemedToast(
       messageStyle={[textStyle, { color: textColor }, props.messageStyle]}
       iconColor={props.iconColor ?? iconColor}
       preset={props.preset ?? "success"}
+      onDismiss={() => {
+        props.onDismiss?.();
+        setVisible(false);
+      }}
       {...props}
     />
   );
