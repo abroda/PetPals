@@ -236,7 +236,7 @@ export default function UserProfileScreen() {
         if (option === "Edit") {
             router.push("/user/me/editProfile");
         } else if (option === "App Settings") {
-            router.push("/settings" as Href<string>);
+            router.push("/user/me/settings" as Href<string>);
         }
     };
 
