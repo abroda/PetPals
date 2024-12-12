@@ -13,11 +13,12 @@ import { GroupWalk, Participant } from "@/context/GroupWalksContext";
 import ThemedDialog, { ThemedDialogProps } from "./ThemedDialog";
 import { DogPicker } from "../inputs/DogPicker";
 import { Dog } from "@/context/DogContext";
-import { useWalks } from "@/hooks/useWalks";
+import { useRecordWalk } from "@/hooks/useRecordWalk";
 import { RadioButton, RadioGroup, View } from "react-native-ui-lib";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
 import { ScrollView } from "react-native-gesture-handler";
 import HorizontalView from "../basic/containers/HorizontalView";
+import { VisibilityMode } from "@/context/RecordWalkContext";
 
 export default function StartWalkDialog({
   groupWalks,
@@ -30,7 +31,7 @@ export default function StartWalkDialog({
   dogs: Dog[];
   onStart: (
     dogsParticipating: string[],
-    visibility: "Public" | "Friends_only" | "Private",
+    visibility: VisibilityMode,
     groupWalk?: GroupWalk
   ) => Promise<void>;
   onDismiss: () => void;
@@ -40,9 +41,8 @@ export default function StartWalkDialog({
     walkId ? groupWalks.find((elem) => elem.id === walkId) : undefined
   );
   const [dogsParticipating, setDogsParticipating] = useState([] as string[]);
-  const [visibilityMode, setVisibilityMode] = useState<
-    "Public" | "Friends_only" | "Private"
-  >("Public");
+  const [visibilityMode, setVisibilityMode] =
+    useState<VisibilityMode>("Public");
   const [errorMessage, setErrorMessage] = useState(" ");
 
   const [isLoading, setIsLoading] = useState(false);

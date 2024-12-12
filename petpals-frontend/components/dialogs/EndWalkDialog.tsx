@@ -19,10 +19,12 @@ import { Tag } from "../display/Tag";
 import TagList from "../lists/TagList";
 
 export default function EndWalkDialog({
+  delay,
   message,
   onDismiss,
   onEnd,
 }: {
+  delay: boolean;
   message: string;
   onDismiss: () => void;
   onEnd: () => void | Promise<void>;
@@ -62,7 +64,7 @@ export default function EndWalkDialog({
           {message}
         </ThemedText>
         <ThemedButton
-          label="Stop recording"
+          label={delay ? "Delay timeout" : "Stop recording"}
           textColorName="text"
           backgroundColorName="alarm"
           style={{
