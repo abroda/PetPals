@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useLayoutEffect, useState} from "react";
+import React, {useCallback, useEffect, useLayoutEffect, useMemo, useState} from "react";
 import {
     SafeAreaView,
     View,
@@ -64,52 +64,94 @@ export default function UserProfileScreen() {
 
     const {getOrCreateChat} = useChat()
     // Check if viewing own profile
-    const isOwnProfile = username === "me" || loggedInUserId === username;
+    const isOwnProfile = useMemo(
+      () => username === "me" || loggedInUserId === username,
+      [username, loggedInUserId]
+    );
+    // Old version - not optimized
+    //const isOwnProfile = username === "me" || loggedInUserId === username;
 
     useEffect(() => {
         console.log("FRIENDS: ", friends)
     }, []);
 
     // Fetch the profile being viewed
-    useEffect(() => {
-        const resolvedUsername = username === "me" ? loggedInUserId : username;
+  useEffect(() => {
+    const resolvedUsername = username === "me" ? loggedInUserId : username;
 
-        if (resolvedUsername) {
-            console.log("[User/Index] UserProfile | Fetching user by id: ", resolvedUsername)
-            fetchUserById(resolvedUsername)
-                .then((user) => {
-                    setVisitedUser(user);
-                })
-                .catch((error) => {
-                    console.error("Failed to fetch visited user:", error);
-                });
+    if (resolvedUsername) {
+      // Only fetch if not already loaded
+      if (!visitedUser || visitedUser.id !== resolvedUsername) {
+        fetchUserById(resolvedUsername)
+          .then((user) => setVisitedUser(user))
+          .catch((error) => console.error("Failed to fetch visited user:", error));
+      }
+
+      const pendingRequest = sentRequests.some(
+        (request) =>
+          request.receiverId === resolvedUsername &&
+          request.status === "PENDING"
+      );
+      setHasPendingRequest(pendingRequest);
+    }
+  }, [username, loggedInUserId, sentRequests]);
+
+  // Old version - trying to improve performance
+    // useEffect(() => {
+    //     const resolvedUsername = username === "me" ? loggedInUserId : username;
+    //
+    //     if (resolvedUsername) {
+    //         console.log("[User/Index] UserProfile | Fetching user by id: ", resolvedUsername)
+    //         fetchUserById(resolvedUsername)
+    //             .then((user) => {
+    //                 setVisitedUser(user);
+    //             })
+    //             .catch((error) => {
+    //                 console.error("Failed to fetch visited user:", error);
+    //             });
+    //
+    //
+    //         const pendingRequest = sentRequests.find(
+    //             (request) =>
+    //                 request.receiverId === resolvedUsername &&
+    //                 request.status === "PENDING"
+    //         );
+    //         setHasPendingRequest(!!pendingRequest);
+    //
+    //     }
+    // }, [username, loggedInUserId]);
 
 
-            const pendingRequest = sentRequests.find(
-                (request) =>
-                    request.receiverId === resolvedUsername &&
-                    request.status === "PENDING"
-            );
-            setHasPendingRequest(!!pendingRequest);
+  const fetchDogs = useCallback(async () => {
+    const ownerId = username === "me" ? loggedInUserId : username;
+    if (!ownerId || (dogs.length > 0 && dogs[0].ownerId === ownerId)) return;
 
-        }
-    }, [username, loggedInUserId]);
+    try {
+      const userDogs = await getDogsByUserId(ownerId);
+      const sortedDogs = userDogs
+        .map((dog) => ({ ...dog, name: dog.name || "Unknown Dog" }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      setDogs(sortedDogs);
+    } catch (error) {
+      console.error("Failed to fetch dogs:", error);
+    }
+  }, [username, loggedInUserId, dogs]);
 
-
-    const fetchDogs = async () => {
-        const ownerId = username === "me" ? loggedInUserId : username;
-        if (!ownerId) return;
-
-        try {
-            const userDogs = await getDogsByUserId(ownerId);
-            const sortedDogs = userDogs
-                .map((dog) => ({...dog, name: dog.name || "Unknown Dog"}))
-                .sort((a, b) => a.name.localeCompare(b.name));
-            setDogs(sortedDogs);
-        } catch (error) {
-            console.error("Failed to fetch dogs:", error);
-        }
-    };
+  // Old version without caching
+    // const fetchDogs = async () => {
+    //     const ownerId = username === "me" ? loggedInUserId : username;
+    //     if (!ownerId) return;
+    //
+    //     try {
+    //         const userDogs = await getDogsByUserId(ownerId);
+    //         const sortedDogs = userDogs
+    //             .map((dog) => ({...dog, name: dog.name || "Unknown Dog"}))
+    //             .sort((a, b) => a.name.localeCompare(b.name));
+    //         setDogs(sortedDogs);
+    //     } catch (error) {
+    //         console.error("Failed to fetch dogs:", error);
+    //     }
+    // };
 
     // Refresh data whenever the screen is focused
     useFocusEffect(
@@ -188,23 +230,23 @@ export default function UserProfileScreen() {
                         marginVertical: heightPercentToPD(1),
                     }}
                 >
-                    {username === "me" && (
-                        <Pressable onPressOut={() => Alert.alert("Notifications")}>
-                            <ThemedIcon
-                                name="notifications-outline"
-                                style={{
-                                    marginHorizontal: widthPercentageToDP(1),
-                                    padding: percentToDP(2),
-                                }}
-                            />
-                        </Pressable>
-                    )}
+                    {/*{username === "me" && (*/}
+                    {/*    <Pressable onPressOut={() => Alert.alert("Notifications")}>*/}
+                    {/*        <ThemedIcon*/}
+                    {/*            name="notifications-outline"*/}
+                    {/*            style={{*/}
+                    {/*                marginHorizontal: widthPercentageToDP(1),*/}
+                    {/*                padding: percentToDP(2),*/}
+                    {/*            }}*/}
+                    {/*        />*/}
+                    {/*    </Pressable>*/}
+                    {/*)}*/}
 
                     {/* Avatar of the currently logged-in user */}
                     <UserAvatar
                         userId={loggedInUserId || ""}
                         imageUrl={userProfile?.imageUrl}
-                        size={10}
+                        size={12}
                         doLink={true}
                     />
 

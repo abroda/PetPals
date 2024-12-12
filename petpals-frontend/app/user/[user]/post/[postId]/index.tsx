@@ -269,9 +269,11 @@ export default function PostScreen() {
                 backgroundColor: themeColors.secondary,
                 alignItems: "center",
                 justifyContent: "center",
+                borderBottomWidth: 1,
+                borderColor: themeColors.tertiary
               }}
             >
-              <ThemedIcon name={"paw-outline"} size={40} style={{marginBottom: percentToDP(1)}}/>
+              <ThemedIcon name={"image"} size={30} style={{marginBottom: percentToDP(1)}}/>
               <ThemedText backgroundColorName={"transparent"} textColorName={"primary"}>No image</ThemedText>
             </View>
           )}

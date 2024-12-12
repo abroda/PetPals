@@ -67,7 +67,7 @@ const PostCard = React.FC<PostCardProps> = ({ post }) => {
               <UserAvatar
                 userId={post.author.imageUrl}
                 imageUrl={post.author.imageUrl}
-                doLink={true}
+                doLink={false}
                 size={10}
               />
             ) : (
@@ -137,6 +137,7 @@ const PostCard = React.FC<PostCardProps> = ({ post }) => {
             borderColor: themeColors.tertiary,
           }}
         >
+          <ThemedIcon name={"image"} size={30} style={{marginBottom: percentToDP(1)}}/>
           <ThemedText
             textColorName={"primary"}
             backgroundColorName={"transparent"}
