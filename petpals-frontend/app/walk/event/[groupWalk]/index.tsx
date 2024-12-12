@@ -39,6 +39,7 @@ import { RefreshControl } from "react-native-gesture-handler";
 import { countToString } from "@/helpers/countToString";
 import ParticipantsDialog from "@/components/dialogs/ParticipantsDialog";
 import { TouchableOpacity } from "react-native-ui-lib";
+import React from "react";
 
 export default function GroupWalkScreen() {
   const walkId = usePathname().split("/")[3];

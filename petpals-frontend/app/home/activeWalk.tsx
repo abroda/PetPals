@@ -148,7 +148,7 @@ export default function ActiveWalkScreen() {
   return (
     <SafeAreaView>
       <ThemedToast
-        visible={!isLoading && errorMessage.length > 0}
+        visible={!isLoading && errorMessage.length > 0 && !summaryVisible}
         message={errorMessage} // {"Check your internet connection."}
         preset="offline"
         aboveTabBar

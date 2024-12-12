@@ -210,7 +210,7 @@ export default function EditGroupWalkScreen(props: { create?: boolean }) {
         refreshControl={
           <RefreshControl
             refreshing={isLoading}
-            onRefresh={props.create ? undefined : getData}
+            onRefresh={getData}
             colors={[useThemeColor("accent"), useThemeColor("text")]}
           />
         }
