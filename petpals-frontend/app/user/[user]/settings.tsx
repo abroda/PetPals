@@ -3,13 +3,16 @@ import {ThemedText} from "@/components/basic/ThemedText";
 import {useWindowDimension} from "@/hooks/theme/useWindowDimension";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {ThemedView} from "@/components/basic/containers/ThemedView";
-import {Pressable, View} from "react-native";
+import {Modal, Pressable, View} from "react-native";
 import HorizontalView from "@/components/basic/containers/HorizontalView";
 import {Href, router} from "expo-router";
 import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
 import {useColorScheme} from "@/hooks/theme/useColorScheme";
 import {ThemeColors} from "@/constants/theme/Colors";
 import {ThemedButton} from "@/components/inputs/ThemedButton";
+import React, {useState} from "react";
+import TermsOfUseDialog from "@/components/dialogs/TermsOfUseDialog";
+import VisibilitySettingDialog from "@/components/dialogs/VisibilitySettingDialog";
 
 export default function AppSettings() {
     const percentToDP = useWindowDimension("shorter");
@@ -17,12 +20,15 @@ export default function AppSettings() {
     const colorScheme = useColorScheme();
     // @ts-ignore
     const themeColors = ThemeColors[colorScheme];
+
+    const [visibilityModal, setVisibilityModal] = useState(false);
+
     return (
         <SafeAreaView style={{flex: 1}}>
             <ThemedScrollView style={{flex: 1, paddingTop: heighPercentToDP(10)}} colorName={"tertiary"}>
                 <ThemedView colorName={"transparent"}>
                     <ThemedText style={{paddingHorizontal: percentToDP(5), paddingVertical: percentToDP(3), fontSize: percentToDP(6)}} backgroundColorName={"transparent"}>Settings</ThemedText>
-                    <Pressable>
+                    <Pressable onPress={() => setVisibilityModal(true)}>
                         <HorizontalView style={{paddingHorizontal: percentToDP(5), paddingVertical: percentToDP(3)}} colorName={"secondary"}>
                             <HorizontalView colorName={"transparent"}>
                                 <ThemedIcon
@@ -43,6 +49,10 @@ export default function AppSettings() {
                         </HorizontalView>
                     </Pressable>
                 </ThemedView>
+
+                {visibilityModal && (
+                    <VisibilitySettingDialog onDismiss={() => setVisibilityModal(false)} />
+                )}
 
                 <ThemedView style={{flex: 1, alignItems: "center"}}>
                     <ThemedView style={{height: 3, marginVertical: percentToDP(5), width: percentToDP(80)}} colorName={"secondary"}>
