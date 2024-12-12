@@ -62,13 +62,11 @@ export const PostProvider = ({ children }) => {
   const {authToken} = useAuth();
 
   // Fetch paginated posts
-  // Fetch paginated posts
   const [fetchedPages, setFetchedPages] = useState(new Set()); // Track fetched pages
 
   const fetchPosts = async (page: number, size: number) => {
     console.log(`[PostContext] Fetching posts for page ${page}, size ${size}`);
 
-    // Prevent fetching the same page multiple times
     if (fetchedPages.has(page)) {
       console.log(`[PostContext] Page ${page} is already fetched.`);
       return;
@@ -81,13 +79,14 @@ export const PostProvider = ({ children }) => {
       (payload) => {
         console.log(`[PostContext] Fetched posts for page ${page}:`, payload.content);
 
-        // Append new posts to the global state
-        setPosts((prevPosts) => [...prevPosts, ...payload.content]);
+        // Deduplicate posts using a Map for better performance
+        setPosts((prevPosts: Post[]) => {
+          const postMap = new Map(prevPosts.map((post) => [post.id, post]));
+          payload.content.forEach((newPost: Post) => postMap.set(newPost.id, newPost));
+          return Array.from(postMap.values());
+        });
 
-        // Update the total number of pages
         setTotalPages(payload.page?.totalPages || 1);
-
-        // Track the fetched page
         setFetchedPages((prev) => new Set(prev).add(page));
 
         setResponseMessage("[PostContext] Fetched posts successfully!");

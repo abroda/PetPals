@@ -28,6 +28,7 @@ import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
 import {useFriendship} from "@/context/FriendshipContext";
 import {useChat} from "@/context/ChatContext";
 import {useWebSocket} from "@/context/WebSocketContext";
+import {usePostContext} from "@/context/PostContext";
 
 export default function UserProfileScreen() {
 
@@ -38,6 +39,7 @@ export default function UserProfileScreen() {
     const {logout, userId: loggedInUserId} = useAuth();
     const {fetchUserById, userProfile} = useUser();
     const navigation = useNavigation();
+    const {posts} = usePostContext();
     const {friends, sendFriendRequest, removePendingFriendRequest, sentRequests, receivedRequests} =
         useFriendship(); // Use friendship context
 
@@ -612,6 +614,8 @@ export default function UserProfileScreen() {
         </ThemedView>
     );
 
+
+
     return (
         <SafeAreaView
             style={{
@@ -627,26 +631,27 @@ export default function UserProfileScreen() {
                 data={[]}
                 ListHeaderComponent={ListHeaderComponent}
                 ListFooterComponent={() => (
-                    <>
-                        <ThemedText
-                            textStyleOptions={{size: 30}}
-                            style={{
-                                color: themeColors.textOnSecondary,
-                                backgroundColor: "transparent",
-                                marginLeft: widthPercentageToDP(5),
-                                marginTop: heightPercentToPD(4),
-                            }}
-                        >
-                            Posts
-                        </ThemedText>
-                      <View style={{
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}>
-                        <PostFeed/>
-                      </View>
-
-                    </>
+                  <>
+                    <ThemedText
+                      textStyleOptions={{ size: 30 }}
+                      style={{
+                        color: themeColors.textOnSecondary,
+                        backgroundColor: "transparent",
+                        marginLeft: widthPercentageToDP(5),
+                        marginTop: heightPercentToPD(4),
+                      }}
+                    >
+                      Posts
+                    </ThemedText>
+                    <View
+                      style={{
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <PostFeed filterAuthorId={visitedUser?.id} />
+                    </View>
+                  </>
                 )}
                 renderItem={(item) => <></>}
             />
