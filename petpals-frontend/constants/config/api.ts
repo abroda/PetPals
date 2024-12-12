@@ -1,5 +1,5 @@
-export const databaseURL = "http://192.168.181.105:8080/";
-export const websocketURL = "http://192.168.181.105:8080/ws"
+export const databaseURL = "http://192.168.1.4:8080/";
+export const websocketURL = "http://192.168.1.4:8080/ws"
 
 export const apiPaths = {
   auth: {
@@ -11,10 +11,27 @@ export const apiPaths = {
     login: databaseURL + "api/auth/login", // POST
   },
   posts: {
-    getFeed: databaseURL + "api/posts",
+    getAllPosts: databaseURL + "api/posts",
     getPostById: (postId: string) => databaseURL + `api/posts/${postId}`,
     likePostById: (postId: string) => databaseURL + `api/posts/${postId}/like`, // POST and DELETE
     addPost: databaseURL + "api/posts",
+    editPost: (postId: string) => databaseURL + `api/posts/${postId}`,
+    deletePost: (postId: string) => databaseURL + `api/posts/${postId}`,
+    addPicture: (postId: string) => databaseURL + `api/posts/${postId}/picture`,
+    deletePicture: (postId: string) => databaseURL + `api/posts/${postId}/picture`,
+    like: (postId: string) => databaseURL + `api/posts/${postId}/like`,
+    unlike: (postId: string) => databaseURL + `api/posts/${postId}/like`,
+    checkNew: databaseURL + "api/posts/checkNew",
+    comments: {
+      getAll: databaseURL + "api/posts/comments",
+      getByPostId: (postId: string) => databaseURL + `api/posts/${postId}/comments`,
+      getById: (commentId: string) => databaseURL + `api/posts/comments/${commentId}`,
+      add: (postId: string) => databaseURL + `api/posts/${postId}/comments`,
+      edit: (commentId: string) => databaseURL + `api/posts/comments/${commentId}`,
+      delete: (commentId: string) => databaseURL + `api/posts/comments/${commentId}`,
+      like: (commentId: string) => databaseURL + `api/posts/comments/${commentId}/like`,
+      unlike: (commentId: string) => databaseURL + `api/posts/comments/${commentId}/like`,
+    },
   },
   profiles: {},
   friends: {

@@ -21,6 +21,7 @@ import {WalksProvider} from "@/context/WalksContext";
 import {WebSocketProvider} from "@/context/WebSocketContext";
 import {ChatProvider} from "@/context/ChatContext";
 import {TextEncoder} from 'text-encoding';
+import {PostCommentProvider} from "@/context/PostCommentContext";
 
 global.TextEncoder = TextEncoder;
 
@@ -52,6 +53,7 @@ export default function RootLayout() {
                             <ChatProvider>
                                 <WebSocketProvider>
                                     <PostProvider>
+                                      <PostCommentProvider>
                                         <DogProvider>
                                             <GroupWalksProvider>
                                                 <WalksProvider>
@@ -83,6 +85,7 @@ export default function RootLayout() {
                                                 </WalksProvider>
                                             </GroupWalksProvider>
                                         </DogProvider>
+                                      </PostCommentProvider>
                                     </PostProvider>
                                 </WebSocketProvider>
                             </ChatProvider>

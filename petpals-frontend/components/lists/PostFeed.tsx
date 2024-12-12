@@ -1,82 +1,70 @@
+import React, { useEffect } from "react";
 import {
-  ThemedView,
-  ThemedViewProps,
-} from "@/components/basic/containers/ThemedView";
-import { FlatList } from "react-native-gesture-handler";
-import Post from "@/components/display/Post";
-import { ViewStyle } from "react-native";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { usePosts } from "@/hooks/usePosts";
-import { PostType } from "@/context/PostContext";
+  FlatList,
+  View,
+  Text,
+  Image,
+  ActivityIndicator,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
+import { usePostContext} from "@/context/PostContext";
+import PostCard from "@/components/display/PostCard";
+import {heightPercentageToDP, widthPercentageToDP} from "react-native-responsive-screen";
 
-export type PostFeedProps = {
-  outerViewProps?: ThemedViewProps;
-  flatListStyle?: ViewStyle;
-};
+const PostFeed = () => {
+  // @ts-ignore
+  const { posts, fetchPosts, totalPages } = usePostContext();
 
-export default function PostFeed({
-  outerViewProps,
-  flatListStyle,
-}: PostFeedProps) {
-  const { getFeed, isProcessing } = usePosts();
-  const asyncAbortController = useRef<AbortController | undefined>();
-
-  const [posts, setPosts] = useState<PostType[]>([]);
-  const [hasMore, setHasMore] = useState(true);
-  const [currentPage, setCurrentPage] = useState(0);
-  const size = 10;
-
-  const [refreshing, setRefreshing] = useState(false);
-  const [newPostsAvailable, setNewPostsAvailable] = useState(false);
-
-  // Initial load
+  // Fetch the first page of posts on component mount
   useEffect(() => {
-    //getData();
+    fetchPosts(0, 10); // Load the first page with 10 posts
+  }, [posts, totalPages]);
 
-    return () => {
-      asyncAbortController.current?.abort();
-    };
-  }, []);
-
-  const getData = useCallback(async () => {
-    if (!hasMore) return;
-    console.log("Start loading");
-    asyncAbortController.current = new AbortController();
-    let result = await getFeed(currentPage, size, asyncAbortController.current);
-    if (result.success) {
-      setPosts((prevPosts) => [...prevPosts, ...result.returnValue.content]);
-      setHasMore(result.returnValue.page.totalPages > currentPage);
-      setCurrentPage((prevPage) => prevPage + 1);
+  // Function to load more posts when the user scrolls to the end of the list
+  const handleLoadMore = () => {
+    const currentPage = Math.floor(posts.length / 10);
+    if (currentPage < totalPages) {
+      fetchPosts(currentPage, 10);
     }
-    console.log("Stop loading");
-  }, [currentPage, posts, hasMore]);
+  };
+
+  // Render a loading indicator at the bottom of the list
+  const renderFooter = () => {
+    return <ActivityIndicator size="small" style={styles.loadingIndicator} />;
+  };
+
+  // Render a single post using PostCard
+  const renderPost = ({ item }) => <PostCard post={item} />;
 
   return (
-    // POST BACKGROUND CONTAINER - flex here is important!
-    <ThemedView
-      colorName="secondary"
-      style={[
-        {
-          flex: 1,
-          height: "100%",
-        },
-        outerViewProps?.style,
-      ]}
-      {...outerViewProps}
-    >
-      {/* ACTUAL POST LIST */}
+    <View style={{
+      flex: 1,
+    }}>
       <FlatList
         data={posts}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <Post postFromFeed={item} />}
-        contentContainerStyle={{ paddingBottom: 50 }}
-        {...flatListStyle}
-        onEndReached={() => {
-          if (hasMore && !isProcessing) {
-            //getData();
-          }
-        }}
+        keyExtractor={(item) => item.id}
+        renderItem={renderPost}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={posts.length > 0 ? renderFooter : null}
+        contentContainerStyle={styles.flatListContainer}
       />
-    </ThemedView>
+      <View style={{
+        height: heightPercentageToDP(25),
+      }}></View>
+    </View>
+
   );
-}
+};
+
+const styles = StyleSheet.create({
+  flatListContainer: {
+    paddingVertical: 10,
+  },
+  loadingIndicator: {
+    marginVertical: 20,
+  },
+});
+
+export default PostFeed;

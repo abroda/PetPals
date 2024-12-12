@@ -91,52 +91,6 @@ export default function Comment({
         {comment?.content}
       </ThemedText>
     </ThemedView>
-    // <ThemedView
-    //   style={{
-    //     padding: percentToDP(4),
-    //     borderRadius: percentToDP(10),
-    //     marginBottom: percentToDP(2),
-    //   }}
-    // >
-    //   <HorizontalView
-    //     colorName="transparent"
-    //     style={{ marginBottom: percentToDP(2) }}
-    //   >
-    //     <HorizontalView
-    //       colorName="transparent"
-    //       justifyOption="flex-start"
-    //     >
-    //       <ThemedView
-    //         style={{
-    //           marginRight: percentToDP(1),
-    //           borderRadius: percentToDP(10),
-    //         }}
-    //       >
-    //         <UserAvatar
-    //           size={10}
-    //           doLink={true}
-    //           userId={comment?.creator.id ?? "me"}
-    //         />
-    //       </ThemedView>
-    //       <ThemedText textStyleOptions={{ size: "big" }}>
-    //         {comment?.creator.name ?? "Username"}
-    //       </ThemedText>
-    //     </HorizontalView>
-    //     <Pressable onPress={() => setLiked(!liked)}>
-    //       <ThemedIcon name={comment?.liked ? "heart" : "heart-outline"} />
-    //     </Pressable>
-    //   </HorizontalView>
-    //   <ThemedText
-    //     backgroundColorName="secondary"
-    //     style={{
-    //       marginHorizontal: percentToDP(1),
-    //       marginVertical: percentToDP(1),
-    //       borderRadius: percentToDP(10),
-    //       padding: percentToDP(3),
-    //     }}
-    //   >
-    //     {comment?.content ?? "Example comment comment"}
-    //   </ThemedText>
-    // </ThemedView>
+
   );
 }
