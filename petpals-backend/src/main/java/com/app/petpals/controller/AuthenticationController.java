@@ -14,6 +14,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -57,5 +59,18 @@ public class AuthenticationController {
             TextResponse textResponse = new TextResponse("Verification code resent.");
             return ResponseEntity.ok(textResponse);
     }
+
+//    @PostMapping("/logout")
+//    @Operation(summary = "Logout.")
+//    public ResponseEntity<TextResponse> logout() {
+//        System.out.println("LOGOUT");
+//        SecurityContextHolder.clearContext();
+//        System.out.println("clear context");
+//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//        User authUser = (User) auth.getPrincipal();
+//        System.out.println("user?: " + authUser);
+//        TextResponse textResponse = new TextResponse("Logged out successfully.");
+//        return ResponseEntity.ok(textResponse);
+//    }
 
 }

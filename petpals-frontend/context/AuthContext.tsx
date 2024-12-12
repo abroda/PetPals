@@ -13,9 +13,9 @@ import { serverQuery } from "@/helpers/serverQuery";
 export type AuthContextType = {
   isLoading: boolean;
   isProcessing: boolean;
-  authToken?: string;
-  userId?: string;
-  userEmail?: string;
+  authToken?: string|null;
+  userId?: string|null;
+  userEmail?: string|null;
   passwordRegex: string;
   codeRegex: string;
   register: (
@@ -56,6 +56,7 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isInit, setIsInit] = useState(false);
 
   const [authToken, setAuthToken] = useState("");
   const [userId, setUserId] = useState("");
@@ -224,13 +225,12 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     });
 
     setIsProcessing(false);
-
-    setIsLoading(false);
   };
 
   useEffect(() => {
     if (isLoading) {
-      load();
+      console.log("LOADING")
+      load().then(r => setIsLoading(false));
     }
   }, []);
 

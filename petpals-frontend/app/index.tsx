@@ -12,6 +12,7 @@ import { useEffect, useLayoutEffect } from "react";
 import "react-native-get-random-values";
 import { useColorScheme } from "@/hooks/theme/useColorScheme";
 import { ThemeColors } from "@/constants/theme/Colors";
+import {ThemedText} from "@/components/basic/ThemedText";
 
 export default function WelcomeScreen() {
   const { isLoading, isProcessing, userId, authToken } = useAuth();
@@ -24,10 +25,11 @@ export default function WelcomeScreen() {
   const themeColors = ThemeColors[colorScheme];
 
   useEffect(() => {
-    if (!isLoading && !isProcessing && userId && authToken) {
+      console.log(`[LOADING] ${isLoading}`)
+    if (!isLoading && !isProcessing && userId != "" && authToken != "") {
       router.replace("/home");
     }
-  }, []);
+  }, [isLoading, isProcessing, userId, authToken]);
 
   const navigation = useNavigation();
   useLayoutEffect(() => {
@@ -72,20 +74,27 @@ export default function WelcomeScreen() {
               showName={!isLoading}
               showMotto={!isLoading}
             />
-            <HorizontalView>
+            {/*<HorizontalView>*/}
+            {/*  <ThemedButton*/}
+            {/*    style={[{ marginBottom: percentToDP(5), width: percentToDP(43) }, userId == "" || authToken == "" ? {backgroundColor: themeColors.disabled} : {}]}*/}
+            {/*    textColorName={userId == "" || authToken == "" ? "textField" : "textOnPrimary"}*/}
+            {/*    label="Home Screen"*/}
+            {/*    onPress={() => router.push("/home")}*/}
+            {/*    disabled={userId == "" || authToken == ""}*/}
+            {/*  />*/}
+            {/*  <ThemedButton*/}
+            {/*    style={{ marginBottom: percentToDP(5), width: percentToDP(43) }}*/}
+            {/*    label="Login"*/}
+            {/*    textColorName="textOnPrimary"*/}
+            {/*    onPress={() => router.push("/login")}*/}
+            {/*  />*/}
+            {/*</HorizontalView>*/}
               <ThemedButton
-                style={{ marginBottom: percentToDP(5), width: percentToDP(43) }}
-                textColorName="textOnPrimary"
-                label="Home Screen"
-                onPress={() => router.push("/home")}
+                  style={{ marginBottom: percentToDP(5)}}
+                  label="Login"
+                  textColorName="textOnPrimary"
+                  onPress={() => router.push("/login")}
               />
-              <ThemedButton
-                style={{ marginBottom: percentToDP(5), width: percentToDP(43) }}
-                label="Login"
-                textColorName="textOnPrimary"
-                onPress={() => router.push("/login")}
-              />
-            </HorizontalView>
             <ThemedButton
               style={{ marginBottom: percentToDP(5) }}
               backgroundColorName="secondary"

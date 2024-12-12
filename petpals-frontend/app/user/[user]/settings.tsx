@@ -14,6 +14,7 @@ import React, {useState} from "react";
 import TermsOfUseDialog from "@/components/dialogs/TermsOfUseDialog";
 import VisibilitySettingDialog from "@/components/dialogs/VisibilitySettingDialog";
 import {useUser} from "@/hooks/useUser";
+import {useAuth} from "@/hooks/useAuth";
 
 export default function AppSettings() {
     const percentToDP = useWindowDimension("shorter");
@@ -23,7 +24,13 @@ export default function AppSettings() {
     const themeColors = ThemeColors[colorScheme];
 
     const {userProfile} = useUser()
+    const {logout} = useAuth()
     const [visibilityModal, setVisibilityModal] = useState(false);
+
+    const handleLogout = () => {
+        logout()
+        router.replace("/" as Href<string>)
+    }
 
     return (
         <SafeAreaView style={{flex: 1}}>
@@ -60,7 +67,7 @@ export default function AppSettings() {
                     <ThemedView style={{height: 3, marginVertical: percentToDP(5), width: percentToDP(80)}} colorName={"secondary"}>
                     </ThemedView>
                     <ThemedButton>
-                        <ThemedText backgroundColorName={"transparent"}>LOGOUT</ThemedText>
+                        <ThemedText backgroundColorName={"transparent"} onPress={handleLogout}>LOGOUT</ThemedText>
                     </ThemedButton>
                 </ThemedView>
             </ThemedScrollView>
