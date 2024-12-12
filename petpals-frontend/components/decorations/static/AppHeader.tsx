@@ -48,19 +48,19 @@ export default function AppHeader(props: {
 
 
       {/* NOTIFICATIONS ICON */}
-      <Pressable
-        style={{
-          marginRight: percentToDP(3),
-        }}
-        onPress={() => {
-          console.log(notificationsVisible);
-          setNotificationsVisible(!notificationsVisible);
-        }}>
-        <ThemedIcon
-          size={percentToDP(6)}
-          name="notifications"
-        />
-      </Pressable>
+      {/*<Pressable*/}
+      {/*  style={{*/}
+      {/*    marginRight: percentToDP(3),*/}
+      {/*  }}*/}
+      {/*  onPress={() => {*/}
+      {/*    console.log(notificationsVisible);*/}
+      {/*    setNotificationsVisible(!notificationsVisible);*/}
+      {/*  }}>*/}
+      {/*  <ThemedIcon*/}
+      {/*    size={percentToDP(6)}*/}
+      {/*    name="notifications"*/}
+      {/*  />*/}
+      {/*</Pressable>*/}
 
       <UserAvatar
         size={10}
