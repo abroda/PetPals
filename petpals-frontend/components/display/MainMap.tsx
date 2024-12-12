@@ -10,7 +10,11 @@ import { useEffect, useRef } from "react";
 import Constants from "expo-constants";
 import Geocoder from "react-native-geocoding";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
-import { MarkerData, PathVertex } from "@/context/RecordWalkContext";
+import {
+  MapPosition,
+  MarkerData,
+  PathVertex,
+} from "@/context/RecordWalkContext";
 import UserAvatar from "../navigation/UserAvatar";
 import { Participant } from "@/context/GroupWalksContext";
 
@@ -27,9 +31,10 @@ export type MainMapProps = {
   mapProps?: MapViewProps;
   markers?: MarkerData[];
   pins?: MarkerData[];
-  nearbyUsers?: (MarkerData & Participant)[];
-  otherParticipants?: (MarkerData & Participant)[];
+  nearbyUsers?: MapPosition[];
+  otherParticipants?: MapPosition[];
   path?: PathVertex[];
+  showingSummary?: boolean;
 };
 
 export function MainMap({
@@ -46,6 +51,7 @@ export function MainMap({
   nearbyUsers,
   otherParticipants,
   path,
+  showingSummary,
   ...rest
 }: MainMapProps) {
   let initialRegion = {
@@ -54,8 +60,6 @@ export function MainMap({
     latitudeDelta: initialDelta,
     longitudeDelta: initialDelta,
   };
-
-  let currentPath = path;
 
   useEffect(() => {
     initialRegion = {
@@ -70,27 +74,59 @@ export function MainMap({
 
   const pathColor = useThemeColor("tertiary");
 
-  const testPath = [
-    { latitude: 51.108592525, longitude: 17.038330603, timestamp: new Date() },
-    { latitude: 51.108192525, longitude: 17.038330603, timestamp: new Date() },
-    { latitude: 51.108192525, longitude: 17.038340603, timestamp: new Date() },
-    { latitude: 51.108592525, longitude: 17.038340603, timestamp: new Date() },
-  ];
+  const getBoundingBox = (path: PathVertex[]) => {
+    let minLat = Number.MAX_VALUE;
+    let maxLat = -Number.MAX_VALUE;
+    let minLng = Number.MAX_VALUE;
+    let maxLng = -Number.MAX_VALUE;
+
+    path.forEach((location) => {
+      minLat = Math.min(minLat, location.latitude);
+      maxLat = Math.max(maxLat, location.latitude);
+      minLng = Math.min(minLng, location.longitude);
+      maxLng = Math.max(maxLng, location.longitude);
+    });
+
+    return { minLat, maxLat, minLng, maxLng };
+  };
+
+  const getRegionContainingWalkPath = (path: PathVertex[]) => {
+    if (path.length === 0) {
+      return initialRegion;
+    }
+
+    const { minLat, maxLat, minLng, maxLng } = getBoundingBox(path);
+
+    const latitudeDelta = maxLat - minLat;
+    const longitudeDelta = maxLng - minLng;
+
+    const centerLat = (minLat + maxLat) / 2;
+    const centerLng = (minLng + maxLng) / 2;
+
+    return {
+      latitude: centerLat,
+      longitude: centerLng,
+      latitudeDelta: latitudeDelta * 1.2, // Add some padding (20%)
+      longitudeDelta: longitudeDelta * 1.2, // Add some padding (20%)
+    };
+  };
 
   const recenter = (newRegion: Region) =>
     mapRef.current?.animateToRegion(
-      {
-        latitudeDelta: Math.min(
-          Math.max(newRegion.latitudeDelta, minDelta),
-          maxDelta
-        ),
-        longitudeDelta: Math.min(
-          Math.max(newRegion.longitudeDelta, minDelta),
-          maxDelta
-        ),
-        latitude: latitude,
-        longitude: longitude,
-      },
+      showingSummary
+        ? getRegionContainingWalkPath(path ?? [])
+        : {
+            latitudeDelta: Math.min(
+              Math.max(newRegion.latitudeDelta, minDelta),
+              maxDelta
+            ),
+            longitudeDelta: Math.min(
+              Math.max(newRegion.longitudeDelta, minDelta),
+              maxDelta
+            ),
+            latitude: latitude,
+            longitude: longitude,
+          },
       1000
     );
 
@@ -112,7 +148,6 @@ export function MainMap({
           },
           mapProps?.style,
         ]}
-        //customMapStyle={} //customize map style, editable in Google Maps Platform console
         provider={PROVIDER_GOOGLE}
         initialRegion={initialRegion}
         onMapLoaded={() => recenter(initialRegion)}
@@ -129,91 +164,50 @@ export function MainMap({
         />
         {path && path.length > 0 && (
           <Polyline
-            coordinates={
-              //   [
-              //   {
-              //     latitude: 51.108592525,
-              //     longitude: 17.038330603,
-              //     timestamp: new Date(),
-              //   } as PathVertex,
-              //   {
-              //     latitude: 51.10500525,
-              //     longitude: 17.036930603,
-              //     timestamp: new Date(),
-              //   } as PathVertex,
-              //   {
-              //     latitude: 51.11020525,
-              //     longitude: 17.056930603,
-              //     timestamp: new Date(),
-              //   } as PathVertex,
-              //   ...path,
-              // ]
-              path.map((elem) => ({
-                latitude: elem.latitude,
-                longitude: elem.longitude,
-                timestamp: elem.timestamp,
-              }))
-            } //, initialRegion as LatLng]}
+            coordinates={path}
             lineDashPattern={[20, 7]}
             strokeColor={pathColor}
             strokeWidth={3}
           />
         )}
-        {/* {nearbyUsers &&
+
+        {nearbyUsers &&
           nearbyUsers.length > 0 &&
-          // [
-          //   ...nearbyUsers,
-          //   {
-          //     coordinates: {
-          //       latitude: 51.108592525,
-          //       longitude: 17.038330603,
-          //     },
-          //     userId: "bac3be56-0e5e-443a-945a-4c493fce170c",
-          //   },
-          // ]
           nearbyUsers.map((elem) => (
             <Marker
               key={elem.userId}
               coordinate={{
-                latitude: elem.coordinates.latitude,
-                longitude: elem.coordinates.longitude,
+                latitude: elem.latitude,
+                longitude: elem.longitude,
               }}
             >
               <UserAvatar
                 size={10}
                 userId={elem.userId}
                 doLink={true}
+                imageUrl={elem.imageUrl ?? undefined}
               />
             </Marker>
-          ))} */}
+          ))}
 
-        {/* {otherParticipants &&
+        {otherParticipants &&
           otherParticipants.length > 0 &&
-          // [
-          //   ...otherParticipants,
-          //   {
-          //     coordinates: {
-          //       latitude: 51.1092534,
-          //       longitude: 17.048330603,
-          //     },
-          //     userId: "bac3be56-0e5e-443a-945a-4c493fce170c",
-          //   },
-          // ]
           otherParticipants.map((elem) => (
             <Marker
               key={elem.userId}
               coordinate={{
-                latitude: elem.coordinates.latitude,
-                longitude: elem.coordinates.longitude,
+                latitude: elem.latitude,
+                longitude: elem.longitude,
               }}
             >
               <UserAvatar
                 size={10}
                 userId={elem.userId}
                 doLink={true}
+                imageUrl={elem.imageUrl ?? undefined}
               />
             </Marker>
-          ))} */}
+          ))}
       </MapView>
     </View>
   );

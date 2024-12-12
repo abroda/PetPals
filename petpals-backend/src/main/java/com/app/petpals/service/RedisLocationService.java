@@ -26,15 +26,17 @@ public class RedisLocationService {
     private static final String VISIBILITY_KEY = "visibility:";
     private static final String FRIENDS_LIST_KEY = "friends_list:";
     private static final String GROUP_WALK_LIST_KEY = "group_walk_list:";
+    private static final String IMAGE_URL_KEY = "image_url:";
 
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
 
     // Initialize walk metadata in Redis
-    public void initWalk(String userId, String visibility, List<String> friends, String groupWalkId) {
+    public void initWalk(String userId, String visibility, List<String> friends, String groupWalkId, String imageUrl) {
         try {
             // Store visibility
             redisTemplate.opsForValue().set(VISIBILITY_KEY + userId, visibility);
+            redisTemplate.opsForValue().set(IMAGE_URL_KEY + userId, imageUrl);
 
             // If visibility is FRIENDS_ONLY, store the friends list in Redis
             if ("FRIENDS_ONLY".equalsIgnoreCase(visibility) && friends != null && !friends.isEmpty()) {
@@ -138,7 +140,9 @@ public class RedisLocationService {
                         String timestampStr = (String) redisTemplate.opsForHash().get(USER_METADATA_KEY, userId);
                         LocalDateTime timestamp = timestampStr != null ? LocalDateTime.parse(timestampStr) : null;
 
-                        return new LocationResponse(userId, point.getY(), point.getX(), timestamp);
+                        String imageUrl = (String) redisTemplate.opsForValue().get(IMAGE_URL_KEY + userId);
+
+                        return new LocationResponse(userId, point.getY(), point.getX(), timestamp, imageUrl);
                     })
                     .collect(Collectors.toList());
         } catch (Exception e) {
@@ -170,8 +174,10 @@ public class RedisLocationService {
                             String timestampStr = (String) redisTemplate.opsForHash().get(USER_METADATA_KEY, userId);
                             LocalDateTime timestamp = timestampStr != null ? LocalDateTime.parse(timestampStr) : null;
 
+                            String imageUrl = (String) redisTemplate.opsForValue().get(IMAGE_URL_KEY + userId);
+
                             // Create and return the LocationResponse
-                            return new LocationResponse(userId, point.getY(), point.getX(), timestamp);
+                            return new LocationResponse(userId, point.getY(), point.getX(), timestamp, imageUrl);
                         } catch (Exception e) {
                             System.err.println("Failed to retrieve location for user: " + userId);
                             return null;
@@ -262,6 +268,7 @@ public class RedisLocationService {
             redisTemplate.opsForHash().delete(USER_METADATA_KEY, userId);
             redisTemplate.delete(VISIBILITY_KEY + userId);
             redisTemplate.delete(FRIENDS_LIST_KEY + userId);
+            redisTemplate.delete(IMAGE_URL_KEY + userId);
             if (groupWalkId != null && !groupWalkId.isEmpty()) {
                 String groupWalkKey = GROUP_WALK_LIST_KEY + groupWalkId;
                 redisTemplate.opsForList().remove(groupWalkKey, 0, userId);

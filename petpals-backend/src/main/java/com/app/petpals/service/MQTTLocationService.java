@@ -30,15 +30,19 @@ public class MQTTLocationService {
     private final ObjectMapper objectMapper;
     private final FriendshipService friendshipService;
     private final DogService dogService;
+    private final UserService userService;
+    private final AWSImageService awsImageService;
 
-    public MQTTLocationService(MqttClient mqttClient, RedisLocationService redisLocationService, WalkSessionService walkSessionService, ObjectMapper objectMapper, FriendshipService friendshipService, DogService dogService) {
+    public MQTTLocationService(MqttClient mqttClient, RedisLocationService redisLocationService, WalkSessionService walkSessionService, ObjectMapper objectMapper, FriendshipService friendshipService, DogService dogService, UserService userService, AWSImageService awsImageService) {
         this.mqttClient = mqttClient;
         this.redisLocationService = redisLocationService;
         this.walkSessionService = walkSessionService;
         this.objectMapper = objectMapper;
         this.friendshipService = friendshipService;
         this.dogService = dogService;
+        this.awsImageService = awsImageService;
         this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        this.userService = userService;
     }
 
     @PostConstruct
@@ -111,8 +115,12 @@ public class MQTTLocationService {
             // Start a new walk session in the database
             String sessionId = walkSessionService.startWalk(userId, startTime, dogs);
 
+            // Adding imageUrl
+            String imageId = userService.getById(userId).getProfilePictureId();
+            String imageUrl = awsImageService.getPresignedUrl(imageId);
+
             // Initialize metadata in Redis
-            redisLocationService.initWalk(userId, visibility, friends, groupWalkId);
+            redisLocationService.initWalk(userId, visibility, friends, groupWalkId, imageUrl);
 
             System.out.println("Walk started for user: " + userId + ", session ID: " + sessionId + ", visibility: " + visibility + ", groupWalkId: " + groupWalkId);
         } catch (Exception e) {
@@ -285,7 +293,7 @@ public class MQTTLocationService {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDateTime();
 
-        return new LocationResponse(userId, latitude, longitude, timestamp);
+        return new LocationResponse(userId, latitude, longitude, timestamp, null);
     }
 
     // Helper method to parse location from JSON payload
@@ -300,6 +308,6 @@ public class MQTTLocationService {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDateTime();
 
-        return new LocationResponse(userId, latitude, longitude, timestamp);
+        return new LocationResponse(userId, latitude, longitude, timestamp, null);
     }
 }
