@@ -2,7 +2,7 @@ import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { ThemedView } from "../basic/containers/ThemedView";
 import { Dimensions, Modal, ModalProps } from "react-native";
 
-export type DialogProps = ModalProps & {
+export type ThemedDialogProps = ModalProps & {
   visible?: boolean;
   onDismiss?: () => void;
 };

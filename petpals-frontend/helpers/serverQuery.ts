@@ -42,10 +42,10 @@ export const serverQuery = async ({
     retryNumber < retriesCount && !result;
     retryNumber += 1
   ) {
-    console.log("try #" + (retryNumber + 1));
+    //console.log("try #" + (retryNumber + 1));
     let timeoutId = timeout
       ? setTimeout(() => {
-          console.log("aborted");
+          console.log("query timed out");
           abortController.abort(); // send abort signout on timeout
         }, timeout)
       : undefined;
@@ -91,9 +91,8 @@ export const serverQuery = async ({
   }
 
   onEnd();
-  console.log("end query");
 
   result = result ?? { success: false, returnValue: onTimeout() };
-  console.log("result: " + JSON.stringify(result));
+  //console.log("result: " + JSON.stringify(result));
   return result;
 };

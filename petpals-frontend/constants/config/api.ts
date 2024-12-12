@@ -1,5 +1,5 @@
-export const databaseURL = "http://192.168.0.4:8080/";
-export const websocketURL = "http://192.168.0.4:8080/ws"
+export const databaseURL = "http://192.168.1.4:8080/";
+export const websocketURL = "http://192.168.1.4:8080/ws"
 
 export const apiPaths = {
   auth: {
@@ -11,10 +11,25 @@ export const apiPaths = {
     login: databaseURL + "api/auth/login", // POST
   },
   posts: {
-    getFeed: databaseURL + "api/posts",
+    getAllPosts: databaseURL + "api/posts",
     getPostById: (postId: string) => databaseURL + `api/posts/${postId}`,
     likePostById: (postId: string) => databaseURL + `api/posts/${postId}/like`, // POST and DELETE
     addPost: databaseURL + "api/posts",
+    editPost: (postId: string) => databaseURL + `api/posts/${postId}`,
+    deletePost: (postId: string) => databaseURL + `api/posts/${postId}`,
+    addPicture: (postId: string) => databaseURL + `api/posts/${postId}/picture`,
+    deletePicture: (postId: string) => databaseURL + `api/posts/${postId}/picture`,
+    toggleLikePost: (postId: string) => databaseURL + `api/posts/${postId}/toggleLike`,
+    checkNew: databaseURL + "api/posts/checkNew",
+    comments: {
+      getAllComments: databaseURL + "api/posts/comments",
+      getByPostId: (postId: string) => databaseURL + `api/posts/${postId}/comments`,
+      getById: (commentId: string) => databaseURL + `api/posts/comments/${commentId}`,
+      addComment: (postId: string) => databaseURL + `api/posts/${postId}/comments`,
+      editComment: (commentId: string) => databaseURL + `api/posts/comments/${commentId}`,
+      deleteComment: (commentId: string) => databaseURL + `api/posts/comments/${commentId}`,
+      toggleLikeComment: (commentId: string) => databaseURL + `api/posts/comments/${commentId}/toggleLike`,
+    },
   },
   profiles: {},
   friends: {
@@ -33,7 +48,8 @@ export const apiPaths = {
   chats: {
     chatrooms: databaseURL + "api/chatroom", // GET, POST
     latestMessages: databaseURL + "api/chatroom/messages/latest", // GET
-    messages: (chatroomId: string) => databaseURL + `api/chatroom/${chatroomId}/messages`, // GET
+    messages: (chatroomId: string) =>
+      databaseURL + `api/chatroom/${chatroomId}/messages`, // GET
   },
   walks: {
     listOngoing: (userId: string) =>

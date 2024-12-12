@@ -9,7 +9,6 @@ import { FlatList, Pressable, StyleSheet, View } from "react-native";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import PostFeed from "@/components/lists/PostFeed";
-import Post from "@/components/display/Post";
 import NotificationsPopup from "@/components/popups/NotificationsPopup";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import { ThemedText } from "@/components/basic/ThemedText";
@@ -151,7 +150,9 @@ export default function HomeScreen() {
             alignItems: 'center',
             paddingVertical: heightPercentToDP(2),
           }}>
-            <ThemedView colorName={"secondary"}>
+            <ThemedView colorName={"secondary"} style={{
+
+            }}>
               <ThemedButton
                 shape="short"
                 center
@@ -170,98 +171,24 @@ export default function HomeScreen() {
                     colorName="textOnPrimary"
                   />
                 )}
-                style={{ marginRight: percentToDP(5), width: percentToDP(30) }}
+                style={{
+                  width: percentToDP(90),
+                  marginVertical: percentToDP(2),
+                }}
               />
+              {/* Post Feed */}
               <PostFeed />
             </ThemedView>
 
           </View>
         )}
 
-        {/*/!* User Results *!/*/}
-        {/*<FlatList*/}
-        {/*  data={searchResults}*/}
-        {/*  keyExtractor={(item) => item.id}*/}
-        {/*  renderItem={({ item }) => (*/}
-        {/*    <UserListItem*/}
-        {/*      id={item.id}*/}
-        {/*      username={item.username}*/}
-        {/*      description={item.description}*/}
-        {/*      imageUrl={item.imageUrl}*/}
-        {/*    />*/}
-        {/*  )}*/}
-        {/*  ListEmptyComponent={*/}
-        {/*    searchQuery.length > 0 && !isSearching ? (*/}
-        {/*      <ThemedText>*/}
-        {/*        No users found*/}
-        {/*      </ThemedText>*/}
-        {/*    ) : null*/}
-        {/*  }*/}
-        {/*  style={styles.resultsContainer}*/}
-        {/*/>*/}
-
-        {/* POST FEED */}
-        {/*<PostFeed></PostFeed>*/}
       </ThemedView>
 
       {notificationsVisible && (
         <NotificationsPopup onDismiss={() => setNotificationsVisible(false)} />
       )}
-      {/*/!* BACKGROUND BEHIND ALL POSTS AND TOP BAR - COLOR VISIBLE BELOW NAVBAR*!/*/}
-      {/*<ThemedView colorName="transparent" style={{height: heightPercentToDP(100)}}>*/}
 
-      {/*    /!*APP LOGO AND USER AVATAR - TOP OF APP *!/*/}
-      {/*    <HorizontalView colorName="background" style={{padding: percentToDP(3)}}>*/}
-      {/*        <AppLogo*/}
-      {/*            size={13}*/}
-      {/*            version="horizontal"*/}
-      {/*        />*/}
-      {/*        <Pressable*/}
-      {/*            onPress={() => {*/}
-      {/*                console.log(notificationsVisible);*/}
-      {/*                setNotificationsVisible(!notificationsVisible);*/}
-      {/*            }}*/}
-      {/*        >*/}
-      {/*            <ThemedIcon*/}
-      {/*                size={percentToDP(8)}*/}
-      {/*                name="notifications"*/}
-      {/*            />*/}
-      {/*        </Pressable>*/}
-
-      {/*        <ThemedView style={{marginLeft: percentToDP(3)}}>*/}
-      {/*            <UserAvatar*/}
-      {/*                size={13}*/}
-      {/*                doLink={true}*/}
-      {/*                userId={(userId?.length ?? 0) > 0 ? userId ?? "me" : "me"}*/}
-      {/*            />*/}
-      {/*        </ThemedView>*/}
-      {/*    </HorizontalView>*/}
-
-      {/*    {notificationsVisible && (*/}
-      {/*        <NotificationsPopup*/}
-      {/*            onDismiss={() => setNotificationsVisible(false)}*/}
-      {/*        />*/}
-      {/*    )}*/}
-
-      {/*    /!* POST FEED *!/*/}
-      {/*    <PostFeed username="Dominika_Xyz"></PostFeed>*/}
-
-      {/*</ThemedView>*/}
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10,
-  },
-  resultsContainer: {
-    marginTop: 10,
-  },
-  noResults: {
-    textAlign: "center",
-    marginVertical: 20,
-    fontSize: 16,
-  },
-});
