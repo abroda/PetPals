@@ -32,6 +32,7 @@ public class MQTTConfig {
         options.setPassword(password.toCharArray());
         options.setConnectionTimeout(10);
         options.setKeepAliveInterval(60);
+        options.setAutomaticReconnect(true);
         options.setSocketFactory(SSLSocketFactoryGenerator.getSocketFactory());
         client.connect(options);
         System.out.println("Connected to HiveMQ Cloud MQTT Broker: " + brokerUrl);
