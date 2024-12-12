@@ -3,8 +3,8 @@ import {ThemedView} from "@/components/basic/containers/ThemedView";
 import {useWindowDimension} from "@/hooks/theme/useWindowDimension";
 import {ThemedText} from "@/components/basic/ThemedText";
 import {ThemedButton} from "@/components/inputs/ThemedButton";
-import React from "react";
-import {Pressable} from "react-native";
+import React, {useEffect, useState} from "react";
+import {Alert, Pressable} from "react-native";
 import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
 import {useAuth} from "@/hooks/useAuth";
 import {useUser} from "@/hooks/useUser";
@@ -19,10 +19,25 @@ export default function VisibilitySettingDialog({
 }) {
     const percentToDP = useWindowDimension("shorter");
     const heightPercentToDP = useWindowDimension("height");
-    const {userProfile} = useUser()
+    const {userProfile, updateUser} = useUser()
+    const {userId} = useAuth()
     const colorScheme = useColorScheme();
     // @ts-ignore
     const themeColors = ThemeColors[colorScheme];
+    const [currentVisibility, setCurrentVisibility] = useState(userProfile?.visibility);
+
+    const setVisibility = () => {
+        if (userId){
+            const updatedData = {
+                displayName: userProfile?.username,
+                description: userProfile?.description,
+                visibility: currentVisibility === "FRIENDS ONLY" ? "FRIENDS_ONLY" : currentVisibility,
+            };
+            updateUser(userId, updatedData).then(res => onDismiss())
+        } else {
+            Alert.alert("Update Failed", "There was an error updating your visibility.");
+        }
+    }
 
     return (
         <ThemedDialog onDismiss={onDismiss}>
@@ -44,10 +59,10 @@ export default function VisibilitySettingDialog({
                 {['PRIVATE', 'PUBLIC', 'FRIENDS ONLY'].map((option) => (
                     <Pressable
                         key={option}
-                        // onPress={() => handleVisibilityChange(option)}
+                        onPress={() => setCurrentVisibility(option)}
                     >
                         <HorizontalView style={{alignItems:"center", justifyContent: "flex-start", gap: 5, marginBottom: 10}}>
-                            <ThemedIcon name={userProfile?.visibility == option ? "checkbox" : "square-outline"}/>
+                            <ThemedIcon name={(currentVisibility === "FRIENDS_ONLY" ? "FRIENDS ONLY" : currentVisibility) == option ? "checkbox" : "square-outline"}/>
                             <ThemedText>{option}</ThemedText>
                         </HorizontalView>
                     </Pressable>
@@ -62,7 +77,7 @@ export default function VisibilitySettingDialog({
                             alignSelf: "center",
                             marginTop: percentToDP(3)
                         }}
-                        onPress={onDismiss}
+                        onPress={setVisibility}
                     />
                     <ThemedButton
                         label="Cancel"

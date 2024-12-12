@@ -13,6 +13,7 @@ import {ThemedButton} from "@/components/inputs/ThemedButton";
 import React, {useState} from "react";
 import TermsOfUseDialog from "@/components/dialogs/TermsOfUseDialog";
 import VisibilitySettingDialog from "@/components/dialogs/VisibilitySettingDialog";
+import {useUser} from "@/hooks/useUser";
 
 export default function AppSettings() {
     const percentToDP = useWindowDimension("shorter");
@@ -21,6 +22,7 @@ export default function AppSettings() {
     // @ts-ignore
     const themeColors = ThemeColors[colorScheme];
 
+    const {userProfile} = useUser()
     const [visibilityModal, setVisibilityModal] = useState(false);
 
     return (
@@ -40,7 +42,7 @@ export default function AppSettings() {
                                 <ThemedText backgroundColorName={"transparent"}>Visibility</ThemedText>
                             </HorizontalView>
                             <HorizontalView colorName={"transparent"} style={{justifyContent: "center", gap: percentToDP(1)}}>
-                                <ThemedText backgroundColorName={"transparent"} textColorName={"placeholderText"} style={{fontSize: percentToDP(4)}}>PUBLIC</ThemedText>
+                                <ThemedText backgroundColorName={"transparent"} textColorName={"placeholderText"} style={{fontSize: percentToDP(4)}}>{userProfile?.visibility}</ThemedText>
                                 <ThemedIcon
                                     name="chevron-forward-outline"
                                     colorName="placeholderText"
