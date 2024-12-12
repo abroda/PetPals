@@ -205,11 +205,13 @@ export const RecordWalkProvider: FC<{ children: ReactNode }> = ({
     [] as (MarkerData & Participant)[]
   );
 
-  // once on mount
+  // when userId changes
   useEffect(() => {
-    tryRestoreFromStorage();
-    mqttConnect(updateNearbyUsers, updateWalkParticipants);
-  }, []);
+    if (userId) {
+      tryRestoreFromStorage();
+      mqttConnect(updateNearbyUsers, updateWalkParticipants);
+    }
+  }, [userId]);
 
   // update timer every 1s and location every 4s when recording
   useEffect(() => {
@@ -235,7 +237,7 @@ export const RecordWalkProvider: FC<{ children: ReactNode }> = ({
     console.log("checking permissions");
     let response = await Location.getBackgroundPermissionsAsync();
     if (response.status !== "granted") {
-      let requestResponse = await Location.requestBackgroundPermissionsAsync();
+      let requestResponse = await Location.requestForegroundPermissionsAsync(); //requestBackgroundPermissionsAsync();
 
       if (requestResponse.status !== "granted") {
         setPermissionsGranted(false);

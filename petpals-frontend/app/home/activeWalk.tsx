@@ -67,8 +67,6 @@ export default function ActiveWalkScreen() {
   const [errorMessage, setErrorMessage] = useState("");
   const asyncAbortController = useRef<AbortController | undefined>();
 
-  const [refreshOnFocus, setRefreshOnFocus] = useState(false);
-
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToDP = useWindowDimension("height");
   const widthPercentToDP = useWindowDimension("width");

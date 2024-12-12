@@ -4,6 +4,7 @@ import { createContext, FC, ReactNode, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRecordWalk } from "@/hooks/useRecordWalk";
 import { mqttPassword, mqttURL, mqttUsername } from "@/constants/config/mqtt";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export type MqttContextType = {
   mqttConnect: (
@@ -47,20 +48,27 @@ export const MqttProvider: FC<{ children: ReactNode }> = ({ children }) => {
     };
   }, []);
 
-  const mqttConnect = async (
+  const mqttConnect = (
     onNearbyUsersUpdate: (payload: any) => void,
     onWalkParticipantsUpdate: (topic: string, payload: any) => void
   ) => {
     console.log("Connecting to MQTT...");
 
+    if (mqttClient) {
+      mqttDisconnect();
+    }
+
     const client = mqtt.connect(mqttURL, {
       username: mqttUsername,
       password: mqttPassword,
       clientId: `user-${userId}`,
+      reconnectPeriod: 3000,
+      clean: false,
     });
 
     client.on("connect", () => {
       console.log("Connected to MQTT broker");
+      handleUnsentMessages();
     });
 
     client.on("message", (topic, message) => {
@@ -93,10 +101,20 @@ export const MqttProvider: FC<{ children: ReactNode }> = ({ children }) => {
       console.log("Disconnected from MQTT broker");
     });
 
+    client.on("offline", () => {
+      console.warn("MQTT client offline");
+    });
+
+    client.on("reconnect", () => {
+      console.log("MQTT reconnecting...");
+    });
+
     setMqttClient(client);
   };
 
   const mqttDisconnect = () => {
+    mqttUnsubscribe();
+    mqttClient?.removeAllListeners();
     mqttClient?.end();
   };
 
@@ -114,56 +132,116 @@ export const MqttProvider: FC<{ children: ReactNode }> = ({ children }) => {
     }
   };
 
-  const sendStartWalkMessage = async (payload: {
+  const sendStartWalkMessage = (payload: {
     timestamp: string;
     visibility: VisibilityMode;
     dogIds: string[];
     walkId?: string;
   }) => {
-    console.log("Sending start message");
-    // ensure mqtt is on
-    if (!mqttClient || !mqttClient.connected) {
-      mqttClient?.reconnect();
-    }
-
     const message = JSON.stringify(payload);
-
-    // send start walk message
-    mqttClient?.publish(`walk/start/${userId}`, message, {
-      qos: 1,
-    });
+    sendMessageWithRetries("startWalkMessage", `walk/start/${userId}`, message);
   };
 
-  const sendLocationUpdate = async (payload: {
+  const sendLocationUpdate = (payload: {
     userId: string;
     latitude: number;
     longitude: number;
     timestamp: string;
     groupWalkId?: string;
   }) => {
-    if (!mqttClient || !mqttClient.connected) {
-      mqttClient?.reconnect();
-    }
-
     const message = JSON.stringify(payload);
-
     mqttClient?.publish(`location/user/${userId}`, message, {
       qos: 1,
     });
   };
 
-  const sendEndWalkMessage = async (payload: {
+  const sendEndWalkMessage = (payload: {
     timestamp: string;
     locations: PathVertex[];
     groupWalkId: string;
   }) => {
-    if (!mqttClient || !mqttClient.connected) {
-      mqttClient?.reconnect();
+    const message = JSON.stringify(payload);
+    sendMessageWithRetries("endWalkMessage", `walk/end/${userId}`, message);
+  };
+
+  const sendMessageWithRetries = (
+    key: string,
+    topic: string,
+    message: string
+  ) => {
+    return new Promise<void>((resolve) => {
+      mqttClient?.publish(topic, message, { qos: 2 }, async (error) => {
+        if (error) {
+          console.log(`error sending message to ${topic}:`, error);
+          await saveMessage(key, { topic, message });
+          resolve();
+        } else {
+          console.log(`message sent to ${topic}.`);
+          await removeMessage(key);
+          resolve();
+        }
+      });
+    });
+  };
+
+  const saveMessage = async (
+    key: string,
+    data: { topic: string; message: string }
+  ) => {
+    console.log("saving message " + key + " to send on reconnect.");
+    try {
+      await AsyncStorage.setItem(key, JSON.stringify(data));
+    } catch (error) {
+      console.log("mqttContext saveMessage error:", error);
+    }
+  };
+
+  const removeMessage = async (key: string) => {
+    console.log("removing message " + key);
+    try {
+      await AsyncStorage.removeItem(key);
+    } catch (error) {
+      console.log("mqttContext removeMessage error:", error);
+    }
+  };
+
+  const handleUnsentMessages = async () => {
+    console.log("sending unsent messages:");
+    try {
+      let item = await AsyncStorage.getItem("startWalkMessage");
+      console.log("startWalkMessage = " + item);
+      if (item) {
+        console.log("sending start walk message");
+        let data = JSON.parse(item);
+        if (data.topic && data.message) {
+          await sendMessageWithRetries(
+            "startWalkMessage",
+            data.topic,
+            data.message
+          );
+        }
+      }
+    } catch (error) {
+      console.log("mqttContext handleUnsentMessages start: ", error);
     }
 
-    const message = JSON.stringify(payload);
-
-    mqttClient?.publish(`walk/end/${userId}`, message, { qos: 1 });
+    try {
+      let item = await AsyncStorage.getItem("endWalkMessage");
+      console.log("endWalkMessage = " + item);
+      if (item) {
+        console.log("sending start end message");
+        let data = JSON.parse(item);
+        if (data.topic && data.message) {
+          await sendMessageWithRetries(
+            "endWalkMessage",
+            data.topic,
+            data.message
+          );
+        }
+      }
+    } catch (error) {
+      console.log("mqttContext handleUnsentMessages end", error);
+    }
   };
 
   return (

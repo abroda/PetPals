@@ -38,9 +38,7 @@ export default function TermsOfUseDialog({ onDismiss = () => {} }) {
             marginBottom: percentToDP(7),
           }}
         >
-          <ThemedText>
-            <TermsOfUse />
-          </ThemedText>
+          <TermsOfUse />
         </ThemedScrollView>
         <ThemedButton
           label="Close"

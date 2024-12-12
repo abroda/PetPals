@@ -105,9 +105,9 @@ public class RedisLocationService {
         return nearbyUsers.stream()
                 .filter(user -> {
                     String visibility = getVisibility(user.getUserId());
-                    // Include the requesting user's own location
+                    // Don't include the requesting user's own location
                     if (user.getUserId().equals(userId)) {
-                        return true;
+                        return false;
                     }
 
                     // Handle visibility rules for other users

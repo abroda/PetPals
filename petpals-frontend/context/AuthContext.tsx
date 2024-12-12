@@ -196,9 +196,10 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     setUserId("");
     setUserEmail("");
     setAuthToken("");
-    await asyncStorage.setItem("userId", "");
-    await asyncStorage.setItem("userEmail", "");
-    await asyncStorage.setItem("authToken", "");
+    await asyncStorage.clear();
+    // await asyncStorage.setItem("userId", "");
+    // await asyncStorage.setItem("userEmail", "");
+    // await asyncStorage.setItem("authToken", "");
 
     setIsProcessing(false);
 
