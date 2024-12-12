@@ -1,5 +1,5 @@
-import {Image, Text, TouchableOpacity, View} from "react-native";
-import React, {useContext} from "react";
+import {ActivityIndicator, Image, Text, TouchableOpacity, View} from "react-native";
+import React, {useContext, useState} from "react";
 import { ColorName } from "react-native-ui-lib";
 import themeContext from "@react-navigation/native/src/theming/ThemeContext";
 import {useWindowDimension} from "@/hooks/theme/useWindowDimension";
@@ -8,17 +8,28 @@ import {ThemeColors} from "@/constants/theme/Colors";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import {ThemedText} from "@/components/basic/ThemedText";
 import {router} from "expo-router";
+import {Post} from "@/context/PostContext";
+import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
+import HorizontalView from "@/components/basic/containers/HorizontalView";
+import {widthPercentageToDP} from "react-native-responsive-screen";
 
-const PostCard = ({ post }) => {
+
+interface PostCardProps {
+  post: Post;
+}
+
+
+const PostCard = React.FC<PostCardProps> = ({ post }) => {
 
   // Styling
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToDP = useWindowDimension("height");
-
-  // Colours
   const colorScheme = useColorScheme();
-  // @ts-ignore
   const themeColors = ThemeColors[colorScheme];
+
+
+  const [isImageLoading, setImageLoading] = useState(true);
+
 
   const handlePress = () => {
     router.push(`/user/${post.author.userId}/post/${post.id}`);
@@ -80,7 +91,9 @@ const PostCard = ({ post }) => {
           </View>
 
           {/* Creation Date */}
-          <ThemedText textColorName={"textOnSecondary"} textStyleOptions={{size: "tiny"}}>
+          <ThemedText textColorName={"textOnSecondary"} textStyleOptions={{size: "tiny"}} backgroundColorName={"transparent"} style={{
+            marginRight: percentToDP(1),
+          }}>
             {new Date(post.createdAt).toLocaleDateString()}
           </ThemedText>
         </View>
@@ -88,60 +101,117 @@ const PostCard = ({ post }) => {
       </View>
 
 
-      {/* Post Image */}
+
+      {/* Post Image & Loading indicator*/}
       {post.imageUrl ? (
-        <Image
-          source={{ uri: post.imageUrl }}
+        <View
           style={{
             width: percentToDP(90),
             height: percentToDP(90),
-          }}
-        />) : (
-          <View style={{
-            width: percentToDP(90),
-            height: percentToDP(90),
+            justifyContent: "center",
+            alignItems: "center",
             backgroundColor: themeColors.transparent,
-            justifyContent: 'center',
+          }}
+        >
+          {isImageLoading && <ActivityIndicator size="small" color={themeColors.primary} />}
+          <Image
+            source={{ uri: post.imageUrl }}
+            style={{
+              width: "100%",
+              height: "100%",
+              display: isImageLoading ? "none" : "flex",
+            }}
+            onLoadEnd={() => setImageLoading(false)}
+            onError={() => setImageLoading(false)}
+          />
+        </View>
+      ) : (
+        <View
+          style={{
+            width: percentToDP(90),
+            height: percentToDP(30),
+            backgroundColor: themeColors.transparent,
+            justifyContent: "center",
+            alignItems: "center",
             borderWidth: 1,
-            // borderTopLeftRadius: percentToDP(5),
-            // borderTopRightRadius: percentToDP(5),
             borderColor: themeColors.tertiary,
-          }}>
-            <ThemedText
-              textColorName={"primary"}
-              backgroundColorName={"transparent"}
-              style={{
-              textAlign: 'center',
-              textAlignVertical: 'center'
-            }}>
-              Image Unavailable
-            </ThemedText>
-          </View>
-
+          }}
+        >
+          <ThemedText
+            textColorName={"primary"}
+            backgroundColorName={"transparent"}
+            style={{
+              textAlign: "center",
+            }}
+          >
+            No Image
+          </ThemedText>
+        </View>
       )}
+      {/*{post.imageUrl ? (*/}
+
+      {/*  <Image*/}
+      {/*    source={{ uri: post.imageUrl }}*/}
+      {/*    style={{*/}
+      {/*      width: percentToDP(90),*/}
+      {/*      height: percentToDP(90),*/}
+      {/*    }}*/}
+      {/*    onLoadEnd={() => setImageLoading(false)}*/}
+      {/*    onError={() => setImageLoading(false)}*/}
+      {/*  />) : (*/}
+      {/*    <View style={{*/}
+      {/*      width: percentToDP(90),*/}
+      {/*      height: percentToDP(30),*/}
+      {/*      backgroundColor: themeColors.transparent,*/}
+      {/*      justifyContent: 'center',*/}
+      {/*      borderWidth: 1,*/}
+      {/*      // borderTopLeftRadius: percentToDP(5),*/}
+      {/*      // borderTopRightRadius: percentToDP(5),*/}
+      {/*      borderColor: themeColors.tertiary,*/}
+      {/*    }}>*/}
+      {/*      <ThemedText*/}
+      {/*        textColorName={"primary"}*/}
+      {/*        backgroundColorName={"transparent"}*/}
+      {/*        style={{*/}
+      {/*        textAlign: 'center',*/}
+      {/*        textAlignVertical: 'center'*/}
+      {/*      }}>*/}
+      {/*        No Image*/}
+      {/*      </ThemedText>*/}
+      {/*    </View>*/}
+
+      {/*)}*/}
 
 
       <View style={{
         backgroundColor: themeColors.tertiary,
         width: percentToDP(90),
+        padding: percentToDP(3),
       }}>
         {/* Post Title */}
-        <ThemedText textColorName={"textOnSecondary"} backgroundColorName={"tertiary"} textStyleOptions={{size: "big"}}>
+        <ThemedText textColorName={"textOnSecondary"} backgroundColorName={"transparent"} textStyleOptions={{size: "medium", weight: 'bold'}}>
           {post.title}
         </ThemedText>
 
         {/* Post Description */}
         {post.description ? (
-          <ThemedText textColorName={"textOnSecondary"} style={{
-            paddingVertical: percentToDP(2),
-          }}>
+          <ThemedText
+            textColorName={"textOnSecondary"}
+            backgroundColorName={"transparent"}
+            textStyleOptions={{size: "small"}}
+            style={{
+              paddingVertical: percentToDP(2),
+            }}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
             {post.description}
           </ThemedText>
         ) : (
-          <ThemedText backgroundColorName={"transparent"} textColorName={"primary"} style={{
+          <ThemedText textColorName={"placeholderText"} backgroundColorName={"transparent"} textStyleOptions={{size: "small"}} style={{
             paddingVertical: percentToDP(2),
           }}>
-            Description Unavailable
+            No description
           </ThemedText>
         )}
       </View>
@@ -149,15 +219,30 @@ const PostCard = ({ post }) => {
       <View style={{
         flexDirection: 'row',
         backgroundColor: themeColors.tertiary,
+        padding: percentToDP(3),
+        borderBottomLeftRadius: percentToDP(5),
+        borderBottomRightRadius: percentToDP(5),
       }}>
+        <HorizontalView style={{}}>
+          <ThemedIcon
+            size={25}
+            name={"heart-outline"}
+            style={{ marginRight: percentToDP(1) }}
+          />
+          <ThemedText textColorName={"textOnSecondary"}>
+            {post.likes.length} Likes
+          </ThemedText>
 
-        <ThemedText textColorName={"textOnSecondary"}>
-          {post.likes.length} Likes
-        </ThemedText>
+          <ThemedIcon
+            size={25}
+            name={"chatbox-outline"}
+            style={{ marginRight: percentToDP(1), marginLeft: percentToDP(6), }}
+          />
+          <ThemedText textColorName={"textOnSecondary"}>
+            {post.comments.length} Comments
+          </ThemedText>
+        </HorizontalView>
 
-        <ThemedText textColorName={"textOnSecondary"}>
-          {post.comments.length} Comments
-        </ThemedText>
       </View>
     </TouchableOpacity>
   );

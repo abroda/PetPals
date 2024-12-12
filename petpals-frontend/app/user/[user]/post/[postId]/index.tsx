@@ -99,7 +99,7 @@ export default function PostScreen() {
                 </Pressable>
               </>
             )}
-            <UserAvatar size={12} userId={loggedInUserId}  doLink={false}/>
+            {/*<UserAvatar size={12} userId={loggedInUserId}   doLink={false}/>*/}
           </View>
         </View>
       ),
@@ -243,14 +243,14 @@ export default function PostScreen() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ThemedScrollView colorName="secondary" style={{ flex: 1 }}>
-        <ThemedView style={{ flex: 1 }}>
+        <ThemedView style={{ flex: 1 }} colorName={"secondary"}>
+
           {/* Post Image */}
           {post.imageUrl ? (
             <ThemedView
               style={{
                 width: percentToDP(100),
                 height: percentToDP(110),
-                marginBottom: percentToDP(5),
               }}
             >
               <Image
@@ -264,14 +264,15 @@ export default function PostScreen() {
           ) : (
             <View
               style={{
-                width: "100%",
-                height: percentToDP(100),
+                width: percentToDP(100),
+                height: percentToDP(110),
                 backgroundColor: themeColors.secondary,
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <ThemedText>No Image Available</ThemedText>
+              <ThemedIcon name={"paw-outline"} size={40} style={{marginBottom: percentToDP(1)}}/>
+              <ThemedText backgroundColorName={"transparent"} textColorName={"primary"}>No image</ThemedText>
             </View>
           )}
 
@@ -280,6 +281,7 @@ export default function PostScreen() {
             justifyOption="flex-start"
             colorName="transparent"
             style={{
+              marginTop: percentToDP(5),
               marginBottom: percentToDP(5),
               paddingHorizontal: percentToDP(5),
             }}
@@ -290,17 +292,21 @@ export default function PostScreen() {
               userId={post.author.userId}
               imageUrl={post.author.imageUrl}
             />
-            <ThemedText style={{ marginLeft: percentToDP(2) }}>
+            <ThemedText backgroundColorName={"transparent"} style={{ marginLeft: percentToDP(2) }}>
               {post.author.username}
             </ThemedText>
+            {post.author.userId === loggedInUserId ? (
+                <ThemedText textStyleOptions={{size: "medium"}} backgroundColorName={"transparent"} textColorName={"placeholderText"} style={{marginLeft: percentToDP(2)}}>[you]</ThemedText>)
+              : (<></>)
+            }
           </HorizontalView>
 
           {/* Title and Description */}
-          <ThemedText style={{ marginBottom: percentToDP(2), paddingHorizontal: percentToDP(5) }}>
+          <ThemedText backgroundColorName={"transparent"} textStyleOptions={{size: "big", weight: "bold"}} style={{ width: "100%", marginBottom: percentToDP(2), paddingHorizontal: percentToDP(5) }}>
             {post.title || "No title"}
           </ThemedText>
 
-          <ThemedText style={{ marginBottom: percentToDP(5), paddingHorizontal: percentToDP(5) }}>
+          <ThemedText backgroundColorName={"transparent"} textStyleOptions={{size: "medium"}} style={{ marginBottom: percentToDP(5), paddingHorizontal: percentToDP(5) }}>
             {post.description || "No description"}
           </ThemedText>
 
@@ -311,11 +317,14 @@ export default function PostScreen() {
               alignItems: "center",
               marginVertical: percentToDP(5),
               paddingHorizontal: percentToDP(5),
+              backgroundColor: themeColors.transparent,
             }}
           >
-            <ThemedText>{formatDateTime(post.createdAt)}</ThemedText>
+            <ThemedText backgroundColorName={"transparent"} textColorName={"primary"} textStyleOptions={{size: "small"}}>
+              {formatDateTime(post.createdAt)}
+            </ThemedText>
 
-            <HorizontalView justifyOption="flex-end" alignItems="center">
+            <HorizontalView justifyOption="flex-end" alignItems="center" colorName={"transparent"}>
               <Pressable
                 onPress={handleToggleLike}
               >
@@ -324,14 +333,14 @@ export default function PostScreen() {
                   style={{ marginRight: 8 }}
                 />
               </Pressable>
-              <ThemedText>{postLikes}</ThemedText>
+              <ThemedText backgroundColorName={"transparent"} >{postLikes}</ThemedText>
             </HorizontalView>
           </HorizontalView>
 
           {/* Comments Section */}
           <ThemedView style={{ padding: percentToDP(5) }}>
             <ThemedText textStyleOptions={{ size: "big" }}>Comments</ThemedText>
-
+            {comments.length == 0 ? (<ThemedText backgroundColorName={"transparent"} textColorName={"placeholderText"} style={{marginTop: percentToDP(2)}}>No comments yet. Be the first!</ThemedText>) : (<></>)}
             {comments.map((comment) => (
               <ThemedView
                 key={comment.commentId}
@@ -358,8 +367,8 @@ export default function PostScreen() {
                       {comment.commenter.username}
                     </ThemedText>
                     { (comment.commenter.userId === loggedInUserId) ? (
-                    <ThemedText backgroundColorName={"transparent"} textStyleOptions={{size: 'tiny'}} textColorName={"placeholderText"} style={{ marginLeft: percentToDP(2), fontStyle: 'italic' } }>
-                      Your comment
+                    <ThemedText backgroundColorName={"transparent"} textStyleOptions={{size: 'tiny'}} textColorName={"placeholderText"} style={{ marginLeft: percentToDP(2) } }>
+                      [Your comment]
                     </ThemedText>) : (<></>)}
                   </HorizontalView>
 
@@ -450,20 +459,7 @@ export default function PostScreen() {
                         }}
                         onPress={() => handleDeleteComment(comment.commentId)}
                       />
-                      {/*<Pressable*/}
-                      {/*  onPress={() => handleEditComment(comment.commentId, comment.content)}*/}
-                      {/*  style={{*/}
-                      {/*    padding: percentToDP(1),*/}
-                      {/*  }}*/}
-                      {/*>*/}
-                      {/*  <ThemedIcon name="pencil" colorName={"primary"}/>*/}
-                      {/*</Pressable>*/}
-                      {/*<Pressable*/}
-                      {/*  onPress={() => handleDeleteComment(comment.commentId)}*/}
-                      {/*  style={{ marginLeft: percentToDP(3), padding: percentToDP(1), }}*/}
-                      {/*>*/}
-                      {/*  <ThemedIcon name="close" colorName={"primary"} />*/}
-                      {/*</Pressable>*/}
+
                     </HorizontalView>
                   )}
                 </HorizontalView>
@@ -477,7 +473,12 @@ export default function PostScreen() {
             <ThemedButton
               label="Add Comment"
               onPress={() => setCommentModalVisible(true)}
-              style={{ marginTop: percentToDP(5),  }}
+              style={{
+                marginTop: percentToDP(5),
+                width: "50%",
+                height: "10",
+
+              }}
             />
           </ThemedView>
         </ThemedView>

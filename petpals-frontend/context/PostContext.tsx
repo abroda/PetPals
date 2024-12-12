@@ -3,15 +3,61 @@ import {apiPaths} from "@/constants/config/api";
 import {useAuth} from "@/hooks/useAuth";
 
 
-// @ts-ignore
-export const PostContext = createContext();
+// TYPES
+export interface PostUser {
+  userId: string;
+  username: string;
+  imageUrl?: string;
+}
 
-// @ts-ignore
+export interface Comment {
+  commentId: string;
+  content: string;
+  createdAt: string;
+  postId: string;
+  commenter: PostUser;
+  likes: string[]; // Array of user IDs who liked the comment
+}
+
+export interface Post {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl?: string;
+  createdAt: string;
+  author: PostUser;
+  comments: Comment[];
+  likes: string[]; // Array of user IDs who liked the post
+}
+
+interface PostContextType {
+  posts: Post[];
+  totalPages: number;
+  responseMessage: string;
+  isProcessing: boolean;
+  fetchPosts: (page: number, size: number) => Promise<void>;
+  fetchPostById: (id: string) => Promise<Post | null>;
+  addPost: (postData: Omit<Post, "id" | "createdAt" | "author" | "comments" | "likes">) => Promise<void>;
+  editPost: (id: string, updatedData: Partial<Post>) => Promise<void>;
+  deletePost: (id: string) => Promise<void>;
+  savePhoto: (postId: string, formData: FormData) => Promise<void>;
+  fetchComments: (postId: string) => Promise<Comment[]>;
+  addComment: (postId: string, commentContent: string) => Promise<void>;
+  editComment: (commentId: string, updatedContent: string) => Promise<void>;
+  deleteComment: (commentId: string) => Promise<void>;
+  toggleLikePost: (postId: string) => Promise<void>;
+  toggleLikeComment: (commentId: string) => Promise<void>;
+}
+
+
+const PostContext = createContext<PostContextType | undefined>(undefined);
+
+
 export const PostProvider = ({ children }) => {
-  const [posts, setPosts] = useState([]); // Global posts state
-  const [responseMessage, setResponseMessage] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [totalPages, setTotalPages] = useState(0);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [responseMessage, setResponseMessage] = useState<string>("");
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [totalPages, setTotalPages] = useState<number>(0);
 
   const {authToken} = useAuth();
 
@@ -167,7 +213,7 @@ export const PostProvider = ({ children }) => {
 
 
   // fetch comments
-  const fetchComments = async (postId) => {
+  const fetchComments = async (postId: string) => {
     console.log(`[PostContext] Fetching comments for post ID: ${postId}`);
 
     return sendJsonQuery(
@@ -187,7 +233,7 @@ export const PostProvider = ({ children }) => {
   };
 
   // Add comment
-  const addComment = async (postId, commentContent) => {
+  const addComment = async (postId: string, commentContent: any) => {
     console.log(`[PostContext] Adding comment to post ID: ${postId}`);
 
     return sendJsonQuery(
@@ -208,7 +254,7 @@ export const PostProvider = ({ children }) => {
   };
 
   // Edit comment
-  const editComment = async (commentId, updatedContent) => {
+  const editComment = async (commentId: string, updatedContent: any) => {
     console.log(`[PostContext] Editing comment with ID: ${commentId}`);
 
     return sendJsonQuery(
@@ -229,7 +275,7 @@ export const PostProvider = ({ children }) => {
   };
 
   // Delete a comment
-  const deleteComment = async (commentId) => {
+  const deleteComment = async (commentId: string) => {
     console.log(`[PostContext] Deleting comment with ID: ${commentId}`);
 
     return sendJsonQuery(
@@ -250,7 +296,7 @@ export const PostProvider = ({ children }) => {
   };
 
   // Like a post
-  const toggleLikePost = async (postId) => {
+  const toggleLikePost = async (postId: string) => {
     console.log(`[PostContext] Toggling like for post ID: ${postId}`);
 
     return sendJsonQuery(
@@ -271,7 +317,7 @@ export const PostProvider = ({ children }) => {
   };
 
   // Like a comment
-  const toggleLikeComment = async (commentId) => {
+  const toggleLikeComment = async (commentId: string) => {
     console.log(`[PostContext] Toggling like for comment ID: ${commentId}`);
 
     return sendJsonQuery(
@@ -390,6 +436,10 @@ export const PostProvider = ({ children }) => {
   );
 };
 
-export const usePostContext = () => {
-  return useContext(PostContext);
+export const usePostContext = (): PostContextType => {
+  const context = useContext(PostContext);
+  if (!context) {
+    throw new Error("usePostContext must be used within a PostProvider");
+  }
+  return context;
 };

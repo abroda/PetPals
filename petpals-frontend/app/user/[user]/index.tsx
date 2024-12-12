@@ -597,7 +597,13 @@ export default function UserProfileScreen() {
                         >
                             Posts
                         </ThemedText>
+                      <View style={{
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
                         <PostFeed/>
+                      </View>
+
                     </>
                 )}
                 renderItem={(item) => <></>}
