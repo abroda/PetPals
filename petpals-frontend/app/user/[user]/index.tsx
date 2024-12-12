@@ -318,7 +318,7 @@ export default function UserProfileScreen() {
         };
 
         return (
-            <Pressable onLongPress={isOwnProfile ? handleDeleteDog : undefined}>
+            <Pressable onLongPress={isOwnProfile ? handleDeleteDog : undefined} onPress={() => router.push(`/user/${username}/pet/${item.id}`)}>
                 <View
                     style={{
                         marginRight: 8,
