@@ -114,7 +114,7 @@ public class MQTTLocationService {
             // Initialize metadata in Redis
             redisLocationService.initWalk(userId, visibility, friends, groupWalkId);
 
-            System.out.println("Walk started for user: " + userId + ", session ID: " + sessionId);
+            System.out.println("Walk started for user: " + userId + ", session ID: " + sessionId + ", visibility: " + visibility + ", groupWalkId: " + groupWalkId);
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Error handling walk start: " + e.getMessage());

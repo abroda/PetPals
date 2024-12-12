@@ -46,8 +46,8 @@ export default function ActiveWalkScreen() {
     permissionsGranted,
     isRecording,
     summaryVisible,
-    firstTimeout,
-    secondTimeout,
+    firstTimer,
+    secondTimer,
     dogsParticipating,
     visibilityMode,
     groupWalkId,
@@ -60,17 +60,13 @@ export default function ActiveWalkScreen() {
     checkLocationPermissions,
     getOngoingGroupWalks,
     startWalk,
-    updateState,
     endWalk,
     reset,
+    delayTimeout,
   } = useWalks();
-  const { getGroupWalk, getUsersDogs, getGroupWalks } = useGroupWalks();
+  const { getGroupWalk, getUsersDogs } = useGroupWalks();
   const { userId } = useAuth();
 
-  const headerColor = useThemeColor("primary");
-  const headerStyle = useTextStyle({ size: "big", weight: "semibold" });
-  const buttonColor = useThemeColor("link");
-  const iconColor = useThemeColor("text");
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToDP = useWindowDimension("height");
   const widthPercentToDP = useWindowDimension("width");
@@ -87,6 +83,19 @@ export default function ActiveWalkScreen() {
       asyncAbortController.current?.abort();
     };
   }, []);
+
+  // on focus
+  // useFocusEffect(() => {
+  //   if (refreshOnFocus && !isLoading) {
+  //     // checkLocationPermissions(); // check permissions -> if not -> show error message
+  //     // getData(); // refresh dog/walk data
+  //     // setRefreshOnFocus(false);
+  //   }
+
+  //   return () => {
+  //     setRefreshOnFocus(!isLoading);
+  //   };
+  // });
 
   const getData = async () => {
     console.log("get data (dogs)");
@@ -135,33 +144,6 @@ export default function ActiveWalkScreen() {
 
     setIsLoading(false);
   };
-
-  // on focus
-  useFocusEffect(() => {
-    if (refreshOnFocus && !isLoading) {
-      checkLocationPermissions(); // check permissions -> if not -> show error message
-      getData(); // refresh dog/walk data
-      setRefreshOnFocus(false);
-    }
-
-    return () => {
-      setRefreshOnFocus(!isLoading);
-    };
-  });
-
-  // update locations every 2.5 seconds when recording
-  useEffect(() => {
-    let intervalId = null;
-    if (isRecording) {
-      intervalId = setInterval(updateState, 6000); // 2500);
-    }
-
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [isRecording]);
 
   const getTotalDistance = () => {
     if (!walkStartTime || !isRecording) {
@@ -280,305 +262,325 @@ export default function ActiveWalkScreen() {
             marginBottom: percentToDP(4),
           }}
         >
-          {isRecording ? "Recording walk" : "Start walking"}
+          {isRecording
+            ? "Recording walk"
+            : summaryVisible
+              ? "Start walking"
+              : "Walk summary"}
         </ThemedText>
-        {/* DETAILS */}
-        <ThemedText
-          textStyleOptions={{ size: "biggerMedium" }}
-          style={{
-            marginBottom: percentToDP(3),
-            marginHorizontal: percentToDP(4),
-          }}
-        >
-          {!isRecording
-            ? 'Press "Start" to begin recording.'
-            : groupWalkId
-              ? `Group walk: ${groupWalk?.title}`
-              : "Solitary walk"}
-        </ThemedText>
-        {/* PETS + VISIBILITY INDICATORS */}
-        {isRecording && (
-          <HorizontalView
-            colorName="transparent"
-            style={{
-              marginHorizontal: percentToDP(3),
-              marginBottom: percentToDP(3),
-              zIndex: 1,
-            }}
-          >
-            <HorizontalView
-              justifyOption="flex-start"
-              colorName="transparent"
-            >
-              {dogs
-                .filter((dog) => dogsParticipating.includes(dog.id))
-                .map((dog) => (
-                  <ThemedView
-                    key={dog.id + "t"}
-                    colorName="transparent"
-                    style={{
-                      marginRight: percentToDP(2),
-                    }}
-                  >
-                    <PetAvatar
-                      key={dog.id + "a"}
-                      size={10}
-                      userId={userId ?? ""}
-                      petId={dog.id}
-                      toggleEnabled
-                      marked={true}
-                    />
-                    <ThemedText
-                      center
-                      textStyleOptions={{ size: "tiny" }}
-                      style={{
-                        marginTop: percentToDP(1),
-                        marginLeft: percentToDP(-1),
-                      }}
-                    >
-                      {dog.name}
-                    </ThemedText>
-                  </ThemedView>
-                ))}
-            </HorizontalView>
-            <ThemedView
-              colorName="secondary"
+        {!summaryVisible && (
+          <>
+            {/* DETAILS */}
+            <ThemedText
+              textStyleOptions={{ size: "biggerMedium" }}
               style={{
-                borderRadius: percentToDP(10),
+                marginBottom: percentToDP(3),
+                marginHorizontal: percentToDP(4),
               }}
             >
-              <ThemedText style={{ textAlign: "center" }}>
-                Visibility
-              </ThemedText>
-              <ThemedText
-                textColorName="primary"
-                style={{ textAlign: "center" }}
-              >
-                {visibilityMode}
-              </ThemedText>
-            </ThemedView>
-          </HorizontalView>
-        )}
-        {/* MAP */}
-        <MainMap
-          latitude={userLocation.latitude}
-          longitude={userLocation.longitude}
-          mapProps={{
-            pitchEnabled: false,
-            rotateEnabled: true,
-          }}
-          viewStyle={{
-            height: heightPercentToDP(isRecording ? 53 : 62.1),
-            width: widthPercentToDP(100),
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: percentToDP(-10),
-          }}
-          markers={
-            isRecording && groupWalk
-              ? [
-                  {
-                    coordinates: {
-                      latitude: groupWalk.latitude,
-                      longitude: groupWalk.longitude,
-                    },
-                    title: "Group walk location",
-                    description: groupWalk.locationName,
-                    color: "green",
-                  } as MarkerData,
-                ]
-              : []
-          }
-          nearbyUsers={nearbyUsers}
-          otherParticipants={otherParticipants}
-          path={isRecording ? walkPath : []}
-        />
-        {/* START/END BUTTON */}
-        <ThemedView
-          colorName="background"
-          style={{
-            zIndex: 1,
-            width: percentToDP(23),
-            height: percentToDP(23),
-            borderRadius: percentToDP(23),
-            marginTop: percentToDP(-2),
-            alignSelf: "center",
-          }}
-        >
-          <ThemedButton
-            onPress={() => {
-              if (isRecording) {
-                setEndDialogVisible(true);
-              } else {
-                setStartDialogVisible(true);
-              }
-              getData();
-            }}
-            backgroundColorName={isRecording ? "alarm" : "accent"}
-            style={{
-              zIndex: 1,
-              width: percentToDP(23),
-              height: percentToDP(23),
-              borderRadius: percentToDP(23),
-              marginTop: percentToDP(0),
-              alignSelf: "center",
-            }}
-            iconSource={() => (
-              <ThemedIcon
-                size={percentToDP(12)}
-                name={isRecording ? "pause-outline" : "caret-forward-outline"}
-                colorName="text"
+              {!isRecording
+                ? 'Press "Start" to begin recording.'
+                : groupWalkId
+                  ? `Group walk: ${groupWalk?.title}`
+                  : "Solitary walk"}
+            </ThemedText>
+            {/* PETS + VISIBILITY INDICATORS */}
+            {isRecording && (
+              <HorizontalView
+                colorName="transparent"
                 style={{
-                  marginRight: percentToDP(isRecording ? 0 : -1.5),
-                  marginTop: percentToDP(isRecording ? 0 : -0.3),
+                  marginHorizontal: percentToDP(3),
+                  marginBottom: percentToDP(3),
+                  zIndex: 1,
                 }}
-              />
+              >
+                <HorizontalView
+                  justifyOption="flex-start"
+                  colorName="transparent"
+                >
+                  {dogs
+                    .filter((dog) => dogsParticipating.includes(dog.id))
+                    .map((dog) => (
+                      <ThemedView
+                        key={dog.id + "t"}
+                        colorName="transparent"
+                        style={{
+                          marginRight: percentToDP(2),
+                        }}
+                      >
+                        <PetAvatar
+                          key={dog.id + "a"}
+                          size={10}
+                          userId={userId ?? ""}
+                          petId={dog.id}
+                          toggleEnabled
+                          marked={true}
+                        />
+                        <ThemedText
+                          center
+                          textStyleOptions={{ size: "tiny" }}
+                          style={{
+                            marginTop: percentToDP(1),
+                            marginLeft: percentToDP(-1),
+                          }}
+                        >
+                          {dog.name}
+                        </ThemedText>
+                      </ThemedView>
+                    ))}
+                </HorizontalView>
+                <ThemedView
+                  colorName="secondary"
+                  style={{
+                    borderRadius: percentToDP(10),
+                  }}
+                >
+                  <ThemedText style={{ textAlign: "center" }}>
+                    Visibility
+                  </ThemedText>
+                  <ThemedText
+                    textColorName="primary"
+                    style={{ textAlign: "center" }}
+                  >
+                    {visibilityMode.replace("_", " ")}
+                  </ThemedText>
+                </ThemedView>
+              </HorizontalView>
             )}
-          />
-        </ThemedView>
-        <ThemedView>
-          <HorizontalView style={{ marginBottom: percentToDP(1) }}>
+            {/* MAP */}
+            <MainMap
+              latitude={userLocation.latitude}
+              longitude={userLocation.longitude}
+              mapProps={{
+                pitchEnabled: false,
+                rotateEnabled: true,
+              }}
+              viewStyle={{
+                height: heightPercentToDP(isRecording ? 53 : 62.1),
+                width: widthPercentToDP(100),
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: percentToDP(-10),
+              }}
+              markers={
+                isRecording && groupWalk
+                  ? [
+                      {
+                        coordinates: {
+                          latitude: groupWalk.latitude,
+                          longitude: groupWalk.longitude,
+                        },
+                        title: "Group walk location",
+                        description: groupWalk.locationName,
+                        color: "green",
+                      } as MarkerData,
+                    ]
+                  : []
+              }
+              nearbyUsers={nearbyUsers}
+              otherParticipants={otherParticipants}
+              path={isRecording ? walkPath : []}
+            />
+            {/* START/END BUTTON */}
             <ThemedView
-              colorName="secondary"
+              colorName="background"
               style={{
-                marginTop: percentToDP(-14),
-                marginLeft: percentToDP(4),
-                borderRadius: percentToDP(6),
-                padding: percentToDP(4),
-                paddingLeft: percentToDP(6),
-                paddingBottom: percentToDP(3),
-                width: percentToDP(38),
-                alignSelf: "flex-start",
+                zIndex: 1,
+                width: percentToDP(23),
+                height: percentToDP(23),
+                borderRadius: percentToDP(23),
+                marginTop: percentToDP(-2),
+                alignSelf: "center",
               }}
             >
-              <ThemedText
-                backgroundColorName="transparent"
-                textStyleOptions={{ size: "big", weight: "bold" }}
-                style={{ alignSelf: "flex-start" }}
-              >
-                {getTotalDistance()}
-              </ThemedText>
-              <ThemedText
-                backgroundColorName="transparent"
-                textStyleOptions={{ size: "tiny" }}
-                style={{ alignSelf: "flex-start" }}
-              >
-                Total distance
-              </ThemedText>
+              <ThemedButton
+                onPress={() => {
+                  if (isRecording) {
+                    setEndDialogVisible(true);
+                  } else {
+                    setStartDialogVisible(true);
+                  }
+                  getData();
+                }}
+                backgroundColorName={isRecording ? "alarm" : "accent"}
+                style={{
+                  zIndex: 1,
+                  width: percentToDP(23),
+                  height: percentToDP(23),
+                  borderRadius: percentToDP(23),
+                  marginTop: percentToDP(0),
+                  alignSelf: "center",
+                }}
+                iconSource={() => (
+                  <ThemedIcon
+                    size={percentToDP(12)}
+                    name={
+                      isRecording ? "pause-outline" : "caret-forward-outline"
+                    }
+                    colorName="text"
+                    style={{
+                      marginRight: percentToDP(isRecording ? 0 : -1.5),
+                      marginTop: percentToDP(isRecording ? 0 : -0.3),
+                    }}
+                  />
+                )}
+              />
             </ThemedView>
-            <ThemedView
-              colorName="secondary"
-              style={{
-                marginTop: percentToDP(-14),
-                marginRight: percentToDP(4),
-                borderRadius: percentToDP(6),
-                padding: percentToDP(4),
-                paddingRight: percentToDP(6),
-                paddingBottom: percentToDP(3),
-                width: percentToDP(38),
-                alignSelf: "flex-end",
-              }}
-            >
-              <ThemedText
-                backgroundColorName="transparent"
-                textStyleOptions={{ size: "big", weight: "bold" }}
-                style={{ alignSelf: "flex-end" }}
-              >
-                {getTotalTime()}
-              </ThemedText>
-              <ThemedText
-                backgroundColorName="transparent"
-                textStyleOptions={{ size: "tiny" }}
-                style={{ alignSelf: "flex-end" }}
-              >
-                Total time
-              </ThemedText>
+            <ThemedView>
+              <HorizontalView style={{ marginBottom: percentToDP(1) }}>
+                <ThemedView
+                  colorName="secondary"
+                  style={{
+                    marginTop: percentToDP(-14),
+                    marginLeft: percentToDP(4),
+                    borderRadius: percentToDP(6),
+                    padding: percentToDP(4),
+                    paddingLeft: percentToDP(6),
+                    paddingBottom: percentToDP(3),
+                    width: percentToDP(38),
+                    alignSelf: "flex-start",
+                  }}
+                >
+                  <ThemedText
+                    backgroundColorName="transparent"
+                    textStyleOptions={{ size: "big", weight: "bold" }}
+                    style={{ alignSelf: "flex-start" }}
+                  >
+                    {getTotalDistance()}
+                  </ThemedText>
+                  <ThemedText
+                    backgroundColorName="transparent"
+                    textStyleOptions={{ size: "tiny" }}
+                    style={{ alignSelf: "flex-start" }}
+                  >
+                    Total distance
+                  </ThemedText>
+                </ThemedView>
+                <ThemedView
+                  colorName="secondary"
+                  style={{
+                    marginTop: percentToDP(-14),
+                    marginRight: percentToDP(4),
+                    borderRadius: percentToDP(6),
+                    padding: percentToDP(4),
+                    paddingRight: percentToDP(6),
+                    paddingBottom: percentToDP(3),
+                    width: percentToDP(38),
+                    alignSelf: "flex-end",
+                  }}
+                >
+                  <ThemedText
+                    backgroundColorName="transparent"
+                    textStyleOptions={{ size: "big", weight: "bold" }}
+                    style={{ alignSelf: "flex-end" }}
+                  >
+                    {getTotalTime()}
+                  </ThemedText>
+                  <ThemedText
+                    backgroundColorName="transparent"
+                    textStyleOptions={{ size: "tiny" }}
+                    style={{ alignSelf: "flex-end" }}
+                  >
+                    Total time
+                  </ThemedText>
+                </ThemedView>
+              </HorizontalView>
+              <HorizontalView>
+                <ThemedView
+                  colorName="secondary"
+                  style={{
+                    marginLeft: percentToDP(4),
+                    borderRadius: percentToDP(6),
+                    padding: percentToDP(4),
+                    paddingLeft: percentToDP(6),
+                    paddingTop: percentToDP(3),
+                    width: percentToDP(38),
+                    alignSelf: "flex-start",
+                  }}
+                >
+                  <ThemedText
+                    backgroundColorName="transparent"
+                    textStyleOptions={{ size: "big", weight: "bold" }}
+                    style={{ alignSelf: "flex-start" }}
+                  >
+                    {getCaloriesBurned()}
+                  </ThemedText>
+                  <ThemedText
+                    backgroundColorName="transparent"
+                    textStyleOptions={{ size: "tiny" }}
+                    style={{ alignSelf: "flex-start" }}
+                  >
+                    Calories burned
+                  </ThemedText>
+                </ThemedView>
+                <ThemedView
+                  colorName="secondary"
+                  style={{
+                    marginRight: percentToDP(4),
+                    borderRadius: percentToDP(6),
+                    padding: percentToDP(4),
+                    paddingRight: percentToDP(6),
+                    paddingTop: percentToDP(3),
+                    width: percentToDP(38),
+                    alignSelf: "flex-end",
+                  }}
+                >
+                  <ThemedText
+                    backgroundColorName="transparent"
+                    textStyleOptions={{ size: "big", weight: "bold" }}
+                    style={{ alignSelf: "flex-end" }}
+                  >
+                    {getAverageSpeed()}
+                  </ThemedText>
+                  <ThemedText
+                    backgroundColorName="transparent"
+                    textStyleOptions={{ size: "tiny" }}
+                    style={{ alignSelf: "flex-end" }}
+                  >
+                    Average speed
+                  </ThemedText>
+                </ThemedView>
+              </HorizontalView>
             </ThemedView>
-          </HorizontalView>
-          <HorizontalView>
-            <ThemedView
-              colorName="secondary"
-              style={{
-                marginLeft: percentToDP(4),
-                borderRadius: percentToDP(6),
-                padding: percentToDP(4),
-                paddingLeft: percentToDP(6),
-                paddingTop: percentToDP(3),
-                width: percentToDP(38),
-                alignSelf: "flex-start",
-              }}
-            >
-              <ThemedText
-                backgroundColorName="transparent"
-                textStyleOptions={{ size: "big", weight: "bold" }}
-                style={{ alignSelf: "flex-start" }}
-              >
-                {getCaloriesBurned()}
-              </ThemedText>
-              <ThemedText
-                backgroundColorName="transparent"
-                textStyleOptions={{ size: "tiny" }}
-                style={{ alignSelf: "flex-start" }}
-              >
-                Calories burned
-              </ThemedText>
-            </ThemedView>
-            <ThemedView
-              colorName="secondary"
-              style={{
-                marginRight: percentToDP(4),
-                borderRadius: percentToDP(6),
-                padding: percentToDP(4),
-                paddingRight: percentToDP(6),
-                paddingTop: percentToDP(3),
-                width: percentToDP(38),
-                alignSelf: "flex-end",
-              }}
-            >
-              <ThemedText
-                backgroundColorName="transparent"
-                textStyleOptions={{ size: "big", weight: "bold" }}
-                style={{ alignSelf: "flex-end" }}
-              >
-                {getAverageSpeed()}
-              </ThemedText>
-              <ThemedText
-                backgroundColorName="transparent"
-                textStyleOptions={{ size: "tiny" }}
-                style={{ alignSelf: "flex-end" }}
-              >
-                Average speed
-              </ThemedText>
-            </ThemedView>
-          </HorizontalView>
-        </ThemedView>
+          </>
+        )}
+        {(summaryVisible || secondTimer === 0) && (
+          <>
+            <ThemedText>TODO: Summary</ThemedText>
+            <ThemedButton
+              label="Close"
+              onPress={reset}
+            />
+          </>
+        )}
       </ThemedScrollView>
-      {startDialogVisible && !isRecording && (
-        <StartWalkDialog
-          groupWalks={ongoingGroupWalks}
-          dogs={dogs}
-          onStart={(dogsParticipating, visibility, groupWalk) => {
-            return startWalk(dogsParticipating, visibilityMode, groupWalk);
-          }}
-          onDismiss={() => setStartDialogVisible(false)}
-        />
-      )}
-      {endDialogVisible && isRecording && (
-        <EndWalkDialog
-          message={
-            firstTimeout === 0
-              ? `If you wish to continue recording the walk, close this dialog. Time until automatic end of the walk: ${secondTimeout}`
-              : "Are you sure you want to end recording the walk?"
-          }
-          onDismiss={() => setEndDialogVisible(false)}
-          onEnd={endWalk}
-        />
-      )}
-      {}
+      {startDialogVisible &&
+        !isRecording &&
+        !(summaryVisible || secondTimer === 0) && (
+          <StartWalkDialog
+            groupWalks={ongoingGroupWalks}
+            dogs={dogs}
+            onStart={(dogsParticipating, visibility, groupWalk) => {
+              return startWalk(dogsParticipating, visibility, groupWalk);
+            }}
+            onDismiss={() => setStartDialogVisible(false)}
+            walkId={walkId}
+          />
+        )}
+      {(endDialogVisible || (firstTimer === 0 && secondTimer > 0)) &&
+        isRecording && (
+          <EndWalkDialog
+            message={
+              firstTimer === 0
+                ? `If you wish to continue recording the walk, close this dialog. Time until automatic end of the walk: ${secondTimer}`
+                : "Are you sure you want to end recording the walk?"
+            }
+            onDismiss={() => {
+              setEndDialogVisible(false);
+            }}
+            onEnd={() => (firstTimer === 0 ? delayTimeout() : endWalk())}
+          />
+        )}
     </SafeAreaView>
   );
 }
-
-const SummaryScreen = () => {
-  return <></>;
-};

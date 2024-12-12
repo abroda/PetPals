@@ -1,5 +1,5 @@
-export const databaseURL = "http://192.168.0.4:8080/";
-export const websocketURL = "http://192.168.0.4:8080/ws"
+export const databaseURL = "http://192.168.140.222:8080/";
+export const websocketURL = "http://192.168.140.222:8080/ws";
 
 export const apiPaths = {
   auth: {
@@ -33,7 +33,8 @@ export const apiPaths = {
   chats: {
     chatrooms: databaseURL + "api/chatroom", // GET, POST
     latestMessages: databaseURL + "api/chatroom/messages/latest", // GET
-    messages: (chatroomId: string) => databaseURL + `api/chatroom/${chatroomId}/messages`, // GET
+    messages: (chatroomId: string) =>
+      databaseURL + `api/chatroom/${chatroomId}/messages`, // GET
   },
   walks: {
     listOngoing: (userId: string) =>

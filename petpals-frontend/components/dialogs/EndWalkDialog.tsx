@@ -5,7 +5,7 @@ import { ThemedButton } from "../inputs/ThemedButton";
 import { ThemedTextField } from "../inputs/ThemedTextField";
 import HorizontalView from "../basic/containers/HorizontalView";
 import { router } from "expo-router";
-import ThemedDialog from "./ThemedDialog";
+import ThemedDialog, { ThemedDialogProps } from "./ThemedDialog";
 import validators from "react-native-ui-lib/src/components/textField/validators";
 import { useAuth } from "@/hooks/useAuth";
 import { useTextStyle } from "@/hooks/theme/useTextStyle";
@@ -25,9 +25,8 @@ export default function EndWalkDialog({
 }: {
   message: string;
   onDismiss: () => void;
-  onEnd: () => Promise<{ success: boolean; returnValue: any }>;
+  onEnd: () => void | Promise<void>;
 }) {
-  const [errorMessage, setErrorMessage] = useState("");
   const asyncAbortController = useRef<AbortController | undefined>(undefined);
 
   const percentToDP = useWindowDimension("shorter");
@@ -39,22 +38,12 @@ export default function EndWalkDialog({
   }, []);
 
   async function submit() {
-    setErrorMessage("");
-
-    let result = await onEnd();
-
-    if (result.success) {
-      onDismiss();
-    } else {
-      setErrorMessage(result.returnValue);
-    }
+    await onEnd();
+    onDismiss();
   }
 
   return (
-    <ThemedDialog
-      visible
-      onDismiss={onDismiss}
-    >
+    <ThemedDialog onDismiss={onDismiss}>
       <KeyboardAwareScrollView
         style={{
           paddingHorizontal: percentToDP(3),
@@ -69,13 +58,8 @@ export default function EndWalkDialog({
         >
           End walk
         </ThemedText>
-        <ThemedText>{message}</ThemedText>
-        <ThemedText
-          textColorName="alarm"
-          textStyleOptions={{ size: "small" }}
-          style={{ marginBottom: percentToDP(2) }}
-        >
-          {errorMessage}
+        <ThemedText style={{ marginBottom: percentToDP(2) }}>
+          {message}
         </ThemedText>
         <ThemedButton
           label="Stop recording"

@@ -10,7 +10,7 @@ import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { useGroupWalks } from "@/hooks/useGroupWalks";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import { GroupWalk, Participant } from "@/context/GroupWalksContext";
-import ThemedDialog from "./ThemedDialog";
+import ThemedDialog, { ThemedDialogProps } from "./ThemedDialog";
 import { DogPicker } from "../inputs/DogPicker";
 import { Dog } from "@/context/DogContext";
 import { useWalks } from "@/hooks/useWalks";
@@ -19,22 +19,29 @@ import { useTextStyle } from "@/hooks/theme/useTextStyle";
 import { ScrollView } from "react-native-gesture-handler";
 import HorizontalView from "../basic/containers/HorizontalView";
 
-export default function StartWalkDialog(props: {
+export default function StartWalkDialog({
+  groupWalks,
+  dogs,
+  onStart,
+  onDismiss,
+  walkId,
+}: {
   groupWalks: GroupWalk[];
   dogs: Dog[];
   onStart: (
     dogsParticipating: string[],
-    visibility: "Public" | "Friends" | "Private",
+    visibility: "Public" | "Friends_only" | "Private",
     groupWalk?: GroupWalk
-  ) => Promise<{ success: boolean; returnValue: any }>;
+  ) => Promise<void>;
   onDismiss: () => void;
+  walkId?: string;
 }) {
-  const [chosenGroupWalk, setChosenGroupWalk] = useState<
-    GroupWalk | undefined
-  >();
+  const [chosenGroupWalk, setChosenGroupWalk] = useState<GroupWalk | undefined>(
+    walkId ? groupWalks.find((elem) => elem.id === walkId) : undefined
+  );
   const [dogsParticipating, setDogsParticipating] = useState([] as string[]);
   const [visibilityMode, setVisibilityMode] = useState<
-    "Public" | "Friends" | "Private"
+    "Public" | "Friends_only" | "Private"
   >("Public");
   const [errorMessage, setErrorMessage] = useState(" ");
 
@@ -55,28 +62,14 @@ export default function StartWalkDialog(props: {
     }
 
     setIsLoading(true);
-    setErrorMessage("");
-
-    let result = await props.onStart(
-      dogsParticipating,
-      visibilityMode,
-      chosenGroupWalk
-    );
-
+    await onStart(dogsParticipating, visibilityMode, chosenGroupWalk);
     setIsLoading(false);
 
-    if (result.success) {
-      props.onDismiss();
-    } else {
-      setErrorMessage(result.returnValue);
-    }
+    onDismiss();
   };
 
   return (
-    <ThemedDialog
-      visible
-      onDismiss={props.onDismiss}
-    >
+    <ThemedDialog onDismiss={onDismiss}>
       <ThemedScrollView
         scrollEnabled={true}
         style={{
@@ -115,7 +108,7 @@ export default function StartWalkDialog(props: {
                 <DogPicker
                   key={"d"}
                   header="Dogs attending"
-                  dogs={props.dogs}
+                  dogs={dogs}
                   dogsParticipating={dogsParticipating}
                   onToggle={(dogId: string) => {
                     dogsParticipating.includes(dogId)
@@ -131,7 +124,7 @@ export default function StartWalkDialog(props: {
                 />
               )}
             </View>
-            {props.groupWalks.map((elem) => (
+            {groupWalks.map((elem) => (
               <View
                 key={elem.id + "v"}
                 style={{ marginBottom: percentToDP(2) }}
@@ -155,7 +148,7 @@ export default function StartWalkDialog(props: {
                   <DogPicker
                     key={elem.id + "d"}
                     header="Dogs attending"
-                    dogs={props.dogs}
+                    dogs={dogs}
                     dogsParticipating={dogsParticipating}
                     onToggle={(dogId: string) => {}}
                     style={{
@@ -185,13 +178,13 @@ export default function StartWalkDialog(props: {
             backgroundColorName="transparent"
             onPress={() =>
               visibilityMode === "Public"
-                ? setVisibilityMode("Friends")
-                : visibilityMode === "Friends"
+                ? setVisibilityMode("Friends_only")
+                : visibilityMode === "Friends_only"
                   ? setVisibilityMode("Private")
                   : setVisibilityMode("Public")
             }
           >
-            {visibilityMode}
+            {visibilityMode.replace("_", " ")}
           </ThemedText>
         </HorizontalView>
         {isLoading && (
@@ -227,7 +220,7 @@ export default function StartWalkDialog(props: {
               label={"Cancel"}
               textColorName="textOnSecondary"
               backgroundColorName="secondary"
-              onPress={props.onDismiss}
+              onPress={onDismiss}
               style={{ marginBottom: percentToDP(3), width: percentToDP(75.8) }}
             />
           </ThemedView>
