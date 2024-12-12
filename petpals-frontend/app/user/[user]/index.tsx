@@ -28,6 +28,7 @@ import {ThemedIcon} from "@/components/decorations/static/ThemedIcon";
 import {useFriendship} from "@/context/FriendshipContext";
 import {useChat} from "@/context/ChatContext";
 import {useWebSocket} from "@/context/WebSocketContext";
+import {usePostContext} from "@/context/PostContext";
 
 export default function UserProfileScreen() {
 
@@ -38,6 +39,7 @@ export default function UserProfileScreen() {
     const {logout, userId: loggedInUserId} = useAuth();
     const {fetchUserById, userProfile} = useUser();
     const navigation = useNavigation();
+    const {posts} = usePostContext();
     const {friends, sendFriendRequest, removePendingFriendRequest, sentRequests, receivedRequests} =
         useFriendship(); // Use friendship context
 
@@ -65,8 +67,8 @@ export default function UserProfileScreen() {
     const {getOrCreateChat} = useChat()
     // Check if viewing own profile
     const isOwnProfile = useMemo(
-        () => username === "me" || loggedInUserId === username,
-        [username, loggedInUserId]
+      () => username === "me" || loggedInUserId === username,
+      [username, loggedInUserId]
     );
     // Old version - not optimized
     //const isOwnProfile = username === "me" || loggedInUserId === username;
@@ -76,27 +78,27 @@ export default function UserProfileScreen() {
     }, []);
 
     // Fetch the profile being viewed
-    useEffect(() => {
-        const resolvedUsername = username === "me" ? loggedInUserId : username;
+  useEffect(() => {
+    const resolvedUsername = username === "me" ? loggedInUserId : username;
 
-        if (resolvedUsername) {
-            // Only fetch if not already loaded
-            if (!visitedUser || visitedUser.id !== resolvedUsername) {
-                fetchUserById(resolvedUsername)
-                    .then((user) => setVisitedUser(user))
-                    .catch((error) => console.error("Failed to fetch visited user:", error));
-            }
+    if (resolvedUsername) {
+      // Only fetch if not already loaded
+      if (!visitedUser || visitedUser.id !== resolvedUsername) {
+        fetchUserById(resolvedUsername)
+          .then((user) => setVisitedUser(user))
+          .catch((error) => console.error("Failed to fetch visited user:", error));
+      }
 
-            const pendingRequest = sentRequests.some(
-                (request) =>
-                    request.receiverId === resolvedUsername &&
-                    request.status === "PENDING"
-            );
-            setHasPendingRequest(pendingRequest);
-        }
-    }, [username, loggedInUserId, sentRequests]);
+      const pendingRequest = sentRequests.some(
+        (request) =>
+          request.receiverId === resolvedUsername &&
+          request.status === "PENDING"
+      );
+      setHasPendingRequest(pendingRequest);
+    }
+  }, [username, loggedInUserId, sentRequests]);
 
-    // Old version - trying to improve performance
+  // Old version - trying to improve performance
     // useEffect(() => {
     //     const resolvedUsername = username === "me" ? loggedInUserId : username;
     //
@@ -122,22 +124,22 @@ export default function UserProfileScreen() {
     // }, [username, loggedInUserId]);
 
 
-    const fetchDogs = useCallback(async () => {
-        const ownerId = username === "me" ? loggedInUserId : username;
-        if (!ownerId || (dogs.length > 0 && dogs[0].ownerId === ownerId)) return;
+  const fetchDogs = useCallback(async () => {
+    const ownerId = username === "me" ? loggedInUserId : username;
+    if (!ownerId || (dogs.length > 0 && dogs[0].ownerId === ownerId)) return;
 
-        try {
-            const userDogs = await getDogsByUserId(ownerId);
-            const sortedDogs = userDogs
-                .map((dog) => ({...dog, name: dog.name || "Unknown Dog"}))
-                .sort((a, b) => a.name.localeCompare(b.name));
-            setDogs(sortedDogs);
-        } catch (error) {
-            console.error("Failed to fetch dogs:", error);
-        }
-    }, [username, loggedInUserId, dogs]);
+    try {
+      const userDogs = await getDogsByUserId(ownerId);
+      const sortedDogs = userDogs
+        .map((dog) => ({ ...dog, name: dog.name || "Unknown Dog" }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      setDogs(sortedDogs);
+    } catch (error) {
+      console.error("Failed to fetch dogs:", error);
+    }
+  }, [username, loggedInUserId, dogs]);
 
-    // Old version without caching
+  // Old version without caching
     // const fetchDogs = async () => {
     //     const ownerId = username === "me" ? loggedInUserId : username;
     //     if (!ownerId) return;
@@ -207,6 +209,10 @@ export default function UserProfileScreen() {
         if (!visitedUser) return;
         const result = await getOrCreateChat(visitedUser.id)
         if (result.success) {
+            // if (stompClient){
+            //     console.log('Cleaning up WebSocket connection');
+            //     stompClient.deactivate();
+            // }
             router.replace("/home/socials" as Href<string>);
             router.push(`/chat/${result.returnValue.chatroomId}` as Href<string>);
         } else {
@@ -312,9 +318,7 @@ export default function UserProfileScreen() {
         };
 
         return (
-            <Pressable onLongPress={isOwnProfile ? handleDeleteDog : undefined} onPress={() => {
-                router.push(`/user/${username}/pet/${item.id}`)
-            }}>
+            <Pressable onLongPress={isOwnProfile ? handleDeleteDog : undefined}>
                 <View
                     style={{
                         marginRight: 8,
@@ -610,6 +614,8 @@ export default function UserProfileScreen() {
         </ThemedView>
     );
 
+
+
     return (
         <SafeAreaView
             style={{
@@ -625,26 +631,27 @@ export default function UserProfileScreen() {
                 data={[]}
                 ListHeaderComponent={ListHeaderComponent}
                 ListFooterComponent={() => (
-                    <>
-                        <ThemedText
-                            textStyleOptions={{size: 30}}
-                            style={{
-                                color: themeColors.textOnSecondary,
-                                backgroundColor: "transparent",
-                                marginLeft: widthPercentageToDP(5),
-                                marginTop: heightPercentToPD(4),
-                            }}
-                        >
-                            Posts
-                        </ThemedText>
-                        <View style={{
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}>
-                            <PostFeed/>
-                        </View>
-
-                    </>
+                  <>
+                    <ThemedText
+                      textStyleOptions={{ size: 30 }}
+                      style={{
+                        color: themeColors.textOnSecondary,
+                        backgroundColor: "transparent",
+                        marginLeft: widthPercentageToDP(5),
+                        marginTop: heightPercentToPD(4),
+                      }}
+                    >
+                      Posts
+                    </ThemedText>
+                    <View
+                      style={{
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <PostFeed filterAuthorId={visitedUser?.id} />
+                    </View>
+                  </>
                 )}
                 renderItem={(item) => <></>}
             />

@@ -12,7 +12,12 @@ import { usePostContext} from "@/context/PostContext";
 import PostCard from "@/components/display/PostCard";
 import {heightPercentageToDP, widthPercentageToDP} from "react-native-responsive-screen";
 
-const PostFeed = () => {
+
+interface PostFeedProps {
+  filterAuthorId?: string; // Optional prop for filtering posts by author
+}
+
+const PostFeed: React.FC<PostFeedProps> = ({ filterAuthorId }) => {
   // @ts-ignore
   const { posts, fetchPosts, totalPages } = usePostContext();
 
@@ -29,29 +34,35 @@ const PostFeed = () => {
     }
   };
 
-  // Render a loading indicator at the bottom of the list
-  const renderFooter = () => {
-    return <ActivityIndicator size="small" style={styles.loadingIndicator} />;
-  };
 
   // Render a single post using PostCard
   const renderPost = ({ item }) => <PostCard post={item} />;
+
+
+  // Filter posts if `filterAuthorId` is provided
+  const filteredPosts = filterAuthorId
+    ? posts.filter((post) => post.author.userId === filterAuthorId)
+    : posts;
 
   return (
     <View style={{
       flex: 1,
     }}>
       <FlatList
-        data={posts}
+        data={filteredPosts}
         keyExtractor={(item) => item.id}
         renderItem={renderPost}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
-        ListFooterComponent={posts.length > 0 ? renderFooter : null}
+        ListFooterComponent={
+          filteredPosts.length > 0 ? (
+            <ActivityIndicator size="small" style={styles.loadingIndicator} />
+          ) : null
+        }
         contentContainerStyle={styles.flatListContainer}
       />
       <View style={{
-        height: heightPercentageToDP(25),
+        height: heightPercentageToDP(15),
       }}></View>
     </View>
 
