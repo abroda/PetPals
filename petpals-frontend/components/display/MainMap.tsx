@@ -10,7 +10,7 @@ import { useEffect, useRef } from "react";
 import Constants from "expo-constants";
 import Geocoder from "react-native-geocoding";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
-import { MarkerData, PathVertex } from "@/context/WalksContext";
+import { MarkerData, PathVertex } from "@/context/RecordWalkContext";
 import UserAvatar from "../navigation/UserAvatar";
 import { Participant } from "@/context/GroupWalksContext";
 
@@ -58,7 +58,6 @@ export function MainMap({
   let currentPath = path;
 
   useEffect(() => {
-    console.log(initialRegion);
     initialRegion = {
       latitude: latitude,
       longitude: longitude,
@@ -160,7 +159,7 @@ export function MainMap({
             strokeWidth={3}
           />
         )}
-        {nearbyUsers &&
+        {/* {nearbyUsers &&
           nearbyUsers.length > 0 &&
           // [
           //   ...nearbyUsers,
@@ -186,9 +185,9 @@ export function MainMap({
                 doLink={true}
               />
             </Marker>
-          ))}
+          ))} */}
 
-        {otherParticipants &&
+        {/* {otherParticipants &&
           otherParticipants.length > 0 &&
           // [
           //   ...otherParticipants,
@@ -214,7 +213,7 @@ export function MainMap({
                 doLink={true}
               />
             </Marker>
-          ))}
+          ))} */}
       </MapView>
     </View>
   );

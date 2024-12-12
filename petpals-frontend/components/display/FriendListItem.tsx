@@ -16,7 +16,7 @@ export default function FriendListItem (props:{
   username: any,
   description: any,
   userId: any,
-  imageUrl: string,
+  imageUrl?: string,
 })
 {
 

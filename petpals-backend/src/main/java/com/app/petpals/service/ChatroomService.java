@@ -24,6 +24,7 @@ public class ChatroomService {
 
     private final ChatroomRepository chatroomRepository;
     private final UserService userService;
+    private final AWSImageService awsImageService;
 
     public Chatroom getChatroomById(String id) {
         return chatroomRepository.findById(id).orElseThrow(() -> new ChatroomNotFoundException("Chatroom not found."));
@@ -48,6 +49,9 @@ public class ChatroomService {
                     .participants(chatroom.getUsers().stream().map((participant) -> ChatroomParticipant.builder()
                                     .id(participant.getId())
                                     .username(participant.getDisplayName())
+                                    .imageUrl(Optional.ofNullable(participant.getProfilePictureId())
+                                            .map(awsImageService::getPresignedUrl)
+                                            .orElse(null))
                                     .build())
                             .collect(Collectors.toList()))
                     .build();
@@ -61,6 +65,9 @@ public class ChatroomService {
                     .participants(savedChatroom.getUsers().stream().map((participant) -> ChatroomParticipant.builder()
                             .id(participant.getId())
                             .username(participant.getDisplayName())
+                            .imageUrl(Optional.ofNullable(participant.getProfilePictureId())
+                                    .map(awsImageService::getPresignedUrl)
+                                    .orElse(null))
                             .build()).collect(Collectors.toList()))
                     .build();
         }
@@ -77,6 +84,9 @@ public class ChatroomService {
                     .participants(chatroom.getUsers().stream().map((participant) -> ChatroomParticipant.builder()
                             .id(participant.getId())
                             .username(participant.getDisplayName())
+                            .imageUrl(Optional.ofNullable(participant.getProfilePictureId())
+                                    .map(awsImageService::getPresignedUrl)
+                                    .orElse(null))
                             .build()).collect(Collectors.toList()))
                     .build());
         });

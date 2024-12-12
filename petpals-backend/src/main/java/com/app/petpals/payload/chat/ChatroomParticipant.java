@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class ChatroomParticipant {
     private String id;
     private String username;
+    private String imageUrl;
 }

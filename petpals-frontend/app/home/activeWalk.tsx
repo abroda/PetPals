@@ -7,30 +7,57 @@ import { MainMap } from "@/components/display/MainMap";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import ThemedToast from "@/components/popups/ThemedToast";
 import { Dog } from "@/context/DogContext";
-import { GroupWalk, Participant } from "@/context/GroupWalksContext";
-import { MarkerData, PathVertex } from "@/context/WalksContext";
-import { useTextStyle } from "@/hooks/theme/useTextStyle";
-import { useThemeColor } from "@/hooks/theme/useThemeColor";
+import { GroupWalk } from "@/context/GroupWalksContext";
+import { MarkerData } from "@/context/RecordWalkContext";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { useAuth } from "@/hooks/useAuth";
 import { useGroupWalks } from "@/hooks/useGroupWalks";
-import { useWalks } from "@/hooks/useWalks";
-import { useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useRecordWalk } from "@/hooks/useRecordWalk";
+import { Href, router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import * as Location from "expo-location";
 import PetAvatar from "@/components/navigation/PetAvatar";
 import StartWalkDialog from "@/components/dialogs/StartWalkDialog";
 import EndWalkDialog from "@/components/dialogs/EndWalkDialog";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { DogPicker } from "@/components/inputs/DogPicker";
+import {
+  averageSpeedToString,
+  caloriesBurnedToString,
+  totalDistanceToString,
+  totalTimeToString,
+} from "@/helpers/recordWalkCounters";
 
 export default function ActiveWalkScreen() {
   const walkId = useLocalSearchParams().walkId as string | undefined;
 
+  const {
+    permissionsGranted,
+    isRecording,
+    summaryVisible,
+    firstTimeout,
+    secondTimeout,
+    dogsParticipating,
+    visibilityMode,
+    groupWalk,
+    userLocation,
+    walkStartTime,
+    walkTotalTime,
+    walkDistance,
+    walkPath,
+    nearbyUsers,
+    otherParticipants,
+    checkLocationPermissions,
+    getOngoingGroupWalks,
+    startWalk,
+    endWalk,
+    reset,
+    delayTimeout,
+    updateGroupWalkData,
+  } = useRecordWalk();
+  const { getGroupWalk, getUsersDogs } = useGroupWalks();
+  const { userId } = useAuth();
+
   const [ongoingGroupWalks, setOngoingGroupWalks] = useState<GroupWalk[]>([]);
-  const [groupWalk, setGroupWalk] = useState<GroupWalk | null>();
   const [dogs, setDogs] = useState([] as Dog[]);
 
   const [startDialogVisible, setStartDialogVisible] = useState(false);
@@ -42,35 +69,6 @@ export default function ActiveWalkScreen() {
 
   const [refreshOnFocus, setRefreshOnFocus] = useState(false);
 
-  const {
-    permissionsGranted,
-    isRecording,
-    summaryVisible,
-    firstTimeout,
-    secondTimeout,
-    dogsParticipating,
-    visibilityMode,
-    groupWalkId,
-    userLocation,
-    walkStartTime,
-    walkDistance,
-    walkPath,
-    nearbyUsers,
-    otherParticipants,
-    checkLocationPermissions,
-    getOngoingGroupWalks,
-    startWalk,
-    updateState,
-    endWalk,
-    reset,
-  } = useWalks();
-  const { getGroupWalk, getUsersDogs, getGroupWalks } = useGroupWalks();
-  const { userId } = useAuth();
-
-  const headerColor = useThemeColor("primary");
-  const headerStyle = useTextStyle({ size: "big", weight: "semibold" });
-  const buttonColor = useThemeColor("link");
-  const iconColor = useThemeColor("text");
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToDP = useWindowDimension("height");
   const widthPercentToDP = useWindowDimension("width");
@@ -79,7 +77,7 @@ export default function ActiveWalkScreen() {
   useEffect(() => {
     checkLocationPermissions();
 
-    if (isRecording) {
+    if (isRecording || summaryVisible) {
       getData();
     }
 
@@ -87,6 +85,19 @@ export default function ActiveWalkScreen() {
       asyncAbortController.current?.abort();
     };
   }, []);
+
+  // on focus
+  // useFocusEffect(() => {
+  //   if (refreshOnFocus && !isLoading) {
+  //     // checkLocationPermissions(); // check permissions -> if not -> show error message
+  //     // getData(); // refresh dog/walk data
+  //     // setRefreshOnFocus(false);
+  //   }
+
+  //   return () => {
+  //     setRefreshOnFocus(!isLoading);
+  //   };
+  // });
 
   const getData = async () => {
     console.log("get data (dogs)");
@@ -101,16 +112,16 @@ export default function ActiveWalkScreen() {
       let dogs = result.returnValue as Dog[];
       setDogs(dogs);
 
-      // if recording a group walk, get only relevant walk
-      if (isRecording && groupWalkId) {
+      // if recording a group walk, refresh only relevant walk
+      if (isRecording && groupWalk) {
         console.log("get data (single walk)");
         asyncAbortController.current = new AbortController();
 
-        result = await getGroupWalk(groupWalkId, asyncAbortController.current);
+        result = await getGroupWalk(groupWalk.id, asyncAbortController.current);
 
         if (result.success) {
           let walk = result.returnValue as GroupWalk;
-          setGroupWalk(walk);
+          updateGroupWalkData(walk);
         } else {
           setErrorMessage(result.returnValue);
         }
@@ -136,118 +147,6 @@ export default function ActiveWalkScreen() {
     setIsLoading(false);
   };
 
-  // on focus
-  useFocusEffect(() => {
-    if (refreshOnFocus && !isLoading) {
-      checkLocationPermissions(); // check permissions -> if not -> show error message
-      getData(); // refresh dog/walk data
-      setRefreshOnFocus(false);
-    }
-
-    return () => {
-      setRefreshOnFocus(!isLoading);
-    };
-  });
-
-  // update locations every 2.5 seconds when recording
-  useEffect(() => {
-    let intervalId = null;
-    if (isRecording) {
-      intervalId = setInterval(updateState, 6000); // 2500);
-    }
-
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [isRecording]);
-
-  const getTotalDistance = () => {
-    if (!walkStartTime || !isRecording) {
-      return "0.0km";
-    }
-
-    return (
-      Math.floor(walkDistance).toString() +
-      "." +
-      Math.floor((walkDistance % 1) * 10).toString() +
-      " km"
-    );
-  };
-
-  const getTotalTime = () => {
-    if (!walkStartTime || !isRecording) {
-      return "00:00";
-    }
-
-    let diffInSeconds = (new Date().valueOf() - walkStartTime.valueOf()) / 1000;
-    let hrs = Math.floor(diffInSeconds / 3600);
-    diffInSeconds -= hrs * 3600;
-    let mins = Math.floor(diffInSeconds / 60);
-    diffInSeconds -= mins * 60;
-    let secs = Math.floor(diffInSeconds);
-
-    return (
-      (hrs > 0 ? hrs.toString() + "h " : "") +
-      (mins > 9 ? "" : "0") +
-      mins.toString() +
-      "m " +
-      (secs > 9 ? "" : "0") +
-      secs.toString() +
-      "s"
-    );
-  };
-
-  const getCaloriesBurned = () => {
-    if (!walkStartTime || !isRecording) {
-      return "0kcal";
-    }
-
-    let diffInSecs = (new Date().valueOf() - walkStartTime.valueOf()) / 1000;
-    let diffInHrs = diffInSecs / 3600;
-    let avgSpeed = walkDistance / diffInHrs;
-
-    let met =
-      avgSpeed < 4
-        ? 2.0 + 0.375 * avgSpeed
-        : avgSpeed < 6
-          ? 3.5 + (avgSpeed - 4.0)
-          : avgSpeed < 12
-            ? 7.0 + 0.5 * (avgSpeed - 6.0)
-            : avgSpeed < 20
-              ? 10 + 0.3 * (avgSpeed - 12.0)
-              : 12.4 + 0.2 * (avgSpeed - 20.0);
-
-    let weight = 70;
-
-    let calories = met * weight * diffInHrs;
-
-    return (
-      Math.floor(calories).toString() +
-      "." +
-      Math.floor((calories % 1) * 10).toString() +
-      " kcal"
-    );
-  };
-
-  const getAverageSpeed = () => {
-    if (!walkStartTime || !isRecording) {
-      return "0km/h";
-    }
-
-    let diffInSecs = (new Date().valueOf() - walkStartTime.valueOf()) / 1000;
-    let diffInHrs = diffInSecs / 3600;
-
-    let speed = walkDistance / diffInHrs;
-    return (
-      Math.floor(speed).toString() +
-      "." +
-      Math.floor((speed % 1) * 10).toString() +
-      " km/h"
-    );
-  };
-
   return (
     <SafeAreaView>
       <ThemedToast
@@ -263,7 +162,6 @@ export default function ActiveWalkScreen() {
         aboveTabBar
       />
       <ThemedScrollView
-        scrollEnabled={false}
         style={{
           height: heightPercentToDP(100),
           paddingTop: percentToDP(5),
@@ -280,24 +178,58 @@ export default function ActiveWalkScreen() {
             marginBottom: percentToDP(4),
           }}
         >
-          {isRecording ? "Recording walk" : "Start walking"}
+          {isRecording
+            ? "Recording walk"
+            : summaryVisible
+              ? "Walk summary"
+              : "Start walking"}
         </ThemedText>
-        {/* DETAILS */}
-        <ThemedText
-          textStyleOptions={{ size: "biggerMedium" }}
-          style={{
-            marginBottom: percentToDP(3),
-            marginHorizontal: percentToDP(4),
-          }}
-        >
-          {!isRecording
-            ? 'Press "Start" to begin recording.'
-            : groupWalkId
-              ? `Group walk: ${groupWalk?.title}`
-              : "Solitary walk"}
-        </ThemedText>
-        {/* PETS + VISIBILITY INDICATORS */}
-        {isRecording && (
+        {/* WALK TYPE */}
+        <HorizontalView style={{ alignContent: "center" }}>
+          <ThemedText
+            textStyleOptions={{ size: "biggerMedium" }}
+            style={{
+              marginBottom: percentToDP(3),
+              marginHorizontal: percentToDP(4),
+            }}
+          >
+            {!(isRecording || summaryVisible)
+              ? 'Press "Start" to begin recording.'
+              : groupWalk?.title
+                ? `Group walk: ${groupWalk.title}`
+                : "Solitary walk"}
+          </ThemedText>
+          {(isRecording || summaryVisible) && groupWalk?.id && (
+            <ThemedIcon
+              name="chevron-forward-outline"
+              colorName="text"
+              onPress={() =>
+                router.push(`walk/event/${groupWalk.id}` as Href<String>)
+              }
+              style={{ marginRight: percentToDP(1) }}
+            />
+          )}
+        </HorizontalView>
+        {/* START DATE-TIME */}
+        {summaryVisible && walkStartTime && (
+          <ThemedText
+            textStyleOptions={{ size: "medium", weight: "semibold" }}
+            style={{
+              marginBottom: percentToDP(3),
+              marginHorizontal: percentToDP(4),
+            }}
+          >
+            {new Date(walkStartTime).toLocaleDateString(undefined, {
+              dateStyle: "short",
+            })}
+            {" @ "}
+            {new Date(walkStartTime).toLocaleTimeString(undefined, {
+              timeStyle: "short",
+            })}
+          </ThemedText>
+        )}
+        {/* PETS + VISIBILITY */}
+        {(isRecording || summaryVisible) && (
           <HorizontalView
             colorName="transparent"
             style={{
@@ -341,12 +273,7 @@ export default function ActiveWalkScreen() {
                   </ThemedView>
                 ))}
             </HorizontalView>
-            <ThemedView
-              colorName="secondary"
-              style={{
-                borderRadius: percentToDP(10),
-              }}
-            >
+            <ThemedView colorName="secondary">
               <ThemedText style={{ textAlign: "center" }}>
                 Visibility
               </ThemedText>
@@ -354,7 +281,7 @@ export default function ActiveWalkScreen() {
                 textColorName="primary"
                 style={{ textAlign: "center" }}
               >
-                {visibilityMode}
+                {visibilityMode.replace("_", " ")}
               </ThemedText>
             </ThemedView>
           </HorizontalView>
@@ -367,13 +294,24 @@ export default function ActiveWalkScreen() {
             pitchEnabled: false,
             rotateEnabled: true,
           }}
-          viewStyle={{
-            height: heightPercentToDP(isRecording ? 53 : 62.1),
-            width: widthPercentToDP(100),
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: percentToDP(-10),
-          }}
+          viewStyle={
+            summaryVisible
+              ? {
+                  height: heightPercentToDP(35),
+                  width: widthPercentToDP(94),
+                  borderRadius: widthPercentToDP(6),
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginHorizontal: percentToDP(3),
+                }
+              : {
+                  height: heightPercentToDP(isRecording ? 51.5 : 62.1),
+                  width: widthPercentToDP(100),
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: percentToDP(-10),
+                }
+          }
           markers={
             isRecording && groupWalk
               ? [
@@ -394,54 +332,58 @@ export default function ActiveWalkScreen() {
           path={isRecording ? walkPath : []}
         />
         {/* START/END BUTTON */}
-        <ThemedView
-          colorName="background"
-          style={{
-            zIndex: 1,
-            width: percentToDP(23),
-            height: percentToDP(23),
-            borderRadius: percentToDP(23),
-            marginTop: percentToDP(-2),
-            alignSelf: "center",
-          }}
-        >
-          <ThemedButton
-            onPress={() => {
-              if (isRecording) {
-                setEndDialogVisible(true);
-              } else {
-                setStartDialogVisible(true);
-              }
-              getData();
-            }}
-            backgroundColorName={isRecording ? "alarm" : "accent"}
+        {!summaryVisible && (
+          <ThemedView
+            colorName="background"
             style={{
               zIndex: 1,
               width: percentToDP(23),
               height: percentToDP(23),
               borderRadius: percentToDP(23),
-              marginTop: percentToDP(0),
+              marginTop: percentToDP(-2),
               alignSelf: "center",
             }}
-            iconSource={() => (
-              <ThemedIcon
-                size={percentToDP(12)}
-                name={isRecording ? "pause-outline" : "caret-forward-outline"}
-                colorName="text"
-                style={{
-                  marginRight: percentToDP(isRecording ? 0 : -1.5),
-                  marginTop: percentToDP(isRecording ? 0 : -0.3),
-                }}
-              />
-            )}
-          />
-        </ThemedView>
+          >
+            <ThemedButton
+              onPress={() => {
+                if (isRecording) {
+                  setEndDialogVisible(true);
+                } else {
+                  setStartDialogVisible(true);
+                }
+                getData();
+              }}
+              backgroundColorName={isRecording ? "alarm" : "accent"}
+              style={{
+                zIndex: 1,
+                width: percentToDP(23),
+                height: percentToDP(23),
+                borderRadius: percentToDP(23),
+                marginTop: percentToDP(0),
+                alignSelf: "center",
+              }}
+              iconSource={() => (
+                <ThemedIcon
+                  size={percentToDP(12)}
+                  name={isRecording ? "pause-outline" : "caret-forward-outline"}
+                  colorName="text"
+                  style={{
+                    marginRight: percentToDP(isRecording ? 0 : -1.5),
+                    marginTop: percentToDP(isRecording ? 0 : -0.3),
+                  }}
+                />
+              )}
+            />
+          </ThemedView>
+        )}
+        {/* COUNTERS */}
         <ThemedView>
           <HorizontalView style={{ marginBottom: percentToDP(1) }}>
+            {/* DISTANCE  */}
             <ThemedView
               colorName="secondary"
               style={{
-                marginTop: percentToDP(-14),
+                marginTop: percentToDP(summaryVisible ? 3 : -14),
                 marginLeft: percentToDP(4),
                 borderRadius: percentToDP(6),
                 padding: percentToDP(4),
@@ -456,7 +398,7 @@ export default function ActiveWalkScreen() {
                 textStyleOptions={{ size: "big", weight: "bold" }}
                 style={{ alignSelf: "flex-start" }}
               >
-                {getTotalDistance()}
+                {totalDistanceToString(walkDistance)}
               </ThemedText>
               <ThemedText
                 backgroundColorName="transparent"
@@ -466,10 +408,11 @@ export default function ActiveWalkScreen() {
                 Total distance
               </ThemedText>
             </ThemedView>
+            {/* TIME */}
             <ThemedView
               colorName="secondary"
               style={{
-                marginTop: percentToDP(-14),
+                marginTop: percentToDP(summaryVisible ? 3 : -14),
                 marginRight: percentToDP(4),
                 borderRadius: percentToDP(6),
                 padding: percentToDP(4),
@@ -484,7 +427,7 @@ export default function ActiveWalkScreen() {
                 textStyleOptions={{ size: "big", weight: "bold" }}
                 style={{ alignSelf: "flex-end" }}
               >
-                {getTotalTime()}
+                {totalTimeToString(walkTotalTime)}
               </ThemedText>
               <ThemedText
                 backgroundColorName="transparent"
@@ -496,6 +439,7 @@ export default function ActiveWalkScreen() {
             </ThemedView>
           </HorizontalView>
           <HorizontalView>
+            {/* CALORIES */}
             <ThemedView
               colorName="secondary"
               style={{
@@ -513,7 +457,7 @@ export default function ActiveWalkScreen() {
                 textStyleOptions={{ size: "big", weight: "bold" }}
                 style={{ alignSelf: "flex-start" }}
               >
-                {getCaloriesBurned()}
+                {caloriesBurnedToString(walkDistance, walkTotalTime)}
               </ThemedText>
               <ThemedText
                 backgroundColorName="transparent"
@@ -523,6 +467,7 @@ export default function ActiveWalkScreen() {
                 Calories burned
               </ThemedText>
             </ThemedView>
+            {/* AVG SPEED */}
             <ThemedView
               colorName="secondary"
               style={{
@@ -540,7 +485,7 @@ export default function ActiveWalkScreen() {
                 textStyleOptions={{ size: "big", weight: "bold" }}
                 style={{ alignSelf: "flex-end" }}
               >
-                {getAverageSpeed()}
+                {averageSpeedToString(walkDistance, walkTotalTime)}
               </ThemedText>
               <ThemedText
                 backgroundColorName="transparent"
@@ -551,34 +496,54 @@ export default function ActiveWalkScreen() {
               </ThemedText>
             </ThemedView>
           </HorizontalView>
+          {summaryVisible && (
+            <ThemedButton
+              center
+              label="Close"
+              onPress={reset}
+              style={{ marginTop: percentToDP(3), marginHorizontal: "auto" }}
+            />
+          )}
         </ThemedView>
       </ThemedScrollView>
+      {/* START DIALOG */}
       {startDialogVisible && !isRecording && (
         <StartWalkDialog
           groupWalks={ongoingGroupWalks}
           dogs={dogs}
           onStart={(dogsParticipating, visibility, groupWalk) => {
-            return startWalk(dogsParticipating, visibilityMode, groupWalk);
+            return startWalk(dogsParticipating, visibility, groupWalk);
           }}
           onDismiss={() => setStartDialogVisible(false)}
+          walkId={walkId}
         />
       )}
-      {endDialogVisible && isRecording && (
-        <EndWalkDialog
-          message={
-            firstTimeout === 0
-              ? `If you wish to continue recording the walk, close this dialog. Time until automatic end of the walk: ${secondTimeout}`
-              : "Are you sure you want to end recording the walk?"
-          }
-          onDismiss={() => setEndDialogVisible(false)}
-          onEnd={endWalk}
-        />
-      )}
-      {}
+      {/* END DIALOG */}
+      {(endDialogVisible ||
+        (firstTimeout &&
+          secondTimeout &&
+          firstTimeout.valueOf() < Date.now() &&
+          secondTimeout.valueOf() > Date.now())) &&
+        isRecording && (
+          <EndWalkDialog
+            delay={
+              (firstTimeout && firstTimeout.valueOf() < Date.now()) as boolean
+            }
+            message={
+              firstTimeout && firstTimeout.valueOf() < Date.now()
+                ? `If you wish to continue recording the walk, press the "Delay timeout" button. Otherwise, walk will end automatically at: ${secondTimeout?.toLocaleTimeString(undefined, { timeStyle: "short" })}`
+                : "Are you sure you want to end recording the walk?"
+            }
+            onDismiss={() => {
+              setEndDialogVisible(false);
+            }}
+            onEnd={() =>
+              firstTimeout && firstTimeout.valueOf() < Date.now()
+                ? delayTimeout()
+                : endWalk()
+            }
+          />
+        )}
     </SafeAreaView>
   );
 }
-
-const SummaryScreen = () => {
-  return <></>;
-};

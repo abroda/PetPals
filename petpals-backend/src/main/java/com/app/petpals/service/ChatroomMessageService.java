@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +24,7 @@ public class ChatroomMessageService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatroomService chatroomService;
     private final UserService userService;
+    private final AWSImageService awsImageService;
 
     public List<ChatMessage> getChatroomMessagesByChatroomId(String chatroomId) {
         return chatMessageRepository.findByChatroomIdOrderBySentAt(chatroomId);
@@ -44,6 +46,9 @@ public class ChatroomMessageService {
                             .sender(ChatroomParticipant.builder()
                                     .id(chatMessage.getSender().getId())
                                     .username(chatMessage.getSender().getDisplayName())
+                                    .imageUrl(Optional.ofNullable(chatMessage.getSender().getProfilePictureId())
+                                            .map(awsImageService::getPresignedUrl)
+                                            .orElse(null))
                                     .build())
                             .sendAt(chatMessage.getSentAt().toString())
                             .content(chatMessage.getContent())
@@ -73,6 +78,9 @@ public class ChatroomMessageService {
                 .sender(ChatroomParticipant.builder()
                         .id(chatMessage.getSender().getId())
                         .username(chatMessage.getSender().getDisplayName())
+                        .imageUrl(Optional.ofNullable(chatMessage.getSender().getProfilePictureId())
+                                .map(awsImageService::getPresignedUrl)
+                                .orElse(null))
                         .build())
                 .build();
     }
