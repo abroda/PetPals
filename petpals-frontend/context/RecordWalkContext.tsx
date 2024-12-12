@@ -373,14 +373,27 @@ export const RecordWalkProvider: FC<{ children: ReactNode }> = ({
       timestamp: new Date(),
     } as PathVertex;
 
-    newWalkPath = [...newWalkPath, location];
-    console.log("oldWalkPath = " + JSON.stringify(walkPath));
-    console.log("newWalkPath = " + JSON.stringify(newWalkPath));
+    setUserLocation(location);
+    setWalkPath((currentWalkPath) => {
+      const newWalkPath = [...currentWalkPath, location];
+      //console.log("newWalkPath = " + JSON.stringify(newWalkPath));
+      saveWalkPath(newWalkPath);
+      return newWalkPath;
+    });
 
-    let dist = walkDistance;
+    let distance = 0;
+
+    for (let i = 1; i < walkPath.length; i++) {
+      distance += distanceInKmFromCoordinates(
+        walkPath[i - 1].latitude,
+        walkPath[i - 1].longitude,
+        walkPath[i].latitude,
+        walkPath[i].longitude
+      );
+    }
 
     if (walkPath.length > 0) {
-      dist += distanceInKmFromCoordinates(
+      distance += distanceInKmFromCoordinates(
         walkPath[walkPath.length - 1].latitude,
         walkPath[walkPath.length - 1].longitude,
         location.latitude,
@@ -388,9 +401,21 @@ export const RecordWalkProvider: FC<{ children: ReactNode }> = ({
       );
     }
 
-    setUserLocation(location);
-    setWalkPath(newWalkPath);
-    setWalkDistance(dist);
+    setWalkDistance(distance);
+    // setWalkDistance((currentDistance) => {
+    //   let distance = currentDistance;
+
+    //   if (walkPath.length > 0) {
+    //     distance += distanceInKmFromCoordinates(
+    //       walkPath[walkPath.length - 1].latitude,
+    //       walkPath[walkPath.length - 1].longitude,
+    //       location.latitude,
+    //       location.longitude
+    //     );
+    //   }
+
+    //   return distance;
+    // });
 
     sendLocationUpdate({
       userId: userId ?? "",
@@ -492,7 +517,9 @@ export const RecordWalkProvider: FC<{ children: ReactNode }> = ({
         data.walkStartTime.valueOf()
     );
 
-    setUserLocation(data.walkPath[data.walkPath.length - 1]);
+    if (data.walkPath.length > 0) {
+      setUserLocation(data.walkPath[data.walkPath.length - 1]);
+    }
 
     let distance = 0;
 
