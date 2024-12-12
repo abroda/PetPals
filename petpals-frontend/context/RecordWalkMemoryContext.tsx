@@ -149,8 +149,6 @@ export const RecordWalkMemoryProvider: FC<{ children: ReactNode }> = ({
     await AsyncStorage.removeItem("walkPath");
   };
 
-  const saveStartMessage = async (message: string) => {};
-
   return (
     <RecordWalkMemoryContext.Provider
       value={{
