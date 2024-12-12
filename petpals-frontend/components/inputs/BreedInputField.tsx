@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import breedsData from "@/assets/DogBreeds.json";
 import {ThemedText} from "@/components/basic/ThemedText";
+import items from "ajv/lib/vocabularies/applicator/items";
 
 // @ts-ignore
 const BreedInputField = ({ newBreed, setNewBreed, themeColors, percentToDP }) => {
@@ -69,25 +70,43 @@ const BreedInputField = ({ newBreed, setNewBreed, themeColors, percentToDP }) =>
             overflow: "hidden",
           }}
         >
-          <FlatList
-            data={filteredBreeds}
-            keyExtractor={(item) => item}
-            renderItem={({ item }) => (
-              <Pressable
-                onPress={() => handleSelectBreed(item)}
-                style={{
-                  padding: percentToDP(2),
-                  borderBottomWidth: 0.5,
-                  borderBottomColor: themeColors.textOnSecondary,
-                }}
-              >
-                <ThemedText backgroundColorName={"transparent"} style={{
-                  color: themeColors.textOnSecondary,
+            {filteredBreeds.map((breed) => {
+                return (
+                    <Pressable
+                        onPress={() => handleSelectBreed(breed)}
+                        style={{
+                            padding: percentToDP(2),
+                            borderBottomWidth: 0.5,
+                            borderBottomColor: themeColors.textOnSecondary,
+                        }}
+                        key={breed}
+                    >
+                        <ThemedText backgroundColorName={"transparent"} style={{
+                            color: themeColors.textOnSecondary,
 
-                }}>{item}</ThemedText>
-              </Pressable>
-            )}
-          />
+                        }}>{breed}</ThemedText>
+                    </Pressable>
+                )
+            })}
+        {/*  <FlatList*/}
+        {/*    data={filteredBreeds}*/}
+        {/*    keyExtractor={(item) => item}*/}
+        {/*    renderItem={({ item }) => (*/}
+        {/*      <Pressable*/}
+        {/*        onPress={() => handleSelectBreed(item)}*/}
+        {/*        style={{*/}
+        {/*          padding: percentToDP(2),*/}
+        {/*          borderBottomWidth: 0.5,*/}
+        {/*          borderBottomColor: themeColors.textOnSecondary,*/}
+        {/*        }}*/}
+        {/*      >*/}
+        {/*        <ThemedText backgroundColorName={"transparent"} style={{*/}
+        {/*          color: themeColors.textOnSecondary,*/}
+
+        {/*        }}>{item}</ThemedText>*/}
+        {/*      </Pressable>*/}
+        {/*    )}*/}
+        {/*  />*/}
         </View>
       )}
     </View>
