@@ -39,6 +39,7 @@ public class UserWalksController {
         User user = userService.getById(userId);
         Set<GroupWalk> uniqueJoinedWalks = user.getDogs().stream()
                 .flatMap(dog -> dog.getJoinedWalks().stream())
+                .filter(walk -> walk.getDatetime().isAfter(ZonedDateTime.now().minusHours(1)))
                 .collect(Collectors.toSet());
         return ResponseEntity.ok(uniqueJoinedWalks.stream().map(groupWalkService::createGroupWalkResponse).collect(Collectors.toList()));
     }
