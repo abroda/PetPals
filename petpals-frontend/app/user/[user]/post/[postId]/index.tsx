@@ -17,6 +17,7 @@ import { ThemeColors } from "@/constants/theme/Colors";
 import { useAuth } from "@/hooks/useAuth";
 import formatDateTime from "@/helpers/dateStringToFormattedDate";
 import {widthPercentageToDP} from "react-native-responsive-screen";
+import {apiPaths} from "@/constants/config/api";
 
 export default function PostScreen() {
   const path = usePathname();
@@ -28,9 +29,10 @@ export default function PostScreen() {
   const themeColors = ThemeColors[colorScheme];
 
   const { userId: loggedInUserId } = useAuth();
-  const { fetchPostById, addComment, fetchComments, toggleLikePost, toggleLikeComment, editComment, deleteComment } =
+  const { deletePost, fetchPostById, addComment, fetchComments, toggleLikePost, toggleLikeComment, editComment, deleteComment } =
     usePostContext();
   const asyncAbortController = useRef<AbortController | undefined>();
+  const {authToken} = useAuth()
 
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
@@ -135,17 +137,49 @@ export default function PostScreen() {
 
   // Delete post
   const handleDelete = useCallback(async () => {
+    if (!post) {
+      Alert.alert("Error", "Post data is not available. Please try again.");
+      return;
+    }
+
     Alert.alert("Confirm Deletion", "Are you sure you want to delete this post?", [
       { text: "Cancel", style: "cancel" },
       {
         text: "Delete",
         style: "destructive",
         onPress: async () => {
-          // Implement post and picture deletion logic
+          try {
+            if (post.imageUrl) {
+              // Delete the post picture first
+              const deletePictureResponse = await fetch(apiPaths.posts.deletePicture(post.id), {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${authToken}` },
+              });
+
+              if (!deletePictureResponse.ok) {
+                throw new Error("Failed to delete post picture.");
+              }
+              console.log("[PostScreen] Post picture deleted successfully.");
+            }
+
+            // Now delete the post itself
+            const deletePostSuccess = await deletePost(post.id);
+
+            if (!deletePostSuccess) {
+              throw new Error("Failed to delete the post.");
+            }
+
+            console.log("[PostScreen] Post deleted successfully.");
+            Alert.alert("Success", "Post deleted successfully!");
+            router.replace(`/user/${authorId}`);
+          } catch (error) {
+            console.error("[PostScreen] Error deleting post:", error);
+            Alert.alert("Error", error.message || "Failed to delete the post.");
+          }
         },
       },
     ]);
-  }, [post, postId]);
+  }, [post, deletePost, authToken, authorId]);
 
   const handleToggleLike = async () => {
     if (loggedInUserId === authorId) {
