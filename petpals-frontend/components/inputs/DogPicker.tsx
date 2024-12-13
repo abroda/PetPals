@@ -37,19 +37,28 @@ export const DogPicker = (
         horizontal
         style={{ paddingBottom: percentToDP(2) }}
       >
-        {props.dogs.map((dog) => (
-          <PetAvatar
-            key={dog.id}
-            petId={dog.id}
-            petName={dog.name}
-            userId={userId ?? ""}
-            source={dog.imageUrl ?? undefined}
-            size={15}
-            toggleEnabled={true}
-            marked={props.dogsParticipating.includes(dog.id)}
-            onPress={() => props.onToggle(dog.id)}
-          />
-        ))}
+        {props.dogs.length === 0 && (
+          <ThemedText
+            textColorName="disabled"
+            center
+          >
+            No dogs found
+          </ThemedText>
+        )}
+        {props.dogs.length > 0 &&
+          props.dogs.map((dog) => (
+            <PetAvatar
+              key={dog.id}
+              petId={dog.id}
+              petName={dog.name}
+              userId={userId ?? ""}
+              source={dog.imageUrl ?? undefined}
+              size={15}
+              toggleEnabled={true}
+              marked={props.dogsParticipating.includes(dog.id)}
+              onPress={() => props.onToggle(dog.id)}
+            />
+          ))}
       </ThemedScrollView>
     </ThemedView>
   );

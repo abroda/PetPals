@@ -243,36 +243,45 @@ export default function ActiveWalkScreen() {
               justifyOption="flex-start"
               colorName="transparent"
             >
-              {dogs
-                .filter((dog) => dogsParticipating.includes(dog.id))
-                .map((dog) => (
-                  <ThemedView
-                    key={dog.id + "t"}
-                    colorName="transparent"
-                    style={{
-                      marginRight: percentToDP(2),
-                    }}
-                  >
-                    <PetAvatar
-                      key={dog.id + "a"}
-                      size={10}
-                      userId={userId ?? ""}
-                      petId={dog.id}
-                      toggleEnabled
-                      marked={true}
-                    />
-                    <ThemedText
-                      center
-                      textStyleOptions={{ size: "tiny" }}
+              {dogs.length === 0 && (
+                <ThemedText
+                  textColorName="disabled"
+                  center
+                >
+                  No dogs found
+                </ThemedText>
+              )}
+              {dogs.length > 0 &&
+                dogs
+                  .filter((dog) => dogsParticipating.includes(dog.id))
+                  .map((dog) => (
+                    <ThemedView
+                      key={dog.id + "t"}
+                      colorName="transparent"
                       style={{
-                        marginTop: percentToDP(1),
-                        marginLeft: percentToDP(-1),
+                        marginRight: percentToDP(2),
                       }}
                     >
-                      {dog.name}
-                    </ThemedText>
-                  </ThemedView>
-                ))}
+                      <PetAvatar
+                        key={dog.id + "a"}
+                        size={10}
+                        userId={userId ?? ""}
+                        petId={dog.id}
+                        toggleEnabled
+                        marked={true}
+                      />
+                      <ThemedText
+                        center
+                        textStyleOptions={{ size: "tiny" }}
+                        style={{
+                          marginTop: percentToDP(1),
+                          marginLeft: percentToDP(-1),
+                        }}
+                      >
+                        {dog.name}
+                      </ThemedText>
+                    </ThemedView>
+                  ))}
             </HorizontalView>
             <ThemedView colorName="secondary">
               <ThemedText style={{ textAlign: "center" }}>
