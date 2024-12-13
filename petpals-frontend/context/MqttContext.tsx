@@ -18,7 +18,7 @@ export type MqttContextType = {
     timestamp: string;
     visibility: VisibilityMode;
     dogIds: string[];
-    walkId?: string;
+    groupWalkId?: string;
   }) => void;
   sendLocationUpdate: (payload: {
     userId: string;
@@ -136,7 +136,7 @@ export const MqttProvider: FC<{ children: ReactNode }> = ({ children }) => {
     timestamp: string;
     visibility: VisibilityMode;
     dogIds: string[];
-    walkId?: string;
+    groupWalkId?: string;
   }) => {
     const message = JSON.stringify(payload);
     sendMessageWithRetries("startWalkMessage", `walk/start/${userId}`, message);
