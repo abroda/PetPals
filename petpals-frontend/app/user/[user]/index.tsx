@@ -430,71 +430,71 @@ export default function UserProfileScreen() {
                     </ThemedText>
                 </View>
 
-                {/* User Info: Friends, KM, Dogs */}
-                <HorizontalView
-                    justifyOption="space-evenly"
-                    style={{
-                        marginBottom: heightPercentToPD(5),
-                        backgroundColor: themeColors.tertiary,
-                        width: widthPercentageToDP(100),
-                    }}
-                >
-                    <View style={{alignItems: "center"}}>
-                        <ThemedText
-                            style={{
-                                fontSize: 24,
-                                lineHeight: 26,
-                                fontWeight: "bold",
-                                color: themeColors.textOnSecondary
-                            }}
-                        >
-                            21
-                        </ThemedText>
-                        <ThemedText style={{
-                            fontSize: 12,
-                            lineHeight: 14,
-                            color: themeColors.textOnSecondary
-                        }}>
-                            friends
-                        </ThemedText>
-                    </View>
-                    <View style={{alignItems: "center"}}>
-                        <ThemedText
-                            style={{
-                                fontSize: 24,
-                                lineHeight: 26,
-                                fontWeight: "bold",
-                                color: themeColors.textOnSecondary
-                            }}
-                        >
-                            2
-                        </ThemedText>
-                        <ThemedText style={{
-                            fontSize: 12,
-                            lineHeight: 14,
-                            color: themeColors.textOnSecondary
-                        }}>
-                            km this week
-                        </ThemedText>
-                    </View>
-                    <View style={{alignItems: "center"}}>
-                        <ThemedText
-                            style={{
-                                fontSize: 24,
-                                lineHeight: 26,
-                                fontWeight: "bold",
-                                color: themeColors.textOnSecondary
-                            }}
-                        >
-                            {dogCount}
-                        </ThemedText>
-                        <ThemedText style={{
-                            fontSize: 12,
-                            lineHeight: 14,
-                            color: themeColors.textOnSecondary
-                        }}>{dogCount === 1 ? "dog" : "dogs"}</ThemedText>
-                    </View>
-                </HorizontalView>
+                {/*/!* User Info: Friends, KM, Dogs *!/*/}
+                {/*<HorizontalView*/}
+                {/*    justifyOption="space-evenly"*/}
+                {/*    style={{*/}
+                {/*        marginBottom: heightPercentToPD(5),*/}
+                {/*        backgroundColor: themeColors.tertiary,*/}
+                {/*        width: widthPercentageToDP(100),*/}
+                {/*    }}*/}
+                {/*>*/}
+                {/*    <View style={{alignItems: "center"}}>*/}
+                {/*        <ThemedText*/}
+                {/*            style={{*/}
+                {/*                fontSize: 24,*/}
+                {/*                lineHeight: 26,*/}
+                {/*                fontWeight: "bold",*/}
+                {/*                color: themeColors.textOnSecondary*/}
+                {/*            }}*/}
+                {/*        >*/}
+                {/*            21*/}
+                {/*        </ThemedText>*/}
+                {/*        <ThemedText style={{*/}
+                {/*            fontSize: 12,*/}
+                {/*            lineHeight: 14,*/}
+                {/*            color: themeColors.textOnSecondary*/}
+                {/*        }}>*/}
+                {/*            friends*/}
+                {/*        </ThemedText>*/}
+                {/*    </View>*/}
+                {/*    <View style={{alignItems: "center"}}>*/}
+                {/*        <ThemedText*/}
+                {/*            style={{*/}
+                {/*                fontSize: 24,*/}
+                {/*                lineHeight: 26,*/}
+                {/*                fontWeight: "bold",*/}
+                {/*                color: themeColors.textOnSecondary*/}
+                {/*            }}*/}
+                {/*        >*/}
+                {/*            2*/}
+                {/*        </ThemedText>*/}
+                {/*        <ThemedText style={{*/}
+                {/*            fontSize: 12,*/}
+                {/*            lineHeight: 14,*/}
+                {/*            color: themeColors.textOnSecondary*/}
+                {/*        }}>*/}
+                {/*            km this week*/}
+                {/*        </ThemedText>*/}
+                {/*    </View>*/}
+                {/*    <View style={{alignItems: "center"}}>*/}
+                {/*        <ThemedText*/}
+                {/*            style={{*/}
+                {/*                fontSize: 24,*/}
+                {/*                lineHeight: 26,*/}
+                {/*                fontWeight: "bold",*/}
+                {/*                color: themeColors.textOnSecondary*/}
+                {/*            }}*/}
+                {/*        >*/}
+                {/*            {dogCount}*/}
+                {/*        </ThemedText>*/}
+                {/*        <ThemedText style={{*/}
+                {/*            fontSize: 12,*/}
+                {/*            lineHeight: 14,*/}
+                {/*            color: themeColors.textOnSecondary*/}
+                {/*        }}>{dogCount === 1 ? "dog" : "dogs"}</ThemedText>*/}
+                {/*    </View>*/}
+                {/*</HorizontalView>*/}
 
 
                 {/* Buttons */}

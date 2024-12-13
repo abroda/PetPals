@@ -13,6 +13,7 @@ import { usePostContext} from "@/context/PostContext";
 import PostCard from "@/components/display/PostCard";
 import {heightPercentageToDP, widthPercentageToDP} from "react-native-responsive-screen";
 import {useFocusEffect} from "expo-router";
+import {useAuth} from "@/hooks/useAuth";
 
 
 interface PostFeedProps {
@@ -24,11 +25,12 @@ interface PostFeedProps {
 const PostFeed: React.FC<PostFeedProps> = ({ filterAuthorId, refreshControl }) => {  // @ts-ignore
   const { posts, fetchPosts, totalPages } = usePostContext();
   const [isRefreshing, setIsRefreshing] = React.useState(false);
-
+  const { authToken } = useAuth();
 
 
   // Function to refresh posts
   const handleRefresh = async () => {
+    console.log("[POST FEED] handleRefresh")
     setIsRefreshing(true);
     await fetchPosts(0, 10); // Re-fetch the first page
     setIsRefreshing(false);
@@ -45,8 +47,12 @@ const PostFeed: React.FC<PostFeedProps> = ({ filterAuthorId, refreshControl }) =
   // Trigger re-fetch when the screen gains focus
   useFocusEffect(
     useCallback(() => {
-      fetchPosts(0, 10); // Ensure the latest data is loaded when returning
-    }, [])
+      console.log("[POST FEED] fetching post on focus")
+      if (authToken && authToken != "") {
+        console.log("[POST FEED] authToken present")
+        fetchPosts(0, 10); // Ensure the latest data is loaded when returning
+      }
+    }, [authToken])
   );
 
 

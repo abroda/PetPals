@@ -51,7 +51,7 @@ export default function VerifyEmailScreen() {
       let result = await verifyEmail(email, code);
 
       if (result.success) {
-        router.dismissAll();
+        // router.dismissAll();
         router.replace("/register/success");
       } else {
         setValidationMessage(result.returnValue);

@@ -91,10 +91,10 @@ export const PostProvider = ({ children }) => {
 
         setResponseMessage("[PostContext] Fetched posts successfully!");
       },
-      (payload) => {
-        console.error("[PostContext] Failed to fetch posts:", payload.message);
-        setResponseMessage("[PostContext] Failed to fetch posts: " + payload.message);
-      }
+      // (payload) => {
+      //   console.error("[PostContext] Failed to fetch posts:", payload.message);
+      //   setResponseMessage("[PostContext] Failed to fetch posts: " + payload.message);
+      // }
     );
   };
 
@@ -402,7 +402,7 @@ export const PostProvider = ({ children }) => {
         return null; // Return null on bad response
       }
     } catch (error) {
-      console.error("[PostContext | sendJsonQuery] Network error:", error);
+      // console.error("[PostContext | sendJsonQuery] Network error:", error);
       onError(error); // Call the error handler
       return null; // Return null on network error
     }

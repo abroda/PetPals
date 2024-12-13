@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import {useCallback, useContext, useRef, useState} from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {FlatList, Pressable, RefreshControl, StyleSheet, View} from "react-native";
+import {Alert, FlatList, Pressable, RefreshControl, StyleSheet, View} from "react-native";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import PostFeed from "@/components/lists/PostFeed";
@@ -41,7 +41,7 @@ export default function HomeScreen() {
   const asyncAbortController = useRef<AbortController | undefined>();
 
   // User Info
-  const { userId } = useAuth();
+  const { userId, authToken } = useAuth();
   const {
     userProfile,
     isProcessing,
@@ -65,18 +65,23 @@ export default function HomeScreen() {
   };
 
   const getData = useCallback(async () => {
-    setIsRefreshing(true);
-    asyncAbortController.current = new AbortController();
+    if (authToken && authToken != ""){
+      console.log("authToken: ", authToken)
+      setIsRefreshing(true);
+      asyncAbortController.current = new AbortController();
 
-    try {
-      await fetchPosts(0, 10); // Fetch the first page of posts
-    } catch (error) {
-      console.error("[HomeScreen] Failed to fetch posts:", error);
-      Alert.alert("Error", "Unable to refresh posts. Please try again.");
-    } finally {
-      setIsRefreshing(false);
+      try {
+        await fetchPosts(0, 10); // Fetch the first page of posts
+      } catch (error) {
+        console.error("[HomeScreen] Failed to fetch posts:", error);
+        Alert.alert("Error", "Unable to refresh posts. Please try again.");
+      } finally {
+        setIsRefreshing(false);
+      }
+    } else {
+      console.log("token not obtained yet.")
     }
-  }, [fetchPosts]);
+  }, [fetchPosts, authToken]);
 
 
   return (
