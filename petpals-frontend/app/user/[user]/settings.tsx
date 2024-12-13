@@ -11,7 +11,6 @@ import { useColorScheme } from "@/hooks/theme/useColorScheme";
 import { ThemeColors } from "@/constants/theme/Colors";
 import { ThemedButton } from "@/components/inputs/ThemedButton";
 import React, { useState } from "react";
-import TermsOfUseDialog from "@/components/dialogs/TermsOfUseDialog";
 import VisibilitySettingDialog from "@/components/dialogs/VisibilitySettingDialog";
 import { useUser } from "@/hooks/useUser";
 import { useAuth } from "@/hooks/useAuth";

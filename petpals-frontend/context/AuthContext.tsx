@@ -13,9 +13,9 @@ import { serverQuery } from "@/helpers/serverQuery";
 export type AuthContextType = {
   isLoading: boolean;
   isProcessing: boolean;
-  authToken?: string|null;
-  userId?: string|null;
-  userEmail?: string|null;
+  authToken?: string | null;
+  userId?: string | null;
+  userEmail?: string | null;
   passwordRegex: string;
   codeRegex: string;
   register: (
@@ -173,6 +173,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         password: password,
       },
       onOKResponse: async (payload: any) => {
+        await asyncStorage.clear();
         setUserId(payload.id);
         setUserEmail(email.trimStart().trimEnd());
         setAuthToken(payload.token);
@@ -230,8 +231,8 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   useEffect(() => {
     if (isLoading) {
-      console.log("LOADING")
-      load().then(r => setIsLoading(false));
+      console.log("LOADING");
+      load().then((r) => setIsLoading(false));
     }
   }, []);
 

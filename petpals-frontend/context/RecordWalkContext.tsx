@@ -103,6 +103,7 @@ export type MapPosition = {
   latitude: number;
   longitude: number;
   timestamp: Date;
+  imageUrl: string | null;
 };
 
 export type PathVertex = {
@@ -128,8 +129,8 @@ export type RecordWalkContextType = {
   walkTotalTime: number;
   walkDistance: number;
   walkPath: PathVertex[];
-  nearbyUsers: (Participant & MarkerData)[];
-  otherParticipants: (Participant & MarkerData)[];
+  nearbyUsers: MapPosition[];
+  otherParticipants: MapPosition[];
   checkLocationPermissions: () => void;
   getOngoingGroupWalks: (
     asyncAbortController?: AbortController
@@ -198,11 +199,9 @@ export const RecordWalkProvider: FC<{ children: ReactNode }> = ({
   const [walkEndTime, setWalkEndTime] = useState<Date | null>(null);
   const [walkDistance, setWalkDistance] = useState(0);
   const [walkPath, setWalkPath] = useState([] as PathVertex[]);
-  const [nearbyUsers, setNearbyUsers] = useState(
-    [] as (MarkerData & Participant)[]
-  );
+  const [nearbyUsers, setNearbyUsers] = useState([] as MapPosition[]);
   const [otherParticipants, setOtherParticipants] = useState(
-    [] as (MarkerData & Participant)[]
+    [] as MapPosition[]
   );
 
   // when userId changes

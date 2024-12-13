@@ -16,4 +16,5 @@ public class LocationResponse {
     private double latitude;
     private double longitude;
     private LocalDateTime timestamp;
+    private String imageUrl;
 }

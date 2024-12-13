@@ -227,12 +227,17 @@ const TagSelector: React.FC<TagSelectorProps> = ({
     <View style={{ padding: 10 }}>
 
       {/* Render available tags grouped by category */}
-      <FlatList
-        data={Object.keys(availableTags)}
-        keyExtractor={(item) => item}
-        renderItem={renderCategory}
-        contentContainerStyle={{ marginBottom: 20 }}
-      />
+      {/*<FlatList*/}
+      {/*  data={Object.keys(availableTags)}*/}
+      {/*  keyExtractor={(item) => item}*/}
+      {/*  renderItem={renderCategory}*/}
+      {/*  contentContainerStyle={{ marginBottom: 20 }}*/}
+      {/*/>*/}
+        {Object.keys(availableTags).map((item, index) => (
+            <View key={item} >
+                {renderCategory({ item })}
+            </View>
+        ))}
 
       {/* Summary of selected tags */}
       <View style={{ marginTop: 20 }}>
