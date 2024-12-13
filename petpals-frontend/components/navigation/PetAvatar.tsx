@@ -8,6 +8,7 @@ import DogPlaceholderImage from "@/assets/images/dog_placeholder_theme-color-fai
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
 import { ThemedIcon } from "../decorations/static/ThemedIcon";
 import { ThemedText } from "../basic/ThemedText";
+import { widthPercentageToDP } from "react-native-responsive-screen";
 
 export default function PetAvatar(props: {
   size: number;
@@ -31,8 +32,8 @@ export default function PetAvatar(props: {
           props.onPress
             ? props.onPress()
             : props.doLink
-            ? router.push(`/user/${props.userId}/pet/${props.petId}`)
-            : {}
+              ? router.push(`/user/${props.userId}/pet/${props.petId}`)
+              : {}
         }
         style={
           props.toggleEnabled
@@ -65,7 +66,9 @@ export default function PetAvatar(props: {
             alignSelf: "center",
             marginTop: percentToDP(0.8),
             marginLeft: percentToDP(-0.8),
+            maxWidth: widthPercentageToDP(18),
           }}
+          numberOfLines={1}
         >
           {props.petName}
         </ThemedText>

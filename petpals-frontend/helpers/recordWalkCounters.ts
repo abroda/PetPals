@@ -30,8 +30,9 @@ export const totalDistanceToString = (walkDistance: number) => {
 
   return (
     Math.floor(walkDistance).toString() +
-    "." +
-    Math.floor((walkDistance % 1) * 10).toString() +
+    (walkDistance < 1000
+      ? "." + Math.floor((walkDistance % 1) * 10).toString()
+      : "") +
     " km"
   );
 };
@@ -53,10 +54,8 @@ export const totalTimeToString = (walkTotalTime: number) => {
     (hrs > 0 ? hrs.toString() + "h " : "") +
     (mins > 9 ? "" : "0") +
     mins.toString() +
-    "m " +
-    (secs > 9 ? "" : "0") +
-    secs.toString() +
-    "s"
+    "m" +
+    (hrs === 0 ? (secs > 9 ? " " : " 0") + secs.toString() + "s" : "")
   );
 };
 
@@ -92,8 +91,7 @@ export const caloriesBurnedToString = (
 
   return (
     Math.floor(calories).toString() +
-    "." +
-    Math.floor((calories % 1) * 10).toString() +
+    (calories < 1000 ? "." + Math.floor((calories % 1) * 10).toString() : "") +
     " kcal"
   );
 };
