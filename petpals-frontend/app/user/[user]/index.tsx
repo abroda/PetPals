@@ -73,30 +73,27 @@ export default function UserProfileScreen() {
     // Old version - not optimized
     //const isOwnProfile = username === "me" || loggedInUserId === username;
 
-    useEffect(() => {
-        console.log("FRIENDS: ", friends)
-    }, []);
-
-    // Fetch the profile being viewed
-  useEffect(() => {
-    const resolvedUsername = username === "me" ? loggedInUserId : username;
-
-    if (resolvedUsername) {
-      // Only fetch if not already loaded
-      if (!visitedUser || visitedUser.id !== resolvedUsername) {
+  useFocusEffect(
+    useCallback(() => {
+      const resolvedUsername = username === "me" ? loggedInUserId : username;
+      if (resolvedUsername) {
         fetchUserById(resolvedUsername)
           .then((user) => setVisitedUser(user))
           .catch((error) => console.error("Failed to fetch visited user:", error));
+
+        const pendingRequest = sentRequests.some(
+          (request) =>
+            request.receiverId === resolvedUsername &&
+            request.status === "PENDING"
+        );
+        setHasPendingRequest(pendingRequest);
       }
 
-      const pendingRequest = sentRequests.some(
-        (request) =>
-          request.receiverId === resolvedUsername &&
-          request.status === "PENDING"
-      );
-      setHasPendingRequest(pendingRequest);
-    }
-  }, [username, loggedInUserId, sentRequests]);
+      return () => {
+
+      };
+    }, [username, loggedInUserId])
+  );
 
   // Old version - trying to improve performance
     // useEffect(() => {

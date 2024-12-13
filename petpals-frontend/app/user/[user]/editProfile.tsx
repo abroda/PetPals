@@ -1,7 +1,7 @@
 import { ThemedText } from "@/components/basic/ThemedText";
 import { ThemedView } from "@/components/basic/containers/ThemedView";
 import UserAvatar from "@/components/navigation/UserAvatar";
-import { useNavigation, usePathname } from "expo-router";
+import {router, useNavigation, usePathname} from "expo-router";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import React, {
   useCallback,
@@ -23,11 +23,13 @@ import { useColorScheme } from "@/hooks/theme/useColorScheme";
 import { ThemeColors } from "@/constants/theme/Colors";
 import {useUser} from "@/hooks/useUser";
 import {useAuth} from "@/hooks/useAuth";
+import {ThemedTextField} from "@/components/inputs/ThemedTextField";
+import {ThemedScrollView} from "@/components/basic/containers/ThemedScrollView";
 
 export default function EditUserProfileScreen() {
   const path = usePathname();
   const username = path.slice(path.lastIndexOf("/") + 1);
-  const {userId} = useAuth();
+  const {userId, userEmail} = useAuth();
 
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToPD = useWindowDimension("height");
@@ -84,10 +86,8 @@ export default function EditUserProfileScreen() {
     const updateSuccessful = await updateUser(userProfile.id, updatedData);
 
     if (updateSuccessful) {
-      Alert.alert(
-        "Profile Updated",
-        "Your profile has been successfully updated."
-      );
+      Alert.alert("Profile Updated", "Your profile has been successfully updated.");
+      router.back(); // Navigate back with refresh trigger
     } else {
       Alert.alert("Update Failed", "There was an error updating your profile.");
     }
@@ -98,6 +98,7 @@ export default function EditUserProfileScreen() {
     userProfile.visibility,
     updateUser,
   ]);
+
 
   // Update Header Options
   useLayoutEffect(() => {
@@ -142,24 +143,29 @@ export default function EditUserProfileScreen() {
         type: "image/jpeg",
       } as unknown as File;
 
-      await changeUserAvatar(userProfile.id, file);
+      const avatarUpdated = await changeUserAvatar(userProfile.id, file);
+      if (avatarUpdated) {
+        router.replace(`/user/${userProfile.id}`); // Navigate back with refresh trigger
+      } else {
+        Alert.alert("Avatar Update Failed", "There was an error updating your avatar.");
+      }
     }
   };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ThemedView style={{ flex: 1 }}>
+      <ThemedScrollView style={{}}>
         {/* Avatar Section */}
         <View
           style={{
-            flex: 3,
+            height: heightPercentToPD(30),
             width: widthPercentageToDP(100),
             backgroundColor: themeColors.secondary,
           }}
         />
         <View
           style={{
-            flex: 7,
+
             flexDirection: "column",
             width: widthPercentageToDP(100),
             paddingHorizontal: widthPercentageToDP(10),
@@ -170,7 +176,7 @@ export default function EditUserProfileScreen() {
             style={{ alignItems: "center", marginTop: heightPercentToPD(-15) }}
           >
             <UserAvatar
-              size={heightPercentToPD(7)}
+              size={heightPercentToPD(8)}
               userId={userProfile?.id}
               imageUrl={userProfile?.imageUrl || null}
               doLink={false}
@@ -181,61 +187,75 @@ export default function EditUserProfileScreen() {
           <View
             style={{
               width: widthPercentageToDP(80),
-              paddingVertical: heightPercentToPD(1),
+              paddingVertical: heightPercentToPD(4),
             }}
           >
             {/* Username */}
-            <ThemedText>Username</ThemedText>
-            <TextInput
-              maxLength={16}
-              style={{
-                paddingHorizontal: percentToDP(6),
-                borderWidth: 1,
-                borderRadius: percentToDP(4),
-                borderColor: themeColors.secondary,
-                color: themeColors.textOnSecondary,
-              }}
-              onChangeText={setUsernameText}
-              value={usernameText}
-            />
-
+            <ThemedText style={{marginTop: percentToDP(5)}}>Username</ThemedText>
+            <ThemedTextField maxLength={16} onChangeText={setUsernameText} value={usernameText.trim()}/>
             {/* Description */}
-            <ThemedText>Description</ThemedText>
-            <TextInput
-              maxLength={64}
-              style={{
-                paddingHorizontal: percentToDP(6),
-                borderWidth: 1,
-                borderRadius: percentToDP(4),
-                borderColor: themeColors.secondary,
-                color: themeColors.textOnSecondary,
-              }}
-              onChangeText={setDescriptionText}
-              value={descriptionText}
-            />
+            <ThemedText style={{marginTop: percentToDP(5)}}>Description</ThemedText>
+            <ThemedTextField maxLength={64} onChangeText={setDescriptionText} value={descriptionText}/>
+
+            <ThemedText style={{marginTop: percentToDP(5)}}>E-mail address</ThemedText>
+            <ThemedTextField maxLength={64} editable={false} value={userEmail}/>
+            {/*<TextInput*/}
+            {/*  maxLength={16}*/}
+            {/*  style={{*/}
+            {/*    padding: percentToDP(4),*/}
+            {/*    borderWidth: 1,*/}
+            {/*    borderRadius: percentToDP(4),*/}
+            {/*    borderColor: themeColors.secondary,*/}
+            {/*    color: themeColors.textOnSecondary,*/}
+            {/*    marginBottom: percentToDP(5),*/}
+            {/*  }}*/}
+            {/*  onChangeText={setUsernameText}*/}
+            {/*  value={usernameText}*/}
+            {/*/>*/}
+
+
+            {/*<TextInput*/}
+            {/*  maxLength={64}*/}
+            {/*  style={{*/}
+            {/*    padding: percentToDP(4),*/}
+            {/*    borderWidth: 1,*/}
+            {/*    borderRadius: percentToDP(4),*/}
+            {/*    borderColor: themeColors.secondary,*/}
+            {/*    color: themeColors.textOnSecondary,*/}
+            {/*    marginBottom: percentToDP(5),*/}
+            {/*  }}*/}
+            {/*  onChangeText={setDescriptionText}*/}
+            {/*  value={descriptionText}*/}
+            {/*/>*/}
 
             {/* Email */}
-            <ThemedText>E-mail Address</ThemedText>
-            <TextInput
-              editable={false}
-              style={{
-                paddingHorizontal: percentToDP(6),
-                borderWidth: 1,
-                borderRadius: percentToDP(4),
-                borderColor: themeColors.secondary,
-                color: themeColors.textOnSecondary,
-              }}
-              value={emailText}
-            />
+            {/*<ThemedText>E-mail Address</ThemedText>*/}
+            {/*<TextInput*/}
+            {/*  editable={false}*/}
+            {/*  style={{*/}
+            {/*    padding: percentToDP(4),*/}
+            {/*    borderWidth: 1,*/}
+            {/*    borderRadius: percentToDP(4),*/}
+            {/*    borderColor: themeColors.secondary,*/}
+            {/*    color: themeColors.textOnSecondary,*/}
+            {/*    marginBottom: percentToDP(5),*/}
+            {/*  }}*/}
+            {/*  value={emailText}*/}
+            {/*/>*/}
 
             {/* Buttons */}
             <ThemedButton
               label="Change avatar"
               onPress={handleAvatarChange}
+              style={{
+                width: "60%",
+                marginTop: percentToDP(8),
+                marginHorizontal: 'auto',
+              }}
             />
           </View>
         </View>
-      </ThemedView>
+      </ThemedScrollView>
     </SafeAreaView>
   );
 }
