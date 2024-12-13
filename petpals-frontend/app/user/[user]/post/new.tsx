@@ -1,5 +1,5 @@
 import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
-import { SafeAreaView, View, TouchableOpacity, Alert } from "react-native";
+import {SafeAreaView, View, TouchableOpacity, Alert, TextInput} from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
 import { useThemeColor } from "@/hooks/theme/useThemeColor";
@@ -12,7 +12,7 @@ import { ThemedView } from "@/components/basic/containers/ThemedView";
 import { ThemedText } from "@/components/basic/ThemedText";
 import { Image } from "react-native-ui-lib";
 import { useNavigation, router } from "expo-router";
-import { usePostContext } from "@/context/PostContext";
+import {Post, usePostContext} from "@/context/PostContext";
 import { useAuth } from "@/hooks/useAuth";
 import { apiPaths } from "@/constants/config/api";
 
@@ -40,11 +40,12 @@ export default function NewPostScreen() {
   const navigation = useNavigation();
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerShown: false,
+      headerShown: true,
     });
   }, [navigation]);
 
-  // Add Post and Photo
+
+// Add Post and Photo
   const handleSavePost = useCallback(async () => {
     if (!postTitle.trim()) {
       setValidationMessage("Post title is required.");
@@ -54,10 +55,12 @@ export default function NewPostScreen() {
     setIsSubmitting(true);
 
     const postPayload = {
-      title: postTitle,
-      description: postDescription,
+      title: postTitle.trim(),
+      description: postDescription.trim(),
       userId,
     };
+
+    console.log("[NewPostScreen] Post payload:", postPayload);
 
     try {
       // Create the post
@@ -74,9 +77,9 @@ export default function NewPostScreen() {
         const formData = new FormData();
         formData.append("file", {
           uri: photoFile.uri,
-          name: photoFile.uri.split("/").pop(), // Extract file name
-          type: "image/jpeg", // Adjust MIME type as needed
-        } as unknown as File);
+          name: photoFile.name || "photo.jpg",
+          type: photoFile.type || "image/jpeg",
+        });
 
         const path = apiPaths.posts.addPicture(newPost.id);
 
@@ -106,6 +109,8 @@ export default function NewPostScreen() {
       setIsSubmitting(false);
     }
   }, [postTitle, postDescription, photoFile, addPost, authToken, userId]);
+
+
 
   // Image Selection
   const selectPhoto = async () => {
@@ -141,49 +146,49 @@ export default function NewPostScreen() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       {/* Top Navigation */}
-      <ThemedView style={{ height: heightPercentToDP(10) }}>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            height: heightPercentToDP(10),
-            paddingHorizontal: percentToDP(5),
-          }}
-        >
-          {/* Back Button */}
-          <ThemedButton
-            backgroundColorName="background"
-            style={{
-              height: heightPercentToDP(7),
-              width: heightPercentToDP(7),
-            }}
-            onPress={() => router.back()}
-          >
-            <ThemedIcon
-              name="arrow-back"
-              size={heightPercentToDP(4)}
-              colorName="primary"
-            />
-          </ThemedButton>
+      {/*<ThemedView style={{ height: heightPercentToDP(10) }}>*/}
+      {/*  <View*/}
+      {/*    style={{*/}
+      {/*      flexDirection: "row",*/}
+      {/*      justifyContent: "space-between",*/}
+      {/*      alignItems: "center",*/}
+      {/*      height: heightPercentToDP(10),*/}
+      {/*      paddingHorizontal: percentToDP(5),*/}
+      {/*    }}*/}
+      {/*  >*/}
+      {/*    /!* Back Button *!/*/}
+      {/*    <ThemedButton*/}
+      {/*      backgroundColorName="background"*/}
+      {/*      style={{*/}
+      {/*        height: heightPercentToDP(7),*/}
+      {/*        width: heightPercentToDP(7),*/}
+      {/*      }}*/}
+      {/*      onPress={() => router.back()}*/}
+      {/*    >*/}
+      {/*      <ThemedIcon*/}
+      {/*        name="arrow-back"*/}
+      {/*        size={heightPercentToDP(4)}*/}
+      {/*        colorName="primary"*/}
+      {/*      />*/}
+      {/*    </ThemedButton>*/}
 
-          {/* Save Button */}
-          <ThemedButton
-            backgroundColorName="background"
-            style={{
-              height: heightPercentToDP(7),
-              width: heightPercentToDP(7),
-            }}
-            onPress={handleSavePost}
-          >
-            <ThemedIcon
-              name="checkmark"
-              size={heightPercentToDP(4)}
-              colorName="primary"
-            />
-          </ThemedButton>
-        </View>
-      </ThemedView>
+      {/*    /!* Save Button *!/*/}
+      {/*    <ThemedButton*/}
+      {/*      backgroundColorName="background"*/}
+      {/*      style={{*/}
+      {/*        height: heightPercentToDP(7),*/}
+      {/*        width: heightPercentToDP(7),*/}
+      {/*      }}*/}
+      {/*      onPress={handleSavePost}*/}
+      {/*    >*/}
+      {/*      <ThemedIcon*/}
+      {/*        name="checkmark"*/}
+      {/*        size={heightPercentToDP(4)}*/}
+      {/*        colorName="primary"*/}
+      {/*      />*/}
+      {/*    </ThemedButton>*/}
+      {/*  </View>*/}
+      {/*</ThemedView>*/}
 
       {/* Form */}
       <ThemedScrollView
@@ -278,7 +283,6 @@ export default function NewPostScreen() {
 
         {/* Title Input */}
         <ThemedTextField
-          ref={postTitleRef}
           label="Post Title"
           value={postTitle}
           onChangeText={setPostTitle}
@@ -287,15 +291,33 @@ export default function NewPostScreen() {
           maxLength={100}
         />
 
+        <ThemedText textStyleOptions={{weight: 'semibold'}} style={{marginLeft: percentToDP(2), marginTop: percentToDP(5)}}>Post Description</ThemedText>
         {/* Description Input */}
-        <ThemedMultilineTextField
-          ref={postDescriptionRef}
-          label="Post Description"
+        <TextInput
           value={postDescription}
           onChangeText={setPostDescription}
-          maxLength={255}
-          style={{ marginBottom: percentToDP(10) }}
+          placeholder="Enter post description"
+          multiline
+          placeholderTextColor={useThemeColor("placeholderText")}
+          style={{
+            borderRadius: percentToDP(100),
+            backgroundColor: useThemeColor("textField"),
+            padding: percentToDP(5),
+            marginVertical: percentToDP(2),
+            color: useThemeColor("textOnSecondary")
+          }}
         />
+
+        {/* Save button */}
+        <ThemedButton
+          label={"Add post"}
+          backgroundColorName="primary"
+          style={{
+            marginTop: percentToDP(5),
+          }}
+          onPress={handleSavePost}
+        />
+
 
         {/* Validation Error Message */}
         {validationMessage ? (
