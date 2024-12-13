@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, {useCallback, useEffect} from "react";
 import {
   FlatList,
   View,
@@ -7,24 +7,32 @@ import {
   ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
+  RefreshControl
 } from "react-native";
 import { usePostContext} from "@/context/PostContext";
 import PostCard from "@/components/display/PostCard";
 import {heightPercentageToDP, widthPercentageToDP} from "react-native-responsive-screen";
+import {useFocusEffect} from "expo-router";
 
 
 interface PostFeedProps {
   filterAuthorId?: string; // Optional prop for filtering posts by author
+  refreshControl?: React.ReactElement; // Prop to accept RefreshControl
 }
 
-const PostFeed: React.FC<PostFeedProps> = ({ filterAuthorId }) => {
-  // @ts-ignore
-  const { posts, fetchPosts, totalPages } = usePostContext();
 
-  // Fetch the first page of posts on component mount
-  useEffect(() => {
-    fetchPosts(0, 10); // Load the first page with 10 posts
-  }, [posts, totalPages]);
+const PostFeed: React.FC<PostFeedProps> = ({ filterAuthorId, refreshControl }) => {  // @ts-ignore
+  const { posts, fetchPosts, totalPages } = usePostContext();
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
+
+
+
+  // Function to refresh posts
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await fetchPosts(0, 10); // Re-fetch the first page
+    setIsRefreshing(false);
+  };
 
   // Function to load more posts when the user scrolls to the end of the list
   const handleLoadMore = () => {
@@ -33,6 +41,14 @@ const PostFeed: React.FC<PostFeedProps> = ({ filterAuthorId }) => {
       fetchPosts(currentPage, 10);
     }
   };
+
+  // Trigger re-fetch when the screen gains focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchPosts(0, 10); // Ensure the latest data is loaded when returning
+    }, [])
+  );
+
 
 
   // Render a single post using PostCard
@@ -54,6 +70,12 @@ const PostFeed: React.FC<PostFeedProps> = ({ filterAuthorId }) => {
         renderItem={renderPost}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={handleRefresh}
+          />
+        }
         ListFooterComponent={
           filteredPosts.length > 0 ? (
             <ActivityIndicator size="small" style={styles.loadingIndicator} />

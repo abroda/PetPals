@@ -3,9 +3,9 @@ import { ThemedView } from "@/components/basic/containers/ThemedView";
 import AppLogo from "@/components/decorations/static/AppLogo";
 import { useAuth } from "@/hooks/useAuth";
 import { useWindowDimension } from "@/hooks/theme/useWindowDimension";
-import { useContext, useState } from "react";
+import {useCallback, useContext, useRef, useState} from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { FlatList, Pressable, StyleSheet, View } from "react-native";
+import {FlatList, Pressable, RefreshControl, StyleSheet, View} from "react-native";
 import { ThemedIcon } from "@/components/decorations/static/ThemedIcon";
 import UserAvatar from "@/components/navigation/UserAvatar";
 import PostFeed from "@/components/lists/PostFeed";
@@ -23,6 +23,8 @@ import { widthPercentageToDP } from "react-native-responsive-screen";
 import { ColorName } from "react-native-ui-lib";
 import themeContext from "@react-navigation/native/src/theming/ThemeContext";
 import {useWebSocket} from "@/context/WebSocketContext";
+import {usePostContext} from "@/context/PostContext";
+import {useThemeColor} from "@/hooks/theme/useThemeColor";
 
 export default function HomeScreen() {
   const [notificationsVisible, setNotificationsVisible] = useState(false);
@@ -31,10 +33,12 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Styling
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToDP = useWindowDimension("height");
+  const asyncAbortController = useRef<AbortController | undefined>();
 
   // User Info
   const { userId } = useAuth();
@@ -43,6 +47,7 @@ export default function HomeScreen() {
     isProcessing,
     searchUsers,
   } = useUser();
+  const { fetchPosts, posts } = usePostContext();
 
 
   // For User search
@@ -58,6 +63,21 @@ export default function HomeScreen() {
       console.log("Search context is not supported:", context);
     }
   };
+
+  const getData = useCallback(async () => {
+    setIsRefreshing(true);
+    asyncAbortController.current = new AbortController();
+
+    try {
+      await fetchPosts(0, 10); // Fetch the first page of posts
+    } catch (error) {
+      console.error("[HomeScreen] Failed to fetch posts:", error);
+      Alert.alert("Error", "Unable to refresh posts. Please try again.");
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [fetchPosts]);
+
 
   return (
     <SafeAreaView>
@@ -177,7 +197,15 @@ export default function HomeScreen() {
                 }}
               />
               {/* Post Feed */}
-              <PostFeed />
+              <PostFeed
+                refreshControl={
+                  <RefreshControl
+                    refreshing={isRefreshing}
+                    onRefresh={getData}
+                    colors={[useThemeColor("accent"), useThemeColor("text")]}
+                  />
+                }
+              />
             </ThemedView>
 
           </View>
