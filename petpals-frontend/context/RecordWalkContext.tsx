@@ -430,12 +430,19 @@ export const RecordWalkProvider: FC<{ children: ReactNode }> = ({
     return newWalkPath;
   };
 
-  const updateNearbyUsers = async (data: any) => {
-    setNearbyUsers(data);
+  const updateNearbyUsers = async (data: MapPosition[]) => {
+    setNearbyUsers(
+      data.filter(
+        (elem: MapPosition) =>
+          !otherParticipants.map((e) => e.userId).includes(elem.userId)
+      )
+    );
   };
 
-  const updateWalkParticipants = async (topic: string, data: any) => {
-    setNearbyUsers(data.filter((elem: MapPosition) => elem.userId !== userId));
+  const updateWalkParticipants = async (data: MapPosition[]) => {
+    setOtherParticipants(
+      data.filter((elem: MapPosition) => elem.userId !== userId)
+    );
   };
 
   const endWalk = async () => {

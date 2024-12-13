@@ -9,7 +9,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export type MqttContextType = {
   mqttConnect: (
     onNearbyUsersUpdate: (payload: any) => void,
-    onWalkParticipantsUpdate: (topic: string, payload: any) => void
+    onWalkParticipantsUpdate: (payload: any) => void
   ) => void;
   mqttDisconnect: () => void;
   mqttSubscribe: (groupWalkId?: string) => void;
@@ -50,7 +50,7 @@ export const MqttProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const mqttConnect = (
     onNearbyUsersUpdate: (payload: any) => void,
-    onWalkParticipantsUpdate: (topic: string, payload: any) => void
+    onWalkParticipantsUpdate: (payload: any) => void
   ) => {
     console.log("Connecting to MQTT...");
 
@@ -75,18 +75,25 @@ export const MqttProvider: FC<{ children: ReactNode }> = ({ children }) => {
       if (topic === `location/nearby/${userId}`) {
         try {
           const parsedMessage = JSON.parse(message.toString());
-          console.log("Nearby users recieved: " + parsedMessage);
+          // console.log(
+          //   "Nearby users recieved: " + JSON.stringify(parsedMessage)
+          // );
           onNearbyUsersUpdate(parsedMessage);
         } catch (err) {
           console.error("Error parsing message from location/nearby:", err);
         }
       }
 
-      if (topic.startsWith("location/walk/")) {
+      if (
+        topic.startsWith("location/walk/") &&
+        topic.endsWith(userId ?? "null")
+      ) {
         try {
           const parsedMessage = JSON.parse(message.toString());
-          console.log("Participants recieved: " + parsedMessage);
-          onWalkParticipantsUpdate(topic, parsedMessage);
+          // console.log(
+          //   "Participants recieved: " + JSON.stringify(parsedMessage)
+          // );
+          onWalkParticipantsUpdate(parsedMessage);
         } catch (err) {
           console.error("Error parsing message from location/walk:", err);
         }

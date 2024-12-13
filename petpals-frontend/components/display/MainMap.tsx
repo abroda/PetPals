@@ -187,23 +187,28 @@ export function MainMap({
         {!showingSummary &&
           nearbyUsers &&
           nearbyUsers.length > 0 &&
-          nearbyUsers.map((elem) => (
-            <Marker
-              key={elem.userId}
-              coordinate={{
-                latitude: elem.latitude,
-                longitude: elem.longitude,
-              }}
-              onPress={() => router.push(`/user/${elem.userId}`)}
-            >
-              <UserAvatar
-                size={12}
-                userId={elem.userId}
-                doLink={false}
-                imageUrl={elem.imageUrl ?? undefined}
-              />
-            </Marker>
-          ))}
+          nearbyUsers
+            .filter(
+              (elem) =>
+                !otherParticipants?.map((e) => e.userId).includes(elem.userId)
+            )
+            .map((elem) => (
+              <Marker
+                key={elem.userId}
+                coordinate={{
+                  latitude: elem.latitude,
+                  longitude: elem.longitude,
+                }}
+                onPress={() => router.push(`/user/${elem.userId}`)}
+              >
+                <UserAvatar
+                  size={12}
+                  userId={elem.userId}
+                  doLink={false}
+                  imageUrl={elem.imageUrl ?? undefined}
+                />
+              </Marker>
+            ))}
 
         {!showingSummary &&
           otherParticipants &&
