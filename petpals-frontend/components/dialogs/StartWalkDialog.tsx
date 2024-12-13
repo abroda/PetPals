@@ -65,22 +65,24 @@ export default function StartWalkDialog({
   const heightPercentToDP = useWindowDimension("height");
 
   const submit = async () => {
-    if (dogsParticipating.length === 0) {
-      setErrorMessage("At least one dog needs to participate.");
-      return;
-    }
-
     if (!permissionsGranted) {
       setErrorMessage("Location permissions were denied.");
       checkLocationPermissions();
       return;
     }
 
-    setIsLoading(true);
-    await onStart(dogsParticipating, visibilityMode, chosenGroupWalk);
-    setIsLoading(false);
+    if (dogsParticipating.length === 0) {
+      setErrorMessage("At least one dog needs to participate.");
+      return;
+    }
 
-    onDismiss();
+    setIsLoading(true);
+    await onStart(dogsParticipating, visibilityMode, chosenGroupWalk).finally(
+      () => {
+        setIsLoading(false);
+        onDismiss();
+      }
+    );
   };
 
   return (

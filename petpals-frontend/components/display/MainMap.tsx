@@ -94,8 +94,8 @@ export function MainMap({
       return {
         latitude: latitude,
         longitude: longitude,
-        latitudeDelta: minDelta * 1.2, // Add some padding (20%)
-        longitudeDelta: minDelta * 1.2, // Add some padding (20%)
+        latitudeDelta: minDelta * 1.2,
+        longitudeDelta: minDelta * 1.2,
       };
     }
 
@@ -110,8 +110,8 @@ export function MainMap({
     return {
       latitude: centerLat,
       longitude: centerLng,
-      latitudeDelta: latitudeDelta * 1.2, // Add some padding (20%)
-      longitudeDelta: longitudeDelta * 1.2, // Add some padding (20%)
+      latitudeDelta: latitudeDelta * 1.2,
+      longitudeDelta: longitudeDelta * 1.2,
     };
   };
 

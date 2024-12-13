@@ -20,6 +20,12 @@ import { useMqtt } from "@/hooks/useMqtt";
 import { useRecordWalkMemory } from "@/hooks/useRecordWalkMemory";
 import { distanceInKmFromCoordinates } from "@/helpers/recordWalkCounters";
 
+const locationSourcingOptions = {
+  accuracy: Location.Accuracy.Highest,
+  timeInterval: 4000,
+  distanceInterval: 2,
+} as Location.LocationOptions;
+
 // TaskManager.defineTask(
 //   "background-location-task",
 //   async ({ data, error }: { data: any; error: any }) => {
@@ -242,6 +248,18 @@ export const RecordWalkProvider: FC<{ children: ReactNode }> = ({
         setPermissionsGranted(false);
       } else {
         setPermissionsGranted(true);
+        if (!summaryVisible) {
+          Location.getCurrentPositionAsync(locationSourcingOptions).then(
+            (result) => {
+              let location = {
+                longitude: result.coords.longitude,
+                latitude: result.coords.latitude,
+                timestamp: new Date(),
+              };
+              setUserLocation(location);
+            }
+          );
+        }
       }
     } else {
       setPermissionsGranted(true);
@@ -352,71 +370,45 @@ export const RecordWalkProvider: FC<{ children: ReactNode }> = ({
 
   const updateLocation = async () => {
     console.log("update location");
-    // // try to get location data from Async Storage (from Bckg Task)
-    // let location = await AsyncStorage.getItem("userLocation");
-    // let active = await AsyncStorage.getItem("backgroundTaskActive");
 
-    // if (location && active) {
-    //   console.log("Task active = " + active);
-    //   console.log("storage ok: location found = " + location);
-    //   let vertex = JSON.parse(location) as PathVertex;
-    //   setUserLocation(vertex);
-    //   setWalkPath([...walkPath, vertex]);
-    // } else {
-    //   // if task not active -> source location
-    //   console.log("Task active = " + active);
-    //   console.log("storage error: location = " + location);
-    let newWalkPath = walkPath;
-    let loc = await Location.getCurrentPositionAsync();
-    let location = {
-      latitude: loc.coords.latitude,
-      longitude: loc.coords.longitude,
-      timestamp: new Date(),
-    } as PathVertex;
+    // try to get current location
+    let location = userLocation;
+    try {
+      let result = await Location.getCurrentPositionAsync(
+        locationSourcingOptions
+      );
+      location = {
+        longitude: result.coords.longitude,
+        latitude: result.coords.latitude,
+        timestamp: new Date(),
+      };
+    } catch (error) {
+      console.log("Error updating location:", error);
+    }
+
+    console.log("sourced location: ", location);
 
     setUserLocation(location);
+
     setWalkPath((currentWalkPath) => {
       const newWalkPath = [...currentWalkPath, location];
-      //console.log("newWalkPath = " + JSON.stringify(newWalkPath));
+      //console.log("Updated walkPath:", JSON.stringify(newWalkPath));
+
+      let totalDistance = 0;
+      for (let i = 1; i < newWalkPath.length; i++) {
+        totalDistance += distanceInKmFromCoordinates(
+          newWalkPath[i - 1].latitude,
+          newWalkPath[i - 1].longitude,
+          newWalkPath[i].latitude,
+          newWalkPath[i].longitude
+        );
+      }
+
+      setWalkDistance(totalDistance);
       saveWalkPath(newWalkPath);
+
       return newWalkPath;
     });
-
-    let distance = 0;
-
-    for (let i = 1; i < walkPath.length; i++) {
-      distance += distanceInKmFromCoordinates(
-        walkPath[i - 1].latitude,
-        walkPath[i - 1].longitude,
-        walkPath[i].latitude,
-        walkPath[i].longitude
-      );
-    }
-
-    if (walkPath.length > 0) {
-      distance += distanceInKmFromCoordinates(
-        walkPath[walkPath.length - 1].latitude,
-        walkPath[walkPath.length - 1].longitude,
-        location.latitude,
-        location.longitude
-      );
-    }
-
-    setWalkDistance(distance);
-    // setWalkDistance((currentDistance) => {
-    //   let distance = currentDistance;
-
-    //   if (walkPath.length > 0) {
-    //     distance += distanceInKmFromCoordinates(
-    //       walkPath[walkPath.length - 1].latitude,
-    //       walkPath[walkPath.length - 1].longitude,
-    //       location.latitude,
-    //       location.longitude
-    //     );
-    //   }
-
-    //   return distance;
-    // });
 
     sendLocationUpdate({
       userId: userId ?? "",
@@ -425,9 +417,8 @@ export const RecordWalkProvider: FC<{ children: ReactNode }> = ({
       timestamp: location.timestamp.toISOString(),
       groupWalkId: groupWalk?.id ?? "",
     });
-    saveWalkPath(newWalkPath);
 
-    return newWalkPath;
+    return [...walkPath, location];
   };
 
   const updateNearbyUsers = async (data: MapPosition[]) => {
@@ -459,18 +450,16 @@ export const RecordWalkProvider: FC<{ children: ReactNode }> = ({
     setWalkEndTime(now);
 
     // do last location update
-    let finalWalkPath = await updateLocation();
-    setWalkPath(finalWalkPath);
+    await updateLocation().then((finalWalkPath) => {
+      sendEndWalkMessage({
+        timestamp: now.toISOString(),
+        locations: finalWalkPath,
+        groupWalkId: groupWalk?.id ?? "",
+      });
+    });
 
     // unsubscribe
     mqttUnsubscribe(groupWalk?.id);
-
-    sendEndWalkMessage({
-      timestamp: now.toISOString(),
-      locations: finalWalkPath,
-      groupWalkId: groupWalk?.id ?? "",
-    });
-
     saveWalkEndTime(now);
   };
 
@@ -496,6 +485,16 @@ export const RecordWalkProvider: FC<{ children: ReactNode }> = ({
     setGroupWalk(null);
     setVisibilityMode("Public");
 
+    let result = await Location.getCurrentPositionAsync(
+      locationSourcingOptions
+    );
+    let location = {
+      longitude: result.coords.longitude,
+      latitude: result.coords.latitude,
+      timestamp: new Date(),
+    };
+    setUserLocation(location);
+
     deleteStorage();
   };
 
@@ -517,11 +516,19 @@ export const RecordWalkProvider: FC<{ children: ReactNode }> = ({
     setDogsParticipating(data.dogsParticipating);
     setVisibilityMode(data.visibilityMode);
     setWalkPath(data.walkPath);
+    if (data.walkPath.length > 0) {
+      setUserLocation(data.walkPath[data.walkPath.length - 1]);
+    }
+    //console.log(data.walkPath);
 
-    setWalkTotalTime(
-      (data.walkEndTime ? data.walkEndTime.valueOf() : Date.now()) -
-        data.walkStartTime.valueOf()
-    );
+    setWalkTotalTime((current) => {
+      let referenceTIme = (
+        data.walkEndTime ? new Date(data.walkEndTime).valueOf() : Date.now()
+      ) as number;
+      let value = new Date(data.walkStartTime).valueOf() as number;
+      let result = (referenceTIme - value) as number;
+      return result;
+    });
 
     if (data.walkPath.length > 0) {
       setUserLocation(data.walkPath[data.walkPath.length - 1]);

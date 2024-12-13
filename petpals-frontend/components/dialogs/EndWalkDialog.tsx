@@ -27,7 +27,7 @@ export default function EndWalkDialog({
   delay: boolean;
   message: string;
   onDismiss: () => void;
-  onEnd: () => void | Promise<void>;
+  onEnd: () => Promise<void>;
 }) {
   const asyncAbortController = useRef<AbortController | undefined>(undefined);
 
@@ -40,8 +40,7 @@ export default function EndWalkDialog({
   }, []);
 
   async function submit() {
-    await onEnd();
-    onDismiss();
+    await onEnd().finally(() => onDismiss());
   }
 
   return (

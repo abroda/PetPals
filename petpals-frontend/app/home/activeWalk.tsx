@@ -328,7 +328,7 @@ export default function ActiveWalkScreen() {
           }
           nearbyUsers={nearbyUsers}
           otherParticipants={otherParticipants}
-          path={isRecording ? walkPath : []}
+          path={walkPath}
           showingSummary={summaryVisible}
         />
         {/* START/END BUTTON */}
@@ -537,7 +537,7 @@ export default function ActiveWalkScreen() {
             onDismiss={() => {
               setEndDialogVisible(false);
             }}
-            onEnd={() =>
+            onEnd={async () =>
               firstTimeout && firstTimeout.valueOf() < Date.now()
                 ? delayTimeout()
                 : endWalk()

@@ -19,8 +19,13 @@ export const distanceInKmFromCoordinates = (
 };
 
 export const totalDistanceToString = (walkDistance: number) => {
-  if (!walkDistance) {
-    return "0.0 km";
+  //console.log("walkDistance", walkDistance);
+  if (!walkDistance || walkDistance < 0) {
+    return "0 m";
+  }
+
+  if (walkDistance < 1) {
+    return Math.floor(walkDistance * 1000).toString() + " m";
   }
 
   return (
@@ -32,6 +37,7 @@ export const totalDistanceToString = (walkDistance: number) => {
 };
 
 export const totalTimeToString = (walkTotalTime: number) => {
+  //console.log("walkTotalTime", walkTotalTime);
   if (walkTotalTime === 0 || !walkTotalTime) {
     return "00m 00s";
   }
@@ -58,6 +64,9 @@ export const caloriesBurnedToString = (
   walkDistance: number,
   walkTotalTime: number
 ) => {
+  //console.log("calories:");
+  //console.log("walkDistance", walkDistance);
+  //console.log("walkTotalTime", walkTotalTime);
   if (walkTotalTime === 0 || !walkTotalTime) {
     return "0.0 kcal";
   }
@@ -93,6 +102,9 @@ export const averageSpeedToString = (
   walkDistance: number,
   walkTotalTime: number
 ) => {
+  //console.log("speed:");
+  //console.log("walkDistance", walkDistance);
+  //console.log("walkTotalTime", walkTotalTime);
   if (walkTotalTime === 0 || !walkTotalTime) {
     return "0.0 km/h";
   }
