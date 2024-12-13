@@ -19,6 +19,7 @@ import { useTextStyle } from "@/hooks/theme/useTextStyle";
 import { ScrollView } from "react-native-gesture-handler";
 import HorizontalView from "../basic/containers/HorizontalView";
 import { VisibilityMode } from "@/context/RecordWalkContext";
+import { useUser } from "@/hooks/useUser";
 
 export default function StartWalkDialog({
   groupWalks,
@@ -37,17 +38,24 @@ export default function StartWalkDialog({
   onDismiss: () => void;
   walkId?: string;
 }) {
+  const { permissionsGranted, checkLocationPermissions } = useRecordWalk();
+  const { userId } = useAuth();
+  const { userProfile } = useUser();
+
   const [chosenGroupWalk, setChosenGroupWalk] = useState<GroupWalk | undefined>(
     walkId ? groupWalks.find((elem) => elem.id === walkId) : undefined
   );
   const [dogsParticipating, setDogsParticipating] = useState([] as string[]);
-  const [visibilityMode, setVisibilityMode] =
-    useState<VisibilityMode>("Public");
+  const [visibilityMode, setVisibilityMode] = useState<VisibilityMode>(
+    userProfile?.visibility === "PRIVATE"
+      ? "Private"
+      : userProfile?.visibility === "FRIENDS_ONLY"
+        ? "Friends_only"
+        : "Public"
+  );
   const [errorMessage, setErrorMessage] = useState(" ");
 
   const [isLoading, setIsLoading] = useState(false);
-  const { permissionsGranted } = useRecordWalk();
-  const { userId } = useAuth();
 
   const radioButtonColor = useThemeColor("primary");
   const textColor = useThemeColor("text");
@@ -64,6 +72,7 @@ export default function StartWalkDialog({
 
     if (!permissionsGranted) {
       setErrorMessage("Location permissions were denied.");
+      checkLocationPermissions();
       return;
     }
 

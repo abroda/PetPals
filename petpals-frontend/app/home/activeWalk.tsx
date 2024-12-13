@@ -157,7 +157,7 @@ export default function ActiveWalkScreen() {
         aboveTabBar
       />
       <ThemedToast
-        visible={!permissionsGranted}
+        visible={!permissionsGranted && !summaryVisible}
         message={"Location permissions were denied."}
         preset="failure"
         aboveTabBar

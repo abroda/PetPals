@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { ThemedView } from "../basic/containers/ThemedView";
 import { Dimensions, Modal, ModalProps } from "react-native";
 import { heightPercentageToDP } from "react-native-responsive-screen";
@@ -44,6 +44,12 @@ export default function ThemedToast(
     ? useTextStyle(props.textStyleOptions)
     : {};
 
+  useEffect(() => {
+    if (!visible) {
+      props.onDismiss?.(); // Ensure cleanup is triggered
+    }
+  }, [visible]);
+
   return (
     <Toast
       visible={visible}
@@ -54,6 +60,7 @@ export default function ThemedToast(
         {
           marginBottom: heightPercentageToDP(props.aboveTabBar ? 10 : 5),
           backgroundColor: backgroundColor,
+          pointerEvents: visible ? "auto" : "none",
         },
         props.style,
       ]}
@@ -61,8 +68,8 @@ export default function ThemedToast(
       iconColor={props.iconColor ?? iconColor}
       preset={props.preset ?? "success"}
       onDismiss={() => {
-        props.onDismiss?.();
         setVisible(false);
+        props.onDismiss?.();
       }}
       {...props}
     />
