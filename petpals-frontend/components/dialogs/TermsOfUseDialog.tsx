@@ -59,10 +59,10 @@ export const TermsOfUse = () => {
   const welcomeColor = useThemeColor("primary");
   const warningColor = useThemeColor("alarm");
   const smallTheme = useTextStyle({ size: "small" });
-  const smallBoldTheme = useTextStyle({ size: "big", weight: "bold" });
+  const smallBoldTheme = useTextStyle({ size: "small", weight: "semibold" });
   const boldTheme = useTextStyle({ weight: "bold" });
-  const bigTheme = useTextStyle({ size: "big" });
-  const bigBoldTheme = useTextStyle({ size: "big", weight: "bold" });
+  const bigTheme = useTextStyle({ size: "biggerMedium" });
+  const bigBoldTheme = useTextStyle({ size: "biggerMedium", weight: "bold" });
   const percentToDP = useWindowDimension("shorter");
   const widthPercentToDP = useWindowDimension("width");
 
