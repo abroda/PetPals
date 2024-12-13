@@ -26,6 +26,7 @@ import {
   totalDistanceToString,
   totalTimeToString,
 } from "@/helpers/recordWalkCounters";
+import { useThemeColor } from "@/hooks/theme/useThemeColor";
 
 export default function ActiveWalkScreen() {
   const walkId = useLocalSearchParams().walkId as string | undefined;
@@ -70,6 +71,8 @@ export default function ActiveWalkScreen() {
   const percentToDP = useWindowDimension("shorter");
   const heightPercentToDP = useWindowDimension("height");
   const widthPercentToDP = useWindowDimension("width");
+
+  const groupWalkPinColor = "#54c40f"; // useThemeColor("secondary");
 
   // on mount
   useEffect(() => {
@@ -154,7 +157,7 @@ export default function ActiveWalkScreen() {
         aboveTabBar
       />
       <ThemedToast
-        visible={!permissionsGranted}
+        visible={!permissionsGranted && !summaryVisible}
         message={"Location permissions were denied."}
         preset="failure"
         aboveTabBar
@@ -310,24 +313,23 @@ export default function ActiveWalkScreen() {
                   marginBottom: percentToDP(-10),
                 }
           }
-          markers={
+          groupWalkMarker={
             isRecording && groupWalk
-              ? [
-                  {
-                    coordinates: {
-                      latitude: groupWalk.latitude,
-                      longitude: groupWalk.longitude,
-                    },
-                    title: "Group walk location",
-                    description: groupWalk.locationName,
-                    color: "green",
-                  } as MarkerData,
-                ]
-              : []
+              ? ({
+                  coordinates: {
+                    latitude: groupWalk.latitude,
+                    longitude: groupWalk.longitude,
+                  },
+                  title: "Starting location",
+                  description: groupWalk.title,
+                  color: groupWalkPinColor,
+                } as MarkerData)
+              : undefined
           }
           nearbyUsers={nearbyUsers}
           otherParticipants={otherParticipants}
           path={isRecording ? walkPath : []}
+          showingSummary={summaryVisible}
         />
         {/* START/END BUTTON */}
         {!summaryVisible && (

@@ -16,7 +16,8 @@ import {
   PathVertex,
 } from "@/context/RecordWalkContext";
 import UserAvatar from "../navigation/UserAvatar";
-import { Participant } from "@/context/GroupWalksContext";
+import { router } from "expo-router";
+import { useTextStyle } from "@/hooks/theme/useTextStyle";
 
 Geocoder.init(Constants.expoConfig?.extra?.googleMapsApiKey);
 
@@ -29,8 +30,7 @@ export type MainMapProps = {
   maxDelta?: number;
   viewStyle?: ViewProps["style"];
   mapProps?: MapViewProps;
-  markers?: MarkerData[];
-  pins?: MarkerData[];
+  groupWalkMarker?: MarkerData;
   nearbyUsers?: MapPosition[];
   otherParticipants?: MapPosition[];
   path?: PathVertex[];
@@ -46,8 +46,7 @@ export function MainMap({
   maxDelta = 0.7,
   viewStyle,
   mapProps,
-  markers,
-  pins,
+  groupWalkMarker,
   nearbyUsers,
   otherParticipants,
   path,
@@ -92,7 +91,12 @@ export function MainMap({
 
   const getRegionContainingWalkPath = (path: PathVertex[]) => {
     if (path.length === 0) {
-      return initialRegion;
+      return {
+        latitude: latitude,
+        longitude: longitude,
+        latitudeDelta: minDelta * 1.2, // Add some padding (20%)
+        longitudeDelta: minDelta * 1.2, // Add some padding (20%)
+      };
     }
 
     const { minLat, maxLat, minLng, maxLng } = getBoundingBox(path);
@@ -162,6 +166,15 @@ export function MainMap({
             longitude: initialRegion.longitude,
           }}
         />
+        {groupWalkMarker && (
+          <Marker
+            title={groupWalkMarker.title}
+            description={groupWalkMarker.description}
+            coordinate={groupWalkMarker.coordinates}
+            pinColor={groupWalkMarker.color}
+            style={useTextStyle({ size: "biggerMedium" })}
+          />
+        )}
         {path && path.length > 0 && (
           <Polyline
             coordinates={path}
@@ -171,26 +184,34 @@ export function MainMap({
           />
         )}
 
-        {nearbyUsers &&
+        {!showingSummary &&
+          nearbyUsers &&
           nearbyUsers.length > 0 &&
-          nearbyUsers.map((elem) => (
-            <Marker
-              key={elem.userId}
-              coordinate={{
-                latitude: elem.latitude,
-                longitude: elem.longitude,
-              }}
-            >
-              <UserAvatar
-                size={10}
-                userId={elem.userId}
-                doLink={true}
-                imageUrl={elem.imageUrl ?? undefined}
-              />
-            </Marker>
-          ))}
+          nearbyUsers
+            .filter(
+              (elem) =>
+                !otherParticipants?.map((e) => e.userId).includes(elem.userId)
+            )
+            .map((elem) => (
+              <Marker
+                key={elem.userId}
+                coordinate={{
+                  latitude: elem.latitude,
+                  longitude: elem.longitude,
+                }}
+                onPress={() => router.push(`/user/${elem.userId}`)}
+              >
+                <UserAvatar
+                  size={12}
+                  userId={elem.userId}
+                  doLink={false}
+                  imageUrl={elem.imageUrl ?? undefined}
+                />
+              </Marker>
+            ))}
 
-        {otherParticipants &&
+        {!showingSummary &&
+          otherParticipants &&
           otherParticipants.length > 0 &&
           otherParticipants.map((elem) => (
             <Marker
@@ -199,12 +220,14 @@ export function MainMap({
                 latitude: elem.latitude,
                 longitude: elem.longitude,
               }}
+              onPress={() => router.push(`/user/${elem.userId}`)}
             >
               <UserAvatar
-                size={10}
+                size={12}
                 userId={elem.userId}
-                doLink={true}
+                doLink={false}
                 imageUrl={elem.imageUrl ?? undefined}
+                marked
               />
             </Marker>
           ))}

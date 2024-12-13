@@ -304,7 +304,7 @@ export const RecordWalkProvider: FC<{ children: ReactNode }> = ({
       timestamp: new Date().toISOString(),
       visibility: visibilityMode,
       dogIds: dogsParticipating,
-      walkId: groupWalk?.id ?? "",
+      groupWalkId: groupWalk?.id ?? "",
     });
 
     saveInStorage({
@@ -430,14 +430,19 @@ export const RecordWalkProvider: FC<{ children: ReactNode }> = ({
     return newWalkPath;
   };
 
-  const updateNearbyUsers = async (data: any) => {
-    setNearbyUsers(data);
-    // TODO: get names + pics
+  const updateNearbyUsers = async (data: MapPosition[]) => {
+    setNearbyUsers(
+      data.filter(
+        (elem: MapPosition) =>
+          !otherParticipants.map((e) => e.userId).includes(elem.userId)
+      )
+    );
   };
 
-  const updateWalkParticipants = async (topic: string, data: any) => {
-    setNearbyUsers(data);
-    // TODO: get names + pics
+  const updateWalkParticipants = async (data: MapPosition[]) => {
+    setOtherParticipants(
+      data.filter((elem: MapPosition) => elem.userId !== userId)
+    );
   };
 
   const endWalk = async () => {

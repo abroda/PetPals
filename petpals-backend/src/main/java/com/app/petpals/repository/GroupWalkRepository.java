@@ -16,6 +16,11 @@ public interface GroupWalkRepository extends JpaRepository<GroupWalk, String> {
     List<GroupWalk> findAllByCreator(User user);
 
     @Query(value = """
+            SELECT gw.* FROM group_walk gw WHERE gw.datetime >= now() - interval '1 hour'
+            """, nativeQuery = true)
+    Page<GroupWalk> findAll(Pageable pageable);
+
+    @Query(value = """
             SELECT t.tags
             FROM group_walk_tags t
             WHERE LOWER(t.tags) LIKE LOWER(CONCAT('%', :tag, '%'))
@@ -28,7 +33,7 @@ public interface GroupWalkRepository extends JpaRepository<GroupWalk, String> {
     @Query(value = """
             SELECT gw.* FROM group_walk gw
             JOIN group_walk_tags gwt ON gw.id = gwt.group_walk_id
-            WHERE gwt.tags IN (:tags)
+            WHERE gwt.tags IN (:tags) AND gw.datetime >= now() - interval '1 hour'
             GROUP BY gw.id
             HAVING COUNT(DISTINCT gwt.tags) = :tagCount
             """, nativeQuery = true)
