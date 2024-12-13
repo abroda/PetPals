@@ -63,20 +63,20 @@ const PostCard = React.FC<PostCardProps> = ({ post }) => {
             alignItems: 'center',
           }}>
             {/* Author Avatar */}
-            {post.author.imageUrl ? (
+            {/*{post.author.imageUrl ? (*/}
               <UserAvatar
                 userId={post.author.imageUrl}
                 imageUrl={post.author.imageUrl}
                 doLink={false}
                 size={10}
               />
-            ) : (
-              <ThemedText
-                textColorName={"textOnSecondary"}
-              >
-                User Avatar Unavailable
-              </ThemedText>
-            )}
+            {/*) : (*/}
+            {/*  <ThemedText*/}
+            {/*    textColorName={"textOnSecondary"}*/}
+            {/*  >*/}
+            {/*    User Avatar Unavailable*/}
+            {/*  </ThemedText>*/}
+            {/*)}*/}
 
             {/* Author Username */}
             <ThemedText
